@@ -1,6 +1,18 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
+
+const router = useRouter()
+const searchQuery = ref('')
+
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push({ path: '/search', query: { q: searchQuery.value.trim() } })
+  } else {
+    router.push('/search')
+  }
+}
 </script>
 
 <template>
@@ -26,18 +38,20 @@ import BaseIcon from '../common/BaseIcon.vue'
           <div class="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-white/20 bg-white/10 backdrop-blur-md">
             <BaseIcon name="Search" class="text-white/60 shrink-0" :size="20" />
             <input
+              v-model="searchQuery"
+              @keydown.enter="handleSearch"
               type="text"
               placeholder="按城市、公园或步道搜索"
               class="w-full bg-transparent text-white placeholder-white/50 text-sm focus:outline-none"
             />
           </div>
-          <RouterLink
-            to="/search"
+          <button
+            @click="handleSearch"
             class="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-semibold text-sm transition-all duration-200 shrink-0 hover:shadow-lg"
           >
             <BaseIcon name="Compass" :size="16" />
             寻找步道
-          </RouterLink>
+          </button>
         </div>
       </div>
     </div>

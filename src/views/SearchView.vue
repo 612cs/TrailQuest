@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import SearchBar from '../components/search/SearchBar.vue'
 import FilterBar from '../components/search/FilterBar.vue'
 import ViewToggle from '../components/search/ViewToggle.vue'
@@ -11,6 +12,20 @@ const searchInput = ref('')
 const currentSearchQuery = ref('')
 const activeView = ref<'list' | 'map'>('list')
 const isInitialLoad = ref(true)
+
+const route = useRoute()
+
+watch(
+  () => route.query.q,
+  (newQ) => {
+    if (newQ !== undefined) {
+      const q = String(newQ)
+      searchInput.value = q
+      currentSearchQuery.value = q
+    }
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   setTimeout(() => {
