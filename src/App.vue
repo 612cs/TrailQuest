@@ -14,7 +14,7 @@ const showHeader = computed(() => !hideHeaderRoutes.includes(route.name as strin
     <RouterView v-slot="{ Component }">
       <transition name="fade" mode="out-in">
         <KeepAlive>
-          <component :is="Component" :key="$route.fullPath" />
+          <component :is="Component" />
         </KeepAlive>
       </transition>
     </RouterView>
