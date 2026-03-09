@@ -6,19 +6,19 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'Home',
     component: () => import('../views/HomeView.vue'),
-    meta: { title: '首页' },
+    meta: { title: '首页', keepAlive: true },
   },
   {
     path: '/search',
     name: 'Search',
     component: () => import('../views/SearchView.vue'),
-    meta: { title: '搜索' },
+    meta: { title: '搜索', keepAlive: true },
   },
   {
     path: '/community',
     name: 'Community',
     component: () => import('../views/CommunityView.vue'),
-    meta: { title: '社区' },
+    meta: { title: '社区', keepAlive: true },
   },
   {
     path: '/profile',
@@ -49,7 +49,7 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior(_to, _from, savedPosition) {
+  scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition
     } else {
