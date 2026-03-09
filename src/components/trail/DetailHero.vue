@@ -10,6 +10,9 @@ defineProps<{
   distance: string
   elevation: string
   duration: string
+  favorites?: number
+  rating?: number
+  reviewCount?: number
 }>()
 </script>
 
@@ -34,6 +37,27 @@ defineProps<{
           <BaseIcon name="MapPin" :size="14" />
           {{ location }}
         </p>
+      </div>
+    </div>
+    <!-- Rating & Favorites Row -->
+    <div v-if="rating || favorites" class="flex items-center justify-between px-4 py-3 border-b" style="border-color: var(--border-default);">
+      <div v-if="rating" class="flex items-center gap-2">
+        <div class="flex gap-0.5">
+          <BaseIcon
+            v-for="i in 5"
+            :key="i"
+            name="Star"
+            :size="14"
+            :class="i <= Math.round(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'"
+          />
+        </div>
+        <span class="text-sm font-bold text-primary-500">{{ rating }}</span>
+        <span v-if="reviewCount" class="text-xs" style="color: var(--text-tertiary);">({{ reviewCount >= 1000 ? (reviewCount / 1000).toFixed(1) + 'k' : reviewCount }} 条评论)</span>
+      </div>
+      <div v-if="favorites" class="flex items-center gap-1.5 text-sm" style="color: var(--text-secondary);">
+        <BaseIcon name="Heart" :size="16" class="text-red-400 fill-red-400" />
+        <span class="font-medium">{{ favorites >= 10000 ? (favorites / 10000).toFixed(1) + 'w' : favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
+        <span class="text-xs" style="color: var(--text-tertiary);">人收藏</span>
       </div>
     </div>
     <!-- Stats Bar -->
