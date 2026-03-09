@@ -8,12 +8,12 @@ import WeatherAlert from '../components/trail/WeatherAlert.vue'
 import LandscapePrediction from '../components/trail/LandscapePrediction.vue'
 import ReviewList from '../components/trail/ReviewList.vue'
 import { getTrailsWithAuthor, getReviewsByTrailId } from '../mock/mockData'
-import type { Review, TrailWithAuthor } from '../mock/mockData'
+import type { TrailWithAuthor, ReviewWithAuthor } from '../mock/mockData'
 
 const router = useRouter()
 const route = useRoute()
 
-const reviews = ref<Review[]>([])
+const reviews = ref<ReviewWithAuthor[]>([])
 
 // Get trail data based on route ID with Author Context
 const trailId = computed(() => Number(route.params.id))
@@ -53,7 +53,7 @@ const heroProps = computed(() => {
   }
 })
 
-function handleAddReview(review: Review) {
+function handleAddReview(review: ReviewWithAuthor) {
   reviews.value.unshift(review)
 }
 </script>

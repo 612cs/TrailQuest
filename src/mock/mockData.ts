@@ -2,9 +2,7 @@
 export interface Review {
     id: number
     trailId?: number // 顶级评论所属的路线 ID
-    user: string
-    avatar: string
-    avatarBg: string
+    userId: number // 评论者 ID
     rating?: number // 顶级评论才有评分，回复没有
     time: string
     text: string
@@ -22,12 +20,22 @@ export interface User {
 }
 
 export const mockUsers: User[] = [
-    { id: 101, username: '@mountain_jess', avatar: 'MJ', avatarBg: '#4f9a48' },
-    { id: 102, username: '@river_wanderer', avatar: 'RW', avatarBg: '#2563eb' },
-    { id: 103, username: '@trail_blazer', avatar: 'TB', avatarBg: '#ea580c' },
+    { id: 101, username: 'Sarah M.', avatar: 'SM', avatarBg: '#8b5cf6' },
+    { id: 102, username: '云游者', avatar: 'YY', avatarBg: '#0891b2' },
+    { id: 103, username: 'Lisa W.', avatar: 'LW', avatarBg: '#2563eb' },
     { id: 104, username: '@hiking_queen', avatar: 'HQ', avatarBg: '#8b5cf6' },
     { id: 105, username: '@forest_spirit', avatar: 'FS', avatarBg: '#059669' },
-    { id: 106, username: '@nature_photo', avatar: 'NP', avatarBg: '#0284c7' },
+    { id: 106, username: '摄影达人', avatar: 'SY', avatarBg: '#0284c7' },
+    { id: 107, username: 'Mike R.', avatar: 'MR', avatarBg: '#ef4444' },
+    { id: 108, username: 'Tom K.', avatar: 'TK', avatarBg: '#16a34a' },
+    { id: 109, username: '山野清风', avatar: 'SY', avatarBg: '#7c3aed' },
+    { id: 110, username: '小背包', avatar: 'XB', avatarBg: '#ea580c' },
+    { id: 111, username: '独行侠', avatar: 'DX', avatarBg: '#4f46e5' },
+    { id: 112, username: '峰行者', avatar: 'FX', avatarBg: '#dc2626' },
+    { id: 113, username: '户外新人', avatar: 'HW', avatarBg: '#059669' },
+    { id: 114, username: '山之恋', avatar: 'SZ', avatarBg: '#7c3aed' },
+    { id: 115, username: '@mountain_jess', avatar: 'MJ', avatarBg: '#4f9a48' },
+    { id: 116, username: '@river_wanderer', avatar: 'RW', avatarBg: '#2563eb' },
 ]
 
 // ===== 路线数据 =====
@@ -180,9 +188,7 @@ export const mockReviews: Review[] = [
     {
         id: 1,
         trailId: 1,
-        user: 'Sarah M.',
-        avatar: 'SM',
-        avatarBg: '#8b5cf6',
+        userId: 101,
         rating: 5,
         time: '1 周前',
         text: '壮观的景色！山顶的日出令人叹为观止。路径标记清晰,但最后一段比较陡峭。建议穿登山鞋。',
@@ -190,18 +196,14 @@ export const mockReviews: Review[] = [
         replies: [
             {
                 id: 101,
-                user: 'Mike R.',
-                avatar: 'MR',
-                avatarBg: '#ef4444',
+                userId: 107,
                 time: '6 天前',
                 text: '同意！日出真的太美了。请问你是几点出发的？',
                 replyTo: 'Sarah M.',
                 replies: [
                     {
                         id: 102,
-                        user: 'Sarah M.',
-                        avatar: 'SM',
-                        avatarBg: '#8b5cf6',
+                        userId: 101,
                         time: '6 天前',
                         text: '我凌晨4点半从停车场出发的，大概5点50到山顶，刚好赶上日出🌅',
                         replyTo: 'Mike R.',
@@ -210,9 +212,7 @@ export const mockReviews: Review[] = [
             },
             {
                 id: 103,
-                user: 'Lisa W.',
-                avatar: 'LW',
-                avatarBg: '#2563eb',
+                userId: 103,
                 time: '5 天前',
                 text: '请问这条路线适合带7岁的小孩去吗？',
                 replyTo: 'Sarah M.',
@@ -222,9 +222,7 @@ export const mockReviews: Review[] = [
     {
         id: 2,
         trailId: 1,
-        user: 'Mike R.',
-        avatar: 'MR',
-        avatarBg: '#ef4444',
+        userId: 107,
         rating: 4,
         time: '2 周前',
         text: '很棒的路线！沿途有很多拍照点。只是周末人会比较多,建议工作日前往。停车位充足。',
@@ -233,18 +231,14 @@ export const mockReviews: Review[] = [
     {
         id: 3,
         trailId: 1,
-        user: 'Lisa W.',
-        avatar: 'LW',
-        avatarBg: '#2563eb',
+        userId: 103,
         rating: 5,
         time: '3 周前',
         text: '这条路线非常适合家庭出行。孩子们特别喜欢沿途的小溪和野花。空气很清新,值得再来。',
         replies: [
             {
                 id: 104,
-                user: 'Tom K.',
-                avatar: 'TK',
-                avatarBg: '#16a34a',
+                userId: 108,
                 time: '2 周前',
                 text: '请问有推荐的停车地点吗？',
                 replyTo: 'Lisa W.',
@@ -254,9 +248,7 @@ export const mockReviews: Review[] = [
     {
         id: 4,
         trailId: 1,
-        user: 'Tom K.',
-        avatar: 'TK',
-        avatarBg: '#16a34a',
+        userId: 108,
         rating: 3,
         time: '1 个月前',
         text: '路线本身还不错，但指示牌有些模糊，中间有一段岔路容易走错。建议提前下载离线地图。',
@@ -265,9 +257,7 @@ export const mockReviews: Review[] = [
     {
         id: 10,
         trailId: 2,
-        user: '云游者',
-        avatar: 'YY',
-        avatarBg: '#0891b2',
+        userId: 102,
         rating: 5,
         time: '3 天前',
         text: '湖水真的像镜子一样！早上7点去人少景美，强烈推荐。带了小朋友也完全没问题，步道非常平整。',
@@ -275,9 +265,7 @@ export const mockReviews: Review[] = [
         replies: [
             {
                 id: 110,
-                user: '山野清风',
-                avatar: 'SY',
-                avatarBg: '#7c3aed',
+                userId: 109,
                 time: '2 天前',
                 text: '确实！我也是早上去的，拍到了雪山倒影，美极了。',
                 replyTo: '云游者',
@@ -287,9 +275,7 @@ export const mockReviews: Review[] = [
     {
         id: 11,
         trailId: 2,
-        user: '小背包',
-        avatar: 'XB',
-        avatarBg: '#ea580c',
+        userId: 110,
         rating: 4,
         time: '1 周前',
         text: '景色很美，但洗手间设施比较少，建议出发前做好准备。沿途有小卖部可以补给。',
@@ -297,9 +283,7 @@ export const mockReviews: Review[] = [
     {
         id: 12,
         trailId: 2,
-        user: '独行侠',
-        avatar: 'DX',
-        avatarBg: '#4f46e5',
+        userId: 111,
         rating: 5,
         time: '2 周前',
         text: '来大理必走的一条步道！环湖一圈很轻松，适合散步发呆。秋天来颜色更漂亮。',
@@ -308,9 +292,7 @@ export const mockReviews: Review[] = [
     {
         id: 20,
         trailId: 3,
-        user: '峰行者',
-        avatar: 'FX',
-        avatarBg: '#dc2626',
+        userId: 112,
         rating: 5,
         time: '5 天前',
         text: '人生必去系列！虽然爬得累但绝对值得。在山顶看到了360度云海环绕，贡嘎金山也清晰可见。记得带厚衣服，山顶温差大。',
@@ -318,27 +300,21 @@ export const mockReviews: Review[] = [
         replies: [
             {
                 id: 120,
-                user: '户外新人',
-                avatar: 'HW',
-                avatarBg: '#059669',
+                userId: 113,
                 time: '4 天前',
                 text: '请问新手适合走这条路线吗？需要什么装备？',
                 replyTo: '峰行者',
                 replies: [
                     {
                         id: 121,
-                        user: '峰行者',
-                        avatar: 'FX',
-                        avatarBg: '#dc2626',
+                        userId: 112,
                         time: '4 天前',
                         text: '不太建议纯新手。至少要有3-4次中等难度的徒步经验。装备方面：登山鞋必须、登山杖推荐、冲锋衣必须、头灯必须（如果要看日出）。',
                         replyTo: '户外新人',
                     },
                     {
                         id: 122,
-                        user: '户外新人',
-                        avatar: 'HW',
-                        avatarBg: '#059669',
+                        userId: 113,
                         time: '3 天前',
                         text: '谢谢详细的建议！那我先去练练中等难度的路线再来挑战💪',
                         replyTo: '峰行者',
@@ -350,9 +326,7 @@ export const mockReviews: Review[] = [
     {
         id: 21,
         trailId: 3,
-        user: '山之恋',
-        avatar: 'SZ',
-        avatarBg: '#7c3aed',
+        userId: 114,
         rating: 4,
         time: '2 周前',
         text: '路线确实有难度，特别是最后2公里的爬升。建议带足水和食物，途中补给点很少。不过风景绝对是顶级的。',
@@ -360,9 +334,7 @@ export const mockReviews: Review[] = [
     {
         id: 22,
         trailId: 3,
-        user: '摄影达人',
-        avatar: 'SY',
-        avatarBg: '#0284c7',
+        userId: 106,
         rating: 5,
         time: '3 周前',
         text: '作为风光摄影师，这是我拍过最震撼的地方。日出时分的云海和星空都是绝佳题材。建议山顶露营过夜。',
@@ -395,9 +367,27 @@ export function getTrailById(id: number): TrailDetail | undefined {
     return mockTrailDetails.find((t) => t.id === id)
 }
 
-// 根据路线 ID 获取评论
-export function getReviewsByTrailId(trailId: number): Review[] {
-    return mockReviews.filter(review => review.trailId === trailId)
+// 合并后的 评论 + 用户 类型
+export interface ReviewWithAuthor extends Omit<Review, 'replies'> {
+    author: User
+    replies?: ReviewWithAuthor[]
+}
+
+// 根据路线 ID 获取评论（联表查询）
+export function getReviewsByTrailId(trailId: number): ReviewWithAuthor[] {
+    const filterAndJoin = (reviews: Review[]): ReviewWithAuthor[] => {
+        return reviews.map(review => {
+            const author = mockUsers.find(u => u.id === review.userId)!
+            return {
+                ...review,
+                author,
+                replies: review.replies ? filterAndJoin(review.replies) : undefined
+            }
+        })
+    }
+
+    const reviews = mockReviews.filter(review => review.trailId === trailId)
+    return filterAndJoin(reviews)
 }
 
 // ===== 预设标签 =====

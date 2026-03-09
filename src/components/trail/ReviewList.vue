@@ -4,17 +4,17 @@ import BaseIcon from '../common/BaseIcon.vue'
 import SectionHeader from '../common/SectionHeader.vue'
 import ImagePreviewModal from '../common/ImagePreviewModal.vue'
 import CommentForm from './CommentForm.vue'
-import type { Review } from '../../mock/mockData'
-import { generateReviewId } from '../../mock/mockData'
+import type { ReviewWithAuthor } from '../../mock/mockData'
+import { generateReviewId, mockUsers } from '../../mock/mockData'
 
 const props = defineProps<{
-  reviews: Review[]
+  reviews: ReviewWithAuthor[]
   averageRating?: number
   totalReviews?: number
 }>()
 
 const emit = defineEmits<{
-  addReview: [review: Review]
+  addReview: [review: ReviewWithAuthor]
 }>()
 
 // Image preview state
@@ -40,11 +40,11 @@ function cancelReply() {
 }
 
 function handleCommentSubmit(data: { rating: number; text: string; images: string[] }) {
-  const newReview: Review = {
+  const currentUser = mockUsers.find(u => u.id === 115)!
+  const newReview: ReviewWithAuthor = {
     id: generateReviewId(),
-    user: '当前用户',
-    avatar: 'ME',
-    avatarBg: '#4f9a48',
+    userId: currentUser.id,
+    author: currentUser,
     rating: data.rating,
     time: '刚刚',
     text: data.text,
@@ -56,11 +56,11 @@ function handleCommentSubmit(data: { rating: number; text: string; images: strin
 function handleReplySubmit(text: string) {
   if (!replyingTo.value || !text.trim()) return
 
-  const reply: Review = {
+  const currentUser = mockUsers.find(u => u.id === 115)!
+  const reply: ReviewWithAuthor = {
     id: generateReviewId(),
-    user: '当前用户',
-    avatar: 'ME',
-    avatarBg: '#4f9a48',
+    userId: currentUser.id,
+    author: currentUser,
     time: '刚刚',
     text: text.trim(),
     replyTo: replyingTo.value.userName,
@@ -71,7 +71,7 @@ function handleReplySubmit(text: string) {
   replyingTo.value = null
 }
 
-function addReplyToReview(reviews: Review[], targetId: number, reply: Review): boolean {
+function addReplyToReview(reviews: ReviewWithAuthor[], targetId: number, reply: ReviewWithAuthor): boolean {
   for (const review of reviews) {
     if (review.id === targetId) {
       if (!review.replies) review.replies = []
@@ -114,13 +114,13 @@ function addReplyToReview(reviews: Review[], targetId: number, reply: Review): b
           <div class="flex items-start gap-3">
             <div
               class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-              :style="`background-color: ${review.avatarBg}`"
+              :style="`background-color: ${review.author.avatarBg}`"
             >
-              {{ review.avatar }}
+              {{ review.author.avatar }}
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
-                <span class="text-sm font-semibold" style="color: var(--text-primary);">{{ review.user }}</span>
+                <span class="text-sm font-semibold" style="color: var(--text-primary);">{{ review.author.username }}</span>
                 <span class="text-xs" style="color: var(--text-tertiary);">{{ review.time }}</span>
               </div>
               <div v-if="review.rating" class="flex gap-0.5 my-1">
@@ -148,7 +148,7 @@ function addReplyToReview(reviews: Review[], targetId: number, reply: Review): b
 
               <!-- Reply Button -->
               <button
-                @click="startReply(review.id, review.user)"
+                @click="startReply(review.id, review.author.username)"
                 class="mt-2 flex items-center gap-1 text-xs font-medium transition-colors hover:text-primary-500"
                 style="color: var(--text-tertiary);"
               >
@@ -190,13 +190,13 @@ function addReplyToReview(reviews: Review[], targetId: number, reply: Review): b
                   <div class="flex items-start gap-2.5">
                     <div
                       class="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-                      :style="`background-color: ${reply1.avatarBg}`"
+                      :style="`background-color: ${reply1.author.avatarBg}`"
                     >
-                      {{ reply1.avatar }}
+                      {{ reply1.author.avatar }}
                     </div>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2">
-                        <span class="text-xs font-semibold" style="color: var(--text-primary);">{{ reply1.user }}</span>
+                        <span class="text-xs font-semibold" style="color: var(--text-primary);">{{ reply1.author.username }}</span>
                         <span v-if="reply1.replyTo" class="text-xs" style="color: var(--text-tertiary);">
                           回复 <span class="font-medium" style="color: var(--text-secondary);">@{{ reply1.replyTo }}</span>
                         </span>
@@ -204,7 +204,7 @@ function addReplyToReview(reviews: Review[], targetId: number, reply: Review): b
                       </div>
                       <p class="text-sm leading-relaxed mt-0.5" style="color: var(--text-secondary);">{{ reply1.text }}</p>
                       <button
-                        @click="startReply(reply1.id, reply1.user, [review.id])"
+                        @click="startReply(reply1.id, reply1.author.username, [review.id])"
                         class="mt-1 flex items-center gap-1 text-xs font-medium transition-colors hover:text-primary-500"
                         style="color: var(--text-tertiary);"
                       >
@@ -241,13 +241,13 @@ function addReplyToReview(reviews: Review[], targetId: number, reply: Review): b
                           <div class="flex items-start gap-2">
                             <div
                               class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                              :style="`background-color: ${reply2.avatarBg}`"
+                              :style="`background-color: ${reply2.author.avatarBg}`"
                             >
-                              {{ reply2.avatar }}
+                              {{ reply2.author.avatar }}
                             </div>
                             <div class="flex-1 min-w-0">
                               <div class="flex items-center gap-2">
-                                <span class="text-xs font-semibold" style="color: var(--text-primary);">{{ reply2.user }}</span>
+                                <span class="text-xs font-semibold" style="color: var(--text-primary);">{{ reply2.author.username }}</span>
                                 <span v-if="reply2.replyTo" class="text-xs" style="color: var(--text-tertiary);">
                                   回复 <span class="font-medium" style="color: var(--text-secondary);">@{{ reply2.replyTo }}</span>
                                 </span>
@@ -255,7 +255,7 @@ function addReplyToReview(reviews: Review[], targetId: number, reply: Review): b
                               </div>
                               <p class="text-xs leading-relaxed mt-0.5" style="color: var(--text-secondary);">{{ reply2.text }}</p>
                               <button
-                                @click="startReply(reply2.id, reply2.user, [review.id, reply1.id])"
+                                @click="startReply(reply2.id, reply2.author.username, [review.id, reply1.id])"
                                 class="mt-1 flex items-center gap-1 text-[10px] font-medium transition-colors hover:text-primary-500"
                                 style="color: var(--text-tertiary);"
                               >
