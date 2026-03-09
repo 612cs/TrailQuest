@@ -28,6 +28,7 @@ export interface Trail {
     description: string
     tags: string[]
     favorites: number
+    likes: number
 }
 
 // ===== 路线详情（含评论数据） =====
@@ -52,6 +53,7 @@ export const mockTrailDetails: TrailDetail[] = [
         description: '老鹰峰顶是临安地区最受欢迎的徒步路线之一，沿途可欣赏壮丽的山谷景色。山顶视野开阔，晴天可远眺天目山脉。',
         tags: ['日出', '山顶', '摄影'],
         favorites: 3842,
+        likes: 1256,
         reviews: [
             {
                 id: 1,
@@ -150,6 +152,7 @@ export const mockTrailDetails: TrailDetail[] = [
         description: '轻松的环湖步道，适合全家出行。湖水清澈见底，四周被苍翠的山林环绕。早晨湖面如镜，倒映雪山，是摄影爱好者的天堂。',
         tags: ['湖泊', '家庭', '休闲'],
         favorites: 5126,
+        likes: 2430,
         reviews: [
             {
                 id: 10,
@@ -207,6 +210,7 @@ export const mockTrailDetails: TrailDetail[] = [
         description: '极具挑战性的峡谷穿越路线，需要较好的体力和经验。云海日出是最大的亮点，贡嘎雪山尽收眼底。',
         tags: ['云海', '挑战', '露营'],
         favorites: 8930,
+        likes: 5620,
         reviews: [
             {
                 id: 20,

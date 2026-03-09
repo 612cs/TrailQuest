@@ -49,6 +49,7 @@ const heroProps = computed(() => {
     elevation: t.elevation,
     duration: t.duration,
     favorites: t.favorites,
+    likes: t.likes,
     rating: t.rating,
     reviewCount: t.reviewCount,
   }
