@@ -79,6 +79,17 @@ function handleAddReview(review: Review) {
       <!-- Hero Card -->
       <DetailHero v-bind="heroProps" />
 
+      <!-- Description Section -->
+      <div class="card p-5 space-y-3">
+        <h3 class="text-base font-semibold flex items-center gap-2" style="color: var(--text-primary);">
+          <BaseIcon name="Info" :size="18" class="text-primary-500" />
+          路线介绍
+        </h3>
+        <p class="text-sm leading-relaxed whitespace-pre-line" style="color: var(--text-secondary);">
+          {{ trailDetail.description }}
+        </p>
+      </div>
+
       <!-- Weather Section -->
       <WeatherSection />
 

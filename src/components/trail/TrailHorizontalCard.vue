@@ -13,7 +13,7 @@ defineProps<{
   elevation: string
   description: string
   rating: number
-  reviews: string
+  reviewCount: number
 }>()
 
 const difficultyColors: Record<string, string> = {
@@ -77,7 +77,7 @@ const difficultyColors: Record<string, string> = {
           <div class="flex items-center gap-1.5">
             <BaseIcon name="Star" :size="16" class="text-primary-500 fill-current" />
             <span class="text-sm font-semibold text-primary-500">{{ rating }}</span>
-            <span class="text-xs" style="color: var(--text-tertiary);">{{ reviews }}</span>
+            <span class="text-xs" style="color: var(--text-tertiary);">({{ reviewCount >= 1000 ? (reviewCount / 1000).toFixed(1) + 'k' : reviewCount }} 条评论)</span>
           </div>
           <span class="flex items-center gap-1 text-sm font-medium text-primary-500">
             查看详情
