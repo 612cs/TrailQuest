@@ -31,6 +31,21 @@ export interface Trail {
     likes: number
 }
 
+// ===== 社区动态数据 =====
+export interface Post {
+    id: number
+    username: string
+    time: string
+    avatar: string
+    avatarBg: string
+    image: string
+    tags: string[]
+    content: string
+    likes: string | number
+    comments: string | number
+    shares: string | number
+}
+
 // ===== 路线详情（含评论数据） =====
 export interface TrailDetail extends Trail {
     reviews: Review[]
@@ -355,3 +370,84 @@ export function formatFavorites(count: number): string {
     if (count >= 1000) return `${(count / 1000).toFixed(1)}k`
     return count.toString()
 }
+// ===== 完整社区动态数据库 =====
+export const mockPosts: Post[] = [
+    {
+        id: 1,
+        username: '@mountain_jess',
+        time: '5 小时前 • 银溪',
+        avatar: 'MJ',
+        avatarBg: '#4f9a48',
+        image: '/trail-lake.png',
+        tags: ['AI: 湖泊', 'AI: 水域'],
+        content: '今天的水质清澈得令人难以置信。在远离主干道的地方发现了一个隐秘的角落。非常适合下午冥想。',
+        likes: '1.2k',
+        comments: '48',
+        shares: '12',
+    },
+    {
+        id: 2,
+        username: '@river_wanderer',
+        time: '5 小时前 • 银溪',
+        avatar: 'RW',
+        avatarBg: '#2563eb',
+        image: '/trail-foggy.png',
+        tags: ['AI: 森林', 'AI: 雾景'],
+        content: '清晨的薄雾中，阳光透过树叶间隙洒落在小径上。这种氛围让人仿佛置身于仙境之中。',
+        likes: '856',
+        comments: '22',
+        shares: '5',
+    },
+    {
+        id: 3,
+        username: '@trail_blazer',
+        time: '1 天前 • 龙脊',
+        avatar: 'TB',
+        avatarBg: '#ea580c',
+        image: '/trail-pine.png',
+        tags: ['AI: 山脉', 'AI: 梯田'],
+        content: '龙脊梯田的线条感真是大自然的杰作。建议大家避开黄金周，淡季的宁静感完全不同。',
+        likes: '2.4k',
+        comments: '156',
+        shares: '45',
+    },
+    {
+        id: 4,
+        username: '@hiking_queen',
+        time: '2 天前 • 莫干山',
+        avatar: 'HQ',
+        avatarBg: '#8b5cf6',
+        image: '/hero-mountain.png',
+        tags: ['AI: 远足', 'AI: 俯瞰'],
+        content: '终于登顶了！虽然路途辛苦，但看到这片云海的那一刻，所有的疲惫都烟消云散了。',
+        likes: '3.1k',
+        comments: '89',
+        shares: '28',
+    },
+    {
+        id: 5,
+        username: '@forest_spirit',
+        time: '3 天前 • 神农架',
+        avatar: 'FS',
+        avatarBg: '#059669',
+        image: '/trail-pine.png',
+        tags: ['AI: 原始森林', 'AI: 生态'],
+        content: '在这里感受到了大自然最原始的心跳。请大家带走垃圾，留下脚印，保护这片净土。',
+        likes: '1.8k',
+        comments: '64',
+        shares: '15',
+    },
+    {
+        id: 6,
+        username: '@nature_photo',
+        time: '4 天前 • 稻城亚丁',
+        avatar: 'NP',
+        avatarBg: '#0284c7',
+        image: '/trail-lake.png',
+        tags: ['AI: 雪山', 'AI: 海子'],
+        content: '蓝色的牛奶海，白色的仙乃日。这里就是川西高原上的香格里拉，美得令人窒息。',
+        likes: '5.2k',
+        comments: '230',
+        shares: '92',
+    }
+]

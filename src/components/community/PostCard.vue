@@ -10,9 +10,9 @@ interface Post {
   image: string
   tags: string[]
   content: string
-  likes: string
-  comments: string
-  shares: string
+  likes: string | number
+  comments: string | number
+  shares: string | number
 }
 
 defineProps<{
