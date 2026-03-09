@@ -61,7 +61,7 @@ function handleAddReview(review: ReviewWithAuthor) {
 <template>
   <main v-if="trailData">
     <!-- Custom Header -->
-    <div class="glass-header sticky top-14 sm:top-16 z-40 px-4 py-3">
+    <div class="glass-header sticky top-0 z-40 px-4 py-3">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
         <button @click="router.back()" class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500" style="color: var(--text-secondary);">
           <BaseIcon name="ChevronLeft" :size="20" />

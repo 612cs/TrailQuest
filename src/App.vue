@@ -1,13 +1,21 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from './components/AppHeader.vue'
+
+const route = useRoute()
+const hideHeaderRoutes = ['TrailDetail']
+const showHeader = computed(() => !hideHeaderRoutes.includes(route.name as string))
 </script>
 
 <template>
   <div class="min-h-screen" style="background-color: var(--bg-page); color: var(--text-primary);">
-    <AppHeader />
+    <AppHeader v-if="showHeader" />
     <RouterView v-slot="{ Component }">
       <transition name="fade" mode="out-in">
-        <component :is="Component" />
+        <KeepAlive>
+          <component :is="Component" :key="$route.fullPath" />
+        </KeepAlive>
       </transition>
     </RouterView>
   </div>
