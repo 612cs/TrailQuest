@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+/* ===== TailwindCSS v4 Theme Tokens ===== */
+@theme {
+  /* Brand Colors - Forest Green Palette */
+  --color-primary-50: #f0f7ef;
+  --color-primary-100: #d9ebd7;
+  --color-primary-200: #b3d7af;
+  --color-primary-300: #7fba79;
+  --color-primary-400: #4f9a48;
+  --color-primary-500: #2d5927;
+  --color-primary-600: #264b21;
+  --color-primary-700: #1e3d1a;
+  --color-primary-800: #172f14;
+  --color-primary-900: #10210e;
+
+  /* Neutral Colors */
+  --color-surface-50: #f6f7f6;
+  --color-surface-100: #ebeeed;
+  --color-surface-200: #d8dbd9;
+  --color-surface-300: #b5bab7;
+  --color-surface-400: #8a918d;
+  --color-surface-500: #6b736e;
+  --color-surface-600: #565d58;
+  --color-surface-700: #474d49;
+  --color-surface-800: #3b403c;
+  --color-surface-900: #1a1d1b;
+  --color-surface-950: #0d0f0d;
+
+  /* Difficulty Badge Colors */
+  --color-easy: #16a34a;
+  --color-moderate: #2563eb;
+  --color-hard: #dc2626;
+
+  /* Warning/Alert */
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fef3c7;
+  --color-warning-dark-bg: #451a03;
+
+  /* Font Family */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+}
+
+/* ===== Dark Mode Variables ===== */
+:root {
+  --bg-page: var(--color-surface-50);
+  --bg-card: #ffffff;
+  --bg-header: rgba(246, 247, 246, 0.8);
+  --bg-input: #ffffff;
+  --bg-tag: rgba(45, 89, 39, 0.08);
+
+  --text-primary: var(--color-surface-900);
+  --text-secondary: var(--color-surface-600);
+  --text-tertiary: var(--color-surface-400);
+  --text-inverse: #ffffff;
+
+  --border-default: rgba(45, 89, 39, 0.1);
+  --border-card: rgba(45, 89, 39, 0.08);
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark {
+  --bg-page: var(--color-surface-950);
+  --bg-card: var(--color-surface-900);
+  --bg-header: rgba(13, 15, 13, 0.85);
+  --bg-input: var(--color-surface-800);
+  --bg-tag: rgba(45, 89, 39, 0.2);
+
+  --text-primary: var(--color-surface-50);
+  --text-secondary: var(--color-surface-300);
+  --text-tertiary: var(--color-surface-500);
+  --text-inverse: var(--color-surface-900);
+
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-card: rgba(255, 255, 255, 0.06);
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.14);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Base Styles ===== */
+body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ===== Utility Classes ===== */
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-lg);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+.glass-header {
+  background-color: var(--bg-header);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.badge-easy {
+  background-color: color-mix(in srgb, var(--color-easy) 15%, transparent);
+  color: var(--color-easy);
+}
+
+.badge-moderate {
+  background-color: color-mix(in srgb, var(--color-primary-500) 15%, transparent);
+  color: var(--color-primary-500);
+}
+
+.dark .badge-moderate {
+  background-color: color-mix(in srgb, var(--color-primary-400) 25%, transparent);
+  color: var(--color-primary-300);
+}
+
+.badge-hard {
+  background-color: color-mix(in srgb, var(--color-hard) 15%, transparent);
+  color: var(--color-hard);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-300);
+  border-radius: var(--radius-full);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-surface-700);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Staggered animations */
+.stagger-1 {
+  animation-delay: 0.1s;
+}
+
+.stagger-2 {
+  animation-delay: 0.2s;
+}
+
+.stagger-3 {
+  animation-delay: 0.3s;
+}
+
+.stagger-4 {
+  animation-delay: 0.4s;
+}
+
+.stagger-5 {
+  animation-delay: 0.5s;
+}
+
+.stagger-6 {
+  animation-delay: 0.6s;
+}
+
+/* Hide scrollbar for horizontal scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
