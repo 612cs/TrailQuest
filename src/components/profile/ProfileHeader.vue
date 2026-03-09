@@ -16,7 +16,6 @@ import ActionButton from '../common/ActionButton.vue'
       <div class="flex-1 text-center sm:text-left space-y-3">
         <div class="flex flex-col sm:flex-row items-center sm:items-start gap-2">
           <h1 class="text-xl sm:text-2xl font-bold" style="color: var(--text-primary);">亚历克斯·汤普森</h1>
-          <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-primary-500/10 text-primary-500">高级会员</span>
         </div>
         <p class="text-sm" style="color: var(--text-secondary);">管理员权限 • 2023年1月加入</p>
         <div class="flex items-center justify-center sm:justify-start gap-2">

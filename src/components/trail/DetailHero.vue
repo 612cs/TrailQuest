@@ -94,15 +94,18 @@ defineProps<{
     <div class="grid grid-cols-3 divide-x p-4" style="border-color: var(--border-default);">
       <div class="text-center">
         <p class="text-sm font-bold text-primary-500">{{ distance }}</p>
-        <p class="text-xs mt-0.5" style="color: var(--text-tertiary);">距离</p>
+        <BaseIcon name="TrendingUp" :size="14" /> 
+        <!-- <p class="text-xs mt-0.5" style="color: var(--text-tertiary);">距离</p> -->
       </div>
       <div class="text-center">
         <p class="text-sm font-bold text-primary-500">{{ elevation }}</p>
-        <p class="text-xs mt-0.5" style="color: var(--text-tertiary);">海拔增益</p>
+         <BaseIcon name="Mountain" :size="14" />
+        <!-- <p class="text-xs mt-0.5" style="color: var(--text-tertiary);">海拔增益</p> -->
       </div>
       <div class="text-center">
         <p class="text-sm font-bold text-primary-500">{{ duration }}</p>
-        <p class="text-xs mt-0.5" style="color: var(--text-tertiary);">预计时间</p>
+         <BaseIcon name="Clock" :size="14" />
+        <!-- <p class="text-xs mt-0.5" style="color: var(--text-tertiary);">预计时间</p> -->
       </div>
     </div>
   </div>

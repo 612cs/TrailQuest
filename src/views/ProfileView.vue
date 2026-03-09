@@ -29,7 +29,7 @@ const posts = [
         </button>
         <button @click="activeTab = 'saved'" class="flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors" :class="activeTab === 'saved' ? 'border-primary-500 text-primary-500' : 'border-transparent'" :style="activeTab !== 'saved' ? 'color: var(--text-secondary)' : ''">
           <BaseIcon name="Bookmark" :size="16" />
-          保存记录
+          我的收藏
         </button>
       </div>
       <div class="divide-y" style="border-color: var(--border-default);">
