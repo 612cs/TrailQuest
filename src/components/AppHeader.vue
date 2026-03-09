@@ -53,6 +53,15 @@ function isActive(path: string): boolean {
 
         <!-- Right Side -->
         <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Publish Button -->
+          <RouterLink
+            to="/publish"
+            class="p-2 rounded-full transition-colors duration-200 hover:bg-primary-500/10"
+            title="发布路线"
+          >
+            <BaseIcon name="PlusCircle" :size="20" :class="isActive('/publish') ? 'text-primary-500' : ''" :style="!isActive('/publish') ? 'color: var(--text-secondary)' : ''" />
+          </RouterLink>
+
           <!-- Theme Toggle -->
           <button
             @click="themeStore.toggle()"

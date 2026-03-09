@@ -27,6 +27,18 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '个人中心' },
   },
   {
+    path: '/publish',
+    name: 'Publish',
+    component: () => import('../views/PublishView.vue'),
+    meta: { title: '发布路线' },
+  },
+  {
+    path: '/chat',
+    name: 'Chat',
+    component: () => import('../views/ChatView.vue'),
+    meta: { title: 'AI 助手' },
+  },
+  {
     path: '/trail/:id',
     name: 'TrailDetail',
     component: () => import('../views/TrailDetailView.vue'),
