@@ -12,6 +12,23 @@ export interface Review {
     replyTo?: string // 回复的用户名
 }
 
+// ===== 用户数据 =====
+export interface User {
+    id: number
+    username: string
+    avatar: string
+    avatarBg: string
+}
+
+export const mockUsers: User[] = [
+    { id: 101, username: '@mountain_jess', avatar: 'MJ', avatarBg: '#4f9a48' },
+    { id: 102, username: '@river_wanderer', avatar: 'RW', avatarBg: '#2563eb' },
+    { id: 103, username: '@trail_blazer', avatar: 'TB', avatarBg: '#ea580c' },
+    { id: 104, username: '@hiking_queen', avatar: 'HQ', avatarBg: '#8b5cf6' },
+    { id: 105, username: '@forest_spirit', avatar: 'FS', avatarBg: '#059669' },
+    { id: 106, username: '@nature_photo', avatar: 'NP', avatarBg: '#0284c7' },
+]
+
 // ===== 路线数据 =====
 export interface Trail {
     id: number
@@ -29,21 +46,8 @@ export interface Trail {
     tags: string[]
     favorites: number
     likes: number
-}
-
-// ===== 社区动态数据 =====
-export interface Post {
-    id: number
-    username: string
-    time: string
-    avatar: string
-    avatarBg: string
-    image: string
-    tags: string[]
-    content: string
-    likes: string | number
-    comments: string | number
-    shares: string | number
+    authorId: number
+    publishTime: string
 }
 
 // ===== 路线详情（含评论数据） =====
@@ -69,6 +73,8 @@ export const mockTrailDetails: TrailDetail[] = [
         tags: ['日出', '山顶', '摄影'],
         favorites: 3842,
         likes: 1256,
+        authorId: 101,
+        publishTime: '5 小时前',
         reviews: [
             {
                 id: 1,
@@ -168,6 +174,8 @@ export const mockTrailDetails: TrailDetail[] = [
         tags: ['湖泊', '家庭', '休闲'],
         favorites: 5126,
         likes: 2430,
+        authorId: 102,
+        publishTime: '1 天前',
         reviews: [
             {
                 id: 10,
@@ -226,6 +234,8 @@ export const mockTrailDetails: TrailDetail[] = [
         tags: ['云海', '挑战', '露营'],
         favorites: 8930,
         likes: 5620,
+        authorId: 104,
+        publishTime: '2 天前',
         reviews: [
             {
                 id: 20,
@@ -289,7 +299,83 @@ export const mockTrailDetails: TrailDetail[] = [
             },
         ],
     },
+    {
+        id: 4,
+        image: '/hero-mountain.png',
+        name: '莫干山云海',
+        location: '浙江 湖州 莫干山',
+        difficulty: 'moderate',
+        difficultyLabel: '适中',
+        rating: 4.6,
+        reviewCount: 420,
+        distance: '9.2 km',
+        elevation: '+580 m',
+        duration: '4h 30m',
+        description: '终于登顶了！虽然路途辛苦，但看到这片云海的那一刻，所有的疲惫都烟消云散了。',
+        tags: ['远足', '俯瞰'],
+        favorites: 2800,
+        likes: 3100,
+        authorId: 104,
+        publishTime: '2 天前',
+        reviews: [],
+    },
+    {
+        id: 5,
+        image: '/trail-pine.png',
+        name: '神农架穿越',
+        location: '湖北 神农架',
+        difficulty: 'hard',
+        difficultyLabel: '困难',
+        rating: 4.9,
+        reviewCount: 890,
+        distance: '24.0 km',
+        elevation: '+1500 m',
+        duration: '2 天',
+        description: '在这里感受到了大自然最原始的心跳。请大家带走垃圾，留下脚印，保护这片净土。',
+        tags: ['原始森林', '生态'],
+        favorites: 1500,
+        likes: 1800,
+        authorId: 105,
+        publishTime: '3 天前',
+        reviews: [],
+    },
+    {
+        id: 6,
+        image: '/trail-lake.png',
+        name: '稻城亚丁短线',
+        location: '四川 稻城',
+        difficulty: 'hard',
+        difficultyLabel: '困难',
+        rating: 5.0,
+        reviewCount: 3200,
+        distance: '12.0 km',
+        elevation: '+800 m',
+        duration: '7h',
+        description: '蓝色的牛奶海，白色的仙乃日。这里就是川西高原上的香格里拉，美得令人窒息。',
+        tags: ['雪山', '海子'],
+        favorites: 9200,
+        likes: 5200,
+        authorId: 106,
+        publishTime: '4 天前',
+        reviews: [],
+    }
 ]
+
+// 合并的 Trail + User 类型
+export interface TrailWithAuthor extends TrailDetail {
+    author: User
+}
+
+// 联表查询所有带有作者信息的路线
+export function getTrailsWithAuthor(): TrailWithAuthor[] {
+    return mockTrailDetails.map(trail => {
+        const author = mockUsers.find(u => u.id === trail.authorId)!
+        return {
+            ...trail,
+            author
+        }
+    })
+}
 
 // 向后兼容：导出扁平路线列表（供首页、搜索页使用）
 export const mockTrails: Trail[] = mockTrailDetails.map(({ reviews, ...trail }) => trail)
@@ -370,84 +456,4 @@ export function formatFavorites(count: number): string {
     if (count >= 1000) return `${(count / 1000).toFixed(1)}k`
     return count.toString()
 }
-// ===== 完整社区动态数据库 =====
-export const mockPosts: Post[] = [
-    {
-        id: 1,
-        username: '@mountain_jess',
-        time: '5 小时前 • 银溪',
-        avatar: 'MJ',
-        avatarBg: '#4f9a48',
-        image: '/trail-lake.png',
-        tags: ['AI: 湖泊', 'AI: 水域'],
-        content: '今天的水质清澈得令人难以置信。在远离主干道的地方发现了一个隐秘的角落。非常适合下午冥想。',
-        likes: '1.2k',
-        comments: '48',
-        shares: '12',
-    },
-    {
-        id: 2,
-        username: '@river_wanderer',
-        time: '5 小时前 • 银溪',
-        avatar: 'RW',
-        avatarBg: '#2563eb',
-        image: '/trail-foggy.png',
-        tags: ['AI: 森林', 'AI: 雾景'],
-        content: '清晨的薄雾中，阳光透过树叶间隙洒落在小径上。这种氛围让人仿佛置身于仙境之中。',
-        likes: '856',
-        comments: '22',
-        shares: '5',
-    },
-    {
-        id: 3,
-        username: '@trail_blazer',
-        time: '1 天前 • 龙脊',
-        avatar: 'TB',
-        avatarBg: '#ea580c',
-        image: '/trail-pine.png',
-        tags: ['AI: 山脉', 'AI: 梯田'],
-        content: '龙脊梯田的线条感真是大自然的杰作。建议大家避开黄金周，淡季的宁静感完全不同。',
-        likes: '2.4k',
-        comments: '156',
-        shares: '45',
-    },
-    {
-        id: 4,
-        username: '@hiking_queen',
-        time: '2 天前 • 莫干山',
-        avatar: 'HQ',
-        avatarBg: '#8b5cf6',
-        image: '/hero-mountain.png',
-        tags: ['AI: 远足', 'AI: 俯瞰'],
-        content: '终于登顶了！虽然路途辛苦，但看到这片云海的那一刻，所有的疲惫都烟消云散了。',
-        likes: '3.1k',
-        comments: '89',
-        shares: '28',
-    },
-    {
-        id: 5,
-        username: '@forest_spirit',
-        time: '3 天前 • 神农架',
-        avatar: 'FS',
-        avatarBg: '#059669',
-        image: '/trail-pine.png',
-        tags: ['AI: 原始森林', 'AI: 生态'],
-        content: '在这里感受到了大自然最原始的心跳。请大家带走垃圾，留下脚印，保护这片净土。',
-        likes: '1.8k',
-        comments: '64',
-        shares: '15',
-    },
-    {
-        id: 6,
-        username: '@nature_photo',
-        time: '4 天前 • 稻城亚丁',
-        avatar: 'NP',
-        avatarBg: '#0284c7',
-        image: '/trail-lake.png',
-        tags: ['AI: 雪山', 'AI: 海子'],
-        content: '蓝色的牛奶海，白色的仙乃日。这里就是川西高原上的香格里拉，美得令人窒息。',
-        likes: '5.2k',
-        comments: '230',
-        shares: '92',
-    }
-]
+// ===== 社区相关辅助工具 =====

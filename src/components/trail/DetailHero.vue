@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import BaseIcon from '../common/BaseIcon.vue'
 
+import type { User } from '../../mock/mockData'
+
 defineProps<{
   image: string
   name: string
@@ -14,6 +16,8 @@ defineProps<{
   likes?: number
   rating?: number
   reviewCount?: number
+  author: User
+  publishTime: string
 }>()
 </script>
 
@@ -39,6 +43,24 @@ defineProps<{
           {{ location }}
         </p>
       </div>
+    </div>
+    <!-- Author Info Row -->
+    <div class="flex items-center justify-between px-4 py-3 border-b" style="border-color: var(--border-default); background-color: var(--bg-card);">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+          :style="`background-color: ${author.avatarBg}`"
+        >
+          {{ author.avatar }}
+        </div>
+        <div>
+          <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ author.username }}</p>
+          <p class="text-xs" style="color: var(--text-tertiary);">发布于 {{ publishTime }}</p>
+        </div>
+      </div>
+      <button class="px-3 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors">
+        关注
+      </button>
     </div>
     <!-- Rating & Favorites Row -->
     <div v-if="rating || favorites" class="flex items-center justify-between px-4 py-3 border-b" style="border-color: var(--border-default);">

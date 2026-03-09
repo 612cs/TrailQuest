@@ -28,12 +28,12 @@ const visiblePages = computed(() => {
 
 const showEndEllipsis = computed(() => {
   const lastVisible = visiblePages.value[visiblePages.value.length - 1]
-  return lastVisible < props.total - 1
+  return lastVisible !== undefined && lastVisible < props.total - 1
 })
 
 const showLastPage = computed(() => {
   const lastVisible = visiblePages.value[visiblePages.value.length - 1]
-  return lastVisible < props.total
+  return lastVisible !== undefined && lastVisible < props.total
 })
 
 function setPage(page: number) {

@@ -2,16 +2,19 @@
 import { ref, computed } from 'vue'
 import PostCard from '../components/community/PostCard.vue'
 import Pagination from '../components/common/Pagination.vue'
-import { mockPosts } from '../mock/mockData'
+import { getTrailsWithAuthor } from '../mock/mockData'
 
 const pageSize = 2
 const currentPage = ref(1)
-const totalPages = Math.ceil(mockPosts.length / pageSize)
+
+// 获取融合后带作者信息的路线数据
+const allPosts = getTrailsWithAuthor()
+const totalPages = Math.ceil(allPosts.length / pageSize)
 
 const currentPosts = computed(() => {
   const start = (currentPage.value - 1) * pageSize
   const end = start + pageSize
-  return mockPosts.slice(start, end)
+  return allPosts.slice(start, end)
 })
 </script>
 

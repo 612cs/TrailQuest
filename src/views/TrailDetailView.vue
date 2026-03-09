@@ -7,38 +7,33 @@ import WeatherSection from '../components/trail/WeatherSection.vue'
 import WeatherAlert from '../components/trail/WeatherAlert.vue'
 import LandscapePrediction from '../components/trail/LandscapePrediction.vue'
 import ReviewList from '../components/trail/ReviewList.vue'
-import { getTrailById } from '../mock/mockData'
-import type { Review, TrailDetail } from '../mock/mockData'
+import { getTrailsWithAuthor } from '../mock/mockData'
+import type { Review, TrailWithAuthor } from '../mock/mockData'
 
 const router = useRouter()
 const route = useRoute()
 
-const trailDetail = ref<TrailDetail | null>(null)
 const reviews = ref<Review[]>([])
 
-// Load trail data based on route param
-function loadTrail() {
-  const id = Number(route.params.id)
-  const detail = getTrailById(id)
-  if (detail) {
-    trailDetail.value = detail
+// Get trail data based on route ID with Author Context
+const trailId = computed(() => Number(route.params.id))
+const allTrails = getTrailsWithAuthor()
+const trailData = computed<TrailWithAuthor | undefined>(() => {
+  return allTrails.find(t => t.id === trailId.value)
+})
+
+// Load reviews when trailData changes
+watch(trailData, (newTrailData) => {
+  if (newTrailData) {
     // Deep clone reviews so mutations don't affect the mock source
-    reviews.value = JSON.parse(JSON.stringify(detail.reviews))
+    reviews.value = JSON.parse(JSON.stringify(newTrailData.reviews))
   } else {
-    // Fallback: if ID not found, show first trail
-    const fallback = getTrailById(1)!
-    trailDetail.value = fallback
-    reviews.value = JSON.parse(JSON.stringify(fallback.reviews))
+    reviews.value = []
   }
-}
-
-loadTrail()
-
-// Reload when route param changes (e.g. navigating between trails)
-watch(() => route.params.id, loadTrail)
+}, { immediate: true }) // immediate: true to run on initial component mount
 
 const heroProps = computed(() => {
-  const t = trailDetail.value!
+  const t = trailData.value!
   return {
     image: t.image,
     name: t.name,
@@ -48,10 +43,12 @@ const heroProps = computed(() => {
     distance: t.distance,
     elevation: t.elevation,
     duration: t.duration,
-    favorites: t.favorites,
-    likes: t.likes,
     rating: t.rating,
     reviewCount: t.reviewCount,
+    likes: t.likes,
+    favorites: t.favorites,
+    author: t.author,
+    publishTime: t.publishTime
   }
 })
 
@@ -61,7 +58,7 @@ function handleAddReview(review: Review) {
 </script>
 
 <template>
-  <main v-if="trailDetail">
+  <main v-if="trailData">
     <!-- Custom Header -->
     <div class="glass-header sticky top-14 sm:top-16 z-40 px-4 py-3">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
@@ -87,7 +84,7 @@ function handleAddReview(review: Review) {
           路线介绍
         </h3>
         <p class="text-sm leading-relaxed whitespace-pre-line" style="color: var(--text-secondary);">
-          {{ trailDetail.description }}
+          {{ trailData.description }}
         </p>
       </div>
 
@@ -106,8 +103,8 @@ function handleAddReview(review: Review) {
       <!-- User Reviews -->
       <ReviewList
         :reviews="reviews"
-        :average-rating="trailDetail.rating"
-        :total-reviews="trailDetail.reviewCount"
+        :average-rating="trailData.rating"
+        :total-reviews="trailData.reviewCount"
         @add-review="handleAddReview"
       />
     </div>
