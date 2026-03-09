@@ -5,11 +5,15 @@ import type { TrailWithAuthor } from '../../mock/mockData'
 
 defineProps<{
   post: TrailWithAuthor
+  isInitialLoad?: boolean
 }>()
 </script>
 
 <template>
-  <article class="card overflow-hidden animate-fade-in-up">
+  <article 
+    class="card overflow-hidden" 
+    :class="isInitialLoad !== false ? 'animate-fade-in-up' : ''"
+  >
     <!-- Post Header -->
     <div class="flex items-center justify-between p-4 pb-3">
       <div class="flex items-center gap-3">

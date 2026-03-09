@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import TrailCard from '../components/TrailCard.vue'
 import HeroSection from '../components/home/HeroSection.vue'
 import ActivityGrid from '../components/home/ActivityGrid.vue'
@@ -21,6 +21,13 @@ const popularTrails = computed(() =>
     duration: t.duration,
   }))
 )
+const isInitialLoad = ref(true)
+
+onMounted(() => {
+  setTimeout(() => {
+    isInitialLoad.value = false
+  }, 1000)
+})
 </script>
 
 <template>
@@ -44,8 +51,7 @@ const popularTrails = computed(() =>
           v-for="trail in popularTrails"
           :key="trail.id"
           v-bind="trail"
-          class="animate-fade-in-up"
-          :class="`stagger-${trail.id}`"
+          :class="isInitialLoad ? `animate-fade-in-up stagger-${trail.id}` : ''"
         />
       </div>
     </section>

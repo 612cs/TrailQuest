@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import PostCard from '../components/community/PostCard.vue'
 import Pagination from '../components/common/Pagination.vue'
 import { getTrailsWithAuthor } from '../mock/mockData'
@@ -15,6 +15,14 @@ const currentPosts = computed(() => {
   const start = (currentPage.value - 1) * pageSize
   const end = start + pageSize
   return allPosts.slice(start, end)
+})
+
+const isInitialLoad = ref(true)
+
+onMounted(() => {
+  setTimeout(() => {
+    isInitialLoad.value = false
+  }, 1000)
 })
 </script>
 
@@ -32,6 +40,7 @@ const currentPosts = computed(() => {
         v-for="post in currentPosts"
         :key="post.id"
         :post="post"
+        :is-initial-load="isInitialLoad"
       />
     </div>
 

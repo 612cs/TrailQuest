@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import SearchBar from '../components/search/SearchBar.vue'
 import FilterBar from '../components/search/FilterBar.vue'
 import ViewToggle from '../components/search/ViewToggle.vue'
@@ -10,6 +10,13 @@ import { mockTrails } from '../mock/mockData'
 const searchInput = ref('')
 const currentSearchQuery = ref('')
 const activeView = ref<'list' | 'map'>('list')
+const isInitialLoad = ref(true)
+
+onMounted(() => {
+  setTimeout(() => {
+    isInitialLoad.value = false
+  }, 1000)
+})
 
 const filters = ['难度', '路线长度', '海拔增益', '评分']
 
@@ -73,6 +80,7 @@ const filteredTrails = computed(() => {
         v-for="trail in filteredTrails"
         :key="trail.id"
         v-bind="trail"
+        :class="isInitialLoad ? `animate-fade-in-up stagger-${trail.id}` : ''"
       />
     </div>
   </main>
