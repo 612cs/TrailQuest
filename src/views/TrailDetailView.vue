@@ -7,7 +7,7 @@ import WeatherSection from '../components/trail/WeatherSection.vue'
 import WeatherAlert from '../components/trail/WeatherAlert.vue'
 import LandscapePrediction from '../components/trail/LandscapePrediction.vue'
 import ReviewList from '../components/trail/ReviewList.vue'
-import { getTrailsWithAuthor } from '../mock/mockData'
+import { getTrailsWithAuthor, getReviewsByTrailId } from '../mock/mockData'
 import type { Review, TrailWithAuthor } from '../mock/mockData'
 
 const router = useRouter()
@@ -23,10 +23,11 @@ const trailData = computed<TrailWithAuthor | undefined>(() => {
 })
 
 // Load reviews when trailData changes
-watch(trailData, (newTrailData) => {
-  if (newTrailData) {
+watch(trailId, (newId) => {
+  if (newId) {
+    const fetchedReviews = getReviewsByTrailId(newId)
     // Deep clone reviews so mutations don't affect the mock source
-    reviews.value = JSON.parse(JSON.stringify(newTrailData.reviews))
+    reviews.value = JSON.parse(JSON.stringify(fetchedReviews))
   } else {
     reviews.value = []
   }
