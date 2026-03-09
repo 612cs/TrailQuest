@@ -3,10 +3,15 @@ import { ref } from 'vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ProfileHeader from '../components/profile/ProfileHeader.vue'
 import Pagination from '../components/common/Pagination.vue'
+import EditProfileModal from '../components/profile/EditProfileModal.vue'
+import AccountSettingsModal from '../components/profile/AccountSettingsModal.vue'
 
 const activeTab = ref<'posts' | 'saved'>('posts')
 const currentPage = ref(1)
 const totalPages = 3
+
+const showEditModal = ref(false)
+const showSettingsModal = ref(false)
 
 const posts = [
   { id: 1, image: '/trail-pine.png', title: '隐藏海岸小径指南', editTime: '2小时前编辑', visibility: '公开' },
@@ -18,7 +23,14 @@ const posts = [
 
 <template>
   <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
-    <ProfileHeader />
+    <ProfileHeader 
+      @show-edit="showEditModal = true"
+      @show-settings="showSettingsModal = true"
+    />
+
+    <!-- Modals -->
+    <EditProfileModal v-model:show="showEditModal" />
+    <AccountSettingsModal v-model:show="showSettingsModal" />
 
     <!-- Tabs & Content Card -->
     <div class="card overflow-hidden">
