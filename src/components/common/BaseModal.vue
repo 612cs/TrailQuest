@@ -46,12 +46,12 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition name="fade">
-      <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="close"></div>
+      <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center px-4 pointer-events-none">
+        <!-- Transparent Backdrop to catch clicks without darkening -->
+        <div class="absolute inset-0 pointer-events-auto" @click="close"></div>
         
         <!-- Modal Content -->
-        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="relative w-full max-w-md bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col max-h-[90vh] pointer-events-auto">
           <!-- Header -->
           <div class="px-6 py-4 flex items-center justify-between border-b" style="border-color: var(--border-default);">
             <h2 class="text-xl font-bold" style="color: var(--text-primary);">{{ title }}</h2>

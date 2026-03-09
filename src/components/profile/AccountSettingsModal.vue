@@ -31,11 +31,11 @@ const privateProfile = ref(false)
         <div class="space-y-3">
           <label class="flex items-center justify-between cursor-pointer">
             <span class="text-sm" style="color: var(--text-secondary);">电子邮件通知</span>
-            <input type="checkbox" v-model="emailNotifications" class="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500" />
+            <input type="checkbox" v-model="emailNotifications" class="w-4 h-4 rounded border-gray-300 focus:ring-primary-500 text-primary-500 accent-primary-500" />
           </label>
           <label class="flex items-center justify-between cursor-pointer">
             <span class="text-sm" style="color: var(--text-secondary);">推送通知</span>
-            <input type="checkbox" v-model="pushNotifications" class="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500" />
+            <input type="checkbox" v-model="pushNotifications" class="w-4 h-4 rounded border-gray-300 focus:ring-primary-500 text-primary-500 accent-primary-500" />
           </label>
         </div>
       </div>
@@ -46,10 +46,10 @@ const privateProfile = ref(false)
         <div class="space-y-3">
           <label class="flex items-center justify-between cursor-pointer">
             <span class="text-sm" style="color: var(--text-secondary);">私密账户</span>
-            <input type="checkbox" v-model="privateProfile" class="w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500" />
+            <input type="checkbox" v-model="privateProfile" class="w-4 h-4 rounded border-gray-300 focus:ring-primary-500 text-primary-500 accent-primary-500" />
           </label>
           <div class="pt-2">
-            <button class="text-sm font-medium text-red-500 hover:text-red-600 transition-colors">
+            <button class="text-sm font-medium transition-colors" style="color: var(--color-primary-500); hover: opacity: 0.8;">
               退出登录
             </button>
           </div>
