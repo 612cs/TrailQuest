@@ -12,6 +12,8 @@ const props = defineProps<{
   location: string
   difficulty: string
   difficultyLabel: string
+  packType: 'light' | 'heavy' | 'both'
+  durationType: 'single_day' | 'multi_day'
   distance: string
   elevation: string
   duration: string
@@ -22,6 +24,17 @@ const props = defineProps<{
   author: User
   publishTime: string
 }>()
+
+const packLabels: Record<'light' | 'heavy' | 'both', string> = {
+  light: '轻装',
+  heavy: '重装',
+  both: '轻重皆可',
+}
+
+const durationLabels: Record<'single_day' | 'multi_day', string> = {
+  single_day: '单日',
+  multi_day: '多日',
+}
 </script>
 
 <template>
@@ -30,16 +43,24 @@ const props = defineProps<{
       <img :src="image" :alt="name" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
       <div class="absolute bottom-4 left-4 right-4">
-        <span
-          class="px-2.5 py-1 rounded-full text-xs font-semibold"
-          :class="{
-            'badge-easy': difficulty === 'easy',
-            'badge-moderate': difficulty === 'moderate',
-            'badge-hard': difficulty === 'hard'
-          }"
-        >
-          {{ difficultyLabel }}
-        </span>
+        <div class="flex flex-wrap items-center gap-2">
+          <span
+            class="px-2.5 py-1 rounded-full text-xs font-semibold"
+            :class="{
+              'badge-easy': difficulty === 'easy',
+              'badge-moderate': difficulty === 'moderate',
+              'badge-hard': difficulty === 'hard'
+            }"
+          >
+            {{ difficultyLabel }}
+          </span>
+          <span class="px-2.5 py-1 rounded-full text-xs font-semibold border border-white/40 text-white/90">
+            {{ packLabels[packType] }}
+          </span>
+          <span class="px-2.5 py-1 rounded-full text-xs font-semibold border border-white/40 text-white/90">
+            {{ durationLabels[durationType] }}
+          </span>
+        </div>
         <h1 class="text-xl sm:text-2xl font-bold text-white mt-2">{{ name }}</h1>
         <p class="text-sm text-white/80 flex items-center gap-1 mt-1">
           <BaseIcon name="MapPin" :size="14" />

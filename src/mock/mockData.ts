@@ -48,6 +48,8 @@ export interface Trail {
     location: string
     difficulty: 'easy' | 'moderate' | 'hard'
     difficultyLabel: string
+    packType: 'light' | 'heavy' | 'both'
+    durationType: 'single_day' | 'multi_day'
     rating: number
     reviewCount: number
     distance: string
@@ -77,6 +79,8 @@ export const mockTrailDetails: TrailDetail[] = [
         ip: '121.41.32.100',
         difficulty: 'moderate',
         difficultyLabel: '适中',
+        packType: 'light',
+        durationType: 'single_day',
         rating: 4.9,
         reviewCount: 1200,
         distance: '6.4 km',
@@ -97,6 +101,8 @@ export const mockTrailDetails: TrailDetail[] = [
         ip: '222.88.90.10',
         difficulty: 'easy',
         difficultyLabel: '简单',
+        packType: 'light',
+        durationType: 'single_day',
         rating: 4.7,
         reviewCount: 856,
         distance: '3.4 km',
@@ -117,6 +123,8 @@ export const mockTrailDetails: TrailDetail[] = [
         ip: '118.125.88.20',
         difficulty: 'hard',
         difficultyLabel: '困难',
+        packType: 'heavy',
+        durationType: 'multi_day',
         rating: 4.8,
         reviewCount: 2400,
         distance: '18.0 km',
@@ -137,6 +145,8 @@ export const mockTrailDetails: TrailDetail[] = [
         ip: '122.227.208.10',
         difficulty: 'moderate',
         difficultyLabel: '适中',
+        packType: 'both',
+        durationType: 'single_day',
         rating: 4.6,
         reviewCount: 420,
         distance: '9.2 km',
@@ -157,6 +167,8 @@ export const mockTrailDetails: TrailDetail[] = [
         ip: '58.19.0.30',
         difficulty: 'hard',
         difficultyLabel: '困难',
+        packType: 'heavy',
+        durationType: 'multi_day',
         rating: 4.9,
         reviewCount: 890,
         distance: '24.0 km',
@@ -177,6 +189,8 @@ export const mockTrailDetails: TrailDetail[] = [
         ip: '103.83.44.15',
         difficulty: 'hard',
         difficultyLabel: '困难',
+        packType: 'both',
+        durationType: 'single_day',
         rating: 5.0,
         reviewCount: 3200,
         distance: '12.0 km',

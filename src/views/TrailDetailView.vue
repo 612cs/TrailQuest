@@ -65,6 +65,8 @@ const heroProps = computed(() => {
     location: t.location,
     difficulty: t.difficulty,
     difficultyLabel: t.difficultyLabel,
+    packType: t.packType,
+    durationType: t.durationType,
     distance: t.distance,
     elevation: t.elevation,
     duration: t.duration,

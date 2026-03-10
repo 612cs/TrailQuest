@@ -12,6 +12,8 @@ const searchInput = ref('')
 const currentSearchQuery = ref('')
 const activeView = ref<'list' | 'map'>('list')
 const isInitialLoad = ref(true)
+const packTypeFilter = ref<'all' | 'light' | 'heavy' | 'both'>('all')
+const durationTypeFilter = ref<'all' | 'single_day' | 'multi_day'>('all')
 
 const route = useRoute()
 
@@ -33,20 +35,38 @@ onMounted(() => {
   }, 1000)
 })
 
-const filters = ['难度', '路线长度', '海拔增益', '评分']
+const filters = ['难度', '路线长度', '海拔增益', '评分', '轻装/重装', '单日/多日']
+
+const packTypeOptions = [
+  { value: 'all', label: '全部' },
+  { value: 'light', label: '轻装' },
+  { value: 'heavy', label: '重装' },
+  { value: 'both', label: '轻重皆可' },
+]
+
+const durationTypeOptions = [
+  { value: 'all', label: '全部' },
+  { value: 'single_day', label: '单日' },
+  { value: 'multi_day', label: '多日' },
+]
 
 const handleSearch = () => {
   currentSearchQuery.value = searchInput.value
 }
 
 const filteredTrails = computed(() => {
-  if (!currentSearchQuery.value) return mockTrails
-  const query = currentSearchQuery.value.toLowerCase()
-  return mockTrails.filter(trail => 
-    trail.name.toLowerCase().includes(query) || 
-    trail.location.toLowerCase().includes(query) ||
-    trail.description.toLowerCase().includes(query)
-  )
+  const base = currentSearchQuery.value
+    ? mockTrails.filter(trail =>
+        trail.name.toLowerCase().includes(currentSearchQuery.value.toLowerCase()) ||
+        trail.location.toLowerCase().includes(currentSearchQuery.value.toLowerCase()) ||
+        trail.description.toLowerCase().includes(currentSearchQuery.value.toLowerCase())
+      )
+    : mockTrails
+  return base.filter((trail) => {
+    const packOk = packTypeFilter.value === 'all' || trail.packType === packTypeFilter.value
+    const durationOk = durationTypeFilter.value === 'all' || trail.durationType === durationTypeFilter.value
+    return packOk && durationOk
+  })
 })
 </script>
 
@@ -81,6 +101,32 @@ const filteredTrails = computed(() => {
           </button>
         </template>
       </FilterBar>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div class="card p-3 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-medium" style="color: var(--text-secondary);">装备类型</span>
+          <button
+            v-for="option in packTypeOptions"
+            :key="option.value"
+            class="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
+            :style="packTypeFilter === option.value ? 'border-color: var(--primary-500); color: var(--primary-500);' : 'border-color: var(--border-default); color: var(--text-secondary);'"
+            @click="packTypeFilter = option.value"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+        <div class="card p-3 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-medium" style="color: var(--text-secondary);">行程天数</span>
+          <button
+            v-for="option in durationTypeOptions"
+            :key="option.value"
+            class="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
+            :style="durationTypeFilter === option.value ? 'border-color: var(--primary-500); color: var(--primary-500);' : 'border-color: var(--border-default); color: var(--text-secondary);'"
+            @click="durationTypeFilter = option.value"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Results Header -->

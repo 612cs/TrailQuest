@@ -6,6 +6,8 @@ defineProps<{
   name: string
   difficulty: 'easy' | 'moderate' | 'hard'
   difficultyLabel: string
+  packType: 'light' | 'heavy' | 'both'
+  durationType: 'single_day' | 'multi_day'
   rating: number
   reviews: string
   distance: string
@@ -18,6 +20,17 @@ const difficultyClass: Record<string, string> = {
   easy: 'badge-easy',
   moderate: 'badge-moderate',
   hard: 'badge-hard',
+}
+
+const packLabels: Record<'light' | 'heavy' | 'both', string> = {
+  light: '轻装',
+  heavy: '重装',
+  both: '轻重皆可',
+}
+
+const durationLabels: Record<'single_day' | 'multi_day', string> = {
+  single_day: '单日',
+  multi_day: '多日',
 }
 </script>
 
@@ -38,13 +51,19 @@ const difficultyClass: Record<string, string> = {
         <BaseIcon name="Heart" :size="16" class="text-surface-500" />
       </button>
       <!-- Difficulty Badge -->
-      <div class="absolute bottom-3 left-3">
+      <div class="absolute bottom-3 left-3 flex flex-wrap gap-2">
         <span
           class="px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm"
           :class="difficultyClass[difficulty]"
           style="backdrop-filter: blur(4px);"
         >
           {{ difficultyLabel }}
+        </span>
+        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/90 text-slate-700 shadow-sm">
+          {{ packLabels[packType] }}
+        </span>
+        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/90 text-slate-700 shadow-sm">
+          {{ durationLabels[durationType] }}
         </span>
       </div>
     </div>
@@ -81,4 +100,3 @@ const difficultyClass: Record<string, string> = {
     </div>
   </RouterLink>
 </template>
-

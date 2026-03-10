@@ -14,6 +14,8 @@ const popularTrails = computed(() =>
     name: t.name,
     difficulty: t.difficulty,
     difficultyLabel: t.difficultyLabel,
+    packType: t.packType,
+    durationType: t.durationType,
     rating: t.rating,
     reviews: `(${t.reviewCount >= 1000 ? (t.reviewCount / 1000).toFixed(1) + 'k' : t.reviewCount} 条评论)`,
     distance: t.distance,
