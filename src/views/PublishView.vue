@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, shallowRef, useTemplateRef, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ImageUploader from '../components/common/ImageUploader.vue'
@@ -7,6 +7,8 @@ import ImagePreviewModal from '../components/common/ImagePreviewModal.vue'
 import { presetTags } from '../mock/mockData'
 
 const router = useRouter()
+import { useAmapLoader } from '../composables/useAmapLoader'
+import { gpx } from '../utils/togeojson'
 
 // Form state
 const name = ref('')
@@ -27,6 +29,14 @@ const showSuccess = ref(false)
 const previewImages = ref<string[]>([])
 const previewIndex = ref(0)
 const showPreview = ref(false)
+
+// GPX Map State
+const mapRef = useTemplateRef<HTMLDivElement>('mapContainer')
+const mapInstance = shallowRef<any>(null)
+const geoJsonData = ref<any>(null)
+const gpxFileName = ref('')
+const mapError = ref('')
+const mapLoading = ref(false)
 
 const difficultyOptions = [
   { value: 'easy' as const, label: '简单', color: 'var(--color-easy)' },
@@ -59,6 +69,74 @@ function openPreview(images: string[], index: number) {
   previewImages.value = images
   previewIndex.value = index
   showPreview.value = true
+}
+
+async function renderMapWithGeoJSON() {
+  if (!geoJsonData.value) return
+
+  await nextTick()
+  if (!mapRef.value) return
+
+  const AMap = await useAmapLoader().load()
+  if (!AMap) {
+    mapError.value = '获取高德地图服务失败'
+    return
+  }
+
+  if (!mapInstance.value) {
+    mapInstance.value = new AMap.Map(mapRef.value, {
+      zoom: 11,
+      resizeEnable: true,
+    })
+  }
+
+  mapInstance.value.clearMap()
+
+  const geojsonObj = new AMap.GeoJSON({
+    geoJSON: geoJsonData.value,
+    getPolyline: function (_geojson: any, lnglats: any) {
+      return new AMap.Polyline({
+        path: lnglats,
+        strokeColor: 'var(--primary-500)',
+        strokeWeight: 6,
+        strokeOpacity: 0.8,
+        lineJoin: 'round',
+        lineCap: 'round',
+        showDir: true
+      })
+    },
+    getMarker: function (geojson: any, lnglats: any) {
+      return new AMap.Marker({
+        position: lnglats,
+        title: geojson.properties.name || '停靠点',
+      })
+    }
+  })
+
+  mapInstance.value.add(geojsonObj)
+  mapInstance.value.setFitView()
+}
+
+async function handleGpxUpload(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+
+  gpxFileName.value = file.name
+  mapLoading.value = true
+  mapError.value = ''
+
+  try {
+    const text = await file.text()
+    const doc = new DOMParser().parseFromString(text, 'text/xml')
+    geoJsonData.value = gpx(doc)
+    await renderMapWithGeoJSON()
+  } catch (err) {
+    console.error(err)
+    mapError.value = '解析 GPX 文件失败，请检查文件格式。'
+    geoJsonData.value = null
+  } finally {
+    mapLoading.value = false
+  }
 }
 
 async function handleSubmit(isDraft = false) {
@@ -163,7 +241,42 @@ async function handleSubmit(isDraft = false) {
         </div>
       </section>
 
-      <!-- Section 3: Trail Parameters -->
+      <!-- Section 3: Trail Route (GPX) -->
+      <section class="card p-4 sm:p-5 space-y-4 animate-fade-in-up stagger-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary);">
+            <BaseIcon name="Map" :size="16" class="text-primary-500" />
+            路线轨迹 (GPX)
+          </h3>
+          <label class="px-3 py-1.5 rounded-lg text-xs font-medium text-primary-500 bg-primary-500/10 cursor-pointer hover:bg-primary-500/20 transition-colors">
+            {{ gpxFileName ? '重新上传' : '上传 GPX' }}
+            <input type="file" accept=".gpx" class="hidden" @change="handleGpxUpload" />
+          </label>
+        </div>
+
+        <div v-if="gpxFileName" class="text-xs" style="color: var(--text-secondary);">
+          已选择文件: <span class="font-medium text-primary-500">{{ gpxFileName }}</span>
+        </div>
+
+        <div class="map-shell relative bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-800" style="height: 240px; border: 1px solid var(--border-default);">
+           <div ref="mapContainer" class="w-full h-full" :style="{ display: geoJsonData ? 'block' : 'none' }"></div>
+           
+           <div v-if="mapLoading" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/5 backdrop-blur-sm z-10">
+              <BaseIcon name="Loader2" :size="20" class="animate-spin text-primary-500" />
+              <span class="text-xs font-medium" style="color: var(--text-secondary);">解析轨迹中...</span>
+           </div>
+           <div v-else-if="mapError" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/5 z-10">
+              <BaseIcon name="AlertCircle" :size="20" class="text-red-500" />
+              <span class="text-xs font-medium text-red-500">{{ mapError }}</span>
+           </div>
+           <div v-else-if="!geoJsonData" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/5 z-10">
+              <BaseIcon name="MapPin" :size="24" style="color: var(--text-tertiary);" />
+              <span class="text-xs font-medium" style="color: var(--text-tertiary);">请上传 GPX 轨迹文件以在地图中预览</span>
+           </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Trail Parameters -->
       <section class="card p-4 sm:p-5 space-y-4 animate-fade-in-up stagger-3">
         <h3 class="text-sm font-semibold flex items-center gap-2" style="color: var(--text-primary);">
           <BaseIcon name="Ruler" :size="16" class="text-primary-500" />
