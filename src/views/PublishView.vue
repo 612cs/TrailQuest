@@ -8,7 +8,7 @@ import { presetTags } from '../mock/mockData'
 
 const router = useRouter()
 import { useAmapLoader } from '../composables/useAmapLoader'
-import { gpx } from '../utils/togeojson'
+import toGeoJSON from '@mapbox/togeojson'
 
 // Form state
 const name = ref('')
@@ -128,7 +128,7 @@ async function handleGpxUpload(e: Event) {
   try {
     const text = await file.text()
     const doc = new DOMParser().parseFromString(text, 'text/xml')
-    geoJsonData.value = gpx(doc)
+    geoJsonData.value = toGeoJSON.gpx(doc)
     await renderMapWithGeoJSON()
   } catch (err) {
     console.error(err)
