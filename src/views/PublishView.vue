@@ -92,29 +92,31 @@ async function renderMapWithGeoJSON() {
 
   mapInstance.value.clearMap()
 
-  const geojsonObj = new AMap.GeoJSON({
-    geoJSON: geoJsonData.value,
-    getPolyline: function (_geojson: any, lnglats: any) {
-      return new AMap.Polyline({
-        path: lnglats,
-        strokeColor: 'var(--primary-500)',
-        strokeWeight: 6,
-        strokeOpacity: 0.8,
-        lineJoin: 'round',
-        lineCap: 'round',
-        showDir: true
-      })
-    },
-    getMarker: function (geojson: any, lnglats: any) {
-      return new AMap.Marker({
-        position: lnglats,
-        title: geojson.properties.name || '停靠点',
-      })
-    }
-  })
+  AMap.plugin('AMap.GeoJSON', () => {
+    const geojsonObj = new AMap.GeoJSON({
+      geoJSON: geoJsonData.value,
+      getPolyline: function (_geojson: any, lnglats: any) {
+        return new AMap.Polyline({
+          path: lnglats,
+          strokeColor: 'var(--primary-500)',
+          strokeWeight: 6,
+          strokeOpacity: 0.8,
+          lineJoin: 'round',
+          lineCap: 'round',
+          showDir: true
+        })
+      },
+      getMarker: function (geojson: any, lnglats: any) {
+        return new AMap.Marker({
+          position: lnglats,
+          title: geojson.properties.name || '停靠点',
+        })
+      }
+    })
 
-  mapInstance.value.add(geojsonObj)
-  mapInstance.value.setFitView()
+    mapInstance.value.add(geojsonObj)
+    mapInstance.value.setFitView()
+  })
 }
 
 async function handleGpxUpload(e: Event) {
