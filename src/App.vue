@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AppHeader from './components/AppHeader.vue'
+import AuthModal from './components/auth/AuthModal.vue'
 
 const route = useRoute()
 const hideHeaderRoutes = ['TrailDetail']
@@ -21,6 +22,7 @@ const showHeader = computed(() => !hideHeaderRoutes.includes(route.name as strin
         <component :is="Component" v-if="!route.meta.keepAlive" :key="route.path" />
       </transition>
     </RouterView>
+    <AuthModal />
   </div>
 </template>
 

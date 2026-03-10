@@ -4,8 +4,11 @@ import BaseIcon from '../common/BaseIcon.vue'
 import SectionHeader from '../common/SectionHeader.vue'
 import ImagePreviewModal from '../common/ImagePreviewModal.vue'
 import CommentForm from './CommentForm.vue'
+import { useUserStore } from '../../stores/useUserStore'
 import type { ReviewWithAuthor } from '../../mock/mockData'
-import { generateReviewId, mockUsers } from '../../mock/mockData'
+import { generateReviewId } from '../../mock/mockData'
+
+const userStore = useUserStore()
 
 const props = defineProps<{
   reviews: ReviewWithAuthor[]
@@ -32,7 +35,9 @@ function openPreview(images: string[], index: number) {
 }
 
 function startReply(reviewId: number, userName: string, parentChain: number[] = []) {
-  replyingTo.value = { reviewId, userName, parentChain: [...parentChain, reviewId] }
+  userStore.requireAuth(() => {
+    replyingTo.value = { reviewId, userName, parentChain: [...parentChain, reviewId] }
+  })
 }
 
 function cancelReply() {
@@ -40,35 +45,41 @@ function cancelReply() {
 }
 
 function handleCommentSubmit(data: { rating: number; text: string; images: string[] }) {
-  const currentUser = mockUsers.find(u => u.id === 115)!
-  const newReview: ReviewWithAuthor = {
-    id: generateReviewId(),
-    userId: currentUser.id,
-    author: currentUser,
-    rating: data.rating,
-    time: '刚刚',
-    text: data.text,
-    images: data.images.length > 0 ? data.images : undefined,
-  }
-  emit('addReview', newReview)
+  userStore.requireAuth(() => {
+    if (!userStore.profile) return
+    const currentUser = userStore.profile
+    const newReview: ReviewWithAuthor = {
+      id: generateReviewId(),
+      userId: currentUser.id,
+      author: currentUser as any,
+      rating: data.rating,
+      time: '刚刚',
+      text: data.text,
+      images: data.images.length > 0 ? data.images : undefined,
+    }
+    emit('addReview', newReview)
+  })
 }
 
 function handleReplySubmit(text: string) {
   if (!replyingTo.value || !text.trim()) return
 
-  const currentUser = mockUsers.find(u => u.id === 115)!
-  const reply: ReviewWithAuthor = {
-    id: generateReviewId(),
-    userId: currentUser.id,
-    author: currentUser,
-    time: '刚刚',
-    text: text.trim(),
-    replyTo: replyingTo.value.userName,
-  }
+  userStore.requireAuth(() => {
+    if (!userStore.profile || !replyingTo.value) return
+    const currentUser = userStore.profile
+    const reply: ReviewWithAuthor = {
+      id: generateReviewId(),
+      userId: currentUser.id,
+      author: currentUser as any,
+      time: '刚刚',
+      text: text.trim(),
+      replyTo: replyingTo.value.userName,
+    }
 
-  // Find the target review and add reply
-  addReplyToReview(props.reviews, replyingTo.value.reviewId, reply)
-  replyingTo.value = null
+    // Find the target review and add reply
+    addReplyToReview(props.reviews, replyingTo.value.reviewId, reply)
+    replyingTo.value = null
+  })
 }
 
 function addReplyToReview(reviews: ReviewWithAuthor[], targetId: number, reply: ReviewWithAuthor): boolean {

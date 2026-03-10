@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import BaseIcon from '../common/BaseIcon.vue'
+import { useUserStore } from '../../stores/useUserStore'
 
 import type { User } from '../../mock/mockData'
 
-defineProps<{
+const userStore = useUserStore()
+
+const props = defineProps<{
   image: string
   name: string
   location: string
@@ -58,7 +61,10 @@ defineProps<{
           <p class="text-xs" style="color: var(--text-tertiary);">发布于 {{ publishTime }}</p>
         </div>
       </div>
-      <button class="px-3 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors">
+      <button 
+        @click="userStore.requireAuth(() => {})"
+        class="px-3 py-1 rounded-full text-xs font-medium bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors"
+      >
         关注
       </button>
     </div>
@@ -78,16 +84,16 @@ defineProps<{
         <span v-if="reviewCount" class="text-xs" style="color: var(--text-tertiary);">({{ reviewCount >= 1000 ? (reviewCount / 1000).toFixed(1) + 'k' : reviewCount }} 条评论)</span>
       </div>
       <div class="flex items-center gap-3">
-        <div v-if="likes" class="flex items-center gap-1 text-sm" style="color: var(--text-secondary);">
+        <button v-if="likes !== undefined" @click="userStore.requireAuth(() => {})" class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80" style="color: var(--text-secondary);">
           <BaseIcon name="Heart" :size="16" class="text-red-400 fill-red-400" />
           <span class="font-medium">{{ likes >= 10000 ? (likes / 10000).toFixed(1) + 'w' : likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
           <span class="text-xs" style="color: var(--text-tertiary);">喜爱</span>
-        </div>
-        <div v-if="favorites" class="flex items-center gap-1 text-sm" style="color: var(--text-secondary);">
+        </button>
+        <button v-if="favorites !== undefined" @click="userStore.requireAuth(() => {})" class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80" style="color: var(--text-secondary);">
           <BaseIcon name="Bookmark" :size="16" class="text-primary-500 fill-primary-500" />
           <span class="font-medium">{{ favorites >= 10000 ? (favorites / 10000).toFixed(1) + 'w' : favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
           <span class="text-xs" style="color: var(--text-tertiary);">收藏</span>
-        </div>
+        </button>
       </div>
     </div>
     <!-- Stats Bar -->
