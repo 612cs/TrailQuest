@@ -64,6 +64,7 @@ export interface Trail {
 // ===== 路线详情 =====
 export interface TrailDetail extends Trail {
     // 移除了 reviews，通过联表查询获取
+    ip: string
 }
 
 // ===== 完整路线数据库 =====
@@ -73,6 +74,7 @@ export const mockTrailDetails: TrailDetail[] = [
         image: '/trail-pine.png',
         name: '老鹰峰顶',
         location: '浙江 杭州 临安',
+        ip: '121.41.32.100',
         difficulty: 'moderate',
         difficultyLabel: '适中',
         rating: 4.9,
@@ -92,6 +94,7 @@ export const mockTrailDetails: TrailDetail[] = [
         image: '/trail-lake.png',
         name: '镜湖环线',
         location: '云南 大理 苍山',
+        ip: '222.88.90.10',
         difficulty: 'easy',
         difficultyLabel: '简单',
         rating: 4.7,
@@ -111,6 +114,7 @@ export const mockTrailDetails: TrailDetail[] = [
         image: '/trail-foggy.png',
         name: '布莱克伍德峡谷',
         location: '四川 雅安 牛背山',
+        ip: '118.125.88.20',
         difficulty: 'hard',
         difficultyLabel: '困难',
         rating: 4.8,
@@ -130,6 +134,7 @@ export const mockTrailDetails: TrailDetail[] = [
         image: '/hero-mountain.png',
         name: '莫干山云海',
         location: '浙江 湖州 莫干山',
+        ip: '122.227.208.10',
         difficulty: 'moderate',
         difficultyLabel: '适中',
         rating: 4.6,
@@ -149,6 +154,7 @@ export const mockTrailDetails: TrailDetail[] = [
         image: '/trail-pine.png',
         name: '神农架穿越',
         location: '湖北 神农架',
+        ip: '58.19.0.30',
         difficulty: 'hard',
         difficultyLabel: '困难',
         rating: 4.9,
@@ -168,6 +174,7 @@ export const mockTrailDetails: TrailDetail[] = [
         image: '/trail-lake.png',
         name: '稻城亚丁短线',
         location: '四川 稻城',
+        ip: '103.83.44.15',
         difficulty: 'hard',
         difficultyLabel: '困难',
         rating: 5.0,
