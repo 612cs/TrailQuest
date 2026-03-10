@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ProfileHeader from '../components/profile/ProfileHeader.vue'
 import Pagination from '../components/common/Pagination.vue'
 import EditProfileModal from '../components/profile/EditProfileModal.vue'
 import AccountSettingsModal from '../components/profile/AccountSettingsModal.vue'
+import { useUserStore } from '../stores/useUserStore'
+
+const userStore = useUserStore()
 
 const activeTab = ref<'posts' | 'saved'>('posts')
 const currentPage = ref(1)
@@ -23,10 +26,11 @@ const posts = [
 
 <template>
   <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
-    <ProfileHeader 
-      @show-edit="showEditModal = true"
-      @show-settings="showSettingsModal = true"
-    />
+    <template v-if="userStore.isLoggedIn">
+      <ProfileHeader 
+        @show-edit="showEditModal = true"
+        @show-settings="showSettingsModal = true"
+      />
 
     <!-- Modals -->
     <EditProfileModal v-model:show="showEditModal" />
@@ -63,5 +67,34 @@ const posts = [
         />
       </div>
     </div>
+    </template>
+    
+    <template v-else>
+      <div class="card p-8 sm:p-12 text-center rounded-2xl flex flex-col items-center justify-center min-h-[50vh]">
+        <div class="w-20 h-20 rounded-full flex items-center justify-center mb-6" style="background-color: var(--bg-tag); color: var(--color-primary-500);">
+          <BaseIcon name="User" :size="36" />
+        </div>
+        <h2 class="text-2xl font-bold mb-3" style="color: var(--text-primary);">欢迎来到 TrailQuest</h2>
+        <p class="text-sm sm:text-base mb-8 max-w-sm mx-auto leading-relaxed" style="color: var(--text-secondary);">
+          登录以查看您的个人资料、回味走过的路线以及管理您的收藏内容。
+        </p>
+        <button 
+          @click="userStore.showAuthModal = true"
+          class="px-8 py-3 rounded-xl font-bold text-white bg-primary-500 hover:bg-primary-600 transition-all shadow-lg hover:shadow-xl shadow-primary-500/30 active:scale-[0.98]"
+        >
+          立即登录 / 注册
+        </button>
+      </div>
+    </template>
   </main>
 </template>
+
+<style scoped>
+.slide-enter-active, .slide-leave-active {
+  transition: transform 0.3s ease;
+}
+.slide-enter-from, .slide-leave-to {
+  transform: translateY(20px);
+  opacity: 0;
+}
+</style>
