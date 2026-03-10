@@ -1,20 +1,30 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseModal from '../common/BaseModal.vue'
+import { useUserStore } from '../../stores/useUserStore'
 
 defineProps<{
   show: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'update:show', value: boolean): void
 }>()
+
+const userStore = useUserStore()
+const router = useRouter()
 
 // Dummy settings state for demonstration
 const emailNotifications = ref(true)
 const pushNotifications = ref(false)
 const privateProfile = ref(false)
 
+const handleLogout = () => {
+  userStore.logout()
+  emit('update:show', false)
+  router.push('/')
+}
 </script>
 
 <template>
@@ -49,7 +59,7 @@ const privateProfile = ref(false)
             <input type="checkbox" v-model="privateProfile" class="w-4 h-4 rounded border-gray-300 focus:ring-primary-500 text-primary-500 accent-primary-500" />
           </label>
           <div class="pt-2">
-            <button class="text-sm font-medium transition-colors" style="color: var(--color-primary-500); hover: opacity: 0.8;">
+            <button @click="handleLogout" class="text-sm font-medium transition-colors hover:opacity-80" style="color: var(--color-primary-500);">
               退出登录
             </button>
           </div>

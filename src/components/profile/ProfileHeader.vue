@@ -12,7 +12,7 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="card p-5 sm:p-8">
+  <div v-if="userStore.profile" class="card p-5 sm:p-8">
     <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-8">
       <div class="relative shrink-0">
         <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 flex items-center justify-center text-2xl font-bold text-white shadow-inner"

@@ -22,11 +22,11 @@ const formData = ref({
 
 // Sync form with store when modal opens
 watch(() => props.show, (isOpen) => {
-  if (isOpen) {
+  if (isOpen && userStore.profile) {
     formData.value = {
       username: userStore.profile.username,
       bio: userStore.profile.bio,
-      location: userStore.profile.location
+      location: userStore.profile.location || ''
     }
   }
 })
