@@ -30,7 +30,7 @@ export function useAmapLoader() {
       loaderPromise = AMapLoader.load({
         key: amapKey,
         version: '2.0',
-        plugins: [], // 可选插件
+        plugins: ['AMap.GeoJSON'], // 注册 GeoJSON 等级插件
       }).then((AMap) => {
         window.AMap = AMap
         isReady.value = true

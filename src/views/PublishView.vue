@@ -93,8 +93,36 @@ async function renderMapWithGeoJSON() {
   mapInstance.value.clearMap()
 
   AMap.plugin('AMap.GeoJSON', () => {
+    // 过滤掉单独的离散锚点，或者将零散的点统一提取为一条 LineString
+    const lineCoordinates: any[] = []
+    geoJsonData.value.features.forEach((feature: any) => {
+      if (feature.geometry.type === 'Point') {
+        lineCoordinates.push(feature.geometry.coordinates)
+      } else if (feature.geometry.type === 'LineString') {
+        lineCoordinates.push(...feature.geometry.coordinates)
+      } else if (feature.geometry.type === 'MultiLineString') {
+        feature.geometry.coordinates.forEach((line: any) => lineCoordinates.push(...line))
+      }
+    })
+
+    const processedGeoJSON = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: lineCoordinates,
+          },
+          properties: {
+             name: '轨迹路线'
+          }
+        }
+      ]
+    }
+
     const geojsonObj = new AMap.GeoJSON({
-      geoJSON: geoJsonData.value,
+      geoJSON: processedGeoJSON,
       getPolyline: function (_geojson: any, lnglats: any) {
         return new AMap.Polyline({
           path: lnglats,
@@ -104,12 +132,6 @@ async function renderMapWithGeoJSON() {
           lineJoin: 'round',
           lineCap: 'round',
           showDir: true
-        })
-      },
-      getMarker: function (geojson: any, lnglats: any) {
-        return new AMap.Marker({
-          position: lnglats,
-          title: geojson.properties.name || '停靠点',
         })
       }
     })
