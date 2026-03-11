@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import SearchBar from '../components/search/SearchBar.vue'
-import FilterBar from '../components/search/FilterBar.vue'
+import FilterBar, { type FilterItem } from '../components/search/FilterBar.vue'
 import ViewToggle from '../components/search/ViewToggle.vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import TrailHorizontalCard from '../components/trail/TrailHorizontalCard.vue'
@@ -12,8 +12,12 @@ const searchInput = ref('')
 const currentSearchQuery = ref('')
 const activeView = ref<'list' | 'map'>('list')
 const isInitialLoad = ref(true)
-const packTypeFilter = ref<'all' | 'light' | 'heavy' | 'both'>('all')
-const durationTypeFilter = ref<'all' | 'single_day' | 'multi_day'>('all')
+
+const filterModel = ref<Record<string, string>>({
+  difficulty: 'all',
+  packType: 'all',
+  durationType: 'all'
+})
 
 const route = useRoute()
 
@@ -35,19 +39,36 @@ onMounted(() => {
   }, 1000)
 })
 
-const filters = ['难度', '路线长度', '海拔增益', '评分', '轻装/重装', '单日/多日']
-
-const packTypeOptions = [
-  { value: 'all', label: '全部' },
-  { value: 'light', label: '轻装' },
-  { value: 'heavy', label: '重装' },
-  { value: 'both', label: '轻重皆可' },
-]
-
-const durationTypeOptions = [
-  { value: 'all', label: '全部' },
-  { value: 'single_day', label: '单日' },
-  { value: 'multi_day', label: '多日' },
+const filters: FilterItem[] = [
+  {
+    key: 'difficulty',
+    label: '难度',
+    options: [
+      { label: '全部难度', value: 'all' },
+      { label: '简单', value: 'easy' },
+      { label: '适中', value: 'moderate' },
+      { label: '困难', value: 'hard' }
+    ]
+  },
+  {
+    key: 'packType',
+    label: '装备',
+    options: [
+      { label: '全部装备', value: 'all' },
+      { label: '轻装', value: 'light' },
+      { label: '重装', value: 'heavy' },
+      { label: '轻重皆可', value: 'both' }
+    ]
+  },
+  {
+    key: 'durationType',
+    label: '耗时',
+    options: [
+      { label: '全部时长', value: 'all' },
+      { label: '单日', value: 'single_day' },
+      { label: '多日', value: 'multi_day' }
+    ]
+  }
 ]
 
 const handleSearch = () => {
@@ -62,10 +83,12 @@ const filteredTrails = computed(() => {
         trail.description.toLowerCase().includes(currentSearchQuery.value.toLowerCase())
       )
     : mockTrails
+
   return base.filter((trail) => {
-    const packOk = packTypeFilter.value === 'all' || trail.packType === packTypeFilter.value
-    const durationOk = durationTypeFilter.value === 'all' || trail.durationType === durationTypeFilter.value
-    return packOk && durationOk
+    const diffOk = filterModel.value.difficulty === 'all' || trail.difficulty === filterModel.value.difficulty
+    const packOk = filterModel.value.packType === 'all' || trail.packType === filterModel.value.packType
+    const durationOk = filterModel.value.durationType === 'all' || trail.durationType === filterModel.value.durationType
+    return diffOk && packOk && durationOk
   })
 })
 </script>
@@ -90,7 +113,7 @@ const filteredTrails = computed(() => {
         </button>
       </div>
 
-      <FilterBar :filters="filters">
+      <FilterBar :filters="filters" v-model="filterModel">
         <template #extra>
           <button
             class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium shrink-0 border transition-colors hover:border-primary-500/30"
@@ -101,32 +124,6 @@ const filteredTrails = computed(() => {
           </button>
         </template>
       </FilterBar>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <div class="card p-3 flex flex-wrap items-center gap-2">
-          <span class="text-xs font-medium" style="color: var(--text-secondary);">装备类型</span>
-          <button
-            v-for="option in packTypeOptions"
-            :key="option.value"
-            class="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
-            :style="packTypeFilter === option.value ? 'border-color: var(--primary-500); color: var(--primary-500);' : 'border-color: var(--border-default); color: var(--text-secondary);'"
-            @click="packTypeFilter = option.value"
-          >
-            {{ option.label }}
-          </button>
-        </div>
-        <div class="card p-3 flex flex-wrap items-center gap-2">
-          <span class="text-xs font-medium" style="color: var(--text-secondary);">行程天数</span>
-          <button
-            v-for="option in durationTypeOptions"
-            :key="option.value"
-            class="px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors"
-            :style="durationTypeFilter === option.value ? 'border-color: var(--primary-500); color: var(--primary-500);' : 'border-color: var(--border-default); color: var(--text-secondary);'"
-            @click="durationTypeFilter = option.value"
-          >
-            {{ option.label }}
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Results Header -->
