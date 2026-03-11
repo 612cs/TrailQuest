@@ -52,6 +52,38 @@ CREATE TABLE `trail_tags` (
   FOREIGN KEY (`tag_id`) REFERENCES `tags`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='路线标签关联表';
 
+-- 路线图片表
+CREATE TABLE `trail_images` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '路线图片ID',
+  `trail_id` BIGINT NOT NULL COMMENT '路线ID',
+  `image` VARCHAR(255) NOT NULL COMMENT '图片地址',
+  `sort_order` INT NOT NULL DEFAULT 0 COMMENT '排序',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  FOREIGN KEY (`trail_id`) REFERENCES `trails`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='路线图片表';
+
+-- 路线收藏明细
+CREATE TABLE `trail_favorites` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '收藏ID',
+  `trail_id` BIGINT NOT NULL COMMENT '路线ID',
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  UNIQUE KEY `uk_trail_fav` (`trail_id`, `user_id`),
+  FOREIGN KEY (`trail_id`) REFERENCES `trails`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='路线收藏表';
+
+-- 路线点赞明细
+CREATE TABLE `trail_likes` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '点赞ID',
+  `trail_id` BIGINT NOT NULL COMMENT '路线ID',
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  UNIQUE KEY `uk_trail_like` (`trail_id`, `user_id`),
+  FOREIGN KEY (`trail_id`) REFERENCES `trails`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='路线点赞表';
+
 -- 评论表（支持多级回复）
 CREATE TABLE `reviews` (
   `id` BIGINT PRIMARY KEY COMMENT '评论ID',
@@ -75,4 +107,27 @@ CREATE TABLE `review_images` (
   `image` VARCHAR(255) NOT NULL COMMENT '图片地址',
   FOREIGN KEY (`review_id`) REFERENCES `reviews`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论图片表';
+
+-- AI 会话表
+CREATE TABLE `ai_conversations` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '会话ID',
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `title` VARCHAR(100) NOT NULL COMMENT '会话标题',
+  `model` VARCHAR(50) NOT NULL COMMENT '模型名称',
+  `status` ENUM('active','archived') NOT NULL DEFAULT 'active' COMMENT '会话状态',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI 会话表';
+
+-- AI 消息表
+CREATE TABLE `ai_messages` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '消息ID',
+  `conversation_id` BIGINT NOT NULL COMMENT '会话ID',
+  `role` ENUM('user','assistant','system') NOT NULL COMMENT '消息角色',
+  `content` TEXT NOT NULL COMMENT '消息内容',
+  `tokens` INT DEFAULT 0 COMMENT '估算token数',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  FOREIGN KEY (`conversation_id`) REFERENCES `ai_conversations`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI 消息表';
 ```
