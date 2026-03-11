@@ -16,7 +16,8 @@ const isInitialLoad = ref(true)
 const filterModel = ref<Record<string, string>>({
   difficulty: 'all',
   packType: 'all',
-  durationType: 'all'
+  durationType: 'all',
+  distance: 'all'
 })
 
 const route = useRoute()
@@ -48,6 +49,16 @@ const filters: FilterItem[] = [
       { label: '简单', value: 'easy' },
       { label: '适中', value: 'moderate' },
       { label: '困难', value: 'hard' }
+    ]
+  },
+  {
+    key: 'distance',
+    label: '路线长度',
+    options: [
+      { label: '全部长度', value: 'all' },
+      { label: '5km以内', value: 'short' },
+      { label: '5-10km', value: 'medium' },
+      { label: '10km以上', value: 'long' }
     ]
   },
   {
@@ -88,7 +99,18 @@ const filteredTrails = computed(() => {
     const diffOk = filterModel.value.difficulty === 'all' || trail.difficulty === filterModel.value.difficulty
     const packOk = filterModel.value.packType === 'all' || trail.packType === filterModel.value.packType
     const durationOk = filterModel.value.durationType === 'all' || trail.durationType === filterModel.value.durationType
-    return diffOk && packOk && durationOk
+    
+    let distanceOk = true
+    if (filterModel.value.distance !== 'all') {
+      const dist = parseFloat(trail.distance)
+      if (!isNaN(dist)) {
+        if (filterModel.value.distance === 'short') distanceOk = dist < 5
+        else if (filterModel.value.distance === 'medium') distanceOk = dist >= 5 && dist <= 10
+        else if (filterModel.value.distance === 'long') distanceOk = dist > 10
+      }
+    }
+
+    return diffOk && packOk && durationOk && distanceOk
   })
 })
 </script>

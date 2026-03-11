@@ -86,7 +86,7 @@ const handleSave = () => {
       <div class="flex justify-end gap-3">
         <button 
           @click="$emit('update:show', false)"
-          class="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100"
+          class="px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-primary-500/10"
           style="color: var(--text-secondary);"
         >
           取消

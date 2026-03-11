@@ -45,7 +45,7 @@ function closeDropdown() {
 </script>
 
 <template>
-  <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+  <div class="flex flex-wrap items-center gap-2 pb-1" style="background-color: transparent;">
     <div
       v-for="filter in filters"
       :key="filter.key"
@@ -54,10 +54,10 @@ function closeDropdown() {
       <!-- Filter Button -->
       <button
         @click="toggleDropdown(filter.key)"
-        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-primary-500/5"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
         :style="{
-          backgroundColor: modelValue[filter.key] !== 'all' ? 'var(--primary-500)' : 'var(--bg-tag)',
-          color: modelValue[filter.key] !== 'all' ? '#ffffff' : 'var(--text-secondary)'
+          backgroundColor: modelValue[filter.key] !== 'all' ? 'var(--color-primary-500)' : 'var(--bg-tag)',
+          color: modelValue[filter.key] !== 'all' ? 'var(--text-inverse)' : 'var(--text-secondary)'
         }"
       >
         {{ filter.options.find(o => o.value === modelValue[filter.key])?.label || filter.label }}
@@ -68,15 +68,16 @@ function closeDropdown() {
       <div
         v-if="activeDropdown === filter.key"
         class="absolute top-full left-0 mt-1 w-32 rounded-lg shadow-lg border z-10 overflow-hidden"
-        style="border-color: var(--border-default); background-color: var(--bg-default);"
+        style="border-color: var(--border-default); background-color: var(--bg-card);"
       >
         <button
           v-for="option in filter.options"
           :key="option.value"
           @click="selectOption(filter.key, option.value)"
-          class="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-primary-500/10"
+          class="w-full text-left px-4 py-2 text-sm transition-colors"
           :style="{
-             color: modelValue[filter.key] === option.value ? 'var(--primary-500)' : 'var(--text-primary)'
+             color: modelValue[filter.key] === option.value ? 'var(--color-primary-500)' : 'var(--text-primary)',
+             backgroundColor: modelValue[filter.key] === option.value ? 'var(--bg-tag)' : 'transparent'
           }"
         >
           {{ option.label }}
