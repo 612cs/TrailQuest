@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
+import TagBadge from '../common/TagBadge.vue'
 
 defineProps<{
   id: number
@@ -17,12 +18,6 @@ defineProps<{
   rating: number
   reviewCount: number
 }>()
-
-const difficultyColors: Record<string, string> = {
-  easy: 'badge-easy',
-  moderate: 'badge-moderate',
-  hard: 'badge-hard',
-}
 
 const packLabels: Record<'light' | 'heavy' | 'both', string> = {
   light: '轻装',
@@ -53,15 +48,9 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
         <div class="flex items-start justify-between gap-3">
           <div class="space-y-1.5">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="inline-block px-2 py-0.5 rounded text-xs font-semibold" :class="difficultyColors[difficulty]">
-              {{ difficultyLabel }}
-              </span>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border" style="border-color: var(--border-default); color: var(--text-secondary);">
-                {{ packLabels[packType] }}
-              </span>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border" style="border-color: var(--border-default); color: var(--text-secondary);">
-                {{ durationLabels[durationType] }}
-              </span>
+              <TagBadge :label="difficultyLabel" />
+              <TagBadge :label="packLabels[packType]" />
+              <TagBadge :label="durationLabels[durationType]" />
             </div>
             <h3 class="font-semibold text-base sm:text-lg leading-tight" style="color: var(--text-primary);">
               {{ name }}

@@ -19,8 +19,23 @@ function parseRectangle(rectangle: string | undefined): [number, number] | null 
   if (!rectangle) return null
   const parts = rectangle.split(';')
   if (parts.length !== 2) return null
-  const [lng1, lat1] = parts[0].split(',').map(Number)
-  const [lng2, lat2] = parts[1].split(',').map(Number)
+
+  const [startPoint, endPoint] = parts
+  if (!startPoint || !endPoint) return null
+
+  const startCoords = startPoint.split(',')
+  const endCoords = endPoint.split(',')
+  if (startCoords.length !== 2 || endCoords.length !== 2) return null
+
+  const [startLng, startLat] = startCoords
+  const [endLng, endLat] = endCoords
+  if (!startLng || !startLat || !endLng || !endLat) return null
+
+  const lng1 = Number(startLng)
+  const lat1 = Number(startLat)
+  const lng2 = Number(endLng)
+  const lat2 = Number(endLat)
+
   if ([lng1, lat1, lng2, lat2].some((v) => Number.isNaN(v))) return null
   return [(lng1 + lng2) / 2, (lat1 + lat2) / 2]
 }
