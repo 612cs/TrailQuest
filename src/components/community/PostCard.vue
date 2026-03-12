@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
+import TagBadge from '../common/TagBadge.vue'
 import type { TrailWithAuthor } from '../../mock/mockData'
 
 defineProps<{
@@ -38,15 +39,12 @@ defineProps<{
       <img :src="post.image" :alt="post.description" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
       <!-- AI Tags -->
       <div class="absolute bottom-3 left-3 flex gap-2">
-        <span
+        <TagBadge
           v-for="tag in post.tags"
           :key="tag"
-          class="px-2.5 py-1 rounded-lg text-xs font-medium backdrop-blur-md flex items-center gap-1"
-          style="background-color: rgba(45, 89, 39, 0.7); color: white;"
-        >
-          <BaseIcon name="Sparkles" :size="10" />
-          {{ tag }}
-        </span>
+          :label="tag"
+          icon="Sparkles"
+        />
       </div>
     </RouterLink>
 

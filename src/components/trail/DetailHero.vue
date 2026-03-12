@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import BaseIcon from '../common/BaseIcon.vue'
+import TagBadge from '../common/TagBadge.vue'
 import { useUserStore } from '../../stores/useUserStore'
 
 import type { User } from '../../mock/mockData'
@@ -44,22 +45,9 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
       <div class="absolute bottom-4 left-4 right-4">
         <div class="flex flex-wrap items-center gap-2">
-          <span
-            class="px-2.5 py-1 rounded-full text-xs font-semibold"
-            :class="{
-              'badge-easy': difficulty === 'easy',
-              'badge-moderate': difficulty === 'moderate',
-              'badge-hard': difficulty === 'hard'
-            }"
-          >
-            {{ difficultyLabel }}
-          </span>
-          <span class="px-2.5 py-1 rounded-full text-xs font-semibold border border-white/40 text-white/90">
-            {{ packLabels[packType] }}
-          </span>
-          <span class="px-2.5 py-1 rounded-full text-xs font-semibold border border-white/40 text-white/90">
-            {{ durationLabels[durationType] }}
-          </span>
+          <TagBadge :label="difficultyLabel" />
+          <TagBadge :label="packLabels[packType]" />
+          <TagBadge :label="durationLabels[durationType]" />
         </div>
         <h1 class="text-xl sm:text-2xl font-bold text-white mt-2">{{ name }}</h1>
         <p class="text-sm text-white/80 flex items-center gap-1 mt-1">

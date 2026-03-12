@@ -80,6 +80,7 @@ src/
 - **No emojis** - Use `lucide-vue-next` icons instead
 - Use `stroke-width="2"` for consistent icon styling
 - Use CSS variables (e.g., `var(--primary-500)`) instead of hardcoded colors
+- **主题适配** - 所有 UI 开发必须适配白天和暗黑模式
 - Use `animate-fade-in-up` class for entrance animations
 
 ### Component Structure

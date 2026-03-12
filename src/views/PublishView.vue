@@ -260,7 +260,10 @@ async function handleSubmit(isDraft = false) {
           已选择文件: <span class="font-medium text-primary-500">{{ gpxFileName }}</span>
         </div>
 
-        <div class="map-shell relative bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-200 dark:border-gray-800" style="height: 240px; border: 1px solid var(--border-default);">
+        <div
+          class="map-shell relative rounded-xl overflow-hidden shadow-inner"
+          style="height: 240px; background-color: var(--bg-input); border: 1px solid var(--border-default); transition: background-color 0.3s ease, border-color 0.3s ease;"
+        >
            <div ref="mapContainer" class="w-full h-full" :style="{ display: geoJsonData ? 'block' : 'none' }"></div>
            
            <div v-if="mapLoading" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/5 backdrop-blur-sm z-10">

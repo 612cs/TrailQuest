@@ -67,7 +67,7 @@ async function handleSubmit() {
 
       <!-- Form -->
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div v-if="errorMessage" class="bg-red-50 text-red-600 text-sm px-4 py-2.5 rounded-lg mb-4 flex items-center gap-2">
+        <div v-if="errorMessage" class="text-sm px-4 py-2.5 rounded-lg mb-4 flex items-center gap-2" style="background-color: var(--bg-tag); color: var(--color-hard);">
             <BaseIcon name="AlertCircle" :size="16" />
             <span>{{ errorMessage }}</span>
         </div>
@@ -127,7 +127,8 @@ async function handleSubmit() {
           type="submit"
           :disabled="!isValid || isLoading"
           class="w-full py-3 rounded-xl font-medium text-white transition-all flex items-center justify-center gap-2 mt-6 disabled:cursor-not-allowed"
-          :class="!isValid || isLoading ? 'bg-gray-400 opacity-70' : 'bg-primary-500 hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/30 active:scale-[0.98]'"
+          :class="!isValid || isLoading ? 'opacity-70' : 'bg-primary-500 hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/30 active:scale-[0.98]'"
+          :style="!isValid || isLoading ? 'background-color: var(--color-surface-400);' : ''"
         >
           <BaseIcon v-if="isLoading" name="Loader2" :size="20" class="animate-spin" />
           <span>{{ isLoading ? '请稍候...' : (isLoginMode ? '登录' : '注册') }}</span>

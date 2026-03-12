@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
 
 ## Project Overview
 
@@ -80,6 +80,7 @@ src/
 - **No emojis** - Use `lucide-vue-next` icons instead
 - Use `stroke-width="2"` for consistent icon styling
 - Use CSS variables (e.g., `var(--primary-500)`) instead of hardcoded colors
+- **主题适配** - 所有 UI 开发必须适配白天和暗黑模式
 - Use `animate-fade-in-up` class for entrance animations
 
 ### Component Structure
@@ -100,7 +101,7 @@ src/
 
 # 代码提交
 
-- **流程**：每当完成一个独立的功能模块（如：一个完整的页面、一个复杂的组件或逻辑重构）后，必须使用 `github-mcp-server` 提供的工具将变更提交到远程仓库。
+- **流程**：由用户发起，用户提交后，由 Codex 进行代码审查和修改。
 - **提交信息**：遵循约定式提交规范（Conventional Commits），如 `feat:`, `fix:`, `docs:`, `refactor:` 等，并且使用中文进行提交。
 - **工具优先**：优先使用 GitHub MCP 进行跨系统的直接提交，以确保操作的原子性和可追溯性。
 - git提交信息必须是中文
