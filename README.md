@@ -1,5 +1,54 @@
-# Vue 3 + TypeScript + Vite
+# TrailQuest Monorepo
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+TrailQuest 现在采用 monorepo 结构管理前端与后端：
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+```text
+hiking/
+  apps/
+    web/   # Vue 3 + TypeScript + Vite
+    api/   # Spring Boot 3
+  DOCS/    # 数据库与产品文档
+```
+
+## Workspace Commands
+
+```bash
+pnpm install
+pnpm dev
+pnpm build
+pnpm preview
+```
+
+以上根命令默认作用于 `apps/web`。
+
+## Frontend
+
+```bash
+pnpm --dir apps/web dev
+pnpm --dir apps/web build
+pnpm --dir apps/web preview
+```
+
+## Backend
+
+Spring Boot 3 后端已迁移到 `apps/api`。
+
+```bash
+pnpm dev:api
+pnpm build:api
+pnpm test:api
+```
+
+如果你更习惯直接使用 Maven Wrapper：
+
+```bash
+./apps/api/mvnw -f apps/api/pom.xml spring-boot:run
+```
+
+补充说明：
+
+- 后端当前包名为 `com.sheng.hikingbackend`
+- 应用名配置在 `apps/api/src/main/resources/application.properties`
+- 原始 `hiking-backend` 目录现在只保留独立仓库元数据和构建产物残留，业务工程已经迁入 `apps/api`
+
+- `apps/api/README.md`

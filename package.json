@@ -1,29 +1,16 @@
 {
-  "name": "hiking",
+  "name": "trailquest-monorepo",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "0.1.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@amap/amap-jsapi-loader": "^1.0.1",
-    "@mapbox/togeojson": "^0.16.2",
-    "lucide-vue-next": "^0.577.0",
-    "pinia": "^3.0.4",
-    "vue": "^3.5.25",
-    "vue-router": "^5.0.3"
-  },
-  "devDependencies": {
-    "@tailwindcss/vite": "^4.2.1",
-    "@types/node": "^24.10.1",
-    "@vitejs/plugin-vue": "^6.0.2",
-    "@vue/tsconfig": "^0.8.1",
-    "tailwindcss": "^4.2.1",
-    "typescript": "~5.9.3",
-    "vite": "^7.3.1",
-    "vue-tsc": "^3.1.5"
+    "dev": "pnpm --dir apps/web dev",
+    "dev:web": "pnpm --dir apps/web dev",
+    "dev:api": "./apps/api/mvnw -f apps/api/pom.xml spring-boot:run",
+    "build": "pnpm --dir apps/web build",
+    "build:web": "pnpm --dir apps/web build",
+    "build:api": "./apps/api/mvnw -f apps/api/pom.xml clean package -DskipTests",
+    "preview": "pnpm --dir apps/web preview",
+    "preview:web": "pnpm --dir apps/web preview",
+    "test:api": "./apps/api/mvnw -f apps/api/pom.xml test"
   }
 }

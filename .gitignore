@@ -8,8 +8,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.vite
 dist
 dist-ssr
+target
 *.local
 
 # Editor directories and files

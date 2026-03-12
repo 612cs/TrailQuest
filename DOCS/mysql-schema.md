@@ -1,5 +1,13 @@
 # MySQL 建表（含字段注释）
 
+当前建模约定：
+
+- `trails` 就是“社区动态”和“路线发布”的本体，不额外拆 `posts` / `publishes` 表。
+- “我的发布”直接查询 `trails.author_id`。
+- “我的收藏”使用 `trail_favorites(trail_id, user_id)` 关系表。
+- 路线发布时间统一使用 `trails.created_at`，前端自行格式化为“几小时前”。
+- AI Chat 以后端表结构为准，前端联调时再把 `id/timestamp` 做字段映射。
+
 ```sql
 -- 用户表
 CREATE TABLE `users` (
@@ -32,8 +40,9 @@ CREATE TABLE `trails` (
   `favorites` INT NOT NULL DEFAULT 0 COMMENT '收藏数',
   `likes` INT NOT NULL DEFAULT 0 COMMENT '点赞数',
   `author_id` BIGINT NOT NULL COMMENT '发布者ID',
-  `publish_time` VARCHAR(20) NOT NULL COMMENT '发布时间文案',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  KEY `idx_trails_author_created` (`author_id`, `created_at`),
   FOREIGN KEY (`author_id`) REFERENCES `users`(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='路线表';
 
@@ -69,6 +78,7 @@ CREATE TABLE `trail_favorites` (
   `user_id` BIGINT NOT NULL COMMENT '用户ID',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   UNIQUE KEY `uk_trail_fav` (`trail_id`, `user_id`),
+  KEY `idx_trail_favorites_user_created` (`user_id`, `created_at`),
   FOREIGN KEY (`trail_id`) REFERENCES `trails`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='路线收藏表';
@@ -95,6 +105,7 @@ CREATE TABLE `reviews` (
   `text` TEXT NOT NULL COMMENT '评论内容',
   `reply_to` VARCHAR(50) COMMENT '回复对象用户名',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  KEY `idx_reviews_trail_parent_created` (`trail_id`, `parent_id`, `created_at`),
   FOREIGN KEY (`trail_id`) REFERENCES `trails`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`parent_id`) REFERENCES `reviews`(`id`) ON DELETE CASCADE
@@ -128,6 +139,62 @@ CREATE TABLE `ai_messages` (
   `content` TEXT NOT NULL COMMENT '消息内容',
   `tokens` INT DEFAULT 0 COMMENT '估算token数',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  KEY `idx_ai_messages_conversation_created` (`conversation_id`, `created_at`),
   FOREIGN KEY (`conversation_id`) REFERENCES `ai_conversations`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI 消息表';
+```
+
+## 典型查询
+
+```sql
+-- 1) 我的发布
+SELECT *
+FROM `trails`
+WHERE `author_id` = 101
+ORDER BY `created_at` DESC;
+
+-- 2) 我的收藏
+SELECT t.*
+FROM `trail_favorites` tf
+JOIN `trails` t ON t.id = tf.trail_id
+WHERE tf.user_id = 101
+ORDER BY tf.created_at DESC;
+
+-- 3) 社区页（路线 + 作者）
+SELECT
+  t.*,
+  u.username,
+  u.avatar,
+  u.avatar_bg
+FROM `trails` t
+JOIN `users` u ON u.id = t.author_id
+ORDER BY t.created_at DESC;
+
+-- 4) 某条路线的顶级评论
+SELECT
+  r.*,
+  u.username,
+  u.avatar,
+  u.avatar_bg
+FROM `reviews` r
+JOIN `users` u ON u.id = r.user_id
+WHERE r.trail_id = 1 AND r.parent_id IS NULL
+ORDER BY r.created_at DESC;
+
+-- 5) 某条评论的回复
+SELECT
+  r.*,
+  u.username,
+  u.avatar,
+  u.avatar_bg
+FROM `reviews` r
+JOIN `users` u ON u.id = r.user_id
+WHERE r.parent_id = 1
+ORDER BY r.created_at ASC;
+
+-- 6) 某个 AI 会话的消息列表
+SELECT *
+FROM `ai_messages`
+WHERE `conversation_id` = 1
+ORDER BY `created_at` ASC;
 ```

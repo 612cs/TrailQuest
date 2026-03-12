@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  apps/web:
     dependencies:
       '@amap/amap-jsapi-loader':
         specifier: ^1.0.1

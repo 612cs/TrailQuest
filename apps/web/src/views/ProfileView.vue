@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref } from 'vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ProfileHeader from '../components/profile/ProfileHeader.vue'
 import Pagination from '../components/common/Pagination.vue'
