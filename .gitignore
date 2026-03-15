@@ -13,6 +13,7 @@ dist
 dist-ssr
 target
 *.local
+apps/api/src/main/resources/application-local.properties
 
 # Editor directories and files
 .vscode/*

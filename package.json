@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "pnpm --dir apps/web dev",
     "dev:web": "pnpm --dir apps/web dev",
-    "dev:api": "./apps/api/mvnw -f apps/api/pom.xml spring-boot:run",
+    "dev:api": "./apps/api/mvnw -f apps/api/pom.xml spring-boot:run -Dspring-boot.run.profiles=local",
     "build": "pnpm --dir apps/web build",
     "build:web": "pnpm --dir apps/web build",
     "build:api": "./apps/api/mvnw -f apps/api/pom.xml clean package -DskipTests",
