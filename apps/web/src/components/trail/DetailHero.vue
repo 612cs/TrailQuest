@@ -2,8 +2,7 @@
 import BaseIcon from '../common/BaseIcon.vue'
 import TagBadge from '../common/TagBadge.vue'
 import { useUserStore } from '../../stores/useUserStore'
-
-import type { User } from '../../mock/mockData'
+import type { TrailAuthor } from '../../types/trail'
 
 const userStore = useUserStore()
 
@@ -22,7 +21,7 @@ const props = defineProps<{
   likes?: number
   rating?: number
   reviewCount?: number
-  author: User
+  author: TrailAuthor
   publishTime: string
 }>()
 

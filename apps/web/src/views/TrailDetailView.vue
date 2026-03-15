@@ -10,24 +10,23 @@ import LandscapePrediction from '../components/trail/LandscapePrediction.vue'
 import ReviewList from '../components/trail/ReviewList.vue'
 import { useTrailGeo } from '../composables/useTrailGeo'
 import { useTrailWeather } from '../composables/useTrailWeather'
-import { getTrailsWithAuthor, getReviewsByTrailId } from '../mock/mockData'
-import type { TrailWithAuthor, ReviewWithAuthor } from '../mock/mockData'
+import { fetchTrailDetail } from '../api/trails'
+import { getReviewsByTrailId } from '../mock/mockData'
+import type { TrailListItem } from '../types/trail'
+import type { ReviewWithAuthor } from '../mock/mockData'
 
 const router = useRouter()
 const route = useRoute()
 
 const reviews = ref<ReviewWithAuthor[]>([])
+const trailData = ref<TrailListItem | null>(null)
+const isLoading = ref(false)
+const errorMessage = ref('')
 const { geo, isLoading: geoLoading, resolve: resolveGeo } = useTrailGeo()
 const { weather, isLoading: weatherLoading, resolve: resolveWeather } = useTrailWeather()
 
-// Get trail data based on route ID with Author Context
 const trailId = computed(() => Number(route.params.id))
-const allTrails = getTrailsWithAuthor()
-const trailData = computed<TrailWithAuthor | undefined>(() => {
-  return allTrails.find(t => t.id === trailId.value)
-})
 
-// Load reviews when trailData changes
 watch(trailId, (newId) => {
   if (newId) {
     const fetchedReviews = getReviewsByTrailId(newId)
@@ -37,6 +36,25 @@ watch(trailId, (newId) => {
     reviews.value = []
   }
 }, { immediate: true }) // immediate: true to run on initial component mount
+
+watch(trailId, async (newId) => {
+  if (!newId) {
+    trailData.value = null
+    return
+  }
+
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    trailData.value = await fetchTrailDetail(newId)
+  } catch (error) {
+    trailData.value = null
+    errorMessage.value = error instanceof Error ? error.message : '路线详情加载失败'
+  } finally {
+    isLoading.value = false
+  }
+}, { immediate: true })
 
 watch(trailData, async (trail, _prev, onCleanup) => {
   if (!trail) return
@@ -162,6 +180,13 @@ function handleAddReview(review: ReviewWithAuthor) {
         :total-reviews="trailData.reviewCount"
         @add-review="handleAddReview"
       />
+    </div>
+  </main>
+  <main v-else class="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+    <div class="card p-8 text-center">
+      <p v-if="isLoading" class="text-sm" style="color: var(--text-secondary);">正在加载路线详情...</p>
+      <p v-else-if="errorMessage" class="text-sm" style="color: var(--color-hard);">{{ errorMessage }}</p>
+      <p v-else class="text-sm" style="color: var(--text-secondary);">未找到该路线</p>
     </div>
   </main>
 </template>
