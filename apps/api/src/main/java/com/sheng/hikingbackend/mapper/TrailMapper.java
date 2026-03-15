@@ -80,7 +80,22 @@ public interface TrailMapper extends BaseMapper<Trail> {
                 </when>
               </choose>
             </where>
-            ORDER BY t.created_at DESC
+            <choose>
+              <when test="query.sort == 'hot'">
+                ORDER BY (
+                  t.likes * 0.4 +
+                  t.favorites * 0.3 +
+                  t.review_count * 0.2 -
+                  TIMESTAMPDIFF(HOUR, t.created_at, NOW()) * 0.1
+                ) DESC, t.created_at DESC
+              </when>
+              <when test="query.sort == 'rating'">
+                ORDER BY t.rating DESC, t.review_count DESC, t.created_at DESC
+              </when>
+              <otherwise>
+                ORDER BY t.created_at DESC
+              </otherwise>
+            </choose>
             </script>
             """)
     IPage<TrailQueryRow> selectTrailPage(Page<TrailQueryRow> page, @Param("query") TrailPageRequest query);

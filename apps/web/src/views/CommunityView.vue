@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import PostCard from '../components/community/PostCard.vue'
 import Pagination from '../components/common/Pagination.vue'
-import { getTrailsWithAuthor } from '../mock/mockData'
+import { fetchTrails } from '../api/trails'
+import type { TrailListItem } from '../types/trail'
+import { toCommunityPost } from '../utils/trailAdapters'
 
 const pageSize = 2
 const currentPage = ref(1)
-
-// 获取融合后带作者信息的路线数据
-const allPosts = getTrailsWithAuthor()
-const totalPages = Math.ceil(allPosts.length / pageSize)
+const totalPages = ref(1)
+const allPosts = ref<TrailListItem[]>([])
+const isLoading = ref(false)
+const errorMessage = ref('')
 
 const currentPosts = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  const end = start + pageSize
-  return allPosts.slice(start, end)
+  return allPosts.value.map(toCommunityPost)
 })
 
 const isInitialLoad = ref(true)
@@ -23,7 +23,32 @@ onMounted(() => {
   setTimeout(() => {
     isInitialLoad.value = false
   }, 1000)
+
+  void loadPosts()
 })
+
+watch(currentPage, () => {
+  void loadPosts()
+})
+
+async function loadPosts() {
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const data = await fetchTrails({
+      sort: 'latest',
+      pageNum: currentPage.value,
+      pageSize,
+    })
+    allPosts.value = data.list
+    totalPages.value = data.totalPages || 1
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '社区动态加载失败'
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -35,7 +60,16 @@ onMounted(() => {
     </div>
 
     <!-- Posts -->
-    <div class="space-y-5">
+    <div v-if="isLoading" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+      正在加载社区动态...
+    </div>
+    <div v-else-if="errorMessage" class="card p-6 text-sm text-center" style="color: var(--color-hard);">
+      {{ errorMessage }}
+    </div>
+    <div v-else-if="currentPosts.length === 0" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+      暂无社区动态
+    </div>
+    <div v-else class="space-y-5">
       <PostCard
         v-for="post in currentPosts"
         :key="post.id"

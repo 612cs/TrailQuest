@@ -5,31 +5,42 @@ import HeroSection from '../components/home/HeroSection.vue'
 import ActivityGrid from '../components/home/ActivityGrid.vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import SectionHeader from '../components/common/SectionHeader.vue'
-import { mockTrails } from '../mock/mockData'
+import { fetchTrails } from '../api/trails'
+import type { TrailListItem } from '../types/trail'
+import { toHomeTrailCard } from '../utils/trailAdapters'
 
-const popularTrails = computed(() =>
-  mockTrails.map((t) => ({
-    id: t.id,
-    image: t.image,
-    name: t.name,
-    difficulty: t.difficulty,
-    difficultyLabel: t.difficultyLabel,
-    packType: t.packType,
-    durationType: t.durationType,
-    rating: t.rating,
-    reviews: `(${t.reviewCount >= 1000 ? (t.reviewCount / 1000).toFixed(1) + 'k' : t.reviewCount} 条评论)`,
-    distance: t.distance,
-    elevation: t.elevation,
-    duration: t.duration,
-  }))
-)
+const trails = ref<TrailListItem[]>([])
 const isInitialLoad = ref(true)
+const isLoading = ref(false)
+const errorMessage = ref('')
+
+const popularTrails = computed(() => trails.value.map(toHomeTrailCard))
 
 onMounted(() => {
   setTimeout(() => {
     isInitialLoad.value = false
   }, 1000)
+
+  void loadTrails()
 })
+
+async function loadTrails() {
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const data = await fetchTrails({
+      sort: 'hot',
+      pageNum: 1,
+      pageSize: 6,
+    })
+    trails.value = data.list
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '热门路线加载失败'
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -48,7 +59,16 @@ onMounted(() => {
       </SectionHeader>
 
       <!-- Trail Cards -->
-      <div class="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible">
+      <div v-if="isLoading" class="py-10 text-sm text-center" style="color: var(--text-secondary);">
+        正在加载热门路线...
+      </div>
+      <div v-else-if="errorMessage" class="card p-6 text-sm text-center" style="color: var(--color-hard);">
+        {{ errorMessage }}
+      </div>
+      <div v-else-if="popularTrails.length === 0" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+        暂无热门路线
+      </div>
+      <div v-else class="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible">
         <TrailCard
           v-for="trail in popularTrails"
           :key="trail.id"

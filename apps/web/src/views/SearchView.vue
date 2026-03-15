@@ -6,12 +6,17 @@ import FilterBar, { type FilterItem } from '../components/search/FilterBar.vue'
 import ViewToggle from '../components/search/ViewToggle.vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import TrailHorizontalCard from '../components/trail/TrailHorizontalCard.vue'
-import { mockTrails } from '../mock/mockData'
+import { fetchTrails } from '../api/trails'
+import type { TrailListItem } from '../types/trail'
+import { toSearchTrailCard } from '../utils/trailAdapters'
 
 const searchInput = ref('')
 const currentSearchQuery = ref('')
 const activeView = ref<'list' | 'map'>('list')
 const isInitialLoad = ref(true)
+const isLoading = ref(false)
+const errorMessage = ref('')
+const trails = ref<TrailListItem[]>([])
 
 const filterModel = ref<Record<string, string>>({
   difficulty: 'all',
@@ -29,6 +34,7 @@ watch(
       const q = String(newQ)
       searchInput.value = q
       currentSearchQuery.value = q
+      void loadTrails()
     }
   },
   { immediate: true }
@@ -38,6 +44,10 @@ onMounted(() => {
   setTimeout(() => {
     isInitialLoad.value = false
   }, 1000)
+
+  if (route.query.q === undefined) {
+    void loadTrails()
+  }
 })
 
 const filters: FilterItem[] = [
@@ -84,35 +94,45 @@ const filters: FilterItem[] = [
 
 const handleSearch = () => {
   currentSearchQuery.value = searchInput.value
+  void loadTrails()
 }
 
-const filteredTrails = computed(() => {
-  const base = currentSearchQuery.value
-    ? mockTrails.filter(trail =>
-        trail.name.toLowerCase().includes(currentSearchQuery.value.toLowerCase()) ||
-        trail.location.toLowerCase().includes(currentSearchQuery.value.toLowerCase()) ||
-        trail.description.toLowerCase().includes(currentSearchQuery.value.toLowerCase())
-      )
-    : mockTrails
+const filteredTrails = computed(() => trails.value.map(toSearchTrailCard))
 
-  return base.filter((trail) => {
-    const diffOk = filterModel.value.difficulty === 'all' || trail.difficulty === filterModel.value.difficulty
-    const packOk = filterModel.value.packType === 'all' || trail.packType === filterModel.value.packType
-    const durationOk = filterModel.value.durationType === 'all' || trail.durationType === filterModel.value.durationType
-    
-    let distanceOk = true
-    if (filterModel.value.distance !== 'all') {
-      const dist = parseFloat(trail.distance)
-      if (!isNaN(dist)) {
-        if (filterModel.value.distance === 'short') distanceOk = dist < 5
-        else if (filterModel.value.distance === 'medium') distanceOk = dist >= 5 && dist <= 10
-        else if (filterModel.value.distance === 'long') distanceOk = dist > 10
-      }
-    }
+watch(
+  filterModel,
+  () => {
+    void loadTrails()
+  },
+  { deep: true },
+)
 
-    return diffOk && packOk && durationOk && distanceOk
-  })
-})
+async function loadTrails() {
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const data = await fetchTrails({
+      keyword: currentSearchQuery.value || undefined,
+      difficulty: withAllAsUndefined(filterModel.value.difficulty),
+      packType: withAllAsUndefined(filterModel.value.packType),
+      durationType: withAllAsUndefined(filterModel.value.durationType),
+      distance: withAllAsUndefined(filterModel.value.distance),
+      sort: 'latest',
+      pageNum: 1,
+      pageSize: 30,
+    })
+    trails.value = data.list
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : '路线搜索失败'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function withAllAsUndefined(value?: string) {
+  return !value || value === 'all' ? undefined : value
+}
 </script>
 
 <template>
@@ -155,7 +175,16 @@ const filteredTrails = computed(() => {
     </div>
 
     <!-- Trail List -->
-    <div class="space-y-4 sm:space-y-5">
+    <div v-if="isLoading" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+      正在加载路线...
+    </div>
+    <div v-else-if="errorMessage" class="card p-6 text-sm text-center" style="color: var(--color-hard);">
+      {{ errorMessage }}
+    </div>
+    <div v-else-if="filteredTrails.length === 0" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+      暂无符合条件的路线
+    </div>
+    <div v-else class="space-y-4 sm:space-y-5">
       <TrailHorizontalCard
         v-for="trail in filteredTrails"
         :key="trail.id"

@@ -29,6 +29,7 @@ public class TrailServiceImpl implements TrailService {
 
     @Override
     public PageResponse<TrailDetailVo> pageTrails(TrailPageRequest request) {
+        request.setSort(normalizeSort(request.getSort()));
         Page<TrailQueryRow> page = Page.of(request.getPageNum(), request.getPageSize());
         IPage<TrailQueryRow> pageResult = trailMapper.selectTrailPage(page, request);
         List<TrailDetailVo> list = pageResult.getRecords().stream()
@@ -116,5 +117,16 @@ public class TrailServiceImpl implements TrailService {
 
         long years = months / 12;
         return years + " 年前";
+    }
+
+    private String normalizeSort(String sort) {
+        if (sort == null || sort.isBlank()) {
+            return "latest";
+        }
+
+        return switch (sort) {
+            case "hot", "latest", "rating" -> sort;
+            default -> "latest";
+        };
     }
 }

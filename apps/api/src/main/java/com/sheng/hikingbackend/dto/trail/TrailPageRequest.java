@@ -14,4 +14,5 @@ public class TrailPageRequest extends PageRequest {
     private String packType;
     private String durationType;
     private String distance;
+    private String sort;
 }
