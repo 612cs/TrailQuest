@@ -25,6 +25,9 @@ public class User {
     @TableField("avatar_bg")
     private String avatarBg;
 
+    @TableField("avatar_media_id")
+    private Long avatarMediaId;
+
     private String email;
 
     @TableField("password_hash")

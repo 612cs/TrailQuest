@@ -14,15 +14,19 @@ public class CurrentUserVo {
     private String username;
     private String avatar;
     private String avatarBg;
+    private Long avatarMediaId;
+    private String avatarMediaUrl;
     private String email;
     private UserRole role;
 
-    public static CurrentUserVo from(User user) {
+    public static CurrentUserVo from(User user, String avatarMediaUrl) {
         return CurrentUserVo.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .avatar(user.getAvatar())
                 .avatarBg(user.getAvatarBg())
+                .avatarMediaId(user.getAvatarMediaId())
+                .avatarMediaUrl(avatarMediaUrl)
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();

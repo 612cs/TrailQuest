@@ -17,7 +17,13 @@ defineEmits<{
       <div class="relative shrink-0">
         <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 flex items-center justify-center text-2xl font-bold text-white shadow-inner"
           :style="{ background: userStore.profile.avatarBg, borderColor: 'var(--border-default)' }">
-          {{ userStore.profile.avatar }}
+          <img
+            v-if="userStore.profile.avatarMediaUrl"
+            :src="userStore.profile.avatarMediaUrl"
+            alt="用户头像"
+            class="w-full h-full object-cover rounded-full"
+          />
+          <span v-else>{{ userStore.profile.avatar }}</span>
         </div>
         <button class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-lg border-2" style="border-color: var(--bg-card);">
           <BaseIcon name="Pencil" :size="14" />

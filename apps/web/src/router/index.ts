@@ -44,6 +44,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/TrailDetailView.vue'),
     meta: { title: '路线详情' },
   },
+  {
+    path: '/oss-upload-test',
+    name: 'OssUploadTest',
+    component: () => import('../views/OssUploadTestView.vue'),
+    meta: { title: 'OSS 上传测试' },
+  },
 ]
 
 const router = createRouter({

@@ -2,9 +2,11 @@
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useThemeStore } from '../stores/theme'
+import { useUserStore } from '../stores/useUserStore'
 import BaseIcon from './common/BaseIcon.vue'
 
 const themeStore = useThemeStore()
+const userStore = useUserStore()
 const route = useRoute()
 const mobileMenuOpen = ref(false)
 
@@ -78,7 +80,16 @@ function isActive(path: string): boolean {
               :class="isActive('/profile') ? 'border-primary-500' : ''"
               :style="`background-color: var(--color-primary-500); color: white; border-color: ${isActive('/profile') ? 'var(--color-primary-400)' : 'var(--border-default)'}`"
             >
-              <BaseIcon name="User" :size="20" />
+              <img
+                v-if="userStore.profile?.avatarMediaUrl"
+                :src="userStore.profile.avatarMediaUrl"
+                alt="用户头像"
+                class="w-full h-full object-cover"
+              />
+              <span v-else-if="userStore.profile" class="leading-none">
+                {{ userStore.profile.avatar }}
+              </span>
+              <BaseIcon v-else name="User" :size="20" />
             </div>
           </RouterLink>
 

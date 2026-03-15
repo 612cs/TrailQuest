@@ -3,6 +3,8 @@ export interface CurrentUser {
   username: string
   avatar: string
   avatarBg: string
+  avatarMediaId?: number | null
+  avatarMediaUrl?: string | null
   email?: string
   role: 'USER' | 'ADMIN'
 }

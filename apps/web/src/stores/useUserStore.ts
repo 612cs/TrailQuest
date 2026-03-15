@@ -11,6 +11,8 @@ export interface UserProfile {
   username: string
   avatar: string
   avatarBg: string
+  avatarMediaId?: number | null
+  avatarMediaUrl?: string | null
   email?: string
   role: string
   joinDate: string
@@ -140,6 +142,8 @@ export const useUserStore = defineStore('user', () => {
       username: user.username,
       avatar: user.avatar,
       avatarBg: user.avatarBg,
+      avatarMediaId: user.avatarMediaId,
+      avatarMediaUrl: user.avatarMediaUrl,
       email: user.email,
       role: user.role === 'ADMIN' ? '管理员' : '徒步爱好者',
       joinDate: '2026年3月',

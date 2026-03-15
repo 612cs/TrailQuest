@@ -18,6 +18,7 @@ import com.sheng.hikingbackend.dto.auth.RegisterRequest;
 import com.sheng.hikingbackend.entity.User;
 import com.sheng.hikingbackend.mapper.UserMapper;
 import com.sheng.hikingbackend.service.AuthService;
+import com.sheng.hikingbackend.service.UploadService;
 import com.sheng.hikingbackend.vo.auth.CurrentUserVo;
 import com.sheng.hikingbackend.vo.auth.LoginResponse;
 
@@ -39,6 +40,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final UploadService uploadService;
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -51,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
                     .accessToken(jwtTokenProvider.generateToken(userDetails))
                     .tokenType("Bearer")
                     .expiresInSeconds(jwtTokenProvider.getExpiresInSeconds())
-                    .user(CurrentUserVo.from(user))
+                    .user(CurrentUserVo.from(user, uploadService.resolveAvatarUrl(user.getAvatarMediaId())))
                     .build();
         } catch (BadCredentialsException ex) {
             throw BusinessException.unauthorized("INVALID_CREDENTIALS", "邮箱或密码不正确");
@@ -79,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(jwtTokenProvider.generateToken(userDetails))
                 .tokenType("Bearer")
                 .expiresInSeconds(jwtTokenProvider.getExpiresInSeconds())
-                .user(CurrentUserVo.from(user))
+                .user(CurrentUserVo.from(user, uploadService.resolveAvatarUrl(user.getAvatarMediaId())))
                 .build();
     }
 
@@ -89,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
         if (user == null) {
             throw BusinessException.notFound("USER_NOT_FOUND", "用户不存在");
         }
-        return CurrentUserVo.from(user);
+        return CurrentUserVo.from(user, uploadService.resolveAvatarUrl(user.getAvatarMediaId()));
     }
 
     private String buildAvatar(String username) {

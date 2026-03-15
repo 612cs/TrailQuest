@@ -15,10 +15,35 @@ CREATE TABLE `users` (
   `username` VARCHAR(50) NOT NULL COMMENT '用户名',
   `avatar` VARCHAR(16) NOT NULL COMMENT '头像缩写',
   `avatar_bg` VARCHAR(16) NOT NULL COMMENT '头像背景色',
+  `avatar_media_id` BIGINT DEFAULT NULL COMMENT '头像媒体文件ID',
   `email` VARCHAR(100) COMMENT '邮箱',
   `password_hash` VARCHAR(255) COMMENT '密码哈希',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+
+-- 通用媒体文件表
+CREATE TABLE `media_files` (
+  `id` BIGINT PRIMARY KEY COMMENT '媒体文件ID',
+  `user_id` BIGINT NOT NULL COMMENT '上传用户ID',
+  `storage_provider` ENUM('aliyun_oss') NOT NULL DEFAULT 'aliyun_oss' COMMENT '存储服务提供商',
+  `bucket_name` VARCHAR(100) NOT NULL COMMENT 'OSS Bucket 名称',
+  `object_key` VARCHAR(255) NOT NULL COMMENT 'OSS 对象Key',
+  `url` VARCHAR(500) NOT NULL COMMENT '文件访问地址',
+  `biz_type` ENUM('avatar','trail_cover','trail_gallery','review') NOT NULL COMMENT '业务类型',
+  `original_name` VARCHAR(255) DEFAULT NULL COMMENT '原始文件名',
+  `extension` VARCHAR(20) DEFAULT NULL COMMENT '文件扩展名',
+  `mime_type` VARCHAR(100) NOT NULL COMMENT '文件MIME类型',
+  `size` BIGINT NOT NULL DEFAULT 0 COMMENT '文件大小（字节）',
+  `width` INT DEFAULT NULL COMMENT '图片宽度',
+  `height` INT DEFAULT NULL COMMENT '图片高度',
+  `status` ENUM('uploaded','active','deleted') NOT NULL DEFAULT 'active' COMMENT '文件状态',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  UNIQUE KEY `uk_media_bucket_object` (`bucket_name`, `object_key`),
+  KEY `idx_media_user_biz_created` (`user_id`, `biz_type`, `created_at`),
+  KEY `idx_media_biz_status_created` (`biz_type`, `status`, `created_at`),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='通用媒体文件表';
 
 -- 路线表
 CREATE TABLE `trails` (
