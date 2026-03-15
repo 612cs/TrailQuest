@@ -4,6 +4,7 @@ import router from './router'
 import './style.css'
 import App from './App.vue'
 import { useThemeStore } from './stores/theme'
+import { useUserStore } from './stores/useUserStore'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -14,5 +15,8 @@ app.use(router)
 // Initialize theme before mount
 const themeStore = useThemeStore()
 themeStore.init()
+
+const userStore = useUserStore()
+await userStore.bootstrap()
 
 app.mount('#app')

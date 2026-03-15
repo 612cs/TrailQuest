@@ -1,133 +1,176 @@
 import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+
+import * as authApi from '../api/auth'
+import { AUTH_TOKEN_STORAGE_KEY, USER_PROFILE_STORAGE_KEY } from '../api/constants'
+import type { CurrentUser } from '../types/auth'
+import { ApiError } from '../types/api'
 
 export interface UserProfile {
-    id: number
-    username: string
-    avatar: string
-    avatarBg: string
-    email?: string
-    role: string
-    joinDate: string
-    postCount: number
-    savedCount: number
-    bio: string
-    location: string
+  id: number
+  username: string
+  avatar: string
+  avatarBg: string
+  email?: string
+  role: string
+  joinDate: string
+  postCount: number
+  savedCount: number
+  bio: string
+  location: string
 }
 
-import { mockUsers } from '../mock/mockData'
+interface AuthActionResult {
+  success: boolean
+  message?: string
+}
 
 export const useUserStore = defineStore('user', () => {
-    // We can keep a default fallback, or just construct it dynamically after login.
-    // For convenience, we define a helper to construct a profile from a MockUser.
-    const createProfileFromUser = (user: any): UserProfile => ({
-        id: user.id,
-        username: user.username,
-        avatar: user.avatar,
-        avatarBg: user.avatarBg,
-        email: user.email,
-        role: '徒步爱好者',
-        joinDate: '2023年1月',
-        postCount: Math.floor(Math.random() * 30),
-        savedCount: Math.floor(Math.random() * 100),
-        bio: '热爱自然，探索未知。',
-        location: '未知地点'
-    })
+  const profile = ref<UserProfile | null>(null)
+  const token = ref('')
+  const showAuthModal = ref(false)
+  const isBootstrapping = ref(false)
 
-    // Define state
-    const profile = ref<UserProfile | null>(null)
-    const showAuthModal = ref(false)
+  const storedToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
+  if (storedToken) {
+    token.value = storedToken
+  }
 
-    // Initialize from localStorage
-    const storedProfile = localStorage.getItem('trailquest_user_profile')
-    if (storedProfile) {
-        try {
-            const parsed = JSON.parse(storedProfile)
-            profile.value = parsed || null
-        } catch (e) {
-            console.error('Failed to parse user profile from local storage', e)
-        }
+  const storedProfile = localStorage.getItem(USER_PROFILE_STORAGE_KEY)
+  if (storedProfile) {
+    try {
+      profile.value = JSON.parse(storedProfile) as UserProfile
+    } catch (error) {
+      console.error('Failed to parse user profile from local storage', error)
+      localStorage.removeItem(USER_PROFILE_STORAGE_KEY)
+    }
+  }
+
+  watch(token, (newToken) => {
+    if (newToken) {
+      localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, newToken)
+    } else {
+      localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY)
+    }
+  })
+
+  watch(
+    profile,
+    (newProfile) => {
+      if (newProfile) {
+        localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(newProfile))
+      } else {
+        localStorage.removeItem(USER_PROFILE_STORAGE_KEY)
+      }
+    },
+    { deep: true },
+  )
+
+  const isLoggedIn = computed(() => !!token.value && !!profile.value)
+
+  function updateProfile(updates: Partial<UserProfile>) {
+    if (!profile.value) return
+    profile.value = { ...profile.value, ...updates }
+  }
+
+  async function login(email?: string, password?: string): Promise<AuthActionResult> {
+    if (!email || !password) {
+      return { success: false, message: '账号或密码不能为空' }
     }
 
-    // Watch for changes and save to localStorage
-    watch(
-        profile,
-        (newProfile) => {
-            if (newProfile) {
-                localStorage.setItem('trailquest_user_profile', JSON.stringify(newProfile))
-            } else {
-                localStorage.removeItem('trailquest_user_profile')
-            }
-        },
-        { deep: true }
-    )
+    try {
+      const data = await authApi.login({ email, password })
+      applyAuthPayload(data.accessToken, data.user)
+      showAuthModal.value = false
+      return { success: true }
+    } catch (error) {
+      return { success: false, message: getErrorMessage(error) }
+    }
+  }
 
-    // Getters
-    const isLoggedIn = computed(() => !!profile.value)
+  async function register(email: string, password: string, username: string): Promise<AuthActionResult> {
+    try {
+      const data = await authApi.register({ email, password, username })
+      applyAuthPayload(data.accessToken, data.user)
+      showAuthModal.value = false
+      return { success: true }
+    } catch (error) {
+      return { success: false, message: getErrorMessage(error) }
+    }
+  }
 
-    // Actions
-    function updateProfile(updates: Partial<UserProfile>) {
-        if (profile.value) {
-            profile.value = { ...profile.value, ...updates }
-        }
+  function logout() {
+    token.value = ''
+    profile.value = null
+  }
+
+  function requireAuth(action: () => void) {
+    if (isLoggedIn.value) {
+      action()
+    } else {
+      showAuthModal.value = true
+    }
+  }
+
+  async function bootstrap() {
+    if (!token.value || isBootstrapping.value) {
+      return
     }
 
-    function login(email?: string, password?: string): { success: boolean, message?: string } {
-        if (!email || !password) {
-            return { success: false, message: '账号或密码不能为空' }
-        }
-
-        const matchedUser = mockUsers.find(u => u.email === email && u.password === password)
-        if (matchedUser) {
-            profile.value = createProfileFromUser(matchedUser)
-            showAuthModal.value = false
-            return { success: true }
-        }
-
-        return { success: false, message: '邮箱或密码不正确' }
+    isBootstrapping.value = true
+    try {
+      const currentUser = await authApi.fetchCurrentUser()
+      profile.value = buildProfile(currentUser)
+    } catch (error) {
+      console.warn('Failed to restore user session', error)
+      logout()
+    } finally {
+      isBootstrapping.value = false
     }
+  }
 
-    function register(email: string, password: string, username: string): { success: boolean, message?: string } {
-        // Simple mock registration
-        const newUser = {
-            id: Date.now(),
-            username,
-            avatar: username.slice(0, 2).toUpperCase(),
-            avatarBg: 'var(--color-primary-500)',
-            email,
-            password
-        }
-        
-        profile.value = createProfileFromUser(newUser)
-        showAuthModal.value = false
-        return { success: true }
-    }
+  function applyAuthPayload(accessToken: string, currentUser: CurrentUser) {
+    token.value = accessToken
+    profile.value = buildProfile(currentUser)
+  }
 
-    function logout() {
-        profile.value = null
-    }
-
-    /**
-     * Intercepts an action requiring authentication.
-     * If logged in, executes the action. 
-     * If not logged in, shows the auth modal.
-     */
-    function requireAuth(action: () => void) {
-        if (isLoggedIn.value) {
-            action()
-        } else {
-            showAuthModal.value = true
-        }
-    }
-
+  function buildProfile(user: CurrentUser): UserProfile {
     return {
-        profile,
-        isLoggedIn,
-        showAuthModal,
-        updateProfile,
-        login,
-        register,
-        logout,
-        requireAuth
+      id: user.id,
+      username: user.username,
+      avatar: user.avatar,
+      avatarBg: user.avatarBg,
+      email: user.email,
+      role: user.role === 'ADMIN' ? '管理员' : '徒步爱好者',
+      joinDate: '2026年3月',
+      postCount: 0,
+      savedCount: 0,
+      bio: user.role === 'ADMIN' ? '负责内容与用户管理。' : '热爱自然，探索未知。',
+      location: '未知地点',
     }
+  }
+
+  function getErrorMessage(error: unknown) {
+    if (error instanceof ApiError) {
+      return error.message
+    }
+    if (error instanceof Error) {
+      return error.message
+    }
+    return '请求失败，请稍后重试'
+  }
+
+  return {
+    profile,
+    token,
+    isLoggedIn,
+    isBootstrapping,
+    showAuthModal,
+    updateProfile,
+    login,
+    register,
+    logout,
+    requireAuth,
+    bootstrap,
+  }
 })

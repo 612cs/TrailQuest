@@ -24,15 +24,12 @@ async function handleSubmit() {
 
   isLoading.value = true
   errorMessage.value = ''
-  
-  // Simulate network request
-  await new Promise(resolve => setTimeout(resolve, 800))
-  
+
   let result
   if (isLoginMode.value) {
-    result = userStore.login(email.value, password.value)
+    result = await userStore.login(email.value, password.value)
   } else {
-    result = userStore.register(email.value, password.value, username.value)
+    result = await userStore.register(email.value, password.value, username.value)
   }
   
   if (result.success) {
