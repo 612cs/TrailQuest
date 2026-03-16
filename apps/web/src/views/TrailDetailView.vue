@@ -11,31 +11,35 @@ import ReviewList from '../components/trail/ReviewList.vue'
 import { useTrailGeo } from '../composables/useTrailGeo'
 import { useTrailWeather } from '../composables/useTrailWeather'
 import { fetchTrailDetail } from '../api/trails'
-import { getReviewsByTrailId } from '../mock/mockData'
+import { createReview, fetchTrailReviews } from '../api/reviews'
 import type { TrailListItem } from '../types/trail'
-import type { ReviewWithAuthor } from '../mock/mockData'
+import type { CreateReviewPayload, ReviewItem } from '../types/review'
 
 const router = useRouter()
 const route = useRoute()
 
-const reviews = ref<ReviewWithAuthor[]>([])
+const reviews = ref<ReviewItem[]>([])
 const trailData = ref<TrailListItem | null>(null)
 const isLoading = ref(false)
+const isReviewsLoading = ref(false)
+const isSubmittingReview = ref(false)
 const errorMessage = ref('')
+const reviewsErrorMessage = ref('')
+const reviewFormResetKey = ref(0)
+const replyFormResetKey = ref(0)
 const { geo, isLoading: geoLoading, resolve: resolveGeo } = useTrailGeo()
 const { weather, isLoading: weatherLoading, resolve: resolveWeather } = useTrailWeather()
 
 const trailId = computed(() => Number(route.params.id))
 
-watch(trailId, (newId) => {
-  if (newId) {
-    const fetchedReviews = getReviewsByTrailId(newId)
-    // Deep clone reviews so mutations don't affect the mock source
-    reviews.value = JSON.parse(JSON.stringify(fetchedReviews))
-  } else {
+watch(trailId, async (newId) => {
+  if (!newId) {
     reviews.value = []
+    return
   }
-}, { immediate: true }) // immediate: true to run on initial component mount
+
+  await loadReviews(newId)
+}, { immediate: true })
 
 watch(trailId, async (newId) => {
   if (!newId) {
@@ -115,8 +119,104 @@ const weatherAlertMessage = computed(() => {
   return '天气条件良好，注意补水与防晒。'
 })
 
-function handleAddReview(review: ReviewWithAuthor) {
-  reviews.value.unshift(review)
+async function handleCreateReview(payload: { rating?: number; text: string; images: string[] }) {
+  if (!trailData.value || isSubmittingReview.value) return
+
+  await submitReview({
+    trailId: trailData.value.id,
+    rating: payload.rating,
+    text: payload.text,
+    images: payload.images,
+  })
+}
+
+async function handleCreateReply(payload: { parentId: string; text: string; replyTo?: string; images: string[] }) {
+  if (!trailData.value || isSubmittingReview.value) return
+
+  await submitReview({
+    trailId: trailData.value.id,
+    parentId: payload.parentId,
+    text: payload.text,
+    replyTo: payload.replyTo,
+    images: payload.images,
+  })
+}
+
+async function submitReview(payload: CreateReviewPayload) {
+  isSubmittingReview.value = true
+  reviewsErrorMessage.value = ''
+
+  try {
+    const result = await createReview(payload)
+    trailData.value = trailData.value
+      ? {
+        ...trailData.value,
+        rating: result.trailRating,
+        reviewCount: result.trailReviewCount,
+      }
+      : trailData.value
+    reviewsErrorMessage.value = ''
+    const inserted = insertReview(result.review)
+    if (!inserted) {
+      await loadReviews(payload.trailId, { replaceOnError: false })
+    }
+    if (payload.parentId) {
+      replyFormResetKey.value += 1
+    } else {
+      reviewFormResetKey.value += 1
+    }
+  } catch (error) {
+    reviewsErrorMessage.value = error instanceof Error ? error.message : '评论提交失败'
+  } finally {
+    isSubmittingReview.value = false
+  }
+}
+
+async function loadReviews(targetTrailId: number, options: { replaceOnError?: boolean } = {}) {
+  const { replaceOnError = true } = options
+  isReviewsLoading.value = true
+  reviewsErrorMessage.value = ''
+
+  try {
+    reviews.value = await fetchTrailReviews(targetTrailId)
+    return true
+  } catch (error) {
+    if (replaceOnError) {
+      reviews.value = []
+    }
+    reviewsErrorMessage.value = error instanceof Error ? error.message : '评论加载失败'
+    return false
+  } finally {
+    isReviewsLoading.value = false
+  }
+}
+
+function insertReview(review: ReviewItem) {
+  const normalizedReview: ReviewItem = {
+    ...review,
+    images: review.images ?? [],
+    replies: review.replies ?? [],
+  }
+
+  if (!normalizedReview.parentId) {
+    reviews.value = [normalizedReview, ...reviews.value]
+    return true
+  }
+
+  return insertReply(reviews.value, normalizedReview)
+}
+
+function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
+  for (const item of items) {
+    if (item.id === review.parentId) {
+      item.replies = [...item.replies, review]
+      return true
+    }
+    if (insertReply(item.replies, review)) {
+      return true
+    }
+  }
+  return false
 }
 </script>
 
@@ -178,7 +278,12 @@ function handleAddReview(review: ReviewWithAuthor) {
         :reviews="reviews"
         :average-rating="trailData.rating"
         :total-reviews="trailData.reviewCount"
-        @add-review="handleAddReview"
+        :is-submitting="isSubmittingReview || isReviewsLoading"
+        :error-message="reviewsErrorMessage"
+        :review-form-reset-key="reviewFormResetKey"
+        :reply-form-reset-key="replyFormResetKey"
+        @submit-review="handleCreateReview"
+        @submit-reply="handleCreateReply"
       />
     </div>
   </main>
