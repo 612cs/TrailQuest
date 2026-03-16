@@ -11,7 +11,7 @@
  Target Server Version : 80045 (8.0.45)
  File Encoding         : 65001
 
- Date: 15/03/2026 23:14:25
+ Date: 16/03/2026 20:49:17
 */
 
 SET NAMES utf8mb4;
@@ -69,6 +69,47 @@ INSERT INTO `ai_messages` (`id`, `conversation_id`, `role`, `content`, `tokens`,
 COMMIT;
 
 -- ----------------------------
+-- Table structure for media_files
+-- ----------------------------
+DROP TABLE IF EXISTS `media_files`;
+CREATE TABLE `media_files` (
+  `id` bigint NOT NULL COMMENT '媒体文件ID',
+  `user_id` bigint NOT NULL COMMENT '上传用户ID',
+  `storage_provider` enum('aliyun_oss') NOT NULL DEFAULT 'aliyun_oss' COMMENT '存储服务提供商',
+  `bucket_name` varchar(100) NOT NULL COMMENT 'OSS Bucket 名称',
+  `object_key` varchar(255) NOT NULL COMMENT 'OSS 对象Key',
+  `url` varchar(500) NOT NULL COMMENT '文件访问地址',
+  `biz_type` enum('avatar','trail_cover','trail_gallery','review') NOT NULL COMMENT '业务类型',
+  `original_name` varchar(255) DEFAULT NULL COMMENT '原始文件名',
+  `extension` varchar(20) DEFAULT NULL COMMENT '文件扩展名',
+  `mime_type` varchar(100) NOT NULL COMMENT '文件MIME类型',
+  `size` bigint NOT NULL DEFAULT '0' COMMENT '文件大小（字节）',
+  `width` int DEFAULT NULL COMMENT '图片宽度',
+  `height` int DEFAULT NULL COMMENT '图片高度',
+  `status` enum('uploaded','active','deleted') NOT NULL DEFAULT 'active' COMMENT '文件状态',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_media_bucket_object` (`bucket_name`,`object_key`),
+  KEY `idx_media_user_biz_created` (`user_id`,`biz_type`,`created_at`),
+  KEY `idx_media_biz_status_created` (`biz_type`,`status`,`created_at`),
+  CONSTRAINT `media_files_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='通用媒体文件表';
+
+-- ----------------------------
+-- Records of media_files
+-- ----------------------------
+BEGIN;
+INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `object_key`, `url`, `biz_type`, `original_name`, `extension`, `mime_type`, `size`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES (2033216883554000897, 2033210514809671681, 'aliyun_oss', 'trailquest-prod-media', 'avatar/2033210514809671681/2026/03/16ca1ca7e71c4b81be3b5a671442566d.png', 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/avatar/2033210514809671681/2026/03/16ca1ca7e71c4b81be3b5a671442566d.png', 'avatar', 'trail-pine.png', 'png', 'image/png', 1023422, 1200, 800, 'active', '2026-03-15 16:20:55', '2026-03-15 16:20:55');
+INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `object_key`, `url`, `biz_type`, `original_name`, `extension`, `mime_type`, `size`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES (2033217283673841666, 2033122436212338690, 'aliyun_oss', 'trailquest-prod-media', 'trail_cover/2033122436212338690/2026/03/29665af0ed5c4c089dbac68c6f61a5a1.png', 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/trail_cover/2033122436212338690/2026/03/29665af0ed5c4c089dbac68c6f61a5a1.png', 'trail_cover', '把腿张开_-lowres__bad_anatomy__bad_hands__extra_limbs__mutated__deformed__blurry__worst_quality__low_quality__watermark__text__signature__ugly__poorly_drawn_face__extra_fingers__fus_1276895851.png', 'png', 'image/png', 732303, 1024, 576, 'active', '2026-03-15 16:22:30', '2026-03-15 16:22:30');
+INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `object_key`, `url`, `biz_type`, `original_name`, `extension`, `mime_type`, `size`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES (2033225575586447361, 2033122436212338690, 'aliyun_oss', 'trailquest-prod-media', 'avatar/2033122436212338690/2026/03/bfa0b77cbf2b4b47a7e8c41b69584232.png', 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/avatar/2033122436212338690/2026/03/bfa0b77cbf2b4b47a7e8c41b69584232.png', 'avatar', 'image3.png', 'png', 'image/png', 1195909, 1024, 1024, 'active', '2026-03-15 16:55:27', '2026-03-15 16:55:27');
+INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `object_key`, `url`, `biz_type`, `original_name`, `extension`, `mime_type`, `size`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES (2033490707202904065, 2033122436212338690, 'aliyun_oss', 'trailquest-prod-media', 'review/2033122436212338690/2026/03/d313e74eab2f4c13af0be7e717edca6a.png', 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/review/2033122436212338690/2026/03/d313e74eab2f4c13af0be7e717edca6a.png', 'review', '一_主体设定_1_人物描述_根据参考图_年轻女性_五官精致_脸型小巧柔和_整体妆容参考韩系女演员风格_画面呈现深夜卧室随手自拍的自然感与_1276895851(1).png', 'png', 'image/png', 1239135, 1024, 1024, 'active', '2026-03-16 10:28:59', '2026-03-16 10:28:59');
+INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `object_key`, `url`, `biz_type`, `original_name`, `extension`, `mime_type`, `size`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES (2033490710457683970, 2033122436212338690, 'aliyun_oss', 'trailquest-prod-media', 'review/2033122436212338690/2026/03/6427ae2be0cf48e1b798af61600c7e10.png', 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/review/2033122436212338690/2026/03/6427ae2be0cf48e1b798af61600c7e10.png', 'review', 'image6.png', 'png', 'image/png', 1610818, 768, 1344, 'active', '2026-03-16 10:29:00', '2026-03-16 10:29:00');
+INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `object_key`, `url`, `biz_type`, `original_name`, `extension`, `mime_type`, `size`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES (2033515323863506946, 2033496679581421570, 'aliyun_oss', 'trailquest-prod-media', 'review/2033496679581421570/2026/03/21daeff024384ee4bb2d2883bc19ce41.png', 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/review/2033496679581421570/2026/03/21daeff024384ee4bb2d2883bc19ce41.png', 'review', '把腿张开_-lowres__bad_anatomy__bad_hands__extra_limbs__mutated__deformed__blurry__worst_quality__low_quality__watermark__text__signature__ugly__poorly_drawn_face__extra_fingers__fus_1276895851.png', 'png', 'image/png', 732303, 1024, 576, 'active', '2026-03-16 12:06:48', '2026-03-16 12:06:48');
+INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `object_key`, `url`, `biz_type`, `original_name`, `extension`, `mime_type`, `size`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES (2033516264947884034, 2033496679581421570, 'aliyun_oss', 'trailquest-prod-media', 'review/2033496679581421570/2026/03/3fbed628be924f6fa24f082660e0b937.png', 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/review/2033496679581421570/2026/03/3fbed628be924f6fa24f082660e0b937.png', 'review', 'image5.png', 'png', 'image/png', 1204106, 1344, 768, 'active', '2026-03-16 12:10:33', '2026-03-16 12:10:33');
+COMMIT;
+
+-- ----------------------------
 -- Table structure for review_images
 -- ----------------------------
 DROP TABLE IF EXISTS `review_images`;
@@ -79,7 +120,7 @@ CREATE TABLE `review_images` (
   PRIMARY KEY (`id`),
   KEY `review_id` (`review_id`),
   CONSTRAINT `review_images_ibfk_1` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='评论图片表';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='评论图片表';
 
 -- ----------------------------
 -- Records of review_images
@@ -87,6 +128,9 @@ CREATE TABLE `review_images` (
 BEGIN;
 INSERT INTO `review_images` (`id`, `review_id`, `image`) VALUES (1, 1, '/trail-pine.png');
 INSERT INTO `review_images` (`id`, `review_id`, `image`) VALUES (2, 1, '/trail-lake.png');
+INSERT INTO `review_images` (`id`, `review_id`, `image`) VALUES (3, 2033490733455052801, 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/review/2033122436212338690/2026/03/d313e74eab2f4c13af0be7e717edca6a.png');
+INSERT INTO `review_images` (`id`, `review_id`, `image`) VALUES (4, 2033490733455052801, 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/review/2033122436212338690/2026/03/6427ae2be0cf48e1b798af61600c7e10.png');
+INSERT INTO `review_images` (`id`, `review_id`, `image`) VALUES (5, 2033516281989341186, 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/review/2033496679581421570/2026/03/3fbed628be924f6fa24f082660e0b937.png');
 COMMIT;
 
 -- ----------------------------
@@ -118,6 +162,14 @@ CREATE TABLE `reviews` (
 BEGIN;
 INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (1, 1, 101, NULL, 5, '1 周前', '壮观的景色！山顶的日出令人叹为观止。', NULL, '2026-03-05 08:00:00');
 INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (101, 1, 104, 1, NULL, '6 天前', '同意！日出真的太美了。', 'Sarah M.', '2026-03-06 09:30:00');
+INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (2033490733455052801, 3, 2033122436212338690, NULL, 5, '刚刚', '很好看', NULL, '2026-03-16 18:29:06');
+INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (2033514612840898562, 3, 2033496679581421570, NULL, 5, '刚刚', '好得很', NULL, '2026-03-16 20:03:59');
+INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (2033515837493780481, 3, 2033496679581421570, 2033490733455052801, NULL, '刚刚', '凑凑的', '猪猪侠', '2026-03-16 20:08:51');
+INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (2033515877381611522, 3, 2033496679581421570, 2033515837493780481, NULL, '刚刚', '你才凑凑的', 'SHENG', '2026-03-16 20:09:01');
+INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (2033515909140881409, 3, 2033496679581421570, 2033515837493780481, NULL, '刚刚', '凑凑', 'SHENG', '2026-03-16 20:09:08');
+INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (2033515944826019842, 3, 2033496679581421570, 2033514612840898562, NULL, '刚刚', '有多好', 'SHENG', '2026-03-16 20:09:17');
+INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (2033516281989341186, 3, 2033496679581421570, 2033515837493780481, NULL, '刚刚', '骚得很', 'SHENG', '2026-03-16 20:10:37');
+INSERT INTO `reviews` (`id`, `trail_id`, `user_id`, `parent_id`, `rating`, `time_label`, `text`, `reply_to`, `created_at`) VALUES (2033523400641781762, 2, 2033496679581421570, NULL, 3, '刚刚', '111', NULL, '2026-03-16 20:38:54');
 COMMIT;
 
 -- ----------------------------
@@ -280,8 +332,8 @@ CREATE TABLE `trails` (
 -- ----------------------------
 BEGIN;
 INSERT INTO `trails` (`id`, `image`, `name`, `location`, `ip`, `difficulty`, `difficulty_label`, `pack_type`, `duration_type`, `rating`, `review_count`, `distance`, `elevation`, `duration`, `description`, `favorites`, `likes`, `author_id`, `created_at`, `updated_at`) VALUES (1, '/trail-pine.png', '老鹰峰顶', '浙江 杭州 临安', '121.41.32.100', 'moderate', '适中', 'light', 'single_day', 4.9, 1200, '6.4 km', '+420 m', '3h 15m', '老鹰峰顶是临安地区最受欢迎的徒步路线之一，沿途可欣赏壮丽的山谷景色。', 3842, 1256, 101, '2026-03-12 16:00:00', '2026-03-12 15:58:38');
-INSERT INTO `trails` (`id`, `image`, `name`, `location`, `ip`, `difficulty`, `difficulty_label`, `pack_type`, `duration_type`, `rating`, `review_count`, `distance`, `elevation`, `duration`, `description`, `favorites`, `likes`, `author_id`, `created_at`, `updated_at`) VALUES (2, '/trail-lake.png', '镜湖环线', '云南 大理 苍山', '222.88.90.10', 'easy', '简单', 'light', 'single_day', 4.7, 856, '3.4 km', '+50 m', '45m', '轻松的环湖步道，适合全家出行。湖水清澈见底，四周被苍翠的山林环绕。', 5126, 2430, 102, '2026-03-11 12:00:00', '2026-03-12 15:58:38');
-INSERT INTO `trails` (`id`, `image`, `name`, `location`, `ip`, `difficulty`, `difficulty_label`, `pack_type`, `duration_type`, `rating`, `review_count`, `distance`, `elevation`, `duration`, `description`, `favorites`, `likes`, `author_id`, `created_at`, `updated_at`) VALUES (3, '/trail-foggy.png', '布莱克伍德峡谷', '四川 雅安 牛背山', '118.125.88.20', 'hard', '困难', 'heavy', 'multi_day', 4.8, 2400, '18.0 km', '+1,200 m', '6h 20m', '极具挑战性的峡谷穿越路线，需要较好的体力和经验。', 8930, 5620, 104, '2026-03-10 09:00:00', '2026-03-12 15:58:38');
+INSERT INTO `trails` (`id`, `image`, `name`, `location`, `ip`, `difficulty`, `difficulty_label`, `pack_type`, `duration_type`, `rating`, `review_count`, `distance`, `elevation`, `duration`, `description`, `favorites`, `likes`, `author_id`, `created_at`, `updated_at`) VALUES (2, '/trail-lake.png', '镜湖环线', '云南 大理 苍山', '222.88.90.10', 'easy', '简单', 'light', 'single_day', 3.0, 1, '3.4 km', '+50 m', '45m', '轻松的环湖步道，适合全家出行。湖水清澈见底，四周被苍翠的山林环绕。', 5126, 2430, 102, '2026-03-11 12:00:00', '2026-03-12 15:58:38');
+INSERT INTO `trails` (`id`, `image`, `name`, `location`, `ip`, `difficulty`, `difficulty_label`, `pack_type`, `duration_type`, `rating`, `review_count`, `distance`, `elevation`, `duration`, `description`, `favorites`, `likes`, `author_id`, `created_at`, `updated_at`) VALUES (3, '/trail-foggy.png', '布莱克伍德峡谷', '四川 雅安 牛背山', '118.125.88.20', 'hard', '困难', 'heavy', 'multi_day', 5.0, 2, '18.0 km', '+1,200 m', '6h 20m', '极具挑战性的峡谷穿越路线，需要较好的体力和经验。', 8930, 5620, 104, '2026-03-10 09:00:00', '2026-03-12 15:58:38');
 COMMIT;
 
 -- ----------------------------
@@ -293,22 +345,27 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL COMMENT '用户名',
   `avatar` varchar(16) NOT NULL COMMENT '头像缩写',
   `avatar_bg` varchar(16) NOT NULL COMMENT '头像背景色',
+  `avatar_media_id` bigint DEFAULT NULL COMMENT '头像媒体文件ID',
   `email` varchar(100) NOT NULL COMMENT '邮箱',
   `password_hash` varchar(255) NOT NULL COMMENT '密码哈希',
   `role` enum('USER','ADMIN') NOT NULL DEFAULT 'USER' COMMENT '用户角色',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_users_email` (`email`)
+  UNIQUE KEY `uk_users_email` (`email`),
+  KEY `idx_users_avatar_media_id` (`avatar_media_id`),
+  CONSTRAINT `users_ibfk_avatar_media` FOREIGN KEY (`avatar_media_id`) REFERENCES `media_files` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户表';
 
 -- ----------------------------
 -- Records of users
 -- ----------------------------
 BEGIN;
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `email`, `password_hash`, `role`, `created_at`) VALUES (101, 'Sarah M.', 'SM', '#8b5cf6', 'sarah@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'USER', '2026-03-12 15:58:38');
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `email`, `password_hash`, `role`, `created_at`) VALUES (102, '云游者', 'YY', '#0891b2', 'yunyou@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'ADMIN', '2026-03-12 15:58:38');
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `email`, `password_hash`, `role`, `created_at`) VALUES (104, '@hiking_queen', 'HQ', '#8b5cf6', 'queen@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'USER', '2026-03-12 15:58:38');
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033122436212338690, '猪猪侠', '猪猪', '#ea580c', 'admin@qq.com', '$2a$10$tmpYeUZ8Fm5L.7SErKaz8OljlRb/bjid38pOAZp2YY3AEqujWm5Zi', 'USER', '2026-03-15 10:05:37');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (101, 'Sarah M.', 'SM', '#8b5cf6', NULL, 'sarah@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'USER', '2026-03-12 15:58:38');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (102, '云游者', 'YY', '#0891b2', NULL, 'yunyou@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'ADMIN', '2026-03-12 15:58:38');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (104, '@hiking_queen', 'HQ', '#8b5cf6', NULL, 'queen@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'USER', '2026-03-12 15:58:38');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033122436212338690, '猪猪侠', '猪猪', '#ea580c', 2033225575586447361, 'admin@qq.com', '$2a$10$tmpYeUZ8Fm5L.7SErKaz8OljlRb/bjid38pOAZp2YY3AEqujWm5Zi', 'USER', '2026-03-15 10:05:37');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033210514809671681, 'oss_test_user', 'OS', '#059669', 2033216883554000897, 'oss-test-20260315@example.com', '$2a$10$npo1CdxmpmY1GugYYCNF6uZbann0a27.ynQoJivY7OJNOmxqKaIWO', 'USER', '2026-03-15 15:55:36');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033496679581421570, 'SHENG', 'SH', '#059669', NULL, '2516824318@qq.com', '$2a$10$h9luatk4n5Jpm3lwzcbgaOlc4AXj3.0c0m/zVeVfVHiYzIN3lklqa', 'USER', '2026-03-16 10:52:43');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
