@@ -1,6 +1,8 @@
 # 后端开发清单
 
-这份清单整合了 `DOCS/backend-handoff.md` 与 `apps/api/README.md`，目标是把“当前状态、下一步顺序、实际交付物”整理成一份可以直接执行的开发指南。
+> 说明：这份清单保留为后端阶段性开发路线参考，其中部分“未完成”描述来自更早阶段。当前真实进度请优先参考 `DOCS/handoff/current-progress-handoff-2026-03-16.md`。
+
+这份清单整合了 `DOCS/backend/backend-handoff.md` 与 `apps/api/README.md`，目标是把“当前状态、下一步顺序、实际交付物”整理成一份可以直接执行的开发指南。
 
 ## 1. 当前状态总览
 
@@ -63,8 +65,8 @@ pnpm test:api
 
 相关文档：
 
-- `DOCS/mysql-schema.md`
-- `DOCS/mysql-test-data.md`
+- `DOCS/database/mysql-schema.md`
+- `DOCS/database/mysql-test-data.md`
 
 ## 4. 还未完成的核心内容
 

@@ -1,5 +1,7 @@
 # 后端阶段总结与交接
 
+> 说明：这份文档主要记录后端早期基础设施阶段的阶段总结。当前真实状态请优先参考 `DOCS/handoff/current-progress-handoff-2026-03-16.md`。
+
 这份文档用于快速回顾当前后端进度，方便在新窗口继续开发。
 
 ## 已完成内容
@@ -18,9 +20,9 @@
   - 不单独为“我的发布”建中间表
   - AI Chat 以后端表结构为准
 - 已整理 MySQL 建表文档：
-  - `DOCS/mysql-schema.md`
+  - `DOCS/database/mysql-schema.md`
 - 已整理测试数据文档：
-  - `DOCS/mysql-test-data.md`
+  - `DOCS/database/mysql-test-data.md`
 
 ### 3. Docker 中的 MySQL / Redis 联通
 

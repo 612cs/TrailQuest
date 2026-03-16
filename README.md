@@ -9,7 +9,7 @@ hiking/
   apps/
     web/     # Vue 3 + TypeScript + Vite 前端
     api/     # Spring Boot 3 + MyBatis-Plus 后端
-  DOCS/      # 数据库设计、测试数据、阶段总结
+  DOCS/      # 交接、后端、数据库与前端规范文档
 ```
 
 ## 当前技术栈
@@ -51,6 +51,9 @@ pnpm test:api
 - 开发期安全拦截已放开，便于前后端联调
 - MyBatis-Plus 与分页插件已安装
 - Swagger / OpenAPI 已接入
+- `media_files` 通用媒体表已设计并落地
+- 阿里云 OSS STS 上传链路已打通
+- 已提供最小上传测试页：`/oss-upload-test`
 - 已提供数据库测试接口：
   - `GET /hello`
   - `GET /test/db`
@@ -58,14 +61,16 @@ pnpm test:api
 
 ## 重点文档
 
-- [后端阶段总结](./DOCS/backend-handoff.md)
-- [MySQL 建表](./DOCS/mysql-schema.md)
-- [MySQL 测试数据](./DOCS/mysql-test-data.md)
-- [前端 UI 指南](./DOCS/UI_GUIDELINES.md)
+- [DOCS 索引](./DOCS/README.md)
+- [最新交接文档（2026-03-16）](./DOCS/handoff/current-progress-handoff-2026-03-16.md)
+- [后端开发清单](./DOCS/backend/backend-development-checklist.md)
+- [MySQL 建表](./DOCS/database/mysql-schema.md)
+- [MySQL 媒体升级脚本](./DOCS/database/mysql-media-files-upgrade.sql)
+- [前端 UI 指南](./DOCS/frontend/UI_GUIDELINES.md)
 
 ## 下一步推荐
 
-1. 建立 `entity / mapper / service / controller` 标准目录
-2. 先从 `users` 或 `trails` 模块落第一套真实业务接口
-3. 去掉 Spring Security 默认生成密码的日志噪音
-4. 把数据库账号密码迁到本地环境配置，避免直接写在仓库里
+1. 优先完成评论模块后端化：`GET /api/trails/{id}/reviews`、`POST /api/reviews`
+2. 把评论图片真实接入 `review` 上传链路并同步写入 `review_images`
+3. 继续接头像编辑页和路线封面/相册的真实上传
+4. 在个人页补齐“我的发布 / 我的收藏 / 统计信息”真实数据
