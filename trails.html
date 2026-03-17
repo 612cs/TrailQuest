@@ -76,18 +76,60 @@
             box-shadow: 0 2px 10px rgba(178, 141, 255, 0.4);
         }
 
-        /* 右下角第三人称跟随按钮 */
-        #track-btn {
+        /* 提示框 Tooltip */
+        #tooltip {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--secondary);
+            border-radius: 15px;
+            padding: 10px 15px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 20;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translate(-50%, -100%);
+            line-height: 1.5;
+        }
+
+        /* 左下角实时镜头参数面板 */
+        #camera-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1), inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            color: var(--text);
             z-index: 10;
         }
-        
-        .active-track {
-            background: linear-gradient(135deg, #4ecdc4, #556270) !important;
-            box-shadow: 0 6px 15px rgba(78, 205, 196, 0.4) !important;
+
+        #camera-panel div {
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        #copy-cam-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        #copy-cam-btn:hover {
+            background: var(--secondary);
         }
 
         #file-input {
@@ -99,6 +141,15 @@
             font-size: 14px;
             color: var(--text);
             font-weight: bold;
+        }
+
+        /* 右下角俯瞰全景按钮 */
+        #overview-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: none;
+            z-index: 10;
         }
 
         /* 装饰元素 */
@@ -140,8 +191,17 @@
         <div id="status-text">等待地图生成...</div>
     </div>
 
-    <!-- 跟踪按钮 -->
-    <button id="track-btn" class="upload-btn">🏃‍♂️ 跟随视角</button>
+    <!-- 镜头控制台面板 -->
+    <div id="camera-panel">
+        <div id="cam-pos">📷 位置: 0.00, 0.00, 0.00</div>
+        <div id="cam-target">🎯 目标: 0.00, 0.00, 0.00</div>
+        <button id="copy-cam-btn">📋 复制镜头参数</button>
+    </div>
+
+    <!-- 俯瞰全景按钮 -->
+    <button id="overview-btn" class="upload-btn">🚁 俯瞰全景</button>
+
+    <div id="tooltip"></div>
 
     <div id="canvas-container"></div>
 
@@ -201,44 +261,66 @@
         let globalTotalDistance = 0;
         let globalMinEle = 0;
         let globalEleRange = 1;
+        let globalTerrainRefPoints = []; // 保存地形参考点，用于相机的实时防穿模检测
         
         // 交互与状态变量
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2(-100, -100);
+        let pointerClientX = 0;
+        let pointerClientY = 0;
         let milestoneHitBoxes = [];
         let currentIntersected = null;
         let popups = []; // 用于存储庆祝云气泡
         let nextPopupKm = 1; // 下一个要弹出的公里数
+        const tooltip = document.getElementById('tooltip');
 
-        // 第三人称视角跟踪
-        let isTracking = false;
-        const trackBtn = document.getElementById('track-btn');
-        
-        trackBtn.addEventListener('click', () => {
-            isTracking = !isTracking;
-            if (isTracking) {
-                trackBtn.innerText = '🌍 自由视角';
-                trackBtn.classList.add('active-track');
-            } else {
-                trackBtn.innerText = '🏃‍♂️ 跟随视角';
-                trackBtn.classList.remove('active-track');
-            }
-            controls.enabled = !isTracking;
-        });
-
-        // 当用户手动滑动屏幕时，打断跟随视角
-        controls.addEventListener('start', () => {
-            if (isTracking) {
-                isTracking = false;
-                trackBtn.innerText = '🏃‍♂️ 跟随视角';
-                trackBtn.classList.remove('active-track');
-                controls.enabled = true;
-            }
-        });
+        // 镜头丝滑平滑专用变量
+        const rotationDummy = new THREE.Object3D(); // 用于计算平滑转身的虚拟替身
 
         window.addEventListener('pointermove', (e) => {
+            pointerClientX = e.clientX;
+            pointerClientY = e.clientY;
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+        window.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                pointerClientX = e.touches[0].clientX;
+                pointerClientY = e.touches[0].clientY;
+                mouse.x = (pointerClientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(pointerClientY / window.innerHeight) * 2 + 1;
+            }
+        }, { passive: true });
+
+        // --- 镜头复制按钮逻辑 ---
+        document.getElementById('copy-cam-btn').addEventListener('click', () => {
+            const cam = camera.position;
+            const tgt = controls.target;
+            const textToCopy = `camera.position.set(${cam.x.toFixed(2)}, ${cam.y.toFixed(2)}, ${cam.z.toFixed(2)});\ncontrols.target.set(${tgt.x.toFixed(2)}, ${tgt.y.toFixed(2)}, ${tgt.z.toFixed(2)});`;
+            
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const btn = document.getElementById('copy-cam-btn');
+                btn.innerText = '✅ 复制成功，发给AI吧！';
+                setTimeout(() => btn.innerText = '📋 复制镜头参数', 3000);
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+            document.body.removeChild(textArea);
+        });
+
+        // --- 俯瞰镜头按钮逻辑 ---
+        document.getElementById('overview-btn').addEventListener('click', () => {
+            // 提取用户给出的相对高度特征：高度在 55 左右，目标点高度在 4 左右。
+            // 因为我们的地图缩放中心永远固定在 (x:0, z:0)，所以完美复刻该视角的通用坐标如下：
+            // Z轴微小的 0.1 偏移是为了防止 Three.js 在完全垂直时发生 Gimbal Lock（万向节死锁导致画面翻转）
+            camera.position.set(0, 56, 0.1); 
+            controls.target.set(0, 4, 0);
+            controls.update();
         });
 
         // --- 地理计算工具 ---
@@ -366,9 +448,6 @@
             const armL = createLimb(matSkin, 0.08, 0.25, 0.08, -0.1); armL.position.set(-0.18, 0.4, 0); charGroup.add(armL);
             const armR = createLimb(matSkin, 0.08, 0.25, 0.08, -0.1); armR.position.set(0.18, 0.4, 0); charGroup.add(armR);
 
-            // 角色略微放大，避免在大地图里难以辨认
-            charGroup.scale.setScalar(2.4);
-
             return { group: charGroup, legL, legR, armL, armR };
         }
 
@@ -415,11 +494,14 @@
             group.add(sprite);
 
             const hitMesh = new THREE.Mesh(new THREE.SphereGeometry(1.2, 8, 8), new THREE.MeshBasicMaterial({ visible: false }));
-            hitMesh.position.y = isHighest ? 0.8 : 0.6; group.add(hitMesh);
+            hitMesh.position.y = isHighest ? 0.8 : 0.6; 
+            // 记录数据以供 Tooltip 交互使用
+            hitMesh.userData = { isMilestone: true, distance: distanceMeters, elevation: elevation, isHighest: isHighest };
+            group.add(hitMesh);
             return { group, hitMesh };
         }
 
-        // --- 5. 文件解析部分 (省略冗余代码) ---
+        // --- 5. 文件解析部分 ---
         document.getElementById('file-input').addEventListener('change', handleFileUpload);
 
         function handleFileUpload(event) {
@@ -499,14 +581,15 @@
 
         // --- 6. 构建 3D 世界 ---
         function build3DWorld(parsedData, fileName) {
+            controls.enabled = true;
+            
             scene.remove(currentSceneGroup);
             currentSceneGroup = new THREE.Group();
             scene.add(currentSceneGroup);
             mainPathCurve = null; travelerData = null; popups = []; nextPopupKm = 1;
-            trackBtn.style.display = 'block';
-            trackBtn.innerText = '🏃‍♂️ 跟随视角';
-            isTracking = false;
-            controls.enabled = true;
+
+            // 显示俯瞰按钮
+            document.getElementById('overview-btn').style.display = 'block';
 
             let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
             globalMinEle = Infinity;
@@ -521,7 +604,7 @@
                 globalMinEle = Math.min(globalMinEle, p.ele); maxEle = Math.max(maxEle, p.ele);
             });
 
-            const mapSize = 50; // 加大一点岛屿
+            const mapSize = 50; 
             globalEleRange = maxEle - globalMinEle || 1;
             const scale = mapSize / Math.max(maxLat - minLat || 1, maxLon - minLon || 1);
             const centerLat = (minLat + maxLat) / 2; const centerLon = (minLon + maxLon) / 2;
@@ -529,13 +612,16 @@
             const toLocal3D = (p) => new THREE.Vector3((p.lon - centerLon) * scale, ((p.ele - globalMinEle) / globalEleRange) * 12 + 0.5, -(p.lat - centerLat) * scale);
             const flat3DPoints = allPoints.map(toLocal3D);
 
-            // 限制视角，禁止看到海洋尽头
+            // 限制视角
             controls.maxDistance = mapSize * 2.2; 
 
             // 生成环境与岛屿
             buildEnvironment(mapSize);
             const step = Math.ceil(flat3DPoints.length / 800);
             const terrainRefPoints = flat3DPoints.filter((_, i) => i % step === 0);
+            
+            globalTerrainRefPoints = terrainRefPoints; // 赋值给全局变量，供相机碰撞使用
+
             if (terrainRefPoints.length > 0) {
                 generateTerrain(terrainRefPoints, mapSize);
                 generateDecorations(terrainRefPoints, mapSize);
@@ -587,7 +673,6 @@
 
                 travelerData = createCuteCharacter();
                 currentSceneGroup.add(travelerData.group);
-                travelerData.group.position.copy(mainPathCurve.getPointAt(0));
             }
 
             controls.target.set(0, 4, 0); camera.position.set(0, 30, 45); animationTime = 0;
@@ -605,7 +690,7 @@
             }
             const distToTrack = Math.sqrt(minDist);
             let finalY = (num / den) - (distToTrack * 0.3 + Math.pow(distToTrack / 6, 2.5)) - 0.15; 
-            if (distToTrack > 15) finalY -= (distToTrack - 15) * 5; // 边缘陡峭入海
+            if (distToTrack > 15) finalY -= (distToTrack - 15) * 5; 
             return { y: finalY, distToTrack };
         }
 
@@ -627,7 +712,7 @@
 
                 let c = new THREE.Color();
                 if (y < -3) {
-                    c.lerpColors(colorRock, colorOcean, Math.min(1, (-y - 3) / 10)); // 沉入海底
+                    c.lerpColors(colorRock, colorOcean, Math.min(1, (-y - 3) / 10)); 
                 } else if (y < 2) {
                     const noise = (Math.sin(vx * 5) + Math.cos(vz * 5)) * 0.03;
                     c.copy(colorGrass); c.r += noise; c.g += noise; c.b += noise;
@@ -670,14 +755,13 @@
         // --- 8. 动画与渲染循环 ---
         const clock = new THREE.Clock();
 
-        function getFollowFocus(position) {
-            // 跟随时看向角色上半身，而不是脚底
-            return position.clone().add(new THREE.Vector3(0, 1.8, 0));
-        }
-
         function animate() {
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
+
+            // 实时更新控制台 UI 的镜头数据
+            document.getElementById('cam-pos').innerText = `📷 位置: ${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)}`;
+            document.getElementById('cam-target').innerText = `🎯 目标: ${controls.target.x.toFixed(2)}, ${controls.target.y.toFixed(2)}, ${controls.target.z.toFixed(2)}`;
 
             // 旋转天空背景里的云
             skyGroup.children.forEach(child => {
@@ -688,7 +772,7 @@
                 }
             });
 
-            // 小人行走与跟随相机
+            // 小人行走
             if (mainPathCurve && travelerData) {
                 animationTime += delta * 0.01; 
                 if (animationTime > 1) {
@@ -699,9 +783,13 @@
                 const pos = mainPathCurve.getPointAt(animationTime);
                 travelerData.group.position.copy(pos);
                 
-                const nextTime = Math.min(1, animationTime + 0.005);
+                const nextTime = Math.min(1, animationTime + 0.01);
                 const nextPos = mainPathCurve.getPointAt(nextTime);
-                travelerData.group.lookAt(new THREE.Vector3(nextPos.x, pos.y, nextPos.z));
+                
+                // 【平滑转身优化】为了防止绑在背上的相机抖动，这里使用 Slerp 球面插值让小人温柔地转身
+                rotationDummy.position.copy(pos);
+                rotationDummy.lookAt(new THREE.Vector3(nextPos.x, pos.y, nextPos.z));
+                travelerData.group.quaternion.slerp(rotationDummy.quaternion, 0.1);
 
                 const swing = Math.sin(animationTime * 60);
                 travelerData.legL.rotation.x = swing * 0.6; travelerData.legR.rotation.x = -swing * 0.6;
@@ -716,33 +804,16 @@
                     showCloudPopup(nextPopupKm, realEle, remainKm, pos);
                     nextPopupKm++;
                 }
-
-                // 处理跟随视角
-                if (isTracking) {
-                    const tangent = mainPathCurve.getTangentAt(animationTime);
-                    const horizontalForward = new THREE.Vector3(tangent.x, 0, tangent.z);
-                    if (horizontalForward.lengthSq() < 0.0001) horizontalForward.set(0, 0, 1);
-                    horizontalForward.normalize();
-
-                    const focusPoint = getFollowFocus(pos);
-                    // 只在水平面后撤，避免坡度把镜头拉进地形或压到地面
-                    const targetCamPos = focusPoint.clone()
-                        .add(horizontalForward.clone().multiplyScalar(-8))
-                        .add(new THREE.Vector3(0, 4.8, 0));
-
-                    camera.position.lerp(targetCamPos, 0.12);
-                    controls.target.lerp(focusPoint, 0.18);
-                }
             }
 
             // 更新庆祝气泡动画 (上浮与消散)
             for (let i = popups.length - 1; i >= 0; i--) {
                 const p = popups[i];
                 p.age += delta;
-                p.sprite.position.y += delta * 1.5; // 缓慢上升
+                p.sprite.position.y += delta * 1.5; 
                 
                 if (p.age > 2) {
-                    p.sprite.material.opacity -= delta * 0.8; // 停留2秒后开始淡出
+                    p.sprite.material.opacity -= delta * 0.8; 
                     if (p.sprite.material.opacity <= 0) {
                         currentSceneGroup.remove(p.sprite);
                         popups.splice(i, 1);
@@ -750,17 +821,29 @@
                 }
             }
 
-            // 处理鼠标交互热区
+            // 处理鼠标交互热区和 Tooltip 提示框
             if (milestoneHitBoxes.length > 0) {
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(milestoneHitBoxes);
                 if (intersects.length > 0) {
                     currentIntersected = intersects[0].object;
                     container.style.cursor = 'pointer';
+                    
+                    const data = currentIntersected.userData;
+                    let distText = data.distance >= 1000 ? `${(data.distance / 1000).toFixed(1)} km` : `${data.distance} m`;
+                    if (data.isHighest) distText = "最高峰";
+                    
+                    tooltip.innerHTML = `🚩 里程: ${distText}<br>🏔️ 海拔: ${Math.round(data.elevation)} m`;
+                    tooltip.style.opacity = 1;
+                    tooltip.style.left = pointerClientX + 'px';
+                    tooltip.style.top = (pointerClientY - 20) + 'px';
                 } else {
                     currentIntersected = null;
                     container.style.cursor = 'default';
+                    tooltip.style.opacity = 0;
                 }
+                
+                // Q弹缩放
                 milestoneHitBoxes.forEach(hitMesh => {
                     const targetScale = (hitMesh === currentIntersected) ? 1.4 : 1.0;
                     hitMesh.parent.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
