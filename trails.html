@@ -158,9 +158,10 @@
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, 30, 45);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
@@ -168,11 +169,16 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
+        controls.minDistance = 8;
         controls.maxPolarAngle = Math.PI / 2 - 0.02; // 防止摄像机完全掉入海里
 
         // --- 2. 灯光设置 ---
-        const ambientLight = new THREE.AmbientLight('#ffffff', 0.6);
+        const ambientLight = new THREE.AmbientLight('#ffffff', 0.45);
         scene.add(ambientLight);
+
+        const hemiLight = new THREE.HemisphereLight('#dff4ff', '#5a86a8', 0.9);
+        hemiLight.position.set(0, 80, 0);
+        scene.add(hemiLight);
 
         const dirLight = new THREE.DirectionalLight('#ffffff', 1.2);
         dirLight.position.set(30, 60, 40);
@@ -187,6 +193,7 @@
         dirLight.shadow.camera.top = d;
         dirLight.shadow.camera.bottom = -d;
         dirLight.shadow.bias = -0.001;
+        dirLight.shadow.normalBias = 0.02;
         scene.add(dirLight);
 
         // --- 3. 全局变量 ---
@@ -212,11 +219,57 @@
 
         // 第三人称视角跟踪
         let isTracking = false;
+        let followCameraOffset = new THREE.Vector3(0, 4.8, 8);
+        let followCameraDistance = followCameraOffset.length();
         const trackBtn = document.getElementById('track-btn');
+        const followFocusOffset = new THREE.Vector3(0, 1.8, 0);
+        const offscreenMouse = new THREE.Vector2(-100, -100);
+        const tempFocusPoint = new THREE.Vector3();
+        const tempTargetCamPos = new THREE.Vector3();
+        const tempFollowDirection = new THREE.Vector3();
+        const tempLookAhead = new THREE.Vector3();
+        const tempScale = new THREE.Vector3();
+
+        function disposeGroupResources(group) {
+            const geometries = new Set();
+            const materials = new Set();
+            const textures = new Set();
+
+            group.traverse((child) => {
+                if (child.geometry) geometries.add(child.geometry);
+
+                const childMaterials = Array.isArray(child.material)
+                    ? child.material
+                    : child.material
+                        ? [child.material]
+                        : [];
+
+                childMaterials.forEach((material) => {
+                    materials.add(material);
+                    Object.values(material).forEach((value) => {
+                        if (value && value.isTexture) textures.add(value);
+                    });
+                });
+            });
+
+            group.clear();
+            textures.forEach((texture) => texture.dispose());
+            materials.forEach((material) => material.dispose());
+            geometries.forEach((geometry) => geometry.dispose());
+        }
         
         trackBtn.addEventListener('click', () => {
             isTracking = !isTracking;
             if (isTracking) {
+                if (travelerData) {
+                    const focusPoint = getFollowFocus(travelerData.group.position, tempFocusPoint);
+                    followCameraOffset.copy(camera.position).sub(focusPoint);
+                    if (followCameraOffset.lengthSq() < 1) {
+                        followCameraOffset.set(0, 4.8, 8);
+                    }
+                    followCameraOffset.y = Math.max(followCameraOffset.y, 4.8);
+                    followCameraDistance = Math.max(followCameraOffset.length(), 6);
+                }
                 trackBtn.innerText = '🌍 自由视角';
                 trackBtn.classList.add('active-track');
             } else {
@@ -237,8 +290,17 @@
         });
 
         window.addEventListener('pointermove', (e) => {
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            const rect = renderer.domElement.getBoundingClientRect();
+            if (
+                e.clientX < rect.left || e.clientX > rect.right ||
+                e.clientY < rect.top || e.clientY > rect.bottom
+            ) {
+                mouse.copy(offscreenMouse);
+                return;
+            }
+
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
         });
 
         // --- 地理计算工具 ---
@@ -258,7 +320,7 @@
 
         // 太阳与天空云朵生成
         function buildEnvironment(mapSize) {
-            skyGroup.clear();
+            disposeGroupResources(skyGroup);
 
             // 无边无际的海洋
             const oceanGeo = new THREE.PlaneGeometry(mapSize * 20, mapSize * 20);
@@ -499,12 +561,16 @@
 
         // --- 6. 构建 3D 世界 ---
         function build3DWorld(parsedData, fileName) {
+            disposeGroupResources(currentSceneGroup);
             scene.remove(currentSceneGroup);
             currentSceneGroup = new THREE.Group();
             scene.add(currentSceneGroup);
             mainPathCurve = null; travelerData = null; popups = []; nextPopupKm = 1;
+            currentIntersected = null;
+            mouse.copy(offscreenMouse);
             trackBtn.style.display = 'block';
             trackBtn.innerText = '🏃‍♂️ 跟随视角';
+            trackBtn.classList.remove('active-track');
             isTracking = false;
             controls.enabled = true;
 
@@ -670,9 +736,9 @@
         // --- 8. 动画与渲染循环 ---
         const clock = new THREE.Clock();
 
-        function getFollowFocus(position) {
+        function getFollowFocus(position, target = new THREE.Vector3()) {
             // 跟随时看向角色上半身，而不是脚底
-            return position.clone().add(new THREE.Vector3(0, 1.8, 0));
+            return target.copy(position).add(followFocusOffset);
         }
 
         function animate() {
@@ -701,7 +767,8 @@
                 
                 const nextTime = Math.min(1, animationTime + 0.005);
                 const nextPos = mainPathCurve.getPointAt(nextTime);
-                travelerData.group.lookAt(new THREE.Vector3(nextPos.x, pos.y, nextPos.z));
+                tempLookAhead.set(nextPos.x, pos.y, nextPos.z);
+                travelerData.group.lookAt(tempLookAhead);
 
                 const swing = Math.sin(animationTime * 60);
                 travelerData.legL.rotation.x = swing * 0.6; travelerData.legR.rotation.x = -swing * 0.6;
@@ -719,19 +786,18 @@
 
                 // 处理跟随视角
                 if (isTracking) {
-                    const tangent = mainPathCurve.getTangentAt(animationTime);
-                    const horizontalForward = new THREE.Vector3(tangent.x, 0, tangent.z);
-                    if (horizontalForward.lengthSq() < 0.0001) horizontalForward.set(0, 0, 1);
-                    horizontalForward.normalize();
+                    const focusPoint = getFollowFocus(pos, tempFocusPoint);
+                    const targetCamPos = tempTargetCamPos.copy(followCameraOffset);
+                    if (targetCamPos.lengthSq() < 0.0001) {
+                        targetCamPos.set(0, 4.8, 8);
+                    }
+                    targetCamPos.copy(
+                        tempFollowDirection.copy(targetCamPos).normalize().multiplyScalar(followCameraDistance)
+                    ).add(focusPoint);
 
-                    const focusPoint = getFollowFocus(pos);
-                    // 只在水平面后撤，避免坡度把镜头拉进地形或压到地面
-                    const targetCamPos = focusPoint.clone()
-                        .add(horizontalForward.clone().multiplyScalar(-8))
-                        .add(new THREE.Vector3(0, 4.8, 0));
-
-                    camera.position.lerp(targetCamPos, 0.12);
-                    controls.target.lerp(focusPoint, 0.18);
+                    camera.position.copy(targetCamPos);
+                    controls.target.copy(focusPoint);
+                    camera.lookAt(focusPoint);
                 }
             }
 
@@ -745,6 +811,7 @@
                     p.sprite.material.opacity -= delta * 0.8; // 停留2秒后开始淡出
                     if (p.sprite.material.opacity <= 0) {
                         currentSceneGroup.remove(p.sprite);
+                        disposeGroupResources(p.sprite);
                         popups.splice(i, 1);
                     }
                 }
@@ -763,12 +830,12 @@
                 }
                 milestoneHitBoxes.forEach(hitMesh => {
                     const targetScale = (hitMesh === currentIntersected) ? 1.4 : 1.0;
-                    hitMesh.parent.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.15);
+                    hitMesh.parent.scale.lerp(tempScale.setScalar(targetScale), 0.15);
                 });
             }
 
             if (currentSceneGroup.children.length === 0) scene.rotation.y += delta * 0.2;
-            controls.update();
+            if (!isTracking) controls.update();
             renderer.render(scene, camera);
         }
 
@@ -776,6 +843,7 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         });
 
         animate();
