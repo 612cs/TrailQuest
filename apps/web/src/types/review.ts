@@ -6,6 +6,20 @@ export interface ReviewAuthor {
   avatarMediaUrl?: string | null
 }
 
+export interface UserCard {
+  id: string
+  username: string
+  avatar: string
+  avatarBg: string
+  avatarMediaUrl?: string | null
+  role: 'USER' | 'ADMIN'
+  joinDate: string
+  postCount: number
+  savedCount: number
+  location: string
+  bio: string
+}
+
 export interface ReviewItem {
   id: string
   trailId: string
@@ -31,6 +45,23 @@ export interface CreateReviewPayload {
 
 export interface CreateReviewResult {
   review: ReviewItem
+  trailRating: number
+  trailReviewCount: number
+}
+
+export interface ReviewPageResult {
+  list: ReviewItem[]
+  nextCursor?: string | null
+  hasMore: boolean
+}
+
+export interface FetchTrailReviewsParams {
+  cursor?: string | null
+  limit?: number
+}
+
+export interface DeleteReviewResult {
+  deletedReviewId: string
   trailRating: number
   trailReviewCount: number
 }

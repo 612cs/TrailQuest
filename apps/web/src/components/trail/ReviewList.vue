@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
-import type { ReviewItem } from '../../types/review'
+import type { ReviewItem, UserCard } from '../../types/review'
 import { useUserStore } from '../../stores/useUserStore'
 import BaseIcon from '../common/BaseIcon.vue'
 import ImagePreviewModal from '../common/ImagePreviewModal.vue'
 import SectionHeader from '../common/SectionHeader.vue'
 import CommentForm from './CommentForm.vue'
+import ReviewThreadItem from './ReviewThreadItem.vue'
+import UserCardModal from './UserCardModal.vue'
 
 const userStore = useUserStore()
 
@@ -15,23 +17,38 @@ const props = defineProps<{
   averageRating?: number
   totalReviews?: number
   isSubmitting?: boolean
+  isLoadingMore?: boolean
+  hasMore?: boolean
   errorMessage?: string
+  loadMoreError?: string
   reviewFormResetKey?: number
   replyFormResetKey?: number
+  activeUserCard?: UserCard | null
+  isUserCardLoading?: boolean
+  userCardErrorMessage?: string
+  deletingIds?: string[]
+  userCardVisible?: boolean
 }>()
 
-const emit = defineEmits<{
-  submitReview: [payload: { rating?: number; text: string; images: string[] }]
-  submitReply: [payload: { parentId: string; text: string; replyTo?: string; images: string[] }]
-}>()
+const emit = defineEmits([
+  'submitReview',
+  'submitReply',
+  'loadMore',
+  'retryLoadMore',
+  'deleteReview',
+  'openUserCard',
+  'closeUserCard',
+])
 
 const previewImages = ref<string[]>([])
 const previewIndex = ref(0)
 const showPreview = ref(false)
 const replyingToId = ref<string | null>(null)
 const replyingToName = ref('')
-
+const loadMoreSentinel = ref<HTMLElement | null>(null)
+const currentUserId = computed(() => userStore.profile?.id ? String(userStore.profile.id) : null)
 const effectiveTotalReviews = computed(() => props.totalReviews ?? props.reviews.length)
+let observer: IntersectionObserver | null = null
 
 function openPreview(images: string[], index: number) {
   previewImages.value = images
@@ -62,7 +79,7 @@ function handleReplySubmit(payload: { rating?: number; text: string; images: str
 
   userStore.requireAuth(() => {
     emit('submitReply', {
-      parentId: replyingToId.value!,
+      parentId: replyingToId.value,
       text: payload.text,
       replyTo: replyingToName.value,
       images: payload.images,
@@ -70,10 +87,59 @@ function handleReplySubmit(payload: { rating?: number; text: string; images: str
   })
 }
 
+function handleDeleteReview(review: ReviewItem) {
+  emit('deleteReview', review)
+}
+
+function handleOpenUserCard(userId: string) {
+  emit('openUserCard', userId)
+}
+
+function observeLoadMore() {
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+
+  if (!loadMoreSentinel.value) return
+
+  observer = new IntersectionObserver((entries) => {
+    if (!entries[0]?.isIntersecting) return
+    if (!props.hasMore || props.isLoadingMore || props.loadMoreError) return
+    emit('loadMore')
+  }, { rootMargin: '160px 0px 160px 0px' })
+
+  observer.observe(loadMoreSentinel.value)
+}
+
+watch(
+  () => [props.hasMore, props.isLoadingMore, props.loadMoreError, props.reviews.length],
+  () => {
+    void nextTick(() => {
+      observeLoadMore()
+    })
+  },
+  { deep: true },
+)
+
+watch(loadMoreSentinel, () => {
+  void nextTick(() => {
+    observeLoadMore()
+  })
+})
+
 watch(() => props.replyFormResetKey, (newValue, oldValue) => {
   if (newValue !== oldValue) {
     cancelReply()
   }
+})
+
+onMounted(() => {
+  observeLoadMore()
+})
+
+onBeforeUnmount(() => {
+  observer?.disconnect()
 })
 </script>
 
@@ -107,233 +173,45 @@ watch(() => props.replyFormResetKey, (newValue, oldValue) => {
 
     <div v-else class="space-y-3">
       <div v-for="review in reviews" :key="review.id" class="card p-4">
-        <div class="flex items-start gap-3">
-          <div class="h-9 w-9 shrink-0 overflow-hidden rounded-full border" style="border-color: var(--border-default);">
-            <img
-              v-if="review.author.avatarMediaUrl"
-              :src="review.author.avatarMediaUrl"
-              alt="用户头像"
-              class="h-full w-full object-cover"
-            />
-            <div
-              v-else
-              class="flex h-full w-full items-center justify-center text-xs font-bold text-white"
-              :style="{ backgroundColor: review.author.avatarBg }"
-            >
-              {{ review.author.avatar }}
-            </div>
-          </div>
-
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-sm font-semibold" style="color: var(--text-primary);">{{ review.author.username }}</span>
-              <span class="text-xs" style="color: var(--text-tertiary);">{{ review.time }}</span>
-            </div>
-
-            <div v-if="review.rating" class="my-1 flex gap-0.5">
-              <BaseIcon
-                v-for="index in 5"
-                :key="index"
-                name="Star"
-                :size="14"
-                :class="index <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'"
-              />
-            </div>
-
-            <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">{{ review.text }}</p>
-
-            <div v-if="review.images.length > 0" class="mt-2 flex gap-2">
-              <button
-                v-for="(image, imageIndex) in review.images"
-                :key="image"
-                type="button"
-                class="h-16 w-16 overflow-hidden rounded-lg sm:h-20 sm:w-20"
-                @click="openPreview(review.images, imageIndex)"
-              >
-                <img :src="image" alt="" class="h-full w-full object-cover transition-transform hover:scale-105" />
-              </button>
-            </div>
-
-            <button
-              type="button"
-              class="mt-2 flex items-center gap-1 text-xs font-medium transition-colors hover:text-primary-500"
-              style="color: var(--text-tertiary);"
-              @click="startReply(review)"
-            >
-              <BaseIcon name="Reply" :size="14" />
-              回复
-            </button>
-
-            <div v-if="replyingToId === review.id" class="mt-3">
-              <CommentForm
-                mode="reply"
-                compact
-                submit-label="发送回复"
-                :placeholder="`回复 @${replyingToName}...`"
-                :disabled="isSubmitting"
-                :reset-key="replyFormResetKey"
-                @submit="handleReplySubmit"
-              />
-              <button
-                type="button"
-                class="mt-2 text-xs"
-                style="color: var(--text-tertiary);"
-                @click="cancelReply"
-              >
-                取消回复
-              </button>
-            </div>
-
-            <div v-if="review.replies.length > 0" class="mt-3 space-y-3 border-l-2 pl-4" style="border-color: var(--border-default);">
-              <template v-for="reply1 in review.replies" :key="reply1.id">
-                <div class="flex items-start gap-2.5">
-                  <div class="h-7 w-7 shrink-0 overflow-hidden rounded-full border" style="border-color: var(--border-default);">
-                    <img
-                      v-if="reply1.author.avatarMediaUrl"
-                      :src="reply1.author.avatarMediaUrl"
-                      alt="用户头像"
-                      class="h-full w-full object-cover"
-                    />
-                    <div
-                      v-else
-                      class="flex h-full w-full items-center justify-center text-[10px] font-bold text-white"
-                      :style="{ backgroundColor: reply1.author.avatarBg }"
-                    >
-                      {{ reply1.author.avatar }}
-                    </div>
-                  </div>
-
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2">
-                      <span class="text-xs font-semibold" style="color: var(--text-primary);">{{ reply1.author.username }}</span>
-                      <span v-if="reply1.replyTo" class="text-xs" style="color: var(--text-tertiary);">
-                        回复 <span class="font-medium" style="color: var(--text-secondary);">@{{ reply1.replyTo }}</span>
-                      </span>
-                      <span class="ml-auto text-[10px]" style="color: var(--text-tertiary);">{{ reply1.time }}</span>
-                    </div>
-                    <p class="mt-0.5 text-sm leading-relaxed" style="color: var(--text-secondary);">{{ reply1.text }}</p>
-
-                    <div v-if="reply1.images.length > 0" class="mt-2 flex gap-2">
-                      <button
-                        v-for="(image, imageIndex) in reply1.images"
-                        :key="image"
-                        type="button"
-                        class="h-14 w-14 overflow-hidden rounded-lg"
-                        @click="openPreview(reply1.images, imageIndex)"
-                      >
-                        <img :src="image" alt="" class="h-full w-full object-cover" />
-                      </button>
-                    </div>
-
-                    <button
-                      type="button"
-                      class="mt-1 flex items-center gap-1 text-xs font-medium transition-colors hover:text-primary-500"
-                      style="color: var(--text-tertiary);"
-                      @click="startReply(reply1)"
-                    >
-                      <BaseIcon name="Reply" :size="12" />
-                      回复
-                    </button>
-
-                    <div v-if="replyingToId === reply1.id" class="mt-2">
-                      <CommentForm
-                        mode="reply"
-                        compact
-                        submit-label="发送回复"
-                        :placeholder="`回复 @${replyingToName}...`"
-                        :disabled="isSubmitting"
-                        :reset-key="replyFormResetKey"
-                        @submit="handleReplySubmit"
-                      />
-                      <button
-                        type="button"
-                        class="mt-2 text-xs"
-                        style="color: var(--text-tertiary);"
-                        @click="cancelReply"
-                      >
-                        取消回复
-                      </button>
-                    </div>
-
-                    <div v-if="reply1.replies.length > 0" class="mt-2 space-y-2 border-l-2 pl-3" style="border-color: var(--border-default);">
-                      <div v-for="reply2 in reply1.replies" :key="reply2.id" class="flex items-start gap-2">
-                        <div class="h-6 w-6 shrink-0 overflow-hidden rounded-full border" style="border-color: var(--border-default);">
-                          <img
-                            v-if="reply2.author.avatarMediaUrl"
-                            :src="reply2.author.avatarMediaUrl"
-                            alt="用户头像"
-                            class="h-full w-full object-cover"
-                          />
-                          <div
-                            v-else
-                            class="flex h-full w-full items-center justify-center text-[9px] font-bold text-white"
-                            :style="{ backgroundColor: reply2.author.avatarBg }"
-                          >
-                            {{ reply2.author.avatar }}
-                          </div>
-                        </div>
-
-                        <div class="min-w-0 flex-1">
-                          <div class="flex items-center gap-2">
-                            <span class="text-xs font-semibold" style="color: var(--text-primary);">{{ reply2.author.username }}</span>
-                            <span v-if="reply2.replyTo" class="text-xs" style="color: var(--text-tertiary);">
-                              回复 <span class="font-medium" style="color: var(--text-secondary);">@{{ reply2.replyTo }}</span>
-                            </span>
-                            <span class="ml-auto text-[10px]" style="color: var(--text-tertiary);">{{ reply2.time }}</span>
-                          </div>
-                          <p class="mt-0.5 text-xs leading-relaxed" style="color: var(--text-secondary);">{{ reply2.text }}</p>
-
-                          <div v-if="reply2.images.length > 0" class="mt-2 flex gap-2">
-                            <button
-                              v-for="(image, imageIndex) in reply2.images"
-                              :key="image"
-                              type="button"
-                              class="h-12 w-12 overflow-hidden rounded-lg"
-                              @click="openPreview(reply2.images, imageIndex)"
-                            >
-                              <img :src="image" alt="" class="h-full w-full object-cover" />
-                            </button>
-                          </div>
-
-                          <button
-                            type="button"
-                            class="mt-1 flex items-center gap-1 text-[10px] font-medium transition-colors hover:text-primary-500"
-                            style="color: var(--text-tertiary);"
-                            @click="startReply(reply2)"
-                          >
-                            <BaseIcon name="Reply" :size="10" />
-                            回复
-                          </button>
-
-                          <div v-if="replyingToId === reply2.id" class="mt-2">
-                            <CommentForm
-                              mode="reply"
-                              compact
-                              submit-label="发送回复"
-                              :placeholder="`回复 @${replyingToName}...`"
-                              :disabled="isSubmitting"
-                              :reset-key="replyFormResetKey"
-                              @submit="handleReplySubmit"
-                            />
-                            <button
-                              type="button"
-                              class="mt-2 text-xs"
-                              style="color: var(--text-tertiary);"
-                              @click="cancelReply"
-                            >
-                              取消回复
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </div>
-          </div>
-        </div>
+        <ReviewThreadItem
+          :review="review"
+          :level="0"
+          :current-user-id="currentUserId"
+          :replying-to-id="replyingToId"
+          :reply-form-reset-key="replyFormResetKey"
+          :is-submitting="isSubmitting"
+          :deleting-ids="deletingIds"
+          @preview-image="openPreview"
+          @start-reply="startReply"
+          @cancel-reply="cancelReply"
+          @submit-reply="handleReplySubmit"
+          @delete-review="handleDeleteReview"
+          @open-user-card="handleOpenUserCard"
+        />
       </div>
+
+      <div v-if="loadMoreError" class="card p-4 text-center">
+        <p class="text-sm" style="color: var(--color-hard);">{{ loadMoreError }}</p>
+        <button
+          type="button"
+          class="mt-3 inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors hover:bg-primary-500/10"
+          style="color: var(--primary-500);"
+          @click="emit('retryLoadMore')"
+        >
+          <BaseIcon name="RefreshCcw" :size="14" />
+          重试加载更多
+        </button>
+      </div>
+
+      <div v-else-if="isLoadingMore" class="py-3 text-center text-sm" style="color: var(--text-secondary);">
+        正在加载更多评论...
+      </div>
+
+      <div v-else-if="!hasMore" class="py-2 text-center text-xs" style="color: var(--text-tertiary);">
+        已经到底啦
+      </div>
+
+      <div v-if="hasMore" ref="loadMoreSentinel" class="h-4 w-full" aria-hidden="true" />
     </div>
 
     <ImagePreviewModal
@@ -341,6 +219,14 @@ watch(() => props.replyFormResetKey, (newValue, oldValue) => {
       :images="previewImages"
       :initial-index="previewIndex"
       @close="showPreview = false"
+    />
+
+    <UserCardModal
+      :show="userCardVisible ?? false"
+      :user-card="activeUserCard ?? null"
+      :is-loading="isUserCardLoading"
+      :error-message="userCardErrorMessage"
+      @close="emit('closeUserCard')"
     />
   </section>
 </template>

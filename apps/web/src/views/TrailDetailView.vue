@@ -1,21 +1,29 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+
 import BaseIcon from '../components/common/BaseIcon.vue'
+import ConfirmDialog from '../components/common/ConfirmDialog.vue'
 import DetailHero from '../components/trail/DetailHero.vue'
-import TrailMapSection from '../components/trail/TrailMapSection.vue'
-import WeatherSection from '../components/trail/WeatherSection.vue'
-import WeatherAlert from '../components/trail/WeatherAlert.vue'
 import LandscapePrediction from '../components/trail/LandscapePrediction.vue'
 import ReviewList from '../components/trail/ReviewList.vue'
+import TrailMapSection from '../components/trail/TrailMapSection.vue'
+import WeatherAlert from '../components/trail/WeatherAlert.vue'
+import WeatherSection from '../components/trail/WeatherSection.vue'
+import { createReview, deleteReview, fetchTrailReviews, fetchUserCard } from '../api/reviews'
+import { fetchTrailDetail } from '../api/trails'
 import { useTrailGeo } from '../composables/useTrailGeo'
 import { useTrailWeather } from '../composables/useTrailWeather'
-import { fetchTrailDetail } from '../api/trails'
-import { createReview, fetchTrailReviews } from '../api/reviews'
 import { useFlashStore } from '../stores/useFlashStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
-import type { CreateReviewPayload, ReviewItem } from '../types/review'
+import type {
+  CreateReviewPayload,
+  ReviewItem,
+  UserCard,
+} from '../types/review'
+
+const REVIEWS_PAGE_SIZE = 10
 
 const router = useRouter()
 const route = useRoute()
@@ -25,12 +33,22 @@ const trailInteractionStore = useTrailInteractionStore()
 const reviews = ref<ReviewItem[]>([])
 const trailData = ref<TrailListItem | null>(null)
 const isLoading = ref(false)
-const isReviewsLoading = ref(false)
+const isLoadingMoreReviews = ref(false)
 const isSubmittingReview = ref(false)
 const errorMessage = ref('')
 const reviewsErrorMessage = ref('')
+const loadMoreErrorMessage = ref('')
 const reviewFormResetKey = ref(0)
 const replyFormResetKey = ref(0)
+const nextReviewCursor = ref<string | null>(null)
+const hasMoreReviews = ref(false)
+const deletingIds = ref<string[]>([])
+const pendingDeleteReview = ref<ReviewItem | null>(null)
+const userCardCache = ref<Record<string, UserCard>>({})
+const activeUserCardId = ref<string | null>(null)
+const isUserCardVisible = ref(false)
+const isUserCardLoading = ref(false)
+const userCardErrorMessage = ref('')
 const { geo, isLoading: geoLoading, resolve: resolveGeo } = useTrailGeo()
 const { weather, isLoading: weatherLoading, resolve: resolveWeather } = useTrailWeather()
 
@@ -39,14 +57,20 @@ const displayTrail = computed(() => {
   if (!trailData.value) return null
   return trailInteractionStore.applyToTrail(trailData.value)
 })
+const activeUserCard = computed(() => {
+  if (!activeUserCardId.value) return null
+  return userCardCache.value[activeUserCardId.value] ?? null
+})
 
 watch(trailId, async (newId) => {
   if (!newId) {
     reviews.value = []
+    nextReviewCursor.value = null
+    hasMoreReviews.value = false
     return
   }
 
-  await loadReviews(newId)
+  await loadInitialReviews(newId)
 }, { immediate: true })
 
 watch(trailId, async (newId) => {
@@ -145,31 +169,6 @@ async function handleCreateReview(payload: { rating?: number; text: string; imag
   })
 }
 
-async function handleShare() {
-  if (!displayTrail.value) return
-
-  const shareUrl = window.location.href
-  const canUseNativeShare = typeof navigator.share === 'function'
-
-  try {
-    if (canUseNativeShare) {
-      await navigator.share({
-        title: displayTrail.value.name,
-        text: `${displayTrail.value.name} · ${displayTrail.value.location}`,
-        url: shareUrl,
-      })
-    } else {
-      await navigator.clipboard.writeText(shareUrl)
-    }
-    flashStore.showSuccess(canUseNativeShare ? '已打开系统分享' : '路线链接已复制')
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      return
-    }
-    flashStore.showError('分享失败，请稍后重试')
-  }
-}
-
 async function handleCreateReply(payload: { parentId: string; text: string; replyTo?: string; images: string[] }) {
   if (!trailData.value || isSubmittingReview.value) return
 
@@ -195,11 +194,12 @@ async function submitReview(payload: CreateReviewPayload) {
         reviewCount: result.trailReviewCount,
       }
       : trailData.value
-    reviewsErrorMessage.value = ''
+
     const inserted = insertReview(result.review)
-    if (!inserted) {
-      await loadReviews(payload.trailId, { replaceOnError: false })
+    if (!inserted && trailData.value) {
+      await loadInitialReviews(trailData.value.id)
     }
+
     if (payload.parentId) {
       replyFormResetKey.value += 1
     } else {
@@ -212,22 +212,137 @@ async function submitReview(payload: CreateReviewPayload) {
   }
 }
 
-async function loadReviews(targetTrailId: number, options: { replaceOnError?: boolean } = {}) {
-  const { replaceOnError = true } = options
-  isReviewsLoading.value = true
+async function loadInitialReviews(targetTrailId: number) {
+  reviews.value = []
+  nextReviewCursor.value = null
+  hasMoreReviews.value = false
   reviewsErrorMessage.value = ''
+  loadMoreErrorMessage.value = ''
 
   try {
-    reviews.value = await fetchTrailReviews(targetTrailId)
+    const result = await fetchTrailReviews(targetTrailId, { limit: REVIEWS_PAGE_SIZE })
+    reviews.value = result.list
+    nextReviewCursor.value = result.nextCursor ?? null
+    hasMoreReviews.value = result.hasMore
     return true
   } catch (error) {
-    if (replaceOnError) {
-      reviews.value = []
-    }
+    reviews.value = []
     reviewsErrorMessage.value = error instanceof Error ? error.message : '评论加载失败'
     return false
+  }
+}
+
+async function loadMoreReviews() {
+  if (!trailData.value || !hasMoreReviews.value || isLoadingMoreReviews.value || !nextReviewCursor.value) return
+
+  isLoadingMoreReviews.value = true
+  loadMoreErrorMessage.value = ''
+
+  try {
+    const result = await fetchTrailReviews(trailData.value.id, {
+      limit: REVIEWS_PAGE_SIZE,
+      cursor: nextReviewCursor.value,
+    })
+    reviews.value = [...reviews.value, ...result.list]
+    nextReviewCursor.value = result.nextCursor ?? null
+    hasMoreReviews.value = result.hasMore
+  } catch (error) {
+    loadMoreErrorMessage.value = error instanceof Error ? error.message : '加载更多评论失败'
   } finally {
-    isReviewsLoading.value = false
+    isLoadingMoreReviews.value = false
+  }
+}
+
+async function retryLoadMoreReviews() {
+  await loadMoreReviews()
+}
+
+async function handleDeleteReview(review: ReviewItem) {
+  if (!trailData.value) return
+  pendingDeleteReview.value = review
+}
+
+async function confirmDeleteReview() {
+  if (!trailData.value || !pendingDeleteReview.value) return
+
+  const review = pendingDeleteReview.value
+
+  deletingIds.value = [...deletingIds.value, review.id]
+
+  try {
+    const result = await deleteReview(review.id)
+    reviews.value = removeReviewNode(reviews.value, result.deletedReviewId)
+    trailData.value = {
+      ...trailData.value,
+      reviewCount: result.trailReviewCount,
+      rating: result.trailRating,
+    }
+    pendingDeleteReview.value = null
+    flashStore.showSuccess('评论已删除')
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '评论删除失败')
+  } finally {
+    deletingIds.value = deletingIds.value.filter((id) => id !== review.id)
+  }
+}
+
+function closeDeleteConfirm() {
+  if (pendingDeleteReview.value && deletingIds.value.includes(pendingDeleteReview.value.id)) {
+    return
+  }
+  pendingDeleteReview.value = null
+}
+
+async function openUserCard(userId: string) {
+  activeUserCardId.value = userId
+  isUserCardVisible.value = true
+  userCardErrorMessage.value = ''
+
+  if (userCardCache.value[userId]) {
+    return
+  }
+
+  isUserCardLoading.value = true
+  try {
+    const card = await fetchUserCard(userId)
+    userCardCache.value = {
+      ...userCardCache.value,
+      [userId]: card,
+    }
+  } catch (error) {
+    userCardErrorMessage.value = error instanceof Error ? error.message : '用户卡片加载失败'
+  } finally {
+    isUserCardLoading.value = false
+  }
+}
+
+function closeUserCard() {
+  isUserCardVisible.value = false
+  userCardErrorMessage.value = ''
+}
+
+async function handleShare() {
+  if (!displayTrail.value) return
+
+  const shareUrl = window.location.href
+  const canUseNativeShare = typeof navigator.share === 'function'
+
+  try {
+    if (canUseNativeShare) {
+      await navigator.share({
+        title: displayTrail.value.name,
+        text: `${displayTrail.value.name} · ${displayTrail.value.location}`,
+        url: shareUrl,
+      })
+    } else {
+      await navigator.clipboard.writeText(shareUrl)
+    }
+    flashStore.showSuccess(canUseNativeShare ? '已打开系统分享' : '路线链接已复制')
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return
+    }
+    flashStore.showError('分享失败，请稍后重试')
   }
 }
 
@@ -258,11 +373,19 @@ function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
   }
   return false
 }
+
+function removeReviewNode(items: ReviewItem[], reviewId: string): ReviewItem[] {
+  return items
+    .filter((item) => item.id !== reviewId)
+    .map((item) => ({
+      ...item,
+      replies: removeReviewNode(item.replies, reviewId),
+    }))
+}
 </script>
 
 <template>
   <main v-if="trailData">
-    <!-- Custom Header -->
     <div class="glass-header sticky top-0 z-40 px-4 py-3">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
         <button @click="router.back()" class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500" style="color: var(--text-secondary);">
@@ -277,7 +400,6 @@ function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
     </div>
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-      <!-- Hero Card -->
       <DetailHero
         v-bind="heroProps"
         @toggle-like="displayTrail && trailInteractionStore.toggleLike(displayTrail)"
@@ -285,7 +407,6 @@ function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
         @share="handleShare"
       />
 
-      <!-- Description Section -->
       <div class="card p-5 space-y-3">
         <h3 class="text-base font-semibold flex items-center gap-2" style="color: var(--text-primary);">
           <BaseIcon name="Info" :size="18" class="text-primary-500" />
@@ -302,35 +423,57 @@ function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
         :city="locationCity"
       />
 
-      <!-- Weather Section -->
       <WeatherSection
         :weather="weather"
         :is-loading="weatherLoading"
         :fallback-city="locationCity"
       />
 
-      <!-- Weather Alert -->
       <WeatherAlert
         title="天气提醒"
         :message="weatherAlertMessage"
       />
 
-      <!-- Landscape Prediction -->
       <LandscapePrediction />
 
-      <!-- User Reviews -->
       <ReviewList
         :reviews="reviews"
         :average-rating="trailData.rating"
         :total-reviews="trailData.reviewCount"
-        :is-submitting="isSubmittingReview || isReviewsLoading"
+        :is-submitting="isSubmittingReview"
+        :is-loading-more="isLoadingMoreReviews"
+        :has-more="hasMoreReviews"
         :error-message="reviewsErrorMessage"
+        :load-more-error="loadMoreErrorMessage"
         :review-form-reset-key="reviewFormResetKey"
         :reply-form-reset-key="replyFormResetKey"
+        :active-user-card="activeUserCard"
+        :is-user-card-loading="isUserCardLoading"
+        :user-card-error-message="userCardErrorMessage"
+        :deleting-ids="deletingIds"
+        :user-card-visible="isUserCardVisible"
         @submit-review="handleCreateReview"
         @submit-reply="handleCreateReply"
+        @load-more="loadMoreReviews"
+        @retry-load-more="retryLoadMoreReviews"
+        @delete-review="handleDeleteReview"
+        @open-user-card="openUserCard"
+        @close-user-card="closeUserCard"
       />
     </div>
+
+    <ConfirmDialog
+      :show="!!pendingDeleteReview"
+      title="删除评论"
+      message="确认删除这条评论吗？删除后无法恢复。"
+      confirm-text="确认删除"
+      cancel-text="暂不删除"
+      tone="danger"
+      :confirm-loading="!!pendingDeleteReview && deletingIds.includes(pendingDeleteReview.id)"
+      @update:show="(value) => { if (!value) closeDeleteConfirm() }"
+      @cancel="closeDeleteConfirm"
+      @confirm="confirmDeleteReview"
+    />
   </main>
   <main v-else class="max-w-4xl mx-auto px-4 sm:px-6 py-10">
     <div class="card p-8 text-center">

@@ -1,14 +1,15 @@
 package com.sheng.hikingbackend.service;
 
-import java.util.List;
-
 import com.sheng.hikingbackend.dto.review.CreateReviewRequest;
 import com.sheng.hikingbackend.vo.review.CreateReviewResponse;
-import com.sheng.hikingbackend.vo.review.ReviewVo;
+import com.sheng.hikingbackend.vo.review.DeleteReviewResponse;
+import com.sheng.hikingbackend.vo.review.ReviewPageVo;
 
 public interface ReviewService {
 
-    List<ReviewVo> listByTrailId(Long trailId);
+    ReviewPageVo listByTrailId(Long trailId, Long cursor, Integer limit);
 
     CreateReviewResponse createReview(Long userId, CreateReviewRequest request);
+
+    DeleteReviewResponse deleteReview(Long userId, Long reviewId);
 }

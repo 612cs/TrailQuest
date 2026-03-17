@@ -27,6 +27,8 @@ import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.UserMapper;
 import com.sheng.hikingbackend.service.ReviewService;
 import com.sheng.hikingbackend.vo.review.CreateReviewResponse;
+import com.sheng.hikingbackend.vo.review.DeleteReviewResponse;
+import com.sheng.hikingbackend.vo.review.ReviewPageVo;
 import com.sheng.hikingbackend.vo.review.ReviewAuthorVo;
 import com.sheng.hikingbackend.vo.review.ReviewQueryRow;
 import com.sheng.hikingbackend.vo.review.ReviewVo;
@@ -38,21 +40,44 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int MAX_PAGE_SIZE = 20;
+
     private final ReviewMapper reviewMapper;
     private final ReviewImageMapper reviewImageMapper;
     private final TrailMapper trailMapper;
     private final UserMapper userMapper;
 
     @Override
-    public List<ReviewVo> listByTrailId(Long trailId) {
+    public ReviewPageVo listByTrailId(Long trailId, Long cursor, Integer limit) {
         ensureTrailExists(trailId);
-        List<ReviewQueryRow> rows = reviewMapper.selectReviewRowsByTrailId(trailId);
-        if (rows.isEmpty()) {
-            return List.of();
+        int pageSize = normalizeLimit(limit);
+        List<ReviewQueryRow> topLevelRows = reviewMapper.selectTopLevelReviewRowsByTrailId(trailId, cursor, pageSize + 1);
+        boolean hasMore = topLevelRows.size() > pageSize;
+        if (hasMore) {
+            topLevelRows = new ArrayList<>(topLevelRows.subList(0, pageSize));
         }
 
+        if (topLevelRows.isEmpty()) {
+            return ReviewPageVo.builder()
+                    .list(List.of())
+                    .nextCursor(null)
+                    .hasMore(false)
+                    .build();
+        }
+
+        List<Long> rootIds = topLevelRows.stream()
+                .map(ReviewQueryRow::getId)
+                .toList();
+        List<ReviewQueryRow> rows = new ArrayList<>(topLevelRows);
+        rows.addAll(reviewMapper.selectRepliesByRootIds(trailId, rootIds));
         Map<Long, List<String>> imagesByReviewId = loadImages(rows);
-        return buildReviewTree(rows, imagesByReviewId);
+        Long nextCursor = hasMore ? topLevelRows.get(topLevelRows.size() - 1).getId() : null;
+        return ReviewPageVo.builder()
+                .list(buildReviewTree(rows, imagesByReviewId))
+                .nextCursor(nextCursor)
+                .hasMore(hasMore)
+                .build();
     }
 
     @Override
@@ -105,6 +130,28 @@ public class ReviewServiceImpl implements ReviewService {
 
         return CreateReviewResponse.builder()
                 .review(reviewVo)
+                .trailRating(scaleRating(stats.getAverageRating()))
+                .trailReviewCount(stats.getReviewCount() == null ? 0 : stats.getReviewCount().intValue())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public DeleteReviewResponse deleteReview(Long userId, Long reviewId) {
+        Review review = reviewMapper.selectById(reviewId);
+        if (review == null) {
+            throw BusinessException.notFound("REVIEW_NOT_FOUND", "评论不存在");
+        }
+        if (!Objects.equals(review.getUserId(), userId)) {
+            throw BusinessException.forbidden("REVIEW_DELETE_FORBIDDEN", "只能删除自己的评论");
+        }
+
+        Trail trail = ensureTrailExists(review.getTrailId());
+        reviewMapper.deleteById(reviewId);
+        TrailReviewStatsVo stats = refreshTrailReviewStats(trail);
+
+        return DeleteReviewResponse.builder()
+                .deletedReviewId(reviewId)
                 .trailRating(scaleRating(stats.getAverageRating()))
                 .trailReviewCount(stats.getReviewCount() == null ? 0 : stats.getReviewCount().intValue())
                 .build();
@@ -237,7 +284,17 @@ public class ReviewServiceImpl implements ReviewService {
         return rating.setScale(1, RoundingMode.HALF_UP);
     }
 
+    private int normalizeLimit(Integer limit) {
+        if (limit == null || limit <= 0) {
+            return DEFAULT_PAGE_SIZE;
+        }
+        return Math.min(limit, MAX_PAGE_SIZE);
+    }
+
     private Map<Long, List<String>> loadImages(List<ReviewQueryRow> rows) {
+        if (rows.isEmpty()) {
+            return Map.of();
+        }
         List<Long> reviewIds = rows.stream()
                 .map(ReviewQueryRow::getId)
                 .toList();

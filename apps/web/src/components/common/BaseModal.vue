@@ -5,6 +5,7 @@ import BaseIcon from './BaseIcon.vue'
 const props = defineProps<{
   show: boolean
   title: string
+  footerTone?: 'muted' | 'plain'
 }>()
 
 const emit = defineEmits<{
@@ -56,7 +57,13 @@ onUnmounted(() => {
           </div>
           
           <!-- Footer -->
-          <div v-if="$slots.footer" class="px-6 py-4 border-t" style="background-color: var(--bg-tag); border-color: var(--border-default);">
+          <div
+            v-if="$slots.footer"
+            class="px-6 py-4 border-t"
+            :style="props.footerTone === 'plain'
+              ? 'background-color: var(--bg-card); border-color: var(--border-default);'
+              : 'background-color: var(--bg-tag); border-color: var(--border-default);'"
+          >
             <slot name="footer"></slot>
           </div>
         </div>

@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers("/hello", "/test/**").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/*/card").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/trails", "/api/trails/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())

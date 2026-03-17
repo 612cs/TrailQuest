@@ -7,11 +7,11 @@ import type { CurrentUser } from '../types/auth'
 import { ApiError } from '../types/api'
 
 export interface UserProfile {
-  id: number
+  id: string
   username: string
   avatar: string
   avatarBg: string
-  avatarMediaId?: number | null
+  avatarMediaId?: string | null
   avatarMediaUrl?: string | null
   email?: string
   role: string

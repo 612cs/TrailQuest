@@ -1,5 +1,7 @@
 package com.sheng.hikingbackend.vo.auth;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.sheng.hikingbackend.common.enums.UserRole;
 import com.sheng.hikingbackend.entity.User;
 
@@ -10,10 +12,12 @@ import lombok.Getter;
 @Builder
 public class CurrentUserVo {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     private String username;
     private String avatar;
     private String avatarBg;
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long avatarMediaId;
     private String avatarMediaUrl;
     private String email;

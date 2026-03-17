@@ -1,9 +1,9 @@
 export interface CurrentUser {
-  id: number
+  id: string
   username: string
   avatar: string
   avatarBg: string
-  avatarMediaId?: number | null
+  avatarMediaId?: string | null
   avatarMediaUrl?: string | null
   email?: string
   role: 'USER' | 'ADMIN'
