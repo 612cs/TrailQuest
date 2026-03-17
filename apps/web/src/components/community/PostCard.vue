@@ -2,11 +2,18 @@
 import { RouterLink } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
 import TagBadge from '../common/TagBadge.vue'
-import type { TrailWithAuthor } from '../../mock/mockData'
+import type { TrailListItem } from '../../types/trail'
 
-defineProps<{
-  post: TrailWithAuthor
+const props = defineProps<{
+  post: TrailListItem
   isInitialLoad?: boolean
+  isLikePending?: boolean
+  isFavoritePending?: boolean
+}>()
+
+defineEmits<{
+  (event: 'toggle-like'): void
+  (event: 'toggle-favorite'): void
 }>()
 </script>
 
@@ -57,8 +64,13 @@ defineProps<{
       <!-- Actions -->
       <div class="flex items-center justify-between pt-2 border-t" style="border-color: var(--border-default);">
         <div class="flex items-center gap-5">
-          <button class="flex items-center gap-1.5 text-xs transition-colors hover:text-primary-500" style="color: var(--text-secondary);">
-            <BaseIcon name="Heart" :size="16" />
+          <button
+            class="flex items-center gap-1.5 text-xs transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            :disabled="props.isLikePending"
+            @click="$emit('toggle-like')"
+            style="color: var(--text-secondary);"
+          >
+            <BaseIcon name="Heart" :size="16" :class="post.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
             {{ post.likes >= 1000 ? (post.likes / 1000).toFixed(1) + 'k' : post.likes }}
           </button>
           <button class="flex items-center gap-1.5 text-xs transition-colors hover:text-primary-500" style="color: var(--text-secondary);">
@@ -67,12 +79,17 @@ defineProps<{
           </button>
           <button class="flex items-center gap-1.5 text-xs transition-colors hover:text-primary-500" style="color: var(--text-secondary);">
             <BaseIcon name="Share2" :size="16" />
-            <span v-if="post.favorites < 1000">{{ post.favorites }}</span>
-            <span v-else>{{ (post.favorites / 1000).toFixed(1) }}k</span>
+            <span>分享</span>
           </button>
         </div>
-        <button class="hover:text-primary-500 transition-colors" style="color: var(--text-tertiary);">
-          <BaseIcon name="Bookmark" :size="18" />
+        <button
+          class="flex items-center gap-1.5 hover:text-primary-500 transition-colors text-xs disabled:opacity-60 disabled:cursor-not-allowed"
+          :disabled="props.isFavoritePending"
+          @click="$emit('toggle-favorite')"
+          style="color: var(--text-tertiary);"
+        >
+          <BaseIcon name="Bookmark" :size="18" :class="post.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
+          <span>{{ post.favorites >= 1000 ? (post.favorites / 1000).toFixed(1) + 'k' : post.favorites }}</span>
         </button>
       </div>
     </div>

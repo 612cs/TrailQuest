@@ -2,7 +2,7 @@
 import BaseIcon from './common/BaseIcon.vue'
 import TagBadge from './common/TagBadge.vue'
 
-defineProps<{
+const props = defineProps<{
   image: string
   name: string
   difficulty: 'easy' | 'moderate' | 'hard'
@@ -14,7 +14,18 @@ defineProps<{
   distance: string
   elevation: string
   duration: string
+  likes: number
+  favorites: number
+  likedByCurrentUser: boolean
+  favoritedByCurrentUser: boolean
+  isLikePending?: boolean
+  isFavoritePending?: boolean
   id?: number
+}>()
+
+defineEmits<{
+  (event: 'toggle-like'): void
+  (event: 'toggle-favorite'): void
 }>()
 
 const packLabels: Record<'light' | 'heavy' | 'both', string> = {
@@ -37,14 +48,32 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
     <!-- Image -->
     <div class="relative aspect-[4/3] overflow-hidden">
       <img :src="image" :alt="name" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
-      <!-- Favorite button -->
-      <button
-        class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-90"
-        style="background-color: rgba(255,255,255,0.85); box-shadow: 0 2px 8px rgba(0,0,0,0.15);"
-        @click.prevent
-      >
-        <BaseIcon name="Heart" :size="16" class="text-surface-500" />
-      </button>
+      <div class="absolute top-3 right-3 flex items-center gap-2">
+        <button
+          class="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-90 disabled:opacity-60 disabled:cursor-not-allowed"
+          style="background-color: rgba(255,255,255,0.88); box-shadow: 0 2px 8px rgba(0,0,0,0.15);"
+          :disabled="props.isLikePending"
+          @click.prevent="$emit('toggle-like')"
+        >
+          <BaseIcon
+            name="Heart"
+            :size="16"
+            :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'text-surface-500'"
+          />
+        </button>
+        <button
+          class="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-90 disabled:opacity-60 disabled:cursor-not-allowed"
+          style="background-color: rgba(255,255,255,0.88); box-shadow: 0 2px 8px rgba(0,0,0,0.15);"
+          :disabled="props.isFavoritePending"
+          @click.prevent="$emit('toggle-favorite')"
+        >
+          <BaseIcon
+            name="Bookmark"
+            :size="16"
+            :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'text-surface-500'"
+          />
+        </button>
+      </div>
       <!-- Difficulty Badge -->
       <div class="absolute bottom-3 left-3 flex flex-wrap gap-2">
         <TagBadge :label="difficultyLabel" />
@@ -65,6 +94,25 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
         <BaseIcon name="Star" :size="14" class="text-primary-500 fill-current" />
         <span class="text-sm font-semibold text-primary-500">{{ rating }}</span>
         <span class="text-xs" style="color: var(--text-tertiary);">{{ reviews }}</span>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs" style="color: var(--text-secondary);">
+        <button
+          class="flex items-center gap-1.5 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+          :disabled="props.isLikePending"
+          @click.prevent="$emit('toggle-like')"
+        >
+          <BaseIcon name="Heart" :size="14" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
+          <span>{{ likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
+        </button>
+        <button
+          class="flex items-center gap-1.5 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+          :disabled="props.isFavoritePending"
+          @click.prevent="$emit('toggle-favorite')"
+        >
+          <BaseIcon name="Bookmark" :size="14" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
+          <span>{{ favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
+        </button>
       </div>
 
       <!-- Stats -->

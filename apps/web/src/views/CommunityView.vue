@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import PostCard from '../components/community/PostCard.vue'
 import Pagination from '../components/common/Pagination.vue'
 import { fetchTrails } from '../api/trails'
+import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
 import { toCommunityPost } from '../utils/trailAdapters'
 
@@ -12,9 +13,12 @@ const totalPages = ref(1)
 const allPosts = ref<TrailListItem[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
+const trailInteractionStore = useTrailInteractionStore()
 
 const currentPosts = computed(() => {
-  return allPosts.value.map(toCommunityPost)
+  return allPosts.value
+    .map((trail) => trailInteractionStore.applyToTrail(trail))
+    .map(toCommunityPost)
 })
 
 const isInitialLoad = ref(true)
@@ -42,6 +46,7 @@ async function loadPosts() {
       pageSize,
     })
     allPosts.value = data.list
+    trailInteractionStore.hydrateTrails(data.list)
     totalPages.value = data.totalPages || 1
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '社区动态加载失败'
@@ -75,6 +80,10 @@ async function loadPosts() {
         :key="post.id"
         :post="post"
         :is-initial-load="isInitialLoad"
+        :is-like-pending="trailInteractionStore.isLikePending(post.id)"
+        :is-favorite-pending="trailInteractionStore.isFavoritePending(post.id)"
+        @toggle-like="trailInteractionStore.toggleLike(post)"
+        @toggle-favorite="trailInteractionStore.toggleFavorite(post)"
       />
     </div>
 

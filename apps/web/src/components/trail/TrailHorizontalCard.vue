@@ -3,7 +3,7 @@ import { RouterLink } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
 import TagBadge from '../common/TagBadge.vue'
 
-defineProps<{
+const props = defineProps<{
   id: number
   image: string
   name: string
@@ -17,6 +17,17 @@ defineProps<{
   description: string
   rating: number
   reviewCount: number
+  likes: number
+  favorites: number
+  likedByCurrentUser: boolean
+  favoritedByCurrentUser: boolean
+  isLikePending?: boolean
+  isFavoritePending?: boolean
+}>()
+
+defineEmits<{
+  (event: 'toggle-like'): void
+  (event: 'toggle-favorite'): void
 }>()
 
 const packLabels: Record<'light' | 'heavy' | 'both', string> = {
@@ -56,9 +67,24 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
               {{ name }}
             </h3>
           </div>
-          <button class="p-1.5 shrink-0 hover:text-primary-500 transition-colors" @click.prevent style="color: var(--text-tertiary)">
-            <BaseIcon name="Bookmark" :size="20" />
-          </button>
+          <div class="flex items-center gap-1 shrink-0">
+            <button
+              class="p-1.5 hover:text-primary-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              :disabled="props.isLikePending"
+              @click.prevent="$emit('toggle-like')"
+              style="color: var(--text-tertiary)"
+            >
+              <BaseIcon name="Heart" :size="20" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
+            </button>
+            <button
+              class="p-1.5 hover:text-primary-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              :disabled="props.isFavoritePending"
+              @click.prevent="$emit('toggle-favorite')"
+              style="color: var(--text-tertiary)"
+            >
+              <BaseIcon name="Bookmark" :size="20" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
+            </button>
+          </div>
         </div>
 
         <!-- Stats -->
@@ -83,11 +109,29 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
         </p>
 
         <!-- Footer -->
-        <div class="flex items-center justify-between pt-1">
-          <div class="flex items-center gap-1.5">
+        <div class="flex items-center justify-between pt-1 gap-4">
+          <div class="flex items-center gap-1.5 shrink-0">
             <BaseIcon name="Star" :size="16" class="text-primary-500 fill-current" />
             <span class="text-sm font-semibold text-primary-500">{{ rating }}</span>
             <span class="text-xs" style="color: var(--text-tertiary);">({{ reviewCount >= 1000 ? (reviewCount / 1000).toFixed(1) + 'k' : reviewCount }} 条评论)</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs sm:text-sm" style="color: var(--text-secondary);">
+            <button
+              class="flex items-center gap-1 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+              :disabled="props.isLikePending"
+              @click.prevent="$emit('toggle-like')"
+            >
+              <BaseIcon name="Heart" :size="14" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
+              <span>{{ likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
+            </button>
+            <button
+              class="flex items-center gap-1 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+              :disabled="props.isFavoritePending"
+              @click.prevent="$emit('toggle-favorite')"
+            >
+              <BaseIcon name="Bookmark" :size="14" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
+              <span>{{ favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
+            </button>
           </div>
           <span class="flex items-center gap-1 text-sm font-medium text-primary-500">
             查看详情

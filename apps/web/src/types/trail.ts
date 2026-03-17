@@ -5,6 +5,16 @@ export interface TrailAuthor {
   avatarBg: string
 }
 
+export interface TrailInteractionState {
+  trailId: number
+  likes: number
+  favorites: number
+  likedByCurrentUser: boolean
+  favoritedByCurrentUser: boolean
+}
+
+export interface TrailInteractionResult extends TrailInteractionState {}
+
 export interface TrailListItem {
   id: number
   image: string
@@ -24,6 +34,8 @@ export interface TrailListItem {
   tags: string[]
   favorites: number
   likes: number
+  likedByCurrentUser: boolean
+  favoritedByCurrentUser: boolean
   authorId: number
   publishTime: string
   createdAt: string

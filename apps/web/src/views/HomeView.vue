@@ -6,6 +6,7 @@ import ActivityGrid from '../components/home/ActivityGrid.vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import SectionHeader from '../components/common/SectionHeader.vue'
 import { fetchTrails } from '../api/trails'
+import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
 import { toHomeTrailCard } from '../utils/trailAdapters'
 
@@ -13,8 +14,11 @@ const trails = ref<TrailListItem[]>([])
 const isInitialLoad = ref(true)
 const isLoading = ref(false)
 const errorMessage = ref('')
+const trailInteractionStore = useTrailInteractionStore()
 
-const popularTrails = computed(() => trails.value.map(toHomeTrailCard))
+const popularTrails = computed(() => trails.value
+  .map((trail) => trailInteractionStore.applyToTrail(trail))
+  .map(toHomeTrailCard))
 
 onMounted(() => {
   setTimeout(() => {
@@ -35,6 +39,7 @@ async function loadTrails() {
       pageSize: 6,
     })
     trails.value = data.list
+    trailInteractionStore.hydrateTrails(data.list)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '热门路线加载失败'
   } finally {
@@ -73,7 +78,11 @@ async function loadTrails() {
           v-for="trail in popularTrails"
           :key="trail.id"
           v-bind="trail"
+          :is-like-pending="trailInteractionStore.isLikePending(trail.id)"
+          :is-favorite-pending="trailInteractionStore.isFavoritePending(trail.id)"
           :class="isInitialLoad ? `animate-fade-in-up stagger-${trail.id}` : ''"
+          @toggle-like="trailInteractionStore.toggleLike(trail)"
+          @toggle-favorite="trailInteractionStore.toggleFavorite(trail)"
         />
       </div>
     </section>

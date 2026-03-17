@@ -7,16 +7,20 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
+import com.sheng.hikingbackend.mapper.TrailFavoriteMapper;
+import com.sheng.hikingbackend.mapper.TrailLikeMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.service.TrailService;
 import com.sheng.hikingbackend.vo.common.UserSummaryVo;
 import com.sheng.hikingbackend.vo.trail.TrailDetailVo;
+import com.sheng.hikingbackend.vo.trail.TrailInteractionVo;
 import com.sheng.hikingbackend.vo.trail.TrailQueryRow;
 
 import lombok.RequiredArgsConstructor;
@@ -26,12 +30,14 @@ import lombok.RequiredArgsConstructor;
 public class TrailServiceImpl implements TrailService {
 
     private final TrailMapper trailMapper;
+    private final TrailLikeMapper trailLikeMapper;
+    private final TrailFavoriteMapper trailFavoriteMapper;
 
     @Override
-    public PageResponse<TrailDetailVo> pageTrails(TrailPageRequest request) {
+    public PageResponse<TrailDetailVo> pageTrails(TrailPageRequest request, Long currentUserId) {
         request.setSort(normalizeSort(request.getSort()));
         Page<TrailQueryRow> page = Page.of(request.getPageNum(), request.getPageSize());
-        IPage<TrailQueryRow> pageResult = trailMapper.selectTrailPage(page, request);
+        IPage<TrailQueryRow> pageResult = trailMapper.selectTrailPage(page, request, currentUserId);
         List<TrailDetailVo> list = pageResult.getRecords().stream()
                 .map(this::toTrailDetailVo)
                 .toList();
@@ -39,12 +45,54 @@ public class TrailServiceImpl implements TrailService {
     }
 
     @Override
-    public TrailDetailVo getTrailDetail(Long id) {
-        TrailQueryRow row = trailMapper.selectTrailDetailById(id);
+    public TrailDetailVo getTrailDetail(Long id, Long currentUserId) {
+        TrailQueryRow row = trailMapper.selectTrailDetailById(id, currentUserId);
         if (row == null) {
             throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
         }
         return toTrailDetailVo(row);
+    }
+
+    @Override
+    @Transactional
+    public TrailInteractionVo likeTrail(Long trailId, Long currentUserId) {
+        ensureTrailExists(trailId);
+        if (trailLikeMapper.countByTrailIdAndUserId(trailId, currentUserId) == 0) {
+            trailLikeMapper.insertRelation(trailId, currentUserId);
+            trailMapper.incrementLikes(trailId);
+        }
+        return getTrailInteraction(trailId, currentUserId);
+    }
+
+    @Override
+    @Transactional
+    public TrailInteractionVo unlikeTrail(Long trailId, Long currentUserId) {
+        ensureTrailExists(trailId);
+        if (trailLikeMapper.deleteRelation(trailId, currentUserId) > 0) {
+            trailMapper.decrementLikes(trailId);
+        }
+        return getTrailInteraction(trailId, currentUserId);
+    }
+
+    @Override
+    @Transactional
+    public TrailInteractionVo favoriteTrail(Long trailId, Long currentUserId) {
+        ensureTrailExists(trailId);
+        if (trailFavoriteMapper.countByTrailIdAndUserId(trailId, currentUserId) == 0) {
+            trailFavoriteMapper.insertRelation(trailId, currentUserId);
+            trailMapper.incrementFavorites(trailId);
+        }
+        return getTrailInteraction(trailId, currentUserId);
+    }
+
+    @Override
+    @Transactional
+    public TrailInteractionVo unfavoriteTrail(Long trailId, Long currentUserId) {
+        ensureTrailExists(trailId);
+        if (trailFavoriteMapper.deleteRelation(trailId, currentUserId) > 0) {
+            trailMapper.decrementFavorites(trailId);
+        }
+        return getTrailInteraction(trailId, currentUserId);
     }
 
     private TrailDetailVo toTrailDetailVo(TrailQueryRow row) {
@@ -67,6 +115,8 @@ public class TrailServiceImpl implements TrailService {
                 .tags(splitTags(row.getTagsCsv()))
                 .favorites(row.getFavorites())
                 .likes(row.getLikes())
+                .likedByCurrentUser(Boolean.TRUE.equals(row.getLikedByCurrentUser()))
+                .favoritedByCurrentUser(Boolean.TRUE.equals(row.getFavoritedByCurrentUser()))
                 .authorId(row.getAuthorId())
                 .publishTime(formatPublishTime(row.getCreatedAt()))
                 .createdAt(row.getCreatedAt())
@@ -77,6 +127,22 @@ public class TrailServiceImpl implements TrailService {
                         .avatarBg(row.getAuthorAvatarBg())
                         .build())
                 .build();
+    }
+
+    private void ensureTrailExists(Long trailId) {
+        if (trailMapper.selectById(trailId) == null) {
+            throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
+        }
+    }
+
+    private TrailInteractionVo getTrailInteraction(Long trailId, Long currentUserId) {
+        TrailInteractionVo interaction = trailMapper.selectTrailInteraction(trailId, currentUserId);
+        if (interaction == null) {
+            throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
+        }
+        interaction.setLikedByCurrentUser(Boolean.TRUE.equals(interaction.getLikedByCurrentUser()));
+        interaction.setFavoritedByCurrentUser(Boolean.TRUE.equals(interaction.getFavoritedByCurrentUser()));
+        return interaction;
     }
 
     private List<String> splitTags(String tagsCsv) {

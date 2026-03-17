@@ -7,6 +7,7 @@ import ViewToggle from '../components/search/ViewToggle.vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import TrailHorizontalCard from '../components/trail/TrailHorizontalCard.vue'
 import { fetchTrails } from '../api/trails'
+import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
 import { toSearchTrailCard } from '../utils/trailAdapters'
 
@@ -17,6 +18,7 @@ const isInitialLoad = ref(true)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const trails = ref<TrailListItem[]>([])
+const trailInteractionStore = useTrailInteractionStore()
 
 const filterModel = ref<Record<string, string>>({
   difficulty: 'all',
@@ -97,7 +99,9 @@ const handleSearch = () => {
   void loadTrails()
 }
 
-const filteredTrails = computed(() => trails.value.map(toSearchTrailCard))
+const filteredTrails = computed(() => trails.value
+  .map((trail) => trailInteractionStore.applyToTrail(trail))
+  .map(toSearchTrailCard))
 
 watch(
   filterModel,
@@ -123,6 +127,7 @@ async function loadTrails() {
       pageSize: 30,
     })
     trails.value = data.list
+    trailInteractionStore.hydrateTrails(data.list)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '路线搜索失败'
   } finally {
@@ -189,7 +194,11 @@ function withAllAsUndefined(value?: string) {
         v-for="trail in filteredTrails"
         :key="trail.id"
         v-bind="trail"
+        :is-like-pending="trailInteractionStore.isLikePending(trail.id)"
+        :is-favorite-pending="trailInteractionStore.isFavoritePending(trail.id)"
         :class="isInitialLoad ? `animate-fade-in-up stagger-${trail.id}` : ''"
+        @toggle-like="trailInteractionStore.toggleLike(trail)"
+        @toggle-favorite="trailInteractionStore.toggleFavorite(trail)"
       />
     </div>
   </main>

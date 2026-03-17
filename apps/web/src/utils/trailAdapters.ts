@@ -14,6 +14,10 @@ export function toHomeTrailCard(trail: TrailListItem) {
     distance: trail.distance,
     elevation: trail.elevation,
     duration: trail.duration,
+    likes: trail.likes,
+    favorites: trail.favorites,
+    likedByCurrentUser: trail.likedByCurrentUser,
+    favoritedByCurrentUser: trail.favoritedByCurrentUser,
   }
 }
 
@@ -32,6 +36,10 @@ export function toSearchTrailCard(trail: TrailListItem) {
     description: trail.description,
     rating: trail.rating,
     reviewCount: trail.reviewCount,
+    likes: trail.likes,
+    favorites: trail.favorites,
+    likedByCurrentUser: trail.likedByCurrentUser,
+    favoritedByCurrentUser: trail.favoritedByCurrentUser,
   }
 }
 

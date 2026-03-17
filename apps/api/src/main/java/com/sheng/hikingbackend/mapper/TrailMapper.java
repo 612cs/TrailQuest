@@ -3,12 +3,14 @@ package com.sheng.hikingbackend.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
 import com.sheng.hikingbackend.entity.Trail;
+import com.sheng.hikingbackend.vo.trail.TrailInteractionVo;
 import com.sheng.hikingbackend.vo.trail.TrailQueryRow;
 
 @Mapper
@@ -34,6 +36,24 @@ public interface TrailMapper extends BaseMapper<Trail> {
               t.description,
               t.favorites,
               t.likes,
+              <choose>
+                <when test="userId != null">
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_likes tl
+                    WHERE tl.trail_id = t.id AND tl.user_id = #{userId}
+                  ) AS liked_by_current_user,
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_favorites tf
+                    WHERE tf.trail_id = t.id AND tf.user_id = #{userId}
+                  ) AS favorited_by_current_user,
+                </when>
+                <otherwise>
+                  FALSE AS liked_by_current_user,
+                  FALSE AS favorited_by_current_user,
+                </otherwise>
+              </choose>
               t.author_id,
               t.created_at,
               tag_summary.tags_csv,
@@ -98,9 +118,13 @@ public interface TrailMapper extends BaseMapper<Trail> {
             </choose>
             </script>
             """)
-    IPage<TrailQueryRow> selectTrailPage(Page<TrailQueryRow> page, @Param("query") TrailPageRequest query);
+    IPage<TrailQueryRow> selectTrailPage(
+            Page<TrailQueryRow> page,
+            @Param("query") TrailPageRequest query,
+            @Param("userId") Long userId);
 
     @Select("""
+            <script>
             SELECT
               t.id,
               t.image,
@@ -119,6 +143,24 @@ public interface TrailMapper extends BaseMapper<Trail> {
               t.description,
               t.favorites,
               t.likes,
+              <choose>
+                <when test="userId != null">
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_likes tl
+                    WHERE tl.trail_id = t.id AND tl.user_id = #{userId}
+                  ) AS liked_by_current_user,
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_favorites tf
+                    WHERE tf.trail_id = t.id AND tf.user_id = #{userId}
+                  ) AS favorited_by_current_user,
+                </when>
+                <otherwise>
+                  FALSE AS liked_by_current_user,
+                  FALSE AS favorited_by_current_user,
+                </otherwise>
+              </choose>
               t.author_id,
               t.created_at,
               tag_summary.tags_csv,
@@ -137,6 +179,66 @@ public interface TrailMapper extends BaseMapper<Trail> {
             ) tag_summary ON tag_summary.trail_id = t.id
             WHERE t.id = #{id}
             LIMIT 1
+            </script>
             """)
-    TrailQueryRow selectTrailDetailById(@Param("id") Long id);
+    TrailQueryRow selectTrailDetailById(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Select("""
+            <script>
+            SELECT
+              t.id AS trail_id,
+              t.likes,
+              t.favorites,
+              <choose>
+                <when test="userId != null">
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_likes tl
+                    WHERE tl.trail_id = t.id AND tl.user_id = #{userId}
+                  ) AS liked_by_current_user,
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_favorites tf
+                    WHERE tf.trail_id = t.id AND tf.user_id = #{userId}
+                  ) AS favorited_by_current_user
+                </when>
+                <otherwise>
+                  FALSE AS liked_by_current_user,
+                  FALSE AS favorited_by_current_user
+                </otherwise>
+              </choose>
+            FROM trails t
+            WHERE t.id = #{trailId}
+            LIMIT 1
+            </script>
+            """)
+    TrailInteractionVo selectTrailInteraction(@Param("trailId") Long trailId, @Param("userId") Long userId);
+
+    @Update("""
+            UPDATE trails
+            SET likes = likes + 1
+            WHERE id = #{trailId}
+            """)
+    int incrementLikes(@Param("trailId") Long trailId);
+
+    @Update("""
+            UPDATE trails
+            SET likes = GREATEST(likes - 1, 0)
+            WHERE id = #{trailId}
+            """)
+    int decrementLikes(@Param("trailId") Long trailId);
+
+    @Update("""
+            UPDATE trails
+            SET favorites = favorites + 1
+            WHERE id = #{trailId}
+            """)
+    int incrementFavorites(@Param("trailId") Long trailId);
+
+    @Update("""
+            UPDATE trails
+            SET favorites = GREATEST(favorites - 1, 0)
+            WHERE id = #{trailId}
+            """)
+    int decrementFavorites(@Param("trailId") Long trailId);
 }

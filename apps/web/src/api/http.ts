@@ -52,4 +52,8 @@ export const http = {
     const response = await httpClient.post<ApiResponse<T>>(path, data, config)
     return unwrap(response.data, response.status)
   },
+  async delete<T>(path: string, config?: AxiosRequestConfig) {
+    const response = await httpClient.delete<ApiResponse<T>>(path, config)
+    return unwrap(response.data, response.status)
+  },
 }

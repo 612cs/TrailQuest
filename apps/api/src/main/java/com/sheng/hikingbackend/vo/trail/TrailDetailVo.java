@@ -31,6 +31,8 @@ public class TrailDetailVo {
     private List<String> tags;
     private Integer favorites;
     private Integer likes;
+    private Boolean likedByCurrentUser;
+    private Boolean favoritedByCurrentUser;
     private Long authorId;
     private String publishTime;
     private LocalDateTime createdAt;

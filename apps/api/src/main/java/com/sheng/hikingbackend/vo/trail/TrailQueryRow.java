@@ -27,6 +27,8 @@ public class TrailQueryRow {
     private String description;
     private Integer favorites;
     private Integer likes;
+    private Boolean likedByCurrentUser;
+    private Boolean favoritedByCurrentUser;
     private Long authorId;
     private LocalDateTime createdAt;
     private String tagsCsv;

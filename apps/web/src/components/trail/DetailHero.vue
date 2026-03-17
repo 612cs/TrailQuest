@@ -7,6 +7,7 @@ import type { TrailAuthor } from '../../types/trail'
 const userStore = useUserStore()
 
 const props = defineProps<{
+  id: number
   image: string
   name: string
   location: string
@@ -19,10 +20,20 @@ const props = defineProps<{
   duration: string
   favorites?: number
   likes?: number
+  likedByCurrentUser?: boolean
+  favoritedByCurrentUser?: boolean
+  isLikePending?: boolean
+  isFavoritePending?: boolean
   rating?: number
   reviewCount?: number
   author: TrailAuthor
   publishTime: string
+}>()
+
+defineEmits<{
+  (event: 'toggle-like'): void
+  (event: 'toggle-favorite'): void
+  (event: 'share'): void
 }>()
 
 const packLabels: Record<'light' | 'heavy' | 'both', string> = {
@@ -91,14 +102,34 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
         <span class="text-sm font-bold text-primary-500">{{ rating }}</span>
         <span v-if="reviewCount" class="text-xs" style="color: var(--text-tertiary);">({{ reviewCount >= 1000 ? (reviewCount / 1000).toFixed(1) + 'k' : reviewCount }} 条评论)</span>
       </div>
-      <div class="flex items-center gap-3">
-        <button v-if="likes !== undefined" @click="userStore.requireAuth(() => {})" class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80" style="color: var(--text-secondary);">
-          <BaseIcon name="Heart" :size="16" class="text-red-400 fill-red-400" />
+      <div class="flex items-center gap-3 flex-wrap justify-end">
+        <button
+          class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
+          @click="$emit('share')"
+          style="color: var(--text-secondary);"
+        >
+          <BaseIcon name="Share2" :size="16" />
+          <span class="font-medium">分享</span>
+        </button>
+        <button
+          v-if="likes !== undefined"
+          class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
+          :disabled="props.isLikePending"
+          @click="$emit('toggle-like')"
+          style="color: var(--text-secondary);"
+        >
+          <BaseIcon name="Heart" :size="16" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
           <span class="font-medium">{{ likes >= 10000 ? (likes / 10000).toFixed(1) + 'w' : likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
           <span class="text-xs" style="color: var(--text-tertiary);">喜爱</span>
         </button>
-        <button v-if="favorites !== undefined" @click="userStore.requireAuth(() => {})" class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80" style="color: var(--text-secondary);">
-          <BaseIcon name="Bookmark" :size="16" class="text-primary-500 fill-primary-500" />
+        <button
+          v-if="favorites !== undefined"
+          class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
+          :disabled="props.isFavoritePending"
+          @click="$emit('toggle-favorite')"
+          style="color: var(--text-secondary);"
+        >
+          <BaseIcon name="Bookmark" :size="16" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
           <span class="font-medium">{{ favorites >= 10000 ? (favorites / 10000).toFixed(1) + 'w' : favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
           <span class="text-xs" style="color: var(--text-tertiary);">收藏</span>
         </button>

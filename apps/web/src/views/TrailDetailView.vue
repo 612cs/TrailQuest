@@ -12,11 +12,15 @@ import { useTrailGeo } from '../composables/useTrailGeo'
 import { useTrailWeather } from '../composables/useTrailWeather'
 import { fetchTrailDetail } from '../api/trails'
 import { createReview, fetchTrailReviews } from '../api/reviews'
+import { useFlashStore } from '../stores/useFlashStore'
+import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
 import type { CreateReviewPayload, ReviewItem } from '../types/review'
 
 const router = useRouter()
 const route = useRoute()
+const flashStore = useFlashStore()
+const trailInteractionStore = useTrailInteractionStore()
 
 const reviews = ref<ReviewItem[]>([])
 const trailData = ref<TrailListItem | null>(null)
@@ -31,6 +35,10 @@ const { geo, isLoading: geoLoading, resolve: resolveGeo } = useTrailGeo()
 const { weather, isLoading: weatherLoading, resolve: resolveWeather } = useTrailWeather()
 
 const trailId = computed(() => Number(route.params.id))
+const displayTrail = computed(() => {
+  if (!trailData.value) return null
+  return trailInteractionStore.applyToTrail(trailData.value)
+})
 
 watch(trailId, async (newId) => {
   if (!newId) {
@@ -51,7 +59,9 @@ watch(trailId, async (newId) => {
   errorMessage.value = ''
 
   try {
-    trailData.value = await fetchTrailDetail(newId)
+    const data = await fetchTrailDetail(newId)
+    trailData.value = data
+    trailInteractionStore.hydrateTrail(data)
   } catch (error) {
     trailData.value = null
     errorMessage.value = error instanceof Error ? error.message : '路线详情加载失败'
@@ -80,8 +90,9 @@ watch(trailData, async (trail, _prev, onCleanup) => {
 }, { immediate: true })
 
 const heroProps = computed(() => {
-  const t = trailData.value!
+  const t = displayTrail.value!
   return {
+    id: t.id,
     image: t.image,
     name: t.name,
     location: t.location,
@@ -96,8 +107,12 @@ const heroProps = computed(() => {
     reviewCount: t.reviewCount,
     likes: t.likes,
     favorites: t.favorites,
+    likedByCurrentUser: t.likedByCurrentUser,
+    favoritedByCurrentUser: t.favoritedByCurrentUser,
+    isLikePending: trailInteractionStore.isLikePending(t.id),
+    isFavoritePending: trailInteractionStore.isFavoritePending(t.id),
     author: t.author,
-    publishTime: t.publishTime
+    publishTime: t.publishTime,
   }
 })
 
@@ -128,6 +143,31 @@ async function handleCreateReview(payload: { rating?: number; text: string; imag
     text: payload.text,
     images: payload.images,
   })
+}
+
+async function handleShare() {
+  if (!displayTrail.value) return
+
+  const shareUrl = window.location.href
+  const canUseNativeShare = typeof navigator.share === 'function'
+
+  try {
+    if (canUseNativeShare) {
+      await navigator.share({
+        title: displayTrail.value.name,
+        text: `${displayTrail.value.name} · ${displayTrail.value.location}`,
+        url: shareUrl,
+      })
+    } else {
+      await navigator.clipboard.writeText(shareUrl)
+    }
+    flashStore.showSuccess(canUseNativeShare ? '已打开系统分享' : '路线链接已复制')
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return
+    }
+    flashStore.showError('分享失败，请稍后重试')
+  }
 }
 
 async function handleCreateReply(payload: { parentId: string; text: string; replyTo?: string; images: string[] }) {
@@ -230,7 +270,7 @@ function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
           返回
         </button>
         <h2 class="text-sm font-semibold" style="color: var(--text-primary);">路线详情</h2>
-        <button class="p-1.5" style="color: var(--text-secondary);">
+        <button class="p-1.5" style="color: var(--text-secondary);" @click="handleShare">
           <BaseIcon name="Share" :size="20" />
         </button>
       </div>
@@ -238,7 +278,12 @@ function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       <!-- Hero Card -->
-      <DetailHero v-bind="heroProps" />
+      <DetailHero
+        v-bind="heroProps"
+        @toggle-like="displayTrail && trailInteractionStore.toggleLike(displayTrail)"
+        @toggle-favorite="displayTrail && trailInteractionStore.toggleFavorite(displayTrail)"
+        @share="handleShare"
+      />
 
       <!-- Description Section -->
       <div class="card p-5 space-y-3">
@@ -247,13 +292,13 @@ function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
           路线介绍
         </h3>
         <p class="text-sm leading-relaxed whitespace-pre-line" style="color: var(--text-secondary);">
-          {{ trailData.description }}
+          {{ displayTrail?.description ?? trailData.description }}
         </p>
       </div>
 
       <TrailMapSection
         :center="mapCenter"
-        :label="trailData.name"
+        :label="displayTrail?.name ?? trailData.name"
         :city="locationCity"
       />
 
