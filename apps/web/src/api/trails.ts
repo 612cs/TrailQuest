@@ -1,4 +1,5 @@
 import { http } from './http'
+import type { EntityId } from '../types/id'
 import type { PageResponse, TrailInteractionResult, TrailListItem, TrailListParams } from '../types/trail'
 
 export interface CreateTrailPayload {
@@ -12,9 +13,9 @@ export interface CreateTrailPayload {
   elevation?: string
   duration?: string
   description: string
-  coverMediaId: number
-  galleryMediaIds?: number[]
-  trackMediaId?: number | null
+  coverMediaId: string
+  galleryMediaIds?: string[]
+  trackMediaId?: string | null
   tags: string[]
 }
 
@@ -22,23 +23,23 @@ export function fetchTrails(params: TrailListParams = {}) {
   return http.get<PageResponse<TrailListItem>>('/api/trails', { params })
 }
 
-export function fetchTrailDetail(id: number) {
+export function fetchTrailDetail(id: EntityId) {
   return http.get<TrailListItem>(`/api/trails/${id}`)
 }
 
-export function likeTrail(id: number) {
+export function likeTrail(id: EntityId) {
   return http.post<TrailInteractionResult>(`/api/trails/${id}/like`)
 }
 
-export function unlikeTrail(id: number) {
+export function unlikeTrail(id: EntityId) {
   return http.delete<TrailInteractionResult>(`/api/trails/${id}/like`)
 }
 
-export function favoriteTrail(id: number) {
+export function favoriteTrail(id: EntityId) {
   return http.post<TrailInteractionResult>(`/api/trails/${id}/favorite`)
 }
 
-export function unfavoriteTrail(id: number) {
+export function unfavoriteTrail(id: EntityId) {
   return http.delete<TrailInteractionResult>(`/api/trails/${id}/favorite`)
 }
 

@@ -58,7 +58,7 @@ function openPreview(images: string[], index: number) {
 
 function startReply(review: ReviewItem) {
   userStore.requireAuth(() => {
-    replyingToId.value = review.id
+    replyingToId.value = String(review.id)
     replyingToName.value = review.author.username
   })
 }

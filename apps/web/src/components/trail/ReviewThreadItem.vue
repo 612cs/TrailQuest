@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import type { EntityId } from '../../types/id'
 import type { ReviewItem } from '../../types/review'
 import BaseIcon from '../common/BaseIcon.vue'
 import CommentForm from './CommentForm.vue'
@@ -24,9 +25,9 @@ const emit = defineEmits([
   'openUserCard',
 ])
 
-const isOwnComment = computed(() => props.currentUserId === props.review.userId)
-const isReplying = computed(() => props.replyingToId === props.review.id)
-const isDeleting = computed(() => props.deletingIds?.includes(props.review.id) ?? false)
+const isOwnComment = computed(() => props.currentUserId === String(props.review.userId))
+const isReplying = computed(() => props.replyingToId === String(props.review.id))
+const isDeleting = computed(() => props.deletingIds?.includes(String(props.review.id)) ?? false)
 
 const avatarSizeClass = computed(() => {
   if (props.level === 0) return 'h-9 w-9 text-xs'
@@ -59,7 +60,7 @@ function handleDelete(review: ReviewItem) {
   emit('deleteReview', review)
 }
 
-function handleOpenUserCard(userId: string) {
+function handleOpenUserCard(userId: EntityId) {
   emit('openUserCard', userId)
 }
 </script>

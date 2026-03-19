@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import BaseIcon from './common/BaseIcon.vue'
 import TagBadge from './common/TagBadge.vue'
+import type { EntityId } from '../types/id'
 
 const props = defineProps<{
   image: string
@@ -20,7 +21,7 @@ const props = defineProps<{
   favoritedByCurrentUser: boolean
   isLikePending?: boolean
   isFavoritePending?: boolean
-  id?: number
+  id?: EntityId
 }>()
 
 defineEmits<{

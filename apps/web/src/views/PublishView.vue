@@ -292,17 +292,16 @@ async function handleSubmit() {
   isSubmitting.value = true
 
   try {
-    const coverMediaId = coverItems.value[0]?.mediaId ? Number(coverItems.value[0].mediaId) : null
+    const coverMediaId = coverItems.value[0]?.mediaId ?? null
     if (!coverMediaId) {
       throw new Error('请先上传路线封面')
     }
 
     const galleryMediaIds = galleryItems.value
       .filter((item) => item.mediaId)
-      .map((item) => Number(item.mediaId))
-      .filter((mediaId) => Number.isFinite(mediaId))
+      .map((item) => item.mediaId!)
 
-    const trackMediaId = trackItem.value?.mediaId ? Number(trackItem.value.mediaId) : null
+    const trackMediaId = trackItem.value?.mediaId ?? null
 
     const created = await createTrail({
       name: name.value.trim(),

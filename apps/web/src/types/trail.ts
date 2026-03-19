@@ -1,5 +1,7 @@
+import type { EntityId } from './id'
+
 export interface TrailAuthor {
-  id: number
+  id: EntityId
   username: string
   avatar: string
   avatarBg: string
@@ -32,7 +34,7 @@ export interface TrailTrackDetail {
 }
 
 export interface TrailInteractionState {
-  trailId: number
+  trailId: EntityId
   likes: number
   favorites: number
   likedByCurrentUser: boolean
@@ -42,7 +44,7 @@ export interface TrailInteractionState {
 export interface TrailInteractionResult extends TrailInteractionState {}
 
 export interface TrailListItem {
-  id: number
+  id: EntityId
   image: string
   name: string
   location: string
@@ -62,7 +64,7 @@ export interface TrailListItem {
   likes: number
   likedByCurrentUser: boolean
   favoritedByCurrentUser: boolean
-  authorId: number
+  authorId: EntityId
   publishTime: string
   createdAt: string
   author: TrailAuthor

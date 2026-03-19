@@ -2,12 +2,13 @@
 import BaseIcon from '../common/BaseIcon.vue'
 import TagBadge from '../common/TagBadge.vue'
 import { useUserStore } from '../../stores/useUserStore'
+import type { EntityId } from '../../types/id'
 import type { TrailAuthor } from '../../types/trail'
 
 const userStore = useUserStore()
 
 const props = defineProps<{
-  id: number
+  id: EntityId
   image: string
   name: string
   location: string

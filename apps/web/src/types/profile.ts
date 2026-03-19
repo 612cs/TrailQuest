@@ -1,9 +1,11 @@
+import type { EntityId } from './id'
+
 export interface UserTrailListItem {
-  id: number
+  id: EntityId
   image: string
   name: string
   location: string
-  authorId: number
+  authorId: EntityId
   authorUsername: string
   publishTime: string
   createdAt: string

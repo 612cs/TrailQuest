@@ -17,6 +17,7 @@ import { useTrailGeo } from '../composables/useTrailGeo'
 import { useTrailWeather } from '../composables/useTrailWeather'
 import { useFlashStore } from '../stores/useFlashStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
+import type { EntityId } from '../types/id'
 import type { TrailListItem } from '../types/trail'
 import type {
   CreateReviewPayload,
@@ -54,7 +55,10 @@ const userCardErrorMessage = ref('')
 const { geo, isLoading: geoLoading, resolve: resolveGeo } = useTrailGeo()
 const { weather, isLoading: weatherLoading, resolve: resolveWeather } = useTrailWeather()
 
-const trailId = computed(() => Number(route.params.id))
+const trailId = computed<EntityId>(() => {
+  const rawId = route.params.id
+  return Array.isArray(rawId) ? rawId[0] ?? '' : String(rawId ?? '')
+})
 const displayTrail = computed(() => {
   if (!trailData.value) return null
   return trailInteractionStore.applyToTrail(trailData.value)
@@ -214,7 +218,7 @@ async function submitReview(payload: CreateReviewPayload) {
   }
 }
 
-async function loadInitialReviews(targetTrailId: number) {
+async function loadInitialReviews(targetTrailId: EntityId) {
   reviews.value = []
   nextReviewCursor.value = null
   hasMoreReviews.value = false
@@ -269,7 +273,7 @@ async function confirmDeleteReview() {
 
   const review = pendingDeleteReview.value
 
-  deletingIds.value = [...deletingIds.value, review.id]
+  deletingIds.value = [...deletingIds.value, String(review.id)]
 
   try {
     const result = await deleteReview(review.id)
@@ -284,32 +288,33 @@ async function confirmDeleteReview() {
   } catch (error) {
     flashStore.showError(error instanceof Error ? error.message : '评论删除失败')
   } finally {
-    deletingIds.value = deletingIds.value.filter((id) => id !== review.id)
+    deletingIds.value = deletingIds.value.filter((id) => id !== String(review.id))
   }
 }
 
 function closeDeleteConfirm() {
-  if (pendingDeleteReview.value && deletingIds.value.includes(pendingDeleteReview.value.id)) {
+  if (pendingDeleteReview.value && deletingIds.value.includes(String(pendingDeleteReview.value.id))) {
     return
   }
   pendingDeleteReview.value = null
 }
 
-async function openUserCard(userId: string) {
-  activeUserCardId.value = userId
+async function openUserCard(userId: EntityId) {
+  const normalizedUserId = String(userId)
+  activeUserCardId.value = normalizedUserId
   isUserCardVisible.value = true
   userCardErrorMessage.value = ''
 
-  if (userCardCache.value[userId]) {
+  if (userCardCache.value[normalizedUserId]) {
     return
   }
 
   isUserCardLoading.value = true
   try {
-    const card = await fetchUserCard(userId)
+    const card = await fetchUserCard(normalizedUserId)
     userCardCache.value = {
       ...userCardCache.value,
-      [userId]: card,
+      [normalizedUserId]: card,
     }
   } catch (error) {
     userCardErrorMessage.value = error instanceof Error ? error.message : '用户卡片加载失败'
@@ -360,9 +365,9 @@ function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
   return false
 }
 
-function removeReviewNode(items: ReviewItem[], reviewId: string): ReviewItem[] {
+function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[] {
   return items
-    .filter((item) => item.id !== reviewId)
+    .filter((item) => String(item.id) !== String(reviewId))
     .map((item) => ({
       ...item,
       replies: removeReviewNode(item.replies, reviewId),
@@ -457,7 +462,7 @@ function removeReviewNode(items: ReviewItem[], reviewId: string): ReviewItem[] {
       confirm-text="确认删除"
       cancel-text="暂不删除"
       tone="danger"
-      :confirm-loading="!!pendingDeleteReview && deletingIds.includes(pendingDeleteReview.id)"
+      :confirm-loading="!!pendingDeleteReview && deletingIds.includes(String(pendingDeleteReview.id))"
       @update:show="(value) => { if (!value) closeDeleteConfirm() }"
       @cancel="closeDeleteConfirm"
       @confirm="confirmDeleteReview"

@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import { favoriteTrail, likeTrail, unfavoriteTrail, unlikeTrail } from '../api/trails'
 import { useFlashStore } from './useFlashStore'
 import { useUserStore } from './useUserStore'
+import type { EntityId } from '../types/id'
 import type { TrailInteractionResult, TrailInteractionState, TrailListItem } from '../types/trail'
 import { ApiError } from '../types/api'
 
@@ -13,14 +14,14 @@ type TrailLikeState = Pick<
 >
 
 export const useTrailInteractionStore = defineStore('trailInteraction', () => {
-  const interactionMap = ref<Record<number, TrailInteractionState>>({})
-  const likePendingMap = ref<Record<number, boolean>>({})
-  const favoritePendingMap = ref<Record<number, boolean>>({})
+  const interactionMap = ref<Record<string, TrailInteractionState>>({})
+  const likePendingMap = ref<Record<string, boolean>>({})
+  const favoritePendingMap = ref<Record<string, boolean>>({})
   const userStore = useUserStore()
   const flashStore = useFlashStore()
 
   function hydrateTrail(trail: TrailLikeState) {
-    interactionMap.value[trail.id] = normalizeTrail(trail)
+    interactionMap.value[String(trail.id)] = normalizeTrail(trail)
   }
 
   function hydrateTrails(trails: TrailLikeState[]) {
@@ -28,7 +29,7 @@ export const useTrailInteractionStore = defineStore('trailInteraction', () => {
   }
 
   function applyToTrail<T extends TrailLikeState>(trail: T): T {
-    const interaction = interactionMap.value[trail.id]
+    const interaction = interactionMap.value[String(trail.id)]
     if (!interaction) {
       return trail
     }
@@ -39,12 +40,12 @@ export const useTrailInteractionStore = defineStore('trailInteraction', () => {
     }
   }
 
-  function isLikePending(trailId: number) {
-    return !!likePendingMap.value[trailId]
+  function isLikePending(trailId: EntityId) {
+    return !!likePendingMap.value[String(trailId)]
   }
 
-  function isFavoritePending(trailId: number) {
-    return !!favoritePendingMap.value[trailId]
+  function isFavoritePending(trailId: EntityId) {
+    return !!favoritePendingMap.value[String(trailId)]
   }
 
   async function toggleLike(trail: TrailLikeState) {
@@ -62,19 +63,19 @@ export const useTrailInteractionStore = defineStore('trailInteraction', () => {
       likedByCurrentUser: !previous.likedByCurrentUser,
     }
 
-    interactionMap.value[trail.id] = optimistic
-    likePendingMap.value[trail.id] = true
+    interactionMap.value[String(trail.id)] = optimistic
+    likePendingMap.value[String(trail.id)] = true
 
     try {
       const result = previous.likedByCurrentUser ? await unlikeTrail(trail.id) : await likeTrail(trail.id)
       applyInteractionResult(result)
       return true
     } catch (error) {
-      interactionMap.value[trail.id] = previous
+      interactionMap.value[String(trail.id)] = previous
       flashStore.showError(resolveErrorMessage(error, previous.likedByCurrentUser ? '取消点赞失败' : '点赞失败'))
       return false
     } finally {
-      likePendingMap.value[trail.id] = false
+      likePendingMap.value[String(trail.id)] = false
     }
   }
 
@@ -93,34 +94,34 @@ export const useTrailInteractionStore = defineStore('trailInteraction', () => {
       favoritedByCurrentUser: !previous.favoritedByCurrentUser,
     }
 
-    interactionMap.value[trail.id] = optimistic
-    favoritePendingMap.value[trail.id] = true
+    interactionMap.value[String(trail.id)] = optimistic
+    favoritePendingMap.value[String(trail.id)] = true
 
     try {
       const result = previous.favoritedByCurrentUser ? await unfavoriteTrail(trail.id) : await favoriteTrail(trail.id)
       applyInteractionResult(result)
       return true
     } catch (error) {
-      interactionMap.value[trail.id] = previous
+      interactionMap.value[String(trail.id)] = previous
       flashStore.showError(resolveErrorMessage(error, previous.favoritedByCurrentUser ? '取消收藏失败' : '收藏失败'))
       return false
     } finally {
-      favoritePendingMap.value[trail.id] = false
+      favoritePendingMap.value[String(trail.id)] = false
     }
   }
 
   function applyInteractionResult(result: TrailInteractionResult) {
-    interactionMap.value[result.trailId] = normalizeInteraction(result)
+    interactionMap.value[String(result.trailId)] = normalizeInteraction(result)
   }
 
   function ensureInteraction(trail: TrailLikeState) {
-    const current = interactionMap.value[trail.id]
+    const current = interactionMap.value[String(trail.id)]
     if (current) {
       return { ...current }
     }
 
     const normalized = normalizeTrail(trail)
-    interactionMap.value[trail.id] = normalized
+    interactionMap.value[String(trail.id)] = normalized
     return { ...normalized }
   }
 

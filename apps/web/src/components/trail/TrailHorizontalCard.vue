@@ -2,9 +2,10 @@
 import { RouterLink } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
 import TagBadge from '../common/TagBadge.vue'
+import type { EntityId } from '../../types/id'
 
 const props = defineProps<{
-  id: number
+  id: EntityId
   image: string
   name: string
   difficulty: string

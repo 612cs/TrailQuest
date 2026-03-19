@@ -1,5 +1,7 @@
+import type { EntityId } from './id'
+
 export interface ReviewAuthor {
-  id: string
+  id: EntityId
   username: string
   avatar: string
   avatarBg: string
@@ -7,7 +9,7 @@ export interface ReviewAuthor {
 }
 
 export interface UserCard {
-  id: string
+  id: EntityId
   username: string
   avatar: string
   avatarBg: string
@@ -21,25 +23,25 @@ export interface UserCard {
 }
 
 export interface ReviewItem {
-  id: string
-  trailId: string
-  userId: string
-  parentId?: string | null
+  id: EntityId
+  trailId: EntityId
+  userId: EntityId
+  parentId?: EntityId | null
   rating?: number | null
   time: string
   text: string
   images: string[]
   replies: ReviewItem[]
-  replyTo?: string | null
+  replyTo?: EntityId | null
   author: ReviewAuthor
 }
 
 export interface CreateReviewPayload {
-  trailId: number
-  parentId?: string
+  trailId: EntityId
+  parentId?: EntityId
   rating?: number
   text: string
-  replyTo?: string
+  replyTo?: EntityId
   images?: string[]
 }
 
@@ -61,7 +63,7 @@ export interface FetchTrailReviewsParams {
 }
 
 export interface DeleteReviewResult {
-  deletedReviewId: string
+  deletedReviewId: EntityId
   trailRating: number
   trailReviewCount: number
 }
