@@ -110,6 +110,15 @@ public class TrackParseServiceImpl implements TrackParseService {
         List<List<TrackPoint>> lines = new ArrayList<>();
         List<TrackPoint> waypoints = new ArrayList<>();
 
+        NodeList gxTrackNodes = document.getElementsByTagNameNS("*", "Track");
+        for (int i = 0; i < gxTrackNodes.getLength(); i++) {
+            Element trackElement = (Element) gxTrackNodes.item(i);
+            List<TrackPoint> points = parseGxTrack(trackElement);
+            if (!points.isEmpty()) {
+                lines.add(points);
+            }
+        }
+
         NodeList lineStringNodes = document.getElementsByTagNameNS("*", "LineString");
         for (int i = 0; i < lineStringNodes.getLength(); i++) {
             Element lineString = (Element) lineStringNodes.item(i);
@@ -131,6 +140,56 @@ public class TrackParseServiceImpl implements TrackParseService {
         }
 
         return buildParseResult("kml", lines, waypoints);
+    }
+
+    private List<TrackPoint> parseGxTrack(Element trackElement) {
+        List<TrackPoint> points = new ArrayList<>();
+        List<Instant> times = new ArrayList<>();
+
+        NodeList childNodes = trackElement.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node node = childNodes.item(i);
+            if (node.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+
+            String nodeName = node.getLocalName() != null ? node.getLocalName() : node.getNodeName();
+            String text = node.getTextContent();
+            if (!StringUtils.hasText(text)) {
+                continue;
+            }
+
+            if ("when".equals(nodeName) || nodeName.endsWith(":when")) {
+                try {
+                    times.add(Instant.parse(text.trim()));
+                } catch (Exception ignored) {
+                    times.add(null);
+                }
+                continue;
+            }
+
+            if ("coord".equals(nodeName) || nodeName.endsWith(":coord")) {
+                TrackPoint point = parseGxCoord(text);
+                if (point != null) {
+                    points.add(point);
+                }
+            }
+        }
+
+        if (points.isEmpty()) {
+            return points;
+        }
+
+        for (int i = 0; i < points.size() && i < times.size(); i++) {
+            Instant time = times.get(i);
+            if (time == null) {
+                continue;
+            }
+            TrackPoint point = points.get(i);
+            points.set(i, new TrackPoint(point.lng, point.lat, point.ele, time));
+        }
+
+        return points;
     }
 
     private TrackParseResult buildParseResult(String sourceFormat, List<List<TrackPoint>> lines, List<TrackPoint> waypoints) {
@@ -291,6 +350,25 @@ public class TrackParseServiceImpl implements TrackParseService {
             points.add(new TrackPoint(lng, lat, ele, null));
         }
         return points;
+    }
+
+    private TrackPoint parseGxCoord(String coordText) {
+        if (!StringUtils.hasText(coordText)) {
+            return null;
+        }
+
+        String[] values = coordText.trim().split("\\s+");
+        if (values.length < 2) {
+            return null;
+        }
+
+        BigDecimal lng = new BigDecimal(values[0].trim());
+        BigDecimal lat = new BigDecimal(values[1].trim());
+        BigDecimal ele = null;
+        if (values.length >= 3 && StringUtils.hasText(values[2])) {
+            ele = new BigDecimal(values[2].trim());
+        }
+        return new TrackPoint(lng, lat, ele, null);
     }
 
     private String findChildText(Element parent, String localName) {
