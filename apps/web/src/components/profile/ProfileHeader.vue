@@ -25,7 +25,11 @@ defineEmits<{
           />
           <span v-else>{{ userStore.profile.avatar }}</span>
         </div>
-        <button class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-lg border-2" style="border-color: var(--bg-card);">
+        <button
+          class="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-lg border-2"
+          style="border-color: var(--bg-card);"
+          @click="$emit('show-edit')"
+        >
           <BaseIcon name="Pencil" :size="14" />
         </button>
       </div>

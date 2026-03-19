@@ -12,7 +12,7 @@ export interface UploadStsPayload {
 }
 
 export interface MediaFilePayload {
-  mediaId: number
+  mediaId: string
   url: string
   objectKey: string
   bizType: 'avatar' | 'trail_cover' | 'trail_gallery' | 'review'

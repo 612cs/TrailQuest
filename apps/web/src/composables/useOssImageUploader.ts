@@ -10,6 +10,7 @@ export interface UploadedImageItem {
   id: string
   localUrl: string
   remoteUrl: string
+  mediaId: string | null
   progress: number
   status: 'uploading' | 'success' | 'error'
   errorMessage: string
@@ -78,6 +79,7 @@ export function useOssImageUploader(options: UseOssImageUploaderOptions) {
       id,
       localUrl,
       remoteUrl: '',
+      mediaId: null,
       progress: 0,
       status: 'uploading',
       errorMessage: '',
@@ -124,6 +126,7 @@ export function useOssImageUploader(options: UseOssImageUploaderOptions) {
       })
 
       patchItem(id, {
+        mediaId: remote.mediaId,
         remoteUrl: remote.url,
         progress: 100,
         status: 'success',

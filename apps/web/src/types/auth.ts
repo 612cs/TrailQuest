@@ -5,6 +5,8 @@ export interface CurrentUser {
   avatarBg: string
   avatarMediaId?: string | null
   avatarMediaUrl?: string | null
+  bio?: string | null
+  location?: string | null
   email?: string
   role: 'USER' | 'ADMIN'
 }

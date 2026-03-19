@@ -29,9 +29,7 @@ import com.sheng.hikingbackend.config.OssProperties;
 import com.sheng.hikingbackend.dto.upload.CompleteUploadRequest;
 import com.sheng.hikingbackend.dto.upload.CreateUploadStsRequest;
 import com.sheng.hikingbackend.entity.MediaFile;
-import com.sheng.hikingbackend.entity.User;
 import com.sheng.hikingbackend.mapper.MediaFileMapper;
-import com.sheng.hikingbackend.mapper.UserMapper;
 import com.sheng.hikingbackend.service.UploadService;
 import com.sheng.hikingbackend.vo.upload.MediaFileVo;
 import com.sheng.hikingbackend.vo.upload.UploadStsVo;
@@ -50,7 +48,6 @@ public class UploadServiceImpl implements UploadService {
 
     private final OssProperties ossProperties;
     private final MediaFileMapper mediaFileMapper;
-    private final UserMapper userMapper;
     private final StringRedisTemplate stringRedisTemplate;
 
     @Override
@@ -118,15 +115,6 @@ public class UploadServiceImpl implements UploadService {
                 return MediaFileVo.from(existing);
             }
             throw BusinessException.badRequest("MEDIA_FILE_ALREADY_EXISTS", "该文件已存在，请重新上传");
-        }
-
-        if (bizType == MediaBizType.AVATAR) {
-            User user = userMapper.selectById(userId);
-            if (user == null) {
-                throw BusinessException.notFound("USER_NOT_FOUND", "用户不存在");
-            }
-            user.setAvatarMediaId(mediaFile.getId());
-            userMapper.updateById(user);
         }
 
         clearIssuedObjectKey(request.getObjectKey());

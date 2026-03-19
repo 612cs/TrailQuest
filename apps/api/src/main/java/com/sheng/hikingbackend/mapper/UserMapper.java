@@ -25,6 +25,8 @@ public interface UserMapper extends BaseMapper<User> {
               u.avatar_bg,
               mf.url AS avatar_media_url,
               u.role,
+              u.location,
+              u.bio,
               u.created_at,
               (
                 SELECT COUNT(*)

@@ -20,6 +20,8 @@ public class CurrentUserVo {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long avatarMediaId;
     private String avatarMediaUrl;
+    private String bio;
+    private String location;
     private String email;
     private UserRole role;
 
@@ -31,6 +33,8 @@ public class CurrentUserVo {
                 .avatarBg(user.getAvatarBg())
                 .avatarMediaId(user.getAvatarMediaId())
                 .avatarMediaUrl(avatarMediaUrl)
+                .bio(user.getBio())
+                .location(user.getLocation())
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();

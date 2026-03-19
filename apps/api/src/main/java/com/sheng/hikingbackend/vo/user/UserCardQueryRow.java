@@ -20,4 +20,6 @@ public class UserCardQueryRow {
     private LocalDateTime createdAt;
     private Integer postCount;
     private Integer savedCount;
+    private String location;
+    private String bio;
 }

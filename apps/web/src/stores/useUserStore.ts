@@ -27,6 +27,13 @@ interface AuthActionResult {
   message?: string
 }
 
+interface SaveProfilePayload {
+  username: string
+  bio?: string | null
+  location?: string | null
+  avatarMediaId?: string | null
+}
+
 export const useUserStore = defineStore('user', () => {
   const profile = ref<UserProfile | null>(null)
   const token = ref('')
@@ -69,11 +76,6 @@ export const useUserStore = defineStore('user', () => {
   )
 
   const isLoggedIn = computed(() => !!token.value && !!profile.value)
-
-  function updateProfile(updates: Partial<UserProfile>) {
-    if (!profile.value) return
-    profile.value = { ...profile.value, ...updates }
-  }
 
   async function login(email?: string, password?: string): Promise<AuthActionResult> {
     if (!email || !password) {
@@ -131,6 +133,25 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function saveProfile(updates: SaveProfilePayload): Promise<AuthActionResult> {
+    if (!profile.value) {
+      return { success: false, message: '请先登录后再编辑资料' }
+    }
+
+    try {
+      const currentUser = await authApi.updateProfile({
+        username: updates.username,
+        bio: normalizeOptional(updates.bio),
+        location: normalizeOptional(updates.location),
+        avatarMediaId: updates.avatarMediaId ?? profile.value.avatarMediaId ?? null,
+      })
+      profile.value = buildProfile(currentUser)
+      return { success: true }
+    } catch (error) {
+      return { success: false, message: getErrorMessage(error) }
+    }
+  }
+
   function applyAuthPayload(accessToken: string, currentUser: CurrentUser) {
     token.value = accessToken
     profile.value = buildProfile(currentUser)
@@ -149,9 +170,14 @@ export const useUserStore = defineStore('user', () => {
       joinDate: '2026年3月',
       postCount: 0,
       savedCount: 0,
-      bio: user.role === 'ADMIN' ? '负责内容与用户管理。' : '热爱自然，探索未知。',
-      location: '未知地点',
+      bio: user.bio?.trim() || '',
+      location: user.location?.trim() || '',
     }
+  }
+
+  function normalizeOptional(value?: string | null) {
+    const trimmed = value?.trim()
+    return trimmed ? trimmed : null
   }
 
   function getErrorMessage(error: unknown) {
@@ -170,11 +196,11 @@ export const useUserStore = defineStore('user', () => {
     isLoggedIn,
     isBootstrapping,
     showAuthModal,
-    updateProfile,
     login,
     register,
     logout,
     requireAuth,
     bootstrap,
+    saveProfile,
   }
 })

@@ -48,6 +48,10 @@ export const http = {
     const response = await httpClient.get<ApiResponse<T>>(path, config)
     return unwrap(response.data, response.status)
   },
+  async put<T>(path: string, data?: unknown, config?: AxiosRequestConfig) {
+    const response = await httpClient.put<ApiResponse<T>>(path, data, config)
+    return unwrap(response.data, response.status)
+  },
   async post<T>(path: string, data?: unknown, config?: AxiosRequestConfig) {
     const response = await httpClient.post<ApiResponse<T>>(path, data, config)
     return unwrap(response.data, response.status)

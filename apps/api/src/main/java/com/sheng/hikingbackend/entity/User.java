@@ -28,6 +28,10 @@ public class User {
     @TableField("avatar_media_id")
     private Long avatarMediaId;
 
+    private String bio;
+
+    private String location;
+
     private String email;
 
     @TableField("password_hash")

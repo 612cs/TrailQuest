@@ -346,6 +346,8 @@ CREATE TABLE `users` (
   `avatar` varchar(16) NOT NULL COMMENT '头像缩写',
   `avatar_bg` varchar(16) NOT NULL COMMENT '头像背景色',
   `avatar_media_id` bigint DEFAULT NULL COMMENT '头像媒体文件ID',
+  `bio` varchar(300) DEFAULT NULL COMMENT '个人简介',
+  `location` varchar(100) DEFAULT NULL COMMENT '所在地',
   `email` varchar(100) NOT NULL COMMENT '邮箱',
   `password_hash` varchar(255) NOT NULL COMMENT '密码哈希',
   `role` enum('USER','ADMIN') NOT NULL DEFAULT 'USER' COMMENT '用户角色',
@@ -360,12 +362,12 @@ CREATE TABLE `users` (
 -- Records of users
 -- ----------------------------
 BEGIN;
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (101, 'Sarah M.', 'SM', '#8b5cf6', NULL, 'sarah@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'USER', '2026-03-12 15:58:38');
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (102, '云游者', 'YY', '#0891b2', NULL, 'yunyou@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'ADMIN', '2026-03-12 15:58:38');
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (104, '@hiking_queen', 'HQ', '#8b5cf6', NULL, 'queen@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'USER', '2026-03-12 15:58:38');
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033122436212338690, '猪猪侠', '猪猪', '#ea580c', 2033225575586447361, 'admin@qq.com', '$2a$10$tmpYeUZ8Fm5L.7SErKaz8OljlRb/bjid38pOAZp2YY3AEqujWm5Zi', 'USER', '2026-03-15 10:05:37');
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033210514809671681, 'oss_test_user', 'OS', '#059669', 2033216883554000897, 'oss-test-20260315@example.com', '$2a$10$npo1CdxmpmY1GugYYCNF6uZbann0a27.ynQoJivY7OJNOmxqKaIWO', 'USER', '2026-03-15 15:55:36');
-INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033496679581421570, 'SHENG', 'SH', '#059669', NULL, '2516824318@qq.com', '$2a$10$h9luatk4n5Jpm3lwzcbgaOlc4AXj3.0c0m/zVeVfVHiYzIN3lklqa', 'USER', '2026-03-16 10:52:43');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `bio`, `location`, `email`, `password_hash`, `role`, `created_at`) VALUES (101, 'Sarah M.', 'SM', '#8b5cf6', NULL, '偏爱清晨出发和沿海风景线，喜欢把路线整理成轻量周末指南。', '浙江 杭州', 'sarah@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'USER', '2026-03-12 15:58:38');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `bio`, `location`, `email`, `password_hash`, `role`, `created_at`) VALUES (102, '云游者', 'YY', '#0891b2', NULL, '负责社区内容审核，也会定期发布长线徒步经验。', '云南 大理', 'yunyou@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'ADMIN', '2026-03-12 15:58:38');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `bio`, `location`, `email`, `password_hash`, `role`, `created_at`) VALUES (104, '@hiking_queen', 'HQ', '#8b5cf6', NULL, '重装徒步和露营爱好者，正在记录自己的高海拔路线清单。', '四川 成都', 'queen@example.com', '$2a$10$XQ4J0sWlD0pW3Gm0k0M8Fu2u92G/Ik2Vq6KYFAsktwVDqveufqdp2', 'USER', '2026-03-12 15:58:38');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `bio`, `location`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033122436212338690, '猪猪侠', '猪猪', '#ea580c', 2033225575586447361, '喜欢城市周边徒步和轻量露营，路线以轻松出片为主。', '广东 深圳', 'admin@qq.com', '$2a$10$tmpYeUZ8Fm5L.7SErKaz8OljlRb/bjid38pOAZp2YY3AEqujWm5Zi', 'USER', '2026-03-15 10:05:37');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `bio`, `location`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033210514809671681, 'oss_test_user', 'OS', '#059669', 2033216883554000897, '用来验证真实上传链路与资料更新的测试账号。', '广东 广州', 'oss-test-20260315@example.com', '$2a$10$npo1CdxmpmY1GugYYCNF6uZbann0a27.ynQoJivY7OJNOmxqKaIWO', 'USER', '2026-03-15 15:55:36');
+INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `bio`, `location`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033496679581421570, 'SHENG', 'SH', '#059669', NULL, '喜欢把真实需求拆成可迭代模块，一边做产品一边走山。', '上海', '2516824318@qq.com', '$2a$10$h9luatk4n5Jpm3lwzcbgaOlc4AXj3.0c0m/zVeVfVHiYzIN3lklqa', 'USER', '2026-03-16 10:52:43');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

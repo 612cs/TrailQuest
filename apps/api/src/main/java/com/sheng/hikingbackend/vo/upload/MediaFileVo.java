@@ -1,5 +1,7 @@
 package com.sheng.hikingbackend.vo.upload;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.sheng.hikingbackend.entity.MediaFile;
 
 import lombok.Builder;
@@ -9,6 +11,7 @@ import lombok.Getter;
 @Builder
 public class MediaFileVo {
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long mediaId;
     private String url;
     private String objectKey;
