@@ -28,6 +28,7 @@ const formData = ref({
 })
 
 const currentAvatarUpload = computed(() => avatarUploader.items.value[0] ?? null)
+const isAvatarUploading = computed(() => avatarUploader.isUploading.value)
 const previewAvatarUrl = computed(() => currentAvatarUpload.value?.localUrl || userStore.profile?.avatarMediaUrl || '')
 const avatarUploadError = computed(() => currentAvatarUpload.value?.status === 'error' ? currentAvatarUpload.value.errorMessage : '')
 const pendingAvatarMediaId = computed(() => {
@@ -36,7 +37,7 @@ const pendingAvatarMediaId = computed(() => {
   }
   return userStore.profile?.avatarMediaId ?? null
 })
-const saveDisabled = computed(() => !userStore.profile || isSaving.value || avatarUploader.isUploading.value)
+const saveDisabled = computed(() => !userStore.profile || isSaving.value || isAvatarUploading.value)
 const previewAvatarText = computed(() => buildAvatarText(formData.value.username, userStore.profile?.avatar ?? 'U'))
 const previewAvatarBg = computed(() => userStore.profile?.avatarBg ?? 'var(--primary-500)')
 
@@ -122,9 +123,13 @@ function buildAvatarText(username: string, fallback: string) {
   >
     <div class="space-y-5">
       <div class="flex items-center gap-4 rounded-2xl border p-4" style="border-color: var(--border-default); background-color: var(--bg-tag);">
-        <div class="relative shrink-0">
+        <button
+          type="button"
+          class="group relative shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60"
+          @click="triggerAvatarUpload"
+        >
           <div
-            class="flex h-[4.5rem] w-[4.5rem] items-center justify-center overflow-hidden rounded-2xl border text-lg font-bold text-white shadow-inner sm:h-20 sm:w-20"
+            class="flex h-[4.5rem] w-[4.5rem] items-center justify-center overflow-hidden rounded-2xl border text-lg font-bold text-white shadow-inner transition-transform group-hover:scale-[1.02] sm:h-20 sm:w-20"
             :style="{ background: previewAvatarBg, borderColor: 'var(--border-default)' }"
           >
             <img
@@ -136,30 +141,29 @@ function buildAvatarText(username: string, fallback: string) {
             <span v-else>{{ previewAvatarText }}</span>
           </div>
           <div
-            v-if="avatarUploader.isUploading"
+            v-if="isAvatarUploading"
             class="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/45 text-white"
           >
             <span class="text-xs font-medium">{{ currentAvatarUpload?.progress ?? 0 }}%</span>
           </div>
-        </div>
+          <div
+            v-else
+            class="absolute inset-0 flex items-end justify-center rounded-2xl bg-gradient-to-t from-black/50 via-black/10 to-transparent px-2 py-2 opacity-0 transition-opacity group-hover:opacity-100"
+          >
+            <span class="inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[11px] font-medium text-slate-900">
+              <BaseIcon name="ImageUp" :size="12" />
+              更换头像
+            </span>
+          </div>
+        </button>
 
         <div class="min-w-0 flex-1 space-y-2">
           <div>
             <p class="text-sm font-semibold" style="color: var(--text-primary);">头像</p>
             <p class="text-xs leading-5" style="color: var(--text-secondary);">
-              支持 JPG、PNG、WEBP，上传后仅在点击“保存更改”后正式生效。
+              点击左侧头像即可更换，支持 JPG、PNG、WEBP，上传后仅在点击“保存更改”后正式生效。
             </p>
           </div>
-
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-colors hover:border-primary-500/40 hover:bg-primary-500/8"
-            style="border-color: var(--border-default); color: var(--text-primary);"
-            @click="triggerAvatarUpload"
-          >
-            <BaseIcon name="ImageUp" :size="16" />
-            {{ currentAvatarUpload ? '重新上传头像' : '上传头像' }}
-          </button>
 
           <p v-if="avatarUploadError" class="text-xs" style="color: var(--color-hard);">
             {{ avatarUploadError }}
@@ -226,7 +230,7 @@ function buildAvatarText(username: string, fallback: string) {
           :disabled="saveDisabled"
           @click="handleSave"
         >
-          {{ avatarUploader.isUploading ? '头像上传中...' : isSaving ? '保存中...' : '保存更改' }}
+          {{ isAvatarUploading ? '头像上传中...' : isSaving ? '保存中...' : '保存更改' }}
         </button>
       </div>
     </template>
