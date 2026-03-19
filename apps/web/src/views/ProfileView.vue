@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import * as authApi from '../api/auth'
 import BaseIcon from '../components/common/BaseIcon.vue'
@@ -15,16 +15,19 @@ import type { ProfileTrailFeedState, UserTrailListItem } from '../types/profile'
 
 const PAGE_SIZE = 10
 
+type ProfileTab = 'posts' | 'saved'
+
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const trailInteractionStore = useTrailInteractionStore()
 
-const activeTab = ref<'posts' | 'saved'>('posts')
+const activeTab = ref<ProfileTab>(resolveTab(route.query.tab))
 const showEditModal = ref(false)
 const showHikingProfileModal = ref(false)
 const showSettingsModal = ref(false)
 
-const feeds = reactive<Record<'posts' | 'saved', ProfileTrailFeedState>>({
+const feeds = reactive<Record<ProfileTab, ProfileTrailFeedState>>({
   posts: createFeedState(),
   saved: createFeedState(),
 })
@@ -50,7 +53,18 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => route.query.tab,
+  (tab) => {
+    const normalizedTab = resolveTab(tab)
+    if (activeTab.value !== normalizedTab) {
+      activeTab.value = normalizedTab
+    }
+  },
+)
+
 watch(activeTab, async (tab) => {
+  syncTabQuery(tab)
   await ensureFeedLoaded(tab)
 })
 
@@ -77,7 +91,7 @@ function resetFeeds() {
   feeds.saved = createFeedState()
 }
 
-async function ensureFeedLoaded(tab: 'posts' | 'saved') {
+async function ensureFeedLoaded(tab: ProfileTab) {
   const feed = feeds[tab]
   if (feed.initialized || feed.isLoading) {
     return
@@ -85,7 +99,7 @@ async function ensureFeedLoaded(tab: 'posts' | 'saved') {
   await loadFeed(tab, true)
 }
 
-async function loadFeed(tab: 'posts' | 'saved', reset = false) {
+async function loadFeed(tab: ProfileTab, reset = false) {
   if (!userStore.isLoggedIn) {
     return
   }
@@ -150,6 +164,31 @@ async function handleToggleFavorite(item: UserTrailListItem) {
     await loadFeed('saved')
   }
 }
+
+function setActiveTab(tab: ProfileTab) {
+  activeTab.value = tab
+}
+
+function resolveTab(tab: unknown): ProfileTab {
+  return tab === 'saved' ? 'saved' : 'posts'
+}
+
+function syncTabQuery(tab: ProfileTab) {
+  const nextTab = tab === 'posts' ? undefined : tab
+  const currentTab = typeof route.query.tab === 'string' ? route.query.tab : undefined
+
+  if (currentTab === nextTab || (!currentTab && !nextTab)) {
+    return
+  }
+
+  void router.replace({
+    name: 'Profile',
+    query: {
+      ...route.query,
+      tab: nextTab,
+    },
+  })
+}
 </script>
 
 <template>
@@ -171,7 +210,7 @@ async function handleToggleFavorite(item: UserTrailListItem) {
             class="flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium transition-colors"
             :class="activeTab === 'posts' ? 'border-primary-500 text-primary-500' : 'border-transparent'"
             :style="activeTab !== 'posts' ? 'color: var(--text-secondary)' : ''"
-            @click="activeTab = 'posts'"
+            @click="setActiveTab('posts')"
           >
             <BaseIcon name="FileText" :size="16" />
             我的发布
@@ -180,7 +219,7 @@ async function handleToggleFavorite(item: UserTrailListItem) {
             class="flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium transition-colors"
             :class="activeTab === 'saved' ? 'border-primary-500 text-primary-500' : 'border-transparent'"
             :style="activeTab !== 'saved' ? 'color: var(--text-secondary)' : ''"
-            @click="activeTab = 'saved'"
+            @click="setActiveTab('saved')"
           >
             <BaseIcon name="Bookmark" :size="16" />
             我的收藏
