@@ -1,6 +1,8 @@
 import { http } from './http'
 import type { AuthPayload, CurrentUser } from '../types/auth'
 import type { HikingProfile } from '../types/hikingProfile'
+import type { PageResponse } from '../types/trail'
+import type { UserTrailListItem } from '../types/profile'
 
 interface LoginRequest {
   email: string
@@ -44,4 +46,16 @@ export function updateProfile(payload: UpdateProfileRequest) {
 
 export function updateHikingProfile(payload: UpdateHikingProfileRequest) {
   return http.put<CurrentUser>('/api/users/me/hiking-profile', payload)
+}
+
+export function fetchMyPublishedTrails(pageNum = 1, pageSize = 10) {
+  return http.get<PageResponse<UserTrailListItem>>('/api/users/me/published-trails', {
+    params: { pageNum, pageSize },
+  })
+}
+
+export function fetchMyFavoriteTrails(pageNum = 1, pageSize = 10) {
+  return http.get<PageResponse<UserTrailListItem>>('/api/users/me/favorite-trails', {
+    params: { pageNum, pageSize },
+  })
 }

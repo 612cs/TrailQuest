@@ -12,6 +12,8 @@ export interface CurrentUser {
   hikingProfile?: HikingProfile | null
   email?: string
   role: 'USER' | 'ADMIN'
+  postCount: number
+  savedCount: number
 }
 
 export interface AuthPayload {

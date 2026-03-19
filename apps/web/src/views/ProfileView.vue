@@ -1,90 +1,217 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import BaseIcon from '../components/common/BaseIcon.vue'
-import ProfileHeader from '../components/profile/ProfileHeader.vue'
-import Pagination from '../components/common/Pagination.vue'
-import EditProfileModal from '../components/profile/EditProfileModal.vue'
-import AccountSettingsModal from '../components/profile/AccountSettingsModal.vue'
-import HikingProfileModal from '../components/profile/HikingProfileModal.vue'
-import { useUserStore } from '../stores/useUserStore'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
+import * as authApi from '../api/auth'
+import BaseIcon from '../components/common/BaseIcon.vue'
+import AccountSettingsModal from '../components/profile/AccountSettingsModal.vue'
+import EditProfileModal from '../components/profile/EditProfileModal.vue'
+import HikingProfileModal from '../components/profile/HikingProfileModal.vue'
+import ProfileHeader from '../components/profile/ProfileHeader.vue'
+import ProfileTrailList from '../components/profile/ProfileTrailList.vue'
+import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
+import { useUserStore } from '../stores/useUserStore'
+import type { ProfileTrailFeedState, UserTrailListItem } from '../types/profile'
+
+const PAGE_SIZE = 10
+
+const router = useRouter()
 const userStore = useUserStore()
+const trailInteractionStore = useTrailInteractionStore()
 
 const activeTab = ref<'posts' | 'saved'>('posts')
-const currentPage = ref(1)
-const totalPages = 3
-
 const showEditModal = ref(false)
 const showHikingProfileModal = ref(false)
 const showSettingsModal = ref(false)
 
-const posts = [
-  { id: 1, image: '/trail-pine.png', title: '隐藏海岸小径指南', editTime: '2小时前编辑', visibility: '公开' },
-  { id: 2, image: '/trail-foggy.png', title: '高山脊摄影点', editTime: '昨天编辑', visibility: '草稿' },
-  { id: 3, image: '/trail-lake.png', title: '城市咖啡之旅 - 市中心', editTime: '3天前编辑', visibility: '私密' },
-  { id: 4, image: '/hero-mountain.png', title: '原生林探险', editTime: '1周前编辑', visibility: '公开' },
-]
+const feeds = reactive<Record<'posts' | 'saved', ProfileTrailFeedState>>({
+  posts: createFeedState(),
+  saved: createFeedState(),
+})
+
+const currentFeed = computed(() => feeds[activeTab.value])
+const currentItems = computed(() =>
+  currentFeed.value.items.map((item) => ({
+    ...item,
+    ...trailInteractionStore.applyToTrail(item),
+  })),
+)
+
+watch(
+  () => userStore.isLoggedIn,
+  (isLoggedIn) => {
+    if (!isLoggedIn) {
+      resetFeeds()
+      return
+    }
+
+    void ensureFeedLoaded(activeTab.value)
+  },
+  { immediate: true },
+)
+
+watch(activeTab, async (tab) => {
+  await ensureFeedLoaded(tab)
+})
+
+onMounted(() => {
+  if (userStore.isLoggedIn) {
+    void ensureFeedLoaded(activeTab.value)
+  }
+})
+
+function createFeedState(): ProfileTrailFeedState {
+  return {
+    items: [],
+    pageNum: 1,
+    hasMore: true,
+    isLoading: false,
+    initialized: false,
+    errorMessage: '',
+    total: 0,
+  }
+}
+
+function resetFeeds() {
+  feeds.posts = createFeedState()
+  feeds.saved = createFeedState()
+}
+
+async function ensureFeedLoaded(tab: 'posts' | 'saved') {
+  const feed = feeds[tab]
+  if (feed.initialized || feed.isLoading) {
+    return
+  }
+  await loadFeed(tab, true)
+}
+
+async function loadFeed(tab: 'posts' | 'saved', reset = false) {
+  if (!userStore.isLoggedIn) {
+    return
+  }
+
+  const feed = feeds[tab]
+  if (feed.isLoading) {
+    return
+  }
+
+  if (!reset && !feed.hasMore) {
+    return
+  }
+
+  feed.isLoading = true
+  feed.errorMessage = ''
+
+  const targetPage = reset ? 1 : feed.pageNum
+
+  try {
+    const response = tab === 'posts'
+      ? await authApi.fetchMyPublishedTrails(targetPage, PAGE_SIZE)
+      : await authApi.fetchMyFavoriteTrails(targetPage, PAGE_SIZE)
+
+    trailInteractionStore.hydrateTrails(response.list)
+
+    feed.items = reset ? response.list : [...feed.items, ...response.list]
+    feed.pageNum = response.pageNum + 1
+    feed.total = response.total
+    feed.hasMore = response.pageNum < response.totalPages
+    feed.initialized = true
+  } catch (error) {
+    feed.errorMessage = error instanceof Error ? error.message : '路线加载失败'
+    feed.initialized = true
+  } finally {
+    feed.isLoading = false
+  }
+}
+
+async function handleLoadMore() {
+  await loadFeed(activeTab.value)
+}
+
+function openTrail(item: UserTrailListItem) {
+  void router.push(`/trail/${item.id}`)
+}
+
+async function handleToggleFavorite(item: UserTrailListItem) {
+  const didToggle = await trailInteractionStore.toggleFavorite(item)
+  if (!didToggle || activeTab.value !== 'saved' || !item.favoritedByCurrentUser) {
+    return
+  }
+
+  const savedFeed = feeds.saved
+  savedFeed.items = savedFeed.items.filter((entry) => entry.id !== item.id)
+  savedFeed.total = Math.max(savedFeed.total - 1, 0)
+
+  if (userStore.profile) {
+    userStore.profile.savedCount = Math.max(userStore.profile.savedCount - 1, 0)
+  }
+
+  if (savedFeed.items.length === 0 && savedFeed.hasMore) {
+    await loadFeed('saved')
+  }
+}
 </script>
 
 <template>
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
+  <main class="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6 sm:py-12">
     <template v-if="userStore.isLoggedIn">
-      <ProfileHeader 
+      <ProfileHeader
         @show-edit="showEditModal = true"
         @show-hiking-profile="showHikingProfileModal = true"
         @show-settings="showSettingsModal = true"
       />
 
-    <!-- Modals -->
-    <EditProfileModal v-model:show="showEditModal" />
-    <HikingProfileModal v-model:show="showHikingProfileModal" />
-    <AccountSettingsModal v-model:show="showSettingsModal" />
+      <EditProfileModal v-model:show="showEditModal" />
+      <HikingProfileModal v-model:show="showHikingProfileModal" />
+      <AccountSettingsModal v-model:show="showSettingsModal" />
 
-    <!-- Tabs & Content Card -->
-    <div class="card overflow-hidden">
-      <div class="flex items-center border-b" style="border-color: var(--border-default); background-color: var(--bg-tag);">
-        <button @click="activeTab = 'posts'" class="flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors" :class="activeTab === 'posts' ? 'border-primary-500 text-primary-500' : 'border-transparent'" :style="activeTab !== 'posts' ? 'color: var(--text-secondary)' : ''">
-          <BaseIcon name="FileText" :size="16" />
-          我的发布
-        </button>
-        <button @click="activeTab = 'saved'" class="flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors" :class="activeTab === 'saved' ? 'border-primary-500 text-primary-500' : 'border-transparent'" :style="activeTab !== 'saved' ? 'color: var(--text-secondary)' : ''">
-          <BaseIcon name="Bookmark" :size="16" />
-          我的收藏
-        </button>
-      </div>
-      <div class="divide-y" style="border-color: var(--border-default);">
-        <div v-for="post in posts" :key="post.id" class="flex items-center gap-4 p-4 hover:bg-primary-500/5 transition-colors cursor-pointer" style="border-color: var(--border-default);">
-          <div class="w-14 h-14 rounded-lg overflow-hidden shrink-0"><img :src="post.image" :alt="post.title" class="w-full h-full object-cover" /></div>
-          <div class="flex-1 min-w-0">
-            <h3 class="text-sm font-medium truncate" style="color: var(--text-primary);">{{ post.title }}</h3>
-            <p class="text-xs mt-1" style="color: var(--text-secondary);">{{ post.editTime }} • {{ post.visibility }}</p>
-          </div>
-          <BaseIcon name="ChevronRight" :size="16" style="color: var(--text-tertiary);" />
+      <div class="card overflow-hidden">
+        <div class="flex items-center border-b" style="border-color: var(--border-default); background-color: var(--bg-tag);">
+          <button
+            class="flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium transition-colors"
+            :class="activeTab === 'posts' ? 'border-primary-500 text-primary-500' : 'border-transparent'"
+            :style="activeTab !== 'posts' ? 'color: var(--text-secondary)' : ''"
+            @click="activeTab = 'posts'"
+          >
+            <BaseIcon name="FileText" :size="16" />
+            我的发布
+          </button>
+          <button
+            class="flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium transition-colors"
+            :class="activeTab === 'saved' ? 'border-primary-500 text-primary-500' : 'border-transparent'"
+            :style="activeTab !== 'saved' ? 'color: var(--text-secondary)' : ''"
+            @click="activeTab = 'saved'"
+          >
+            <BaseIcon name="Bookmark" :size="16" />
+            我的收藏
+          </button>
         </div>
-      </div>
-      <div class="flex items-center justify-between px-4 py-3" style="background-color: var(--bg-tag);">
-        <span class="text-xs" style="color: var(--text-tertiary);">显示第 1-4 条，共 24 条发布</span>
-        <Pagination
-          v-model:current="currentPage"
-          :total="totalPages"
-          :max-visible="3"
+
+        <ProfileTrailList
+          :items="currentItems"
+          :tab="activeTab"
+          :has-more="currentFeed.hasMore"
+          :is-loading="currentFeed.isLoading"
+          :error-message="currentFeed.errorMessage"
+          @load-more="handleLoadMore"
+          @open-trail="openTrail"
+          @toggle-favorite="handleToggleFavorite"
         />
       </div>
-    </div>
     </template>
-    
+
     <template v-else>
-      <div class="card p-8 sm:p-12 text-center rounded-2xl flex flex-col items-center justify-center min-h-[50vh]">
-        <div class="w-20 h-20 rounded-full flex items-center justify-center mb-6" style="background-color: var(--bg-tag); color: var(--color-primary-500);">
+      <div class="card flex min-h-[50vh] flex-col items-center justify-center rounded-2xl p-8 text-center sm:p-12">
+        <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full" style="background-color: var(--bg-tag); color: var(--color-primary-500);">
           <BaseIcon name="User" :size="36" />
         </div>
-        <h2 class="text-2xl font-bold mb-3" style="color: var(--text-primary);">欢迎来到 TrailQuest</h2>
-        <p class="text-sm sm:text-base mb-8 max-w-sm mx-auto leading-relaxed" style="color: var(--text-secondary);">
+        <h2 class="mb-3 text-2xl font-bold" style="color: var(--text-primary);">欢迎来到 TrailQuest</h2>
+        <p class="mx-auto mb-8 max-w-sm text-sm leading-relaxed sm:text-base" style="color: var(--text-secondary);">
           登录以查看您的个人资料、回味走过的路线以及管理您的收藏内容。
         </p>
-        <button 
+        <button
+          class="rounded-xl bg-primary-500 px-8 py-3 font-bold text-white shadow-lg shadow-primary-500/30 transition-all hover:bg-primary-600 hover:shadow-xl active:scale-[0.98]"
           @click="userStore.showAuthModal = true"
-          class="px-8 py-3 rounded-xl font-bold text-white bg-primary-500 hover:bg-primary-600 transition-all shadow-lg hover:shadow-xl shadow-primary-500/30 active:scale-[0.98]"
         >
           立即登录 / 注册
         </button>
@@ -92,13 +219,3 @@ const posts = [
     </template>
   </main>
 </template>
-
-<style scoped>
-.slide-enter-active, .slide-leave-active {
-  transition: transform 0.3s ease;
-}
-.slide-enter-from, .slide-leave-to {
-  transform: translateY(20px);
-  opacity: 0;
-}
-</style>

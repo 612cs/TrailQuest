@@ -1,10 +1,15 @@
 package com.sheng.hikingbackend.service.impl;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sheng.hikingbackend.common.PageRequest;
+import com.sheng.hikingbackend.common.PageResponse;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sheng.hikingbackend.common.enums.HikingExperienceLevel;
 import com.sheng.hikingbackend.common.enums.HikingPackPreference;
@@ -19,14 +24,19 @@ import com.sheng.hikingbackend.entity.MediaFile;
 import com.sheng.hikingbackend.entity.User;
 import com.sheng.hikingbackend.entity.UserHikingProfile;
 import com.sheng.hikingbackend.mapper.MediaFileMapper;
+import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.UserHikingProfileMapper;
 import com.sheng.hikingbackend.mapper.UserMapper;
+import com.sheng.hikingbackend.service.TrailService;
 import com.sheng.hikingbackend.service.UserService;
 import com.sheng.hikingbackend.service.UploadService;
 import com.sheng.hikingbackend.vo.auth.CurrentUserVo;
 import com.sheng.hikingbackend.vo.user.HikingProfileVo;
 import com.sheng.hikingbackend.vo.user.UserCardQueryRow;
 import com.sheng.hikingbackend.vo.user.UserCardVo;
+import com.sheng.hikingbackend.vo.user.UserStatsQueryRow;
+import com.sheng.hikingbackend.vo.user.UserTrailListItemVo;
+import com.sheng.hikingbackend.vo.trail.TrailQueryRow;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,6 +51,8 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final MediaFileMapper mediaFileMapper;
     private final UserHikingProfileMapper userHikingProfileMapper;
+    private final TrailMapper trailMapper;
+    private final TrailService trailService;
     private final UploadService uploadService;
 
     @Override
@@ -117,6 +129,26 @@ public class UserServiceImpl implements UserService {
         return buildCurrentUser(user);
     }
 
+    @Override
+    public PageResponse<UserTrailListItemVo> getCurrentUserPublishedTrails(Long userId, PageRequest request) {
+        Page<TrailQueryRow> page = Page.of(request.getPageNum(), request.getPageSize());
+        IPage<TrailQueryRow> pageResult = trailMapper.selectPublishedTrailsByUserId(page, userId, userId);
+        List<UserTrailListItemVo> list = pageResult.getRecords().stream()
+                .map(this::toUserTrailListItem)
+                .toList();
+        return PageResponse.of(list, pageResult.getCurrent(), pageResult.getSize(), pageResult.getTotal());
+    }
+
+    @Override
+    public PageResponse<UserTrailListItemVo> getCurrentUserFavoriteTrails(Long userId, PageRequest request) {
+        Page<TrailQueryRow> page = Page.of(request.getPageNum(), request.getPageSize());
+        IPage<TrailQueryRow> pageResult = trailMapper.selectFavoriteTrailsByUserId(page, userId, userId);
+        List<UserTrailListItemVo> list = pageResult.getRecords().stream()
+                .map(this::toUserTrailListItem)
+                .toList();
+        return PageResponse.of(list, pageResult.getCurrent(), pageResult.getSize(), pageResult.getTotal());
+    }
+
     private String normalizeNullable(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
     }
@@ -135,10 +167,30 @@ public class UserServiceImpl implements UserService {
     }
 
     private CurrentUserVo buildCurrentUser(User user) {
+        UserStatsQueryRow stats = userMapper.selectUserStatsById(user.getId());
         return CurrentUserVo.from(
                 user,
                 uploadService.resolveAvatarUrl(user.getAvatarMediaId()),
-                HikingProfileVo.from(userHikingProfileMapper.selectByUserId(user.getId())));
+                HikingProfileVo.from(userHikingProfileMapper.selectByUserId(user.getId())),
+                stats == null ? 0 : stats.getPostCount(),
+                stats == null ? 0 : stats.getSavedCount());
+    }
+
+    private UserTrailListItemVo toUserTrailListItem(TrailQueryRow row) {
+        return UserTrailListItemVo.builder()
+                .id(row.getId())
+                .image(row.getImage())
+                .name(row.getName())
+                .location(row.getLocation())
+                .authorId(row.getAuthorId())
+                .authorUsername(row.getAuthorUsername())
+                .publishTime(trailService.formatPublishTime(row.getCreatedAt()))
+                .createdAt(row.getCreatedAt())
+                .favoritedByCurrentUser(Boolean.TRUE.equals(row.getFavoritedByCurrentUser()))
+                .likedByCurrentUser(Boolean.TRUE.equals(row.getLikedByCurrentUser()))
+                .favorites(row.getFavorites() == null ? 0 : row.getFavorites())
+                .likes(row.getLikes() == null ? 0 : row.getLikes())
+                .build();
     }
 
     private void applyHikingProfile(UserHikingProfile profile, HikingProfileRequest request) {

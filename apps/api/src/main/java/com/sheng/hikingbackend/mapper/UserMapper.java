@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sheng.hikingbackend.entity.User;
 import com.sheng.hikingbackend.vo.user.UserCardQueryRow;
+import com.sheng.hikingbackend.vo.user.UserStatsQueryRow;
 
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
@@ -44,4 +45,19 @@ public interface UserMapper extends BaseMapper<User> {
             LIMIT 1
             """)
     UserCardQueryRow selectUserCardById(@Param("userId") Long userId);
+
+    @Select("""
+            SELECT
+              (
+                SELECT COUNT(*)
+                FROM trails t
+                WHERE t.author_id = #{userId}
+              ) AS post_count,
+              (
+                SELECT COUNT(*)
+                FROM trail_favorites tf
+                WHERE tf.user_id = #{userId}
+              ) AS saved_count
+            """)
+    UserStatsQueryRow selectUserStatsById(@Param("userId") Long userId);
 }

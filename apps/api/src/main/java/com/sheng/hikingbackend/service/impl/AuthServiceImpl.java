@@ -30,6 +30,7 @@ import com.sheng.hikingbackend.service.UploadService;
 import com.sheng.hikingbackend.vo.auth.CurrentUserVo;
 import com.sheng.hikingbackend.vo.auth.LoginResponse;
 import com.sheng.hikingbackend.vo.user.HikingProfileVo;
+import com.sheng.hikingbackend.vo.user.UserStatsQueryRow;
 
 import lombok.RequiredArgsConstructor;
 
@@ -128,10 +129,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private CurrentUserVo buildCurrentUser(User user) {
+        UserStatsQueryRow stats = userMapper.selectUserStatsById(user.getId());
         return CurrentUserVo.from(
                 user,
                 uploadService.resolveAvatarUrl(user.getAvatarMediaId()),
-                HikingProfileVo.from(userHikingProfileMapper.selectByUserId(user.getId())));
+                HikingProfileVo.from(userHikingProfileMapper.selectByUserId(user.getId())),
+                stats == null ? 0 : stats.getPostCount(),
+                stats == null ? 0 : stats.getSavedCount());
     }
 
     private void saveHikingProfile(Long userId, HikingProfileRequest request) {

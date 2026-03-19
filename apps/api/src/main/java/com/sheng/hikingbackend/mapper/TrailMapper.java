@@ -214,6 +214,89 @@ public interface TrailMapper extends BaseMapper<Trail> {
             """)
     TrailInteractionVo selectTrailInteraction(@Param("trailId") Long trailId, @Param("userId") Long userId);
 
+    @Select("""
+            <script>
+            SELECT
+              t.id,
+              t.image,
+              t.name,
+              t.location,
+              t.favorites,
+              t.likes,
+              <choose>
+                <when test="userId != null">
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_likes tl
+                    WHERE tl.trail_id = t.id AND tl.user_id = #{userId}
+                  ) AS liked_by_current_user,
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_favorites tf
+                    WHERE tf.trail_id = t.id AND tf.user_id = #{userId}
+                  ) AS favorited_by_current_user,
+                </when>
+                <otherwise>
+                  FALSE AS liked_by_current_user,
+                  FALSE AS favorited_by_current_user,
+                </otherwise>
+              </choose>
+              t.author_id,
+              t.created_at,
+              u.username AS author_username
+            FROM trails t
+            JOIN users u ON u.id = t.author_id
+            WHERE t.author_id = #{currentUserId}
+            ORDER BY t.created_at DESC
+            </script>
+            """)
+    IPage<TrailQueryRow> selectPublishedTrailsByUserId(
+            Page<TrailQueryRow> page,
+            @Param("currentUserId") Long currentUserId,
+            @Param("userId") Long userId);
+
+    @Select("""
+            <script>
+            SELECT
+              t.id,
+              t.image,
+              t.name,
+              t.location,
+              t.favorites,
+              t.likes,
+              <choose>
+                <when test="userId != null">
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_likes tl
+                    WHERE tl.trail_id = t.id AND tl.user_id = #{userId}
+                  ) AS liked_by_current_user,
+                  EXISTS(
+                    SELECT 1
+                    FROM trail_favorites tf
+                    WHERE tf.trail_id = t.id AND tf.user_id = #{userId}
+                  ) AS favorited_by_current_user,
+                </when>
+                <otherwise>
+                  FALSE AS liked_by_current_user,
+                  FALSE AS favorited_by_current_user,
+                </otherwise>
+              </choose>
+              t.author_id,
+              t.created_at,
+              u.username AS author_username
+            FROM trail_favorites favorite
+            JOIN trails t ON t.id = favorite.trail_id
+            JOIN users u ON u.id = t.author_id
+            WHERE favorite.user_id = #{currentUserId}
+            ORDER BY favorite.created_at DESC, favorite.id DESC
+            </script>
+            """)
+    IPage<TrailQueryRow> selectFavoriteTrailsByUserId(
+            Page<TrailQueryRow> page,
+            @Param("currentUserId") Long currentUserId,
+            @Param("userId") Long userId);
+
     @Update("""
             UPDATE trails
             SET likes = likes + 1

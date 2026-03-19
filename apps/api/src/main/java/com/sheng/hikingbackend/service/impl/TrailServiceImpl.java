@@ -95,7 +95,8 @@ public class TrailServiceImpl implements TrailService {
         return getTrailInteraction(trailId, currentUserId);
     }
 
-    private TrailDetailVo toTrailDetailVo(TrailQueryRow row) {
+    @Override
+    public TrailDetailVo toTrailDetailVo(TrailQueryRow row) {
         return TrailDetailVo.builder()
                 .id(row.getId())
                 .image(row.getImage())
@@ -155,7 +156,8 @@ public class TrailServiceImpl implements TrailService {
                 .toList();
     }
 
-    private String formatPublishTime(LocalDateTime createdAt) {
+    @Override
+    public String formatPublishTime(LocalDateTime createdAt) {
         if (createdAt == null) {
             return "";
         }

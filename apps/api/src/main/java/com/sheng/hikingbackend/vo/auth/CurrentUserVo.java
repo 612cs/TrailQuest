@@ -26,8 +26,15 @@ public class CurrentUserVo {
     private HikingProfileVo hikingProfile;
     private String email;
     private UserRole role;
+    private Integer postCount;
+    private Integer savedCount;
 
-    public static CurrentUserVo from(User user, String avatarMediaUrl, HikingProfileVo hikingProfile) {
+    public static CurrentUserVo from(
+            User user,
+            String avatarMediaUrl,
+            HikingProfileVo hikingProfile,
+            Integer postCount,
+            Integer savedCount) {
         return CurrentUserVo.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -40,6 +47,8 @@ public class CurrentUserVo {
                 .hikingProfile(hikingProfile)
                 .email(user.getEmail())
                 .role(user.getRole())
+                .postCount(postCount == null ? 0 : postCount)
+                .savedCount(savedCount == null ? 0 : savedCount)
                 .build();
     }
 }

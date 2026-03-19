@@ -4,6 +4,7 @@ import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
 import com.sheng.hikingbackend.vo.trail.TrailDetailVo;
 import com.sheng.hikingbackend.vo.trail.TrailInteractionVo;
+import com.sheng.hikingbackend.vo.trail.TrailQueryRow;
 
 public interface TrailService {
 
@@ -18,4 +19,8 @@ public interface TrailService {
     TrailInteractionVo favoriteTrail(Long trailId, Long currentUserId);
 
     TrailInteractionVo unfavoriteTrail(Long trailId, Long currentUserId);
+
+    TrailDetailVo toTrailDetailVo(TrailQueryRow row);
+
+    String formatPublishTime(java.time.LocalDateTime createdAt);
 }
