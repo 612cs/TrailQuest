@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 import BaseIcon from '../components/common/BaseIcon.vue'
@@ -8,6 +8,7 @@ import DetailHero from '../components/trail/DetailHero.vue'
 import LandscapePrediction from '../components/trail/LandscapePrediction.vue'
 import ReviewList from '../components/trail/ReviewList.vue'
 import TrailMapSection from '../components/trail/TrailMapSection.vue'
+import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
 import WeatherAlert from '../components/trail/WeatherAlert.vue'
 import WeatherSection from '../components/trail/WeatherSection.vue'
 import { createReview, deleteReview, fetchTrailReviews, fetchUserCard } from '../api/reviews'
@@ -19,6 +20,7 @@ import { useFlashStore } from '../stores/useFlashStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { EntityId } from '../types/id'
 import type { TrailListItem } from '../types/trail'
+import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
 import type {
   CreateReviewPayload,
   ReviewItem,
@@ -52,6 +54,7 @@ const activeUserCardId = ref<string | null>(null)
 const isUserCardVisible = ref(false)
 const isUserCardLoading = ref(false)
 const userCardErrorMessage = ref('')
+const detailContentAnchorRef = useTemplateRef<HTMLDivElement>('detailContentAnchor')
 const { geo, isLoading: geoLoading, resolve: resolveGeo } = useTrailGeo()
 const { weather, isLoading: weatherLoading, resolve: resolveWeather } = useTrailWeather()
 
@@ -148,6 +151,14 @@ const heroProps = computed(() => {
 
 const mapCenter = computed(() => geo.value?.center ?? null)
 const locationCity = computed(() => geo.value?.city ?? trailData.value?.location ?? '')
+const detailTrackViewerData = computed(() => createTrackViewerData({
+  title: trailData.value?.name ?? null,
+  fileName: trailData.value?.track?.originalFileName ?? null,
+  distanceMeters: typeof trailData.value?.track?.distanceMeters === 'number'
+    ? trailData.value.track.distanceMeters
+    : null,
+  geoJson: trailData.value?.track?.geoJson,
+}))
 const weatherAlertMessage = computed(() => {
   if (!weather.value) {
     return geoLoading.value || weatherLoading.value
@@ -337,6 +348,13 @@ async function handleShare() {
   })
 }
 
+function scrollToDetailContent() {
+  detailContentAnchorRef.value?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  })
+}
+
 function insertReview(review: ReviewItem) {
   const normalizedReview: ReviewItem = {
     ...review,
@@ -391,6 +409,16 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
     </div>
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <TrailTrackViewer
+        v-if="detailTrackViewerData"
+        :data="detailTrackViewerData"
+        mode="detail"
+        :show-scroll-to-content-button="true"
+        @scroll-to-content="scrollToDetailContent"
+      />
+
+      <div ref="detailContentAnchor" class="sr-only" aria-hidden="true"></div>
+
       <DetailHero
         v-bind="heroProps"
         @toggle-like="displayTrail && trailInteractionStore.toggleLike(displayTrail)"

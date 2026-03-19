@@ -5,12 +5,14 @@ import toGeoJSON from '@mapbox/togeojson'
 
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ImagePreviewModal from '../components/common/ImagePreviewModal.vue'
+import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
 import { createTrail } from '../api/trails'
 import { useAmapLoader } from '../composables/useAmapLoader'
 import { useOssImageUploader } from '../composables/useOssImageUploader'
 import { useOssTrackUploader } from '../composables/useOssTrackUploader'
 import { useFlashStore } from '../stores/useFlashStore'
 import { presetTags } from '../mock/mockData'
+import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
 
 type TrackCoordinate = [number, number, number?]
 
@@ -34,6 +36,7 @@ const showSuccess = ref(false)
 const previewImages = ref<string[]>([])
 const previewIndex = ref(0)
 const showPreview = ref(false)
+const showTrackFullscreen = ref(false)
 
 const mapRef = useTemplateRef<HTMLDivElement>('mapContainer')
 const mapInstance = shallowRef<any>(null)
@@ -71,6 +74,12 @@ const difficultyLabelMap = {
 const coverItems = computed(() => coverUploader.items.value)
 const galleryItems = computed(() => galleryUploader.items.value)
 const trackItem = computed(() => trackUploader.item.value)
+const publishTrackViewerData = computed(() => createTrackViewerData({
+  title: name.value.trim() || location.value.trim() || '未命名路线',
+  fileName: trackItem.value?.fileName ?? null,
+  distanceMeters: parseDistanceToMeters(distance.value),
+  geoJson: geoJsonData.value,
+}))
 
 const isAnyUploading = computed(() =>
   coverUploader.isUploading.value || galleryUploader.isUploading.value || trackUploader.isUploading.value,
@@ -284,6 +293,21 @@ function clearTrack() {
   trackUploader.clear()
   geoJsonData.value = null
   mapError.value = ''
+  showTrackFullscreen.value = false
+}
+
+function parseDistanceToMeters(value: string) {
+  const normalized = value.trim().toLowerCase()
+  if (!normalized) return null
+  const numberValue = Number(normalized.replace(/[^0-9.]/g, ''))
+  if (!Number.isFinite(numberValue)) return null
+  if (normalized.includes('km')) {
+    return numberValue * 1000
+  }
+  if (normalized.includes('m')) {
+    return numberValue
+  }
+  return null
 }
 
 async function handleSubmit() {
@@ -515,6 +539,14 @@ function getImageSources(items: { localUrl: string; remoteUrl: string }[]) {
             <span class="text-xs font-medium" style="color: var(--text-tertiary);">请上传 GPX / KML 轨迹文件以在地图中预览</span>
           </div>
         </div>
+
+        <TrailTrackViewer
+          v-if="publishTrackViewerData"
+          :data="publishTrackViewerData"
+          mode="embedded"
+          :show-fullscreen-button="true"
+          @request-fullscreen="showTrackFullscreen = true"
+        />
       </section>
 
       <section class="card animate-fade-in-up space-y-4 p-4 sm:p-5">
@@ -648,6 +680,30 @@ function getImageSources(items: { localUrl: string; remoteUrl: string }[]) {
       :initial-index="previewIndex"
       @close="showPreview = false"
     />
+
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="showTrackFullscreen && publishTrackViewerData" class="fixed inset-0 z-[70] bg-black/55 backdrop-blur-sm">
+          <div class="flex h-full w-full flex-col p-3 sm:p-5">
+            <div class="mb-3 flex items-center justify-between">
+              <p class="text-sm font-semibold text-white/90">轨迹全屏浏览</p>
+              <button
+                type="button"
+                class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+                @click="showTrackFullscreen = false"
+              >
+                <BaseIcon name="X" :size="18" />
+              </button>
+            </div>
+            <TrailTrackViewer
+              :data="publishTrackViewerData"
+              mode="fullscreen"
+              @exit-fullscreen="showTrackFullscreen = false"
+            />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </main>
 </template>
 
