@@ -407,6 +407,8 @@ function removeReviewNode(items: ReviewItem[], reviewId: string): ReviewItem[] {
         :center="mapCenter"
         :label="displayTrail?.name ?? trailData.name"
         :city="locationCity"
+        :track-geo-json="trailData.track?.geoJson"
+        :track-download-url="trailData.track?.downloadUrl"
       />
 
       <WeatherSection

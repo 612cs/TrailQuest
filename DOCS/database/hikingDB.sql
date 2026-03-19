@@ -79,7 +79,7 @@ CREATE TABLE `media_files` (
   `bucket_name` varchar(100) NOT NULL COMMENT 'OSS Bucket 名称',
   `object_key` varchar(255) NOT NULL COMMENT 'OSS 对象Key',
   `url` varchar(500) NOT NULL COMMENT '文件访问地址',
-  `biz_type` enum('avatar','trail_cover','trail_gallery','review') NOT NULL COMMENT '业务类型',
+  `biz_type` enum('avatar','trail_cover','trail_gallery','trail_track','review') NOT NULL COMMENT '业务类型',
   `original_name` varchar(255) DEFAULT NULL COMMENT '原始文件名',
   `extension` varchar(20) DEFAULT NULL COMMENT '文件扩展名',
   `mime_type` varchar(100) NOT NULL COMMENT '文件MIME类型',
@@ -108,6 +108,45 @@ INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `
 INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `object_key`, `url`, `biz_type`, `original_name`, `extension`, `mime_type`, `size`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES (2033515323863506946, 2033496679581421570, 'aliyun_oss', 'trailquest-prod-media', 'review/2033496679581421570/2026/03/21daeff024384ee4bb2d2883bc19ce41.png', 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/review/2033496679581421570/2026/03/21daeff024384ee4bb2d2883bc19ce41.png', 'review', '把腿张开_-lowres__bad_anatomy__bad_hands__extra_limbs__mutated__deformed__blurry__worst_quality__low_quality__watermark__text__signature__ugly__poorly_drawn_face__extra_fingers__fus_1276895851.png', 'png', 'image/png', 732303, 1024, 576, 'active', '2026-03-16 12:06:48', '2026-03-16 12:06:48');
 INSERT INTO `media_files` (`id`, `user_id`, `storage_provider`, `bucket_name`, `object_key`, `url`, `biz_type`, `original_name`, `extension`, `mime_type`, `size`, `width`, `height`, `status`, `created_at`, `updated_at`) VALUES (2033516264947884034, 2033496679581421570, 'aliyun_oss', 'trailquest-prod-media', 'review/2033496679581421570/2026/03/3fbed628be924f6fa24f082660e0b937.png', 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/review/2033496679581421570/2026/03/3fbed628be924f6fa24f082660e0b937.png', 'review', 'image5.png', 'png', 'image/png', 1204106, 1344, 768, 'active', '2026-03-16 12:10:33', '2026-03-16 12:10:33');
 COMMIT;
+
+-- ----------------------------
+-- Table structure for trail_tracks
+-- ----------------------------
+DROP TABLE IF EXISTS `trail_tracks`;
+CREATE TABLE `trail_tracks` (
+  `id` bigint NOT NULL COMMENT '轨迹记录ID',
+  `trail_id` bigint NOT NULL COMMENT '路线ID',
+  `media_file_id` bigint NOT NULL COMMENT '原始轨迹文件ID',
+  `user_id` bigint NOT NULL COMMENT '上传用户ID',
+  `source_format` enum('gpx','kml') NOT NULL COMMENT '轨迹来源格式',
+  `original_file_name` varchar(255) DEFAULT NULL COMMENT '原始文件名',
+  `track_geojson` json NOT NULL COMMENT '标准化轨迹 GeoJSON',
+  `track_points_count` int NOT NULL DEFAULT '0' COMMENT '轨迹点数量',
+  `waypoint_count` int NOT NULL DEFAULT '0' COMMENT '航点数量',
+  `start_lng` decimal(10,6) DEFAULT NULL COMMENT '起点经度',
+  `start_lat` decimal(10,6) DEFAULT NULL COMMENT '起点纬度',
+  `end_lng` decimal(10,6) DEFAULT NULL COMMENT '终点经度',
+  `end_lat` decimal(10,6) DEFAULT NULL COMMENT '终点纬度',
+  `bbox_min_lng` decimal(10,6) DEFAULT NULL COMMENT '边界框最小经度',
+  `bbox_min_lat` decimal(10,6) DEFAULT NULL COMMENT '边界框最小纬度',
+  `bbox_max_lng` decimal(10,6) DEFAULT NULL COMMENT '边界框最大经度',
+  `bbox_max_lat` decimal(10,6) DEFAULT NULL COMMENT '边界框最大纬度',
+  `distance_meters` decimal(12,2) DEFAULT NULL COMMENT '总距离(米)',
+  `elevation_gain_meters` decimal(12,2) DEFAULT NULL COMMENT '累计爬升(米)',
+  `elevation_loss_meters` decimal(12,2) DEFAULT NULL COMMENT '累计下降(米)',
+  `duration_seconds` bigint DEFAULT NULL COMMENT '轨迹时长(秒)',
+  `status` enum('parsed','parse_failed') NOT NULL DEFAULT 'parsed' COMMENT '解析状态',
+  `parse_error_message` varchar(255) DEFAULT NULL COMMENT '解析失败信息',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_trail_tracks_trail_id` (`trail_id`),
+  KEY `idx_trail_tracks_user_created` (`user_id`,`created_at`),
+  KEY `idx_trail_tracks_media` (`media_file_id`),
+  CONSTRAINT `trail_tracks_ibfk_1` FOREIGN KEY (`trail_id`) REFERENCES `trails` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `trail_tracks_ibfk_2` FOREIGN KEY (`media_file_id`) REFERENCES `media_files` (`id`) ON DELETE RESTRICT,
+  CONSTRAINT `trail_tracks_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='路线轨迹解析表';
 
 -- ----------------------------
 -- Table structure for review_images

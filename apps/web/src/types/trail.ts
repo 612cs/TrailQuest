@@ -5,6 +5,32 @@ export interface TrailAuthor {
   avatarBg: string
 }
 
+export interface TrailTrackDetail {
+  hasTrack: boolean
+  sourceFormat?: 'gpx' | 'kml' | string
+  originalFileName?: string | null
+  downloadUrl?: string | null
+  geoJson?: unknown
+  bounds?: {
+    minLng: number
+    minLat: number
+    maxLng: number
+    maxLat: number
+  } | null
+  startPoint?: {
+    lng: number
+    lat: number
+  } | null
+  endPoint?: {
+    lng: number
+    lat: number
+  } | null
+  distanceMeters?: number | null
+  elevationGainMeters?: number | null
+  elevationLossMeters?: number | null
+  durationSeconds?: number | null
+}
+
 export interface TrailInteractionState {
   trailId: number
   likes: number
@@ -40,6 +66,7 @@ export interface TrailListItem {
   publishTime: string
   createdAt: string
   author: TrailAuthor
+  track?: TrailTrackDetail | null
 }
 
 export interface TrailListParams {

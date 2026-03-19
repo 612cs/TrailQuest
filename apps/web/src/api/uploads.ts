@@ -2,13 +2,13 @@ import { http } from './http'
 import type { MediaFilePayload, UploadStsPayload } from '../types/upload'
 
 interface CreateUploadStsRequest {
-  bizType: 'avatar' | 'trail_cover' | 'trail_gallery' | 'review'
+  bizType: 'avatar' | 'trail_cover' | 'trail_gallery' | 'trail_track' | 'review'
   fileName: string
   mimeType: string
 }
 
 interface CompleteUploadRequest {
-  bizType: 'avatar' | 'trail_cover' | 'trail_gallery' | 'review'
+  bizType: 'avatar' | 'trail_cover' | 'trail_gallery' | 'trail_track' | 'review'
   objectKey: string
   url: string
   originalName?: string

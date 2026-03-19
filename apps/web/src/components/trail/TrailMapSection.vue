@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, shallowRef, watch, useTemplateRef, nextTick } from 'vue'
+import BaseIcon from '../common/BaseIcon.vue'
 import SectionHeader from '../common/SectionHeader.vue'
 import { useAmapLoader } from '../../composables/useAmapLoader'
 
@@ -7,6 +8,8 @@ const props = defineProps<{
   center: [number, number] | null
   label: string
   city: string
+  trackGeoJson?: unknown
+  trackDownloadUrl?: string | null
 }>()
 
 const mapRef = useTemplateRef<HTMLDivElement>('map')
@@ -17,9 +20,10 @@ const mapError = shallowRef<string | null>(null)
 const { isReady, error, load } = useAmapLoader()
 
 const hasCenter = computed(() => Boolean(props.center))
+const hasTrack = computed(() => Boolean(props.trackGeoJson))
 
 async function initMap() {
-  if (!props.center) return
+  if (!props.center && !props.trackGeoJson) return
 
   mapError.value = null
   const AMap = await load()
@@ -42,11 +46,36 @@ async function initMap() {
   if (!mapInstance.value) {
     mapInstance.value = new AMap.Map(mapRef.value, {
       zoom: 11,
-      center: props.center,
+      center: props.center ?? undefined,
       resizeEnable: true,
     })
-  } else {
+  } else if (props.center) {
     mapInstance.value.setCenter(props.center)
+  }
+
+  mapInstance.value.clearMap()
+
+  if (props.trackGeoJson) {
+    AMap.plugin('AMap.GeoJSON', () => {
+      const geojsonObj = new AMap.GeoJSON({
+        geoJSON: props.trackGeoJson,
+        getPolyline(_geojson: unknown, lnglats: unknown) {
+          return new AMap.Polyline({
+            path: lnglats,
+            strokeColor: '#2f6f36',
+            strokeWeight: 6,
+            strokeOpacity: 0.85,
+            lineJoin: 'round',
+            lineCap: 'round',
+            showDir: true,
+          })
+        },
+      })
+
+      mapInstance.value.add(geojsonObj)
+      mapInstance.value.setFitView()
+    })
+    return
   }
 
   if (markerInstance.value) {
@@ -69,9 +98,16 @@ watch(
 )
 
 watch(
+  () => props.trackGeoJson,
+  () => {
+    initMap()
+  }
+)
+
+watch(
   () => isReady.value,
   (ready) => {
-    if (ready && props.center) {
+    if (ready && (props.center || props.trackGeoJson)) {
       initMap()
     }
   }
@@ -101,12 +137,23 @@ onUnmounted(() => {
     <div class="card p-4 space-y-3">
       <div class="flex items-center justify-between text-xs" style="color: var(--text-tertiary);">
         <span>定位来源</span>
-        <span>{{ hasCenter ? '高德 IP/地理解析' : '定位失败' }}</span>
+          <span>{{ hasTrack ? '轨迹文件解析' : hasCenter ? '高德 IP/地理解析' : '定位失败' }}</span>
       </div>
-      <div class="map-shell" :class="{ 'is-empty': !hasCenter || !mapReady }">
+      <div v-if="trackDownloadUrl" class="flex justify-end">
+        <a
+          :href="trackDownloadUrl"
+          target="_blank"
+          rel="noreferrer"
+          class="inline-flex items-center gap-1 rounded-full bg-primary-500/10 px-3 py-1 text-xs font-medium text-primary-500 transition-colors hover:bg-primary-500/15"
+        >
+          <BaseIcon name="Download" :size="14" />
+          下载轨迹
+        </a>
+      </div>
+      <div class="map-shell" :class="{ 'is-empty': (!hasCenter && !hasTrack) || !mapReady }">
         <!-- 始终挂载 DOM，如果还没有准备好通过 z-index 置于下层或隐藏视觉内容 -->
-        <div ref="map" class="map-canvas" :style="{ display: (mapReady && hasCenter && !mapError) ? 'block' : 'none' }"></div>
-        <div v-if="!hasCenter" class="map-placeholder">
+        <div ref="map" class="map-canvas" :style="{ display: (mapReady && (hasCenter || hasTrack) && !mapError) ? 'block' : 'none' }"></div>
+        <div v-if="!hasCenter && !hasTrack" class="map-placeholder">
           暂无法获取定位，稍后重试
         </div>
         <div v-else-if="mapError" class="map-placeholder">

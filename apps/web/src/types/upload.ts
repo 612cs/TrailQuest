@@ -15,5 +15,5 @@ export interface MediaFilePayload {
   mediaId: string
   url: string
   objectKey: string
-  bizType: 'avatar' | 'trail_cover' | 'trail_gallery' | 'review'
+  bizType: 'avatar' | 'trail_cover' | 'trail_gallery' | 'trail_track' | 'review'
 }

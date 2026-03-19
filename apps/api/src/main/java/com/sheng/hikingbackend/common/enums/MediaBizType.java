@@ -6,6 +6,7 @@ public enum MediaBizType {
     AVATAR("avatar"),
     TRAIL_COVER("trail_cover"),
     TRAIL_GALLERY("trail_gallery"),
+    TRAIL_TRACK("trail_track"),
     REVIEW("review");
 
     private final String code;

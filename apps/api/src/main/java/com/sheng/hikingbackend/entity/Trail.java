@@ -16,7 +16,7 @@ import lombok.Setter;
 @TableName("trails")
 public class Trail {
 
-    @TableId(type = IdType.INPUT)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     private String image;

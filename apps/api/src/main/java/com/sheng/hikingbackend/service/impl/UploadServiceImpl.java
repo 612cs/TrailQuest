@@ -44,6 +44,7 @@ public class UploadServiceImpl implements UploadService {
 
     private static final ZoneId ZONE_ID = ZoneId.of("Asia/Shanghai");
     private static final long MAX_IMAGE_SIZE = 10L * 1024 * 1024;
+    private static final long MAX_TRACK_SIZE = 20L * 1024 * 1024;
     private static final String STS_CACHE_PREFIX = "upload:sts:";
 
     private final OssProperties ossProperties;
@@ -55,7 +56,7 @@ public class UploadServiceImpl implements UploadService {
         validateOssProperties();
 
         MediaBizType bizType = requireBizType(request.getBizType());
-        validateImageFile(request.getFileName(), request.getMimeType());
+        validateFileForBizType(bizType, request.getFileName(), request.getMimeType());
 
         String extension = extractExtension(request.getFileName());
         String objectKey = buildObjectKey(bizType, userId, extension);
@@ -84,8 +85,8 @@ public class UploadServiceImpl implements UploadService {
         validateOssProperties();
 
         MediaBizType bizType = requireBizType(request.getBizType());
-        validateImageFile(request.getOriginalName(), request.getMimeType());
-        validateUploadMetadata(request);
+        validateFileForBizType(bizType, request.getOriginalName(), request.getMimeType());
+        validateUploadMetadata(bizType, request);
         validateIssuedObjectKey(userId, bizType, request.getObjectKey());
         validateUrl(request.getUrl(), request.getObjectKey());
 
@@ -152,21 +153,65 @@ public class UploadServiceImpl implements UploadService {
         return bizType;
     }
 
-    private void validateImageFile(String fileName, String mimeType) {
+    private void validateFileForBizType(MediaBizType bizType, String fileName, String mimeType) {
+        if (fileName != null && fileName.contains("..")) {
+            throw BusinessException.badRequest("INVALID_FILE_NAME", "文件名不合法");
+        }
+
+        if (bizType == MediaBizType.TRAIL_TRACK) {
+            validateTrackFile(fileName, mimeType);
+            return;
+        }
+
+        validateImageFile(mimeType);
+    }
+
+    private void validateImageFile(String mimeType) {
         if (!StringUtils.hasText(mimeType) || !mimeType.startsWith("image/")) {
             throw BusinessException.badRequest("INVALID_FILE_TYPE", "仅支持图片上传");
         }
         if (!("image/jpeg".equals(mimeType) || "image/png".equals(mimeType) || "image/webp".equals(mimeType))) {
             throw BusinessException.badRequest("INVALID_FILE_TYPE", "仅支持 JPG、PNG、WEBP 图片");
         }
-        if (fileName != null && fileName.contains("..")) {
-            throw BusinessException.badRequest("INVALID_FILE_NAME", "文件名不合法");
+    }
+
+    private void validateTrackFile(String fileName, String mimeType) {
+        String extension = extractExtension(fileName);
+        if (!("gpx".equals(extension) || "kml".equals(extension))) {
+            throw BusinessException.badRequest("INVALID_FILE_TYPE", "仅支持 GPX 或 KML 轨迹文件");
+        }
+
+        if (!StringUtils.hasText(mimeType)) {
+            throw BusinessException.badRequest("INVALID_FILE_TYPE", "轨迹文件 MIME 类型不能为空");
+        }
+
+        boolean validMimeType = switch (extension) {
+            case "gpx" -> "application/gpx+xml".equals(mimeType)
+                    || "application/xml".equals(mimeType)
+                    || "text/xml".equals(mimeType)
+                    || "application/octet-stream".equals(mimeType);
+            case "kml" -> "application/vnd.google-earth.kml+xml".equals(mimeType)
+                    || "application/xml".equals(mimeType)
+                    || "text/xml".equals(mimeType)
+                    || "application/octet-stream".equals(mimeType);
+            default -> false;
+        };
+
+        if (!validMimeType) {
+            throw BusinessException.badRequest("INVALID_FILE_TYPE", "轨迹文件 MIME 类型不合法");
         }
     }
 
-    private void validateUploadMetadata(CompleteUploadRequest request) {
-        if (request.getSize() > MAX_IMAGE_SIZE) {
-            throw BusinessException.badRequest("FILE_TOO_LARGE", "图片大小不能超过 10MB");
+    private void validateUploadMetadata(MediaBizType bizType, CompleteUploadRequest request) {
+        long maxSize = bizType == MediaBizType.TRAIL_TRACK ? MAX_TRACK_SIZE : MAX_IMAGE_SIZE;
+        if (request.getSize() > maxSize) {
+            throw BusinessException.badRequest("FILE_TOO_LARGE", bizType == MediaBizType.TRAIL_TRACK
+                    ? "轨迹文件大小不能超过 20MB"
+                    : "图片大小不能超过 10MB");
+        }
+
+        if (bizType == MediaBizType.TRAIL_TRACK) {
+            return;
         }
         if (request.getWidth() != null && request.getWidth() <= 0) {
             throw BusinessException.badRequest("INVALID_IMAGE_WIDTH", "图片宽度不合法");

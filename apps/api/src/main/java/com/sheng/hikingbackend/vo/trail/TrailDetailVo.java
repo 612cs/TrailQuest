@@ -37,4 +37,5 @@ public class TrailDetailVo {
     private String publishTime;
     private LocalDateTime createdAt;
     private UserSummaryVo author;
+    private TrailTrackVo track;
 }
