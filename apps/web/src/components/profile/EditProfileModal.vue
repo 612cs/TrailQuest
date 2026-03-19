@@ -179,6 +179,18 @@ function buildAvatarText(username: string, fallback: string) {
       </div>
 
       <div class="space-y-1.5">
+        <label class="block text-sm font-medium" style="color: var(--text-secondary);">邮箱</label>
+        <input
+          :value="userStore.profile?.email ?? ''"
+          type="email"
+          readonly
+          tabindex="-1"
+          class="w-full rounded-xl border px-4 py-2.5 text-sm cursor-default focus:outline-none focus:ring-0"
+          style="border-color: var(--border-default); background-color: var(--bg-tag); color: var(--text-secondary);"
+        />
+      </div>
+
+      <div class="space-y-1.5">
         <label class="block text-sm font-medium" style="color: var(--text-secondary);">昵称</label>
         <input
           v-model="formData.username"
