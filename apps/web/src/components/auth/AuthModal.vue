@@ -273,7 +273,7 @@ const isUserNotFoundError = computed(() => currentView.value === 'login' && erro
       <div v-else-if="currentView === 'register-profile'" class="space-y-6">
         <div class="space-y-2">
           <p class="text-sm" style="color: var(--text-secondary);">
-            这一步是可选的。告诉我们你的徒步偏好，后续推荐会更贴近你，也可以先跳过直接注册。
+            这一步是可选的。告诉我们你的徒步偏好，后续推荐会更贴近你，也 <b class="text-base text-primary-500">可以先跳过</b> 直接注册。
           </p>
         </div>
 
