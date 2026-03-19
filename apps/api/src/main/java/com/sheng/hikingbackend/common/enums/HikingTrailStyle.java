@@ -2,7 +2,9 @@ package com.sheng.hikingbackend.common.enums;
 
 import java.util.Arrays;
 
-public enum HikingTrailStyle {
+import com.baomidou.mybatisplus.annotation.IEnum;
+
+public enum HikingTrailStyle implements IEnum<String> {
     CITY_WEEKEND("city_weekend"),
     LONG_DISTANCE("long_distance"),
     BOTH("both");
@@ -14,6 +16,11 @@ public enum HikingTrailStyle {
     }
 
     public String getCode() {
+        return code;
+    }
+
+    @Override
+    public String getValue() {
         return code;
     }
 

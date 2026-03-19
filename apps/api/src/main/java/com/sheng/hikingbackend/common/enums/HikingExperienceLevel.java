@@ -2,7 +2,9 @@ package com.sheng.hikingbackend.common.enums;
 
 import java.util.Arrays;
 
-public enum HikingExperienceLevel {
+import com.baomidou.mybatisplus.annotation.IEnum;
+
+public enum HikingExperienceLevel implements IEnum<String> {
     BEGINNER("beginner"),
     INTERMEDIATE("intermediate"),
     EXPERT("expert");
@@ -14,6 +16,11 @@ public enum HikingExperienceLevel {
     }
 
     public String getCode() {
+        return code;
+    }
+
+    @Override
+    public String getValue() {
         return code;
     }
 

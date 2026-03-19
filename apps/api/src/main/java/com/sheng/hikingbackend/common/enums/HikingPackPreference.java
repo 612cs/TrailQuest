@@ -2,7 +2,9 @@ package com.sheng.hikingbackend.common.enums;
 
 import java.util.Arrays;
 
-public enum HikingPackPreference {
+import com.baomidou.mybatisplus.annotation.IEnum;
+
+public enum HikingPackPreference implements IEnum<String> {
     LIGHT("light"),
     HEAVY("heavy"),
     BOTH("both");
@@ -14,6 +16,11 @@ public enum HikingPackPreference {
     }
 
     public String getCode() {
+        return code;
+    }
+
+    @Override
+    public String getValue() {
         return code;
     }
 
