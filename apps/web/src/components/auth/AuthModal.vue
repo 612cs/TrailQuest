@@ -1,153 +1,365 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import BaseModal from '../common/BaseModal.vue'
+import { computed, ref, watch } from 'vue'
+
 import BaseIcon from '../common/BaseIcon.vue'
+import BaseModal from '../common/BaseModal.vue'
+import type { HikingProfile, HikingProfileFormValue } from '../../types/hikingProfile'
+import HikingProfileForm from '../profile/HikingProfileForm.vue'
 import { useUserStore } from '../../stores/useUserStore'
 
-const userStore = useUserStore()
-const isLoginMode = ref(true)
+type AuthView = 'login' | 'register-profile' | 'register-account'
 
+const userStore = useUserStore()
+
+const currentView = ref<AuthView>('login')
 const email = ref('')
 const username = ref('')
 const password = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
-
-const isValid = computed(() => {
-  const baseValid = email.value.includes('@') && password.value.length >= 6
-  if (isLoginMode.value) return baseValid
-  return baseValid && username.value.trim().length >= 2
+const hikingProfileForm = ref<HikingProfileFormValue>({
+  experienceLevel: '',
+  trailStyle: '',
+  packPreference: '',
+  location: '',
 })
 
+const canSubmitLogin = computed(() => email.value.includes('@') && password.value.length >= 6)
+const canContinueProfile = computed(() =>
+  !!hikingProfileForm.value.experienceLevel
+  && !!hikingProfileForm.value.trailStyle
+  && !!hikingProfileForm.value.packPreference,
+)
+const canSubmitRegister = computed(() =>
+  email.value.includes('@') && password.value.length >= 6 && username.value.trim().length >= 2,
+)
+
+const modalTitle = computed(() => {
+  if (currentView.value === 'login') return '欢迎回来'
+  if (currentView.value === 'register-profile') return '先了解一下你'
+  return '加入 TrailQuest'
+})
+
+watch(
+  () => userStore.showAuthModal,
+  (isOpen) => {
+    if (isOpen) {
+      return
+    }
+    resetAll()
+  },
+)
+
+function resetAll() {
+  currentView.value = 'login'
+  email.value = ''
+  username.value = ''
+  password.value = ''
+  errorMessage.value = ''
+  isLoading.value = false
+  hikingProfileForm.value = {
+    experienceLevel: '',
+    trailStyle: '',
+    packPreference: '',
+    location: '',
+  }
+}
+
+function goToRegisterProfile() {
+  errorMessage.value = ''
+  currentView.value = 'register-profile'
+}
+
+function goToLogin() {
+  errorMessage.value = ''
+  currentView.value = 'login'
+}
+
+function skipToRegister() {
+  errorMessage.value = ''
+  hikingProfileForm.value = {
+    ...hikingProfileForm.value,
+    experienceLevel: '',
+    trailStyle: '',
+    packPreference: '',
+  }
+  currentView.value = 'register-account'
+}
+
+function continueToRegister() {
+  if (!canContinueProfile.value) {
+    return
+  }
+  errorMessage.value = ''
+  currentView.value = 'register-account'
+}
+
+function backToProfile() {
+  errorMessage.value = ''
+  currentView.value = 'register-profile'
+}
+
 async function handleSubmit() {
-  if (!isValid.value) return
+  if (currentView.value === 'login') {
+    if (!canSubmitLogin.value) return
+    isLoading.value = true
+    errorMessage.value = ''
+    const result = await userStore.login(email.value, password.value)
+    isLoading.value = false
+    if (result.success) {
+      resetAll()
+      return
+    }
+    errorMessage.value = result.message || '操作失败'
+    return
+  }
+
+  if (!canSubmitRegister.value) {
+    return
+  }
 
   isLoading.value = true
   errorMessage.value = ''
-
-  let result
-  if (isLoginMode.value) {
-    result = await userStore.login(email.value, password.value)
-  } else {
-    result = await userStore.register(email.value, password.value, username.value)
-  }
-  
-  if (result.success) {
-      // Reset form
-      email.value = ''
-      username.value = ''
-      password.value = ''
-      isLoginMode.value = true
-  } else {
-      errorMessage.value = result.message || '操作失败'
-  }
-  
+  const hikingProfile = buildCompleteHikingProfile(hikingProfileForm.value)
+  const result = await userStore.register({
+    email: email.value,
+    password: password.value,
+    username: username.value,
+    location: hikingProfileForm.value.location,
+    hikingProfile,
+  })
   isLoading.value = false
+
+  if (result.success) {
+    resetAll()
+    return
+  }
+  errorMessage.value = result.message || '操作失败'
+}
+
+function buildCompleteHikingProfile(form: HikingProfileFormValue): HikingProfile | null {
+  if (!form.experienceLevel || !form.trailStyle || !form.packPreference) {
+    return null
+  }
+
+  return {
+    experienceLevel: form.experienceLevel,
+    trailStyle: form.trailStyle,
+    packPreference: form.packPreference,
+  }
 }
 </script>
 
 <template>
   <BaseModal
     :show="userStore.showAuthModal"
+    :title="modalTitle"
     @update:show="userStore.showAuthModal = $event"
-    :title="isLoginMode ? '欢迎回来' : '加入 TrailQuest'"
     class="auth-modal"
   >
     <div class="space-y-6">
-      <!-- Welcome Text -->
-      <p class="text-sm" style="color: var(--text-secondary);">
-        {{ isLoginMode 
-          ? '登录以保存路线、发表评论和与社区互动。' 
-          : '创建一个账户，开始您的户外探索之旅。' 
-        }}
-      </p>
+      <div v-if="currentView === 'login'" class="space-y-6">
+        <p class="text-sm" style="color: var(--text-secondary);">
+          登录以保存路线、发表评论和与社区互动。
+        </p>
 
-      <!-- Form -->
-      <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div v-if="errorMessage" class="text-sm px-4 py-2.5 rounded-lg mb-4 flex items-center gap-2" style="background-color: var(--bg-tag); color: var(--color-hard);">
+        <form class="space-y-4" @submit.prevent="handleSubmit">
+          <div v-if="errorMessage" class="mb-4 flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm" style="background-color: var(--bg-tag); color: var(--color-hard);">
             <BaseIcon name="AlertCircle" :size="16" />
             <span>{{ errorMessage }}</span>
-        </div>
-        
-        <div class="space-y-1">
-          <label class="block text-sm font-medium" style="color: var(--text-primary);">邮箱</label>
-          <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary);">
-              <BaseIcon name="Mail" :size="18" />
-            </span>
-            <input 
-              v-model="email"
-              type="email" 
-              placeholder="your@email.com"
-              class="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-              style="background-color: var(--bg-input); border-color: var(--border-default); color: var(--text-primary);"
-            />
           </div>
+
+          <div class="space-y-1">
+            <label class="block text-sm font-medium" style="color: var(--text-primary);">邮箱</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary);">
+                <BaseIcon name="Mail" :size="18" />
+              </span>
+              <input
+                v-model="email"
+                type="email"
+                placeholder="your@email.com"
+                class="w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                style="background-color: var(--bg-input); border-color: var(--border-default); color: var(--text-primary);"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <label class="block text-sm font-medium" style="color: var(--text-primary);">密码</label>
+              <a href="#" class="text-xs font-medium text-primary-500 hover:underline">忘记密码？</a>
+            </div>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary);">
+                <BaseIcon name="Lock" :size="18" />
+              </span>
+              <input
+                v-model="password"
+                type="password"
+                placeholder="••••••••"
+                class="w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                style="background-color: var(--bg-input); border-color: var(--border-default); color: var(--text-primary);"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            :disabled="!canSubmitLogin || isLoading"
+            class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-medium text-white transition-all disabled:cursor-not-allowed"
+            :class="!canSubmitLogin || isLoading ? 'opacity-70' : 'bg-primary-500 hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/30 active:scale-[0.98]'"
+            :style="!canSubmitLogin || isLoading ? 'background-color: var(--color-surface-400);' : ''"
+          >
+            <BaseIcon v-if="isLoading" name="Loader2" :size="20" class="animate-spin" />
+            <span>{{ isLoading ? '请稍候...' : '登录' }}</span>
+          </button>
+        </form>
+
+        <div class="border-t pt-4 text-center text-sm" style="border-color: var(--border-default); color: var(--text-secondary);">
+          还没有账户？
+          <button class="font-semibold text-primary-500 transition-colors hover:underline" @click="goToRegisterProfile">
+            立即注册
+          </button>
+        </div>
+      </div>
+
+      <div v-else-if="currentView === 'register-profile'" class="space-y-6">
+        <div class="space-y-2">
+          <p class="text-sm" style="color: var(--text-secondary);">
+            这一步是可选的。告诉我们你的徒步偏好，后续推荐会更贴近你，也可以先跳过直接注册。
+          </p>
         </div>
 
-        <div v-if="!isLoginMode" class="space-y-1">
-          <label class="block text-sm font-medium" style="color: var(--text-primary);">用户昵称</label>
-          <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary);">
-              <BaseIcon name="User" :size="18" />
-            </span>
-            <input 
-              v-model="username"
-              type="text" 
-              placeholder="您的昵称"
-              class="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-              style="background-color: var(--bg-input); border-color: var(--border-default); color: var(--text-primary);"
-            />
-          </div>
+        <HikingProfileForm v-model="hikingProfileForm" />
+
+        <div class="flex gap-3">
+          <button
+            type="button"
+            class="flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-colors hover:border-primary-500/30 hover:bg-primary-500/6"
+            style="border-color: var(--border-default); color: var(--text-secondary);"
+            @click="skipToRegister"
+          >
+            跳过
+          </button>
+          <button
+            type="button"
+            class="flex-1 rounded-xl bg-primary-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
+            :disabled="!canContinueProfile"
+            @click="continueToRegister"
+          >
+            下一步
+          </button>
         </div>
 
-        <div class="space-y-1">
-          <div class="flex justify-between items-center">
+        <div class="border-t pt-4 text-center text-sm" style="border-color: var(--border-default); color: var(--text-secondary);">
+          已有账户？
+          <button class="font-semibold text-primary-500 transition-colors hover:underline" @click="goToLogin">
+            去登录
+          </button>
+        </div>
+      </div>
+
+      <div v-else class="space-y-6">
+        <p class="text-sm" style="color: var(--text-secondary);">
+          创建一个账户，开始你的户外探索之旅。已填写的补充信息会在注册成功后直接保存到个人主页。
+        </p>
+
+        <form class="space-y-4" @submit.prevent="handleSubmit">
+          <div v-if="errorMessage" class="mb-4 flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm" style="background-color: var(--bg-tag); color: var(--color-hard);">
+            <BaseIcon name="AlertCircle" :size="16" />
+            <span>{{ errorMessage }}</span>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-sm font-medium" style="color: var(--text-primary);">邮箱</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary);">
+                <BaseIcon name="Mail" :size="18" />
+              </span>
+              <input
+                v-model="email"
+                type="email"
+                placeholder="your@email.com"
+                class="w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                style="background-color: var(--bg-input); border-color: var(--border-default); color: var(--text-primary);"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-1">
+            <label class="block text-sm font-medium" style="color: var(--text-primary);">用户昵称</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary);">
+                <BaseIcon name="User" :size="18" />
+              </span>
+              <input
+                v-model="username"
+                type="text"
+                placeholder="你的昵称"
+                class="w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                style="background-color: var(--bg-input); border-color: var(--border-default); color: var(--text-primary);"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-1">
             <label class="block text-sm font-medium" style="color: var(--text-primary);">密码</label>
-            <a v-if="isLoginMode" href="#" class="text-xs font-medium hover:underline text-primary-500">忘记密码？</a>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary);">
+                <BaseIcon name="Lock" :size="18" />
+              </span>
+              <input
+                v-model="password"
+                type="password"
+                placeholder="••••••••"
+                class="w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+                style="background-color: var(--bg-input); border-color: var(--border-default); color: var(--text-primary);"
+              />
+            </div>
           </div>
-          <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary);">
-              <BaseIcon name="Lock" :size="18" />
-            </span>
-            <input 
-              v-model="password"
-              type="password" 
-              placeholder="••••••••"
-              class="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-              style="background-color: var(--bg-input); border-color: var(--border-default); color: var(--text-primary);"
-            />
+
+          <div class="rounded-2xl border px-4 py-3 text-sm" style="border-color: var(--border-default); background-color: var(--bg-tag); color: var(--text-secondary);">
+            <p>地区：{{ hikingProfileForm.location || '未填写' }}</p>
+            <p class="mt-1">
+              徒步画像：
+              {{ hikingProfileForm.experienceLevel ? '已补充' : '已跳过' }}
+            </p>
           </div>
+
+          <div class="flex gap-3 pt-2">
+            <button
+              type="button"
+              class="rounded-xl border px-4 py-3 text-sm font-medium transition-colors hover:border-primary-500/30 hover:bg-primary-500/6"
+              style="border-color: var(--border-default); color: var(--text-secondary);"
+              @click="backToProfile"
+            >
+              上一步
+            </button>
+            <button
+              type="submit"
+              :disabled="!canSubmitRegister || isLoading"
+              class="flex-1 rounded-xl py-3 font-medium text-white transition-all disabled:cursor-not-allowed"
+              :class="!canSubmitRegister || isLoading ? 'opacity-70' : 'bg-primary-500 hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/30 active:scale-[0.98]'"
+              :style="!canSubmitRegister || isLoading ? 'background-color: var(--color-surface-400);' : ''"
+            >
+              <span>{{ isLoading ? '请稍候...' : '注册' }}</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="border-t pt-4 text-center text-sm" style="border-color: var(--border-default); color: var(--text-secondary);">
+          已有账户？
+          <button class="font-semibold text-primary-500 transition-colors hover:underline" @click="goToLogin">
+            去登录
+          </button>
         </div>
-
-        <button 
-          type="submit"
-          :disabled="!isValid || isLoading"
-          class="w-full py-3 rounded-xl font-medium text-white transition-all flex items-center justify-center gap-2 mt-6 disabled:cursor-not-allowed"
-          :class="!isValid || isLoading ? 'opacity-70' : 'bg-primary-500 hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/30 active:scale-[0.98]'"
-          :style="!isValid || isLoading ? 'background-color: var(--color-surface-400);' : ''"
-        >
-          <BaseIcon v-if="isLoading" name="Loader2" :size="20" class="animate-spin" />
-          <span>{{ isLoading ? '请稍候...' : (isLoginMode ? '登录' : '注册') }}</span>
-        </button>
-      </form>
-
-      <!-- Toggle Mode -->
-      <div class="pt-4 text-center border-t text-sm" style="border-color: var(--border-default); color: var(--text-secondary);">
-        {{ isLoginMode ? '还没有账户？' : '已有账户？' }}
-        <button 
-          class="font-semibold transition-colors hover:underline text-primary-500"
-          @click="isLoginMode = !isLoginMode"
-        >
-          {{ isLoginMode ? '立即注册' : '去登录' }}
-        </button>
       </div>
     </div>
   </BaseModal>
 </template>
 
 <style scoped>
-/* Remove padding from base modal to have edge-to-edge content */
 :deep(.modal-content) {
   padding: 0 !important;
 }

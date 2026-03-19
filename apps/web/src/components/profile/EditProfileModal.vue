@@ -148,11 +148,10 @@ function buildAvatarText(username: string, fallback: string) {
           </div>
           <div
             v-else
-            class="absolute inset-0 flex items-end justify-center rounded-2xl bg-gradient-to-t from-black/50 via-black/10 to-transparent px-2 py-2 opacity-0 transition-opacity group-hover:opacity-100"
+            class="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/28 opacity-0 transition-opacity group-hover:opacity-100"
           >
-            <span class="inline-flex items-center gap-1 rounded-full bg-white/92 px-2 py-1 text-[11px] font-medium text-slate-900">
-              <BaseIcon name="ImageUp" :size="12" />
-              更换头像
+            <span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/92 text-slate-900 shadow-sm">
+              <BaseIcon name="ImageUp" :size="22" />
             </span>
           </div>
         </button>

@@ -7,6 +7,7 @@ const userStore = useUserStore()
 
 defineEmits<{
   (e: 'show-edit'): void
+  (e: 'show-hiking-profile'): void
   (e: 'show-settings'): void
 }>()
 </script>
@@ -43,6 +44,10 @@ defineEmits<{
           <ActionButton variant="primary" @click="$emit('show-edit')">
             <BaseIcon name="Settings2" :size="16" />
             编辑资料
+          </ActionButton>
+          <ActionButton variant="secondary" @click="$emit('show-hiking-profile')">
+            <BaseIcon name="Route" :size="16" />
+            徒步画像
           </ActionButton>
           <ActionButton variant="secondary" @click="$emit('show-settings')">
             <BaseIcon name="Shield" :size="16" />

@@ -5,6 +5,7 @@ import ProfileHeader from '../components/profile/ProfileHeader.vue'
 import Pagination from '../components/common/Pagination.vue'
 import EditProfileModal from '../components/profile/EditProfileModal.vue'
 import AccountSettingsModal from '../components/profile/AccountSettingsModal.vue'
+import HikingProfileModal from '../components/profile/HikingProfileModal.vue'
 import { useUserStore } from '../stores/useUserStore'
 
 const userStore = useUserStore()
@@ -14,6 +15,7 @@ const currentPage = ref(1)
 const totalPages = 3
 
 const showEditModal = ref(false)
+const showHikingProfileModal = ref(false)
 const showSettingsModal = ref(false)
 
 const posts = [
@@ -29,11 +31,13 @@ const posts = [
     <template v-if="userStore.isLoggedIn">
       <ProfileHeader 
         @show-edit="showEditModal = true"
+        @show-hiking-profile="showHikingProfileModal = true"
         @show-settings="showSettingsModal = true"
       />
 
     <!-- Modals -->
     <EditProfileModal v-model:show="showEditModal" />
+    <HikingProfileModal v-model:show="showHikingProfileModal" />
     <AccountSettingsModal v-model:show="showSettingsModal" />
 
     <!-- Tabs & Content Card -->

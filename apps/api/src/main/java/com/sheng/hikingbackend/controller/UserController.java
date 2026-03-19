@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sheng.hikingbackend.common.ApiResponse;
 import com.sheng.hikingbackend.config.CustomUserDetails;
+import com.sheng.hikingbackend.dto.user.UpdateHikingProfileRequest;
 import com.sheng.hikingbackend.dto.user.UpdateProfileRequest;
 import com.sheng.hikingbackend.service.UserService;
 import com.sheng.hikingbackend.vo.auth.CurrentUserVo;
@@ -37,5 +38,12 @@ public class UserController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UpdateProfileRequest request) {
         return ApiResponse.success("资料更新成功", userService.updateCurrentUserProfile(userDetails.getId(), request));
+    }
+
+    @PutMapping("/me/hiking-profile")
+    public ApiResponse<CurrentUserVo> updateCurrentUserHikingProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody UpdateHikingProfileRequest request) {
+        return ApiResponse.success("徒步画像更新成功", userService.updateCurrentUserHikingProfile(userDetails.getId(), request));
     }
 }

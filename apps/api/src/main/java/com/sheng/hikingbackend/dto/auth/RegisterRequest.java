@@ -1,8 +1,11 @@
 package com.sheng.hikingbackend.dto.auth;
 
+import com.sheng.hikingbackend.dto.user.HikingProfileRequest;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,4 +24,10 @@ public class RegisterRequest {
     @NotBlank(message = "密码不能为空")
     @Size(min = 6, max = 64, message = "密码长度需在 6 到 64 个字符之间")
     private String password;
+
+    @Size(max = 100, message = "所在地长度不能超过 100 个字符")
+    private String location;
+
+    @Valid
+    private HikingProfileRequest hikingProfile;
 }

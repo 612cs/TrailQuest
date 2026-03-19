@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.sheng.hikingbackend.common.enums.UserRole;
 import com.sheng.hikingbackend.entity.User;
+import com.sheng.hikingbackend.vo.user.HikingProfileVo;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -22,10 +23,11 @@ public class CurrentUserVo {
     private String avatarMediaUrl;
     private String bio;
     private String location;
+    private HikingProfileVo hikingProfile;
     private String email;
     private UserRole role;
 
-    public static CurrentUserVo from(User user, String avatarMediaUrl) {
+    public static CurrentUserVo from(User user, String avatarMediaUrl, HikingProfileVo hikingProfile) {
         return CurrentUserVo.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -35,6 +37,7 @@ public class CurrentUserVo {
                 .avatarMediaUrl(avatarMediaUrl)
                 .bio(user.getBio())
                 .location(user.getLocation())
+                .hikingProfile(hikingProfile)
                 .email(user.getEmail())
                 .role(user.getRole())
                 .build();

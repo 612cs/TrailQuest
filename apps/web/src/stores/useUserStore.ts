@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import * as authApi from '../api/auth'
 import { AUTH_TOKEN_STORAGE_KEY, USER_PROFILE_STORAGE_KEY } from '../api/constants'
 import type { CurrentUser } from '../types/auth'
+import type { HikingProfile } from '../types/hikingProfile'
 import { ApiError } from '../types/api'
 
 export interface UserProfile {
@@ -20,6 +21,7 @@ export interface UserProfile {
   savedCount: number
   bio: string
   location: string
+  hikingProfile: HikingProfile | null
 }
 
 interface AuthActionResult {
@@ -32,6 +34,18 @@ interface SaveProfilePayload {
   bio?: string | null
   location?: string | null
   avatarMediaId?: string | null
+}
+
+interface RegisterPayload {
+  email: string
+  password: string
+  username: string
+  location?: string | null
+  hikingProfile?: HikingProfile | null
+}
+
+interface SaveHikingProfilePayload {
+  hikingProfile: HikingProfile
 }
 
 export const useUserStore = defineStore('user', () => {
@@ -92,9 +106,15 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  async function register(email: string, password: string, username: string): Promise<AuthActionResult> {
+  async function register(payload: RegisterPayload): Promise<AuthActionResult> {
     try {
-      const data = await authApi.register({ email, password, username })
+      const data = await authApi.register({
+        email: payload.email,
+        password: payload.password,
+        username: payload.username,
+        location: normalizeOptional(payload.location),
+        hikingProfile: payload.hikingProfile ?? null,
+      })
       applyAuthPayload(data.accessToken, data.user)
       showAuthModal.value = false
       return { success: true }
@@ -152,6 +172,22 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function saveHikingProfile(payload: SaveHikingProfilePayload): Promise<AuthActionResult> {
+    if (!profile.value) {
+      return { success: false, message: '请先登录后再编辑徒步画像' }
+    }
+
+    try {
+      const currentUser = await authApi.updateHikingProfile({
+        hikingProfile: payload.hikingProfile,
+      })
+      profile.value = buildProfile(currentUser)
+      return { success: true }
+    } catch (error) {
+      return { success: false, message: getErrorMessage(error) }
+    }
+  }
+
   function applyAuthPayload(accessToken: string, currentUser: CurrentUser) {
     token.value = accessToken
     profile.value = buildProfile(currentUser)
@@ -172,6 +208,7 @@ export const useUserStore = defineStore('user', () => {
       savedCount: 0,
       bio: user.bio?.trim() || '',
       location: user.location?.trim() || '',
+      hikingProfile: user.hikingProfile ?? null,
     }
   }
 
@@ -202,5 +239,6 @@ export const useUserStore = defineStore('user', () => {
     requireAuth,
     bootstrap,
     saveProfile,
+    saveHikingProfile,
   }
 })

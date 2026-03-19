@@ -6,17 +6,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sheng.hikingbackend.common.enums.HikingExperienceLevel;
+import com.sheng.hikingbackend.common.enums.HikingPackPreference;
+import com.sheng.hikingbackend.common.enums.HikingTrailStyle;
 import com.sheng.hikingbackend.common.enums.MediaBizType;
 import com.sheng.hikingbackend.common.enums.MediaFileStatus;
 import com.sheng.hikingbackend.common.exception.BusinessException;
+import com.sheng.hikingbackend.dto.user.HikingProfileRequest;
+import com.sheng.hikingbackend.dto.user.UpdateHikingProfileRequest;
 import com.sheng.hikingbackend.dto.user.UpdateProfileRequest;
 import com.sheng.hikingbackend.entity.MediaFile;
 import com.sheng.hikingbackend.entity.User;
+import com.sheng.hikingbackend.entity.UserHikingProfile;
 import com.sheng.hikingbackend.mapper.MediaFileMapper;
+import com.sheng.hikingbackend.mapper.UserHikingProfileMapper;
 import com.sheng.hikingbackend.mapper.UserMapper;
 import com.sheng.hikingbackend.service.UserService;
 import com.sheng.hikingbackend.service.UploadService;
 import com.sheng.hikingbackend.vo.auth.CurrentUserVo;
+import com.sheng.hikingbackend.vo.user.HikingProfileVo;
 import com.sheng.hikingbackend.vo.user.UserCardQueryRow;
 import com.sheng.hikingbackend.vo.user.UserCardVo;
 
@@ -32,6 +40,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final MediaFileMapper mediaFileMapper;
+    private final UserHikingProfileMapper userHikingProfileMapper;
     private final UploadService uploadService;
 
     @Override
@@ -82,7 +91,30 @@ public class UserServiceImpl implements UserService {
         }
 
         userMapper.updateById(user);
-        return CurrentUserVo.from(user, uploadService.resolveAvatarUrl(user.getAvatarMediaId()));
+        return buildCurrentUser(user);
+    }
+
+    @Override
+    public CurrentUserVo updateCurrentUserHikingProfile(Long userId, UpdateHikingProfileRequest request) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw BusinessException.notFound("USER_NOT_FOUND", "用户不存在");
+        }
+
+        UserHikingProfile existingProfile = userHikingProfileMapper.selectByUserId(userId);
+        HikingProfileRequest payload = request.getHikingProfile();
+
+        if (existingProfile == null) {
+            existingProfile = new UserHikingProfile();
+            existingProfile.setUserId(userId);
+            applyHikingProfile(existingProfile, payload);
+            userHikingProfileMapper.insert(existingProfile);
+        } else {
+            applyHikingProfile(existingProfile, payload);
+            userHikingProfileMapper.updateById(existingProfile);
+        }
+
+        return buildCurrentUser(user);
     }
 
     private String normalizeNullable(String value) {
@@ -100,5 +132,42 @@ public class UserServiceImpl implements UserService {
         }
         int endIndex = Math.min(normalized.length(), 2);
         return normalized.substring(0, endIndex).toUpperCase();
+    }
+
+    private CurrentUserVo buildCurrentUser(User user) {
+        return CurrentUserVo.from(
+                user,
+                uploadService.resolveAvatarUrl(user.getAvatarMediaId()),
+                HikingProfileVo.from(userHikingProfileMapper.selectByUserId(user.getId())));
+    }
+
+    private void applyHikingProfile(UserHikingProfile profile, HikingProfileRequest request) {
+        profile.setExperienceLevel(requireExperienceLevel(request.getExperienceLevel()));
+        profile.setTrailStyle(requireTrailStyle(request.getTrailStyle()));
+        profile.setPackPreference(requirePackPreference(request.getPackPreference()));
+    }
+
+    private HikingExperienceLevel requireExperienceLevel(String code) {
+        HikingExperienceLevel value = HikingExperienceLevel.fromCode(code);
+        if (value == null) {
+            throw BusinessException.badRequest("INVALID_EXPERIENCE_LEVEL", "徒步经验选项不合法");
+        }
+        return value;
+    }
+
+    private HikingTrailStyle requireTrailStyle(String code) {
+        HikingTrailStyle value = HikingTrailStyle.fromCode(code);
+        if (value == null) {
+            throw BusinessException.badRequest("INVALID_TRAIL_STYLE", "常走类型选项不合法");
+        }
+        return value;
+    }
+
+    private HikingPackPreference requirePackPreference(String code) {
+        HikingPackPreference value = HikingPackPreference.fromCode(code);
+        if (value == null) {
+            throw BusinessException.badRequest("INVALID_PACK_PREFERENCE", "负重偏好选项不合法");
+        }
+        return value;
     }
 }

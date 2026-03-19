@@ -359,6 +359,23 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户表';
 
 -- ----------------------------
+-- Table structure for user_hiking_profiles
+-- ----------------------------
+DROP TABLE IF EXISTS `user_hiking_profiles`;
+CREATE TABLE `user_hiking_profiles` (
+  `id` bigint NOT NULL COMMENT '画像ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `experience_level` enum('beginner','intermediate','expert') NOT NULL COMMENT '徒步经验等级',
+  `trail_style` enum('city_weekend','long_distance','both') NOT NULL COMMENT '常走路线类型',
+  `pack_preference` enum('light','heavy','both') NOT NULL COMMENT '负重偏好',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_hiking_profiles_user_id` (`user_id`),
+  CONSTRAINT `user_hiking_profiles_ibfk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户徒步画像表';
+
+-- ----------------------------
 -- Records of users
 -- ----------------------------
 BEGIN;
@@ -368,6 +385,11 @@ INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`,
 INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `bio`, `location`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033122436212338690, '猪猪侠', '猪猪', '#ea580c', 2033225575586447361, '喜欢城市周边徒步和轻量露营，路线以轻松出片为主。', '广东 深圳', 'admin@qq.com', '$2a$10$tmpYeUZ8Fm5L.7SErKaz8OljlRb/bjid38pOAZp2YY3AEqujWm5Zi', 'USER', '2026-03-15 10:05:37');
 INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `bio`, `location`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033210514809671681, 'oss_test_user', 'OS', '#059669', 2033216883554000897, '用来验证真实上传链路与资料更新的测试账号。', '广东 广州', 'oss-test-20260315@example.com', '$2a$10$npo1CdxmpmY1GugYYCNF6uZbann0a27.ynQoJivY7OJNOmxqKaIWO', 'USER', '2026-03-15 15:55:36');
 INSERT INTO `users` (`id`, `username`, `avatar`, `avatar_bg`, `avatar_media_id`, `bio`, `location`, `email`, `password_hash`, `role`, `created_at`) VALUES (2033496679581421570, 'SHENG', 'SH', '#059669', NULL, '喜欢把真实需求拆成可迭代模块，一边做产品一边走山。', '上海', '2516824318@qq.com', '$2a$10$h9luatk4n5Jpm3lwzcbgaOlc4AXj3.0c0m/zVeVfVHiYzIN3lklqa', 'USER', '2026-03-16 10:52:43');
+INSERT INTO `user_hiking_profiles` (`id`, `user_id`, `experience_level`, `trail_style`, `pack_preference`, `created_at`, `updated_at`) VALUES (2033701000000000001, 101, 'intermediate', 'city_weekend', 'light', '2026-03-12 15:58:38', '2026-03-12 15:58:38');
+INSERT INTO `user_hiking_profiles` (`id`, `user_id`, `experience_level`, `trail_style`, `pack_preference`, `created_at`, `updated_at`) VALUES (2033701000000000002, 102, 'expert', 'long_distance', 'both', '2026-03-12 15:58:38', '2026-03-12 15:58:38');
+INSERT INTO `user_hiking_profiles` (`id`, `user_id`, `experience_level`, `trail_style`, `pack_preference`, `created_at`, `updated_at`) VALUES (2033701000000000003, 104, 'expert', 'long_distance', 'heavy', '2026-03-12 15:58:38', '2026-03-12 15:58:38');
+INSERT INTO `user_hiking_profiles` (`id`, `user_id`, `experience_level`, `trail_style`, `pack_preference`, `created_at`, `updated_at`) VALUES (2033701000000000004, 2033122436212338690, 'intermediate', 'city_weekend', 'light', '2026-03-15 10:05:37', '2026-03-15 10:05:37');
+INSERT INTO `user_hiking_profiles` (`id`, `user_id`, `experience_level`, `trail_style`, `pack_preference`, `created_at`, `updated_at`) VALUES (2033701000000000005, 2033496679581421570, 'intermediate', 'both', 'both', '2026-03-16 10:52:43', '2026-03-16 10:52:43');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

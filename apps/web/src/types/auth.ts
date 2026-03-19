@@ -1,3 +1,5 @@
+import type { HikingProfile } from './hikingProfile'
+
 export interface CurrentUser {
   id: string
   username: string
@@ -7,6 +9,7 @@ export interface CurrentUser {
   avatarMediaUrl?: string | null
   bio?: string | null
   location?: string | null
+  hikingProfile?: HikingProfile | null
   email?: string
   role: 'USER' | 'ADMIN'
 }
