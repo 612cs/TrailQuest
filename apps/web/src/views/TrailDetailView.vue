@@ -12,6 +12,7 @@ import WeatherAlert from '../components/trail/WeatherAlert.vue'
 import WeatherSection from '../components/trail/WeatherSection.vue'
 import { createReview, deleteReview, fetchTrailReviews, fetchUserCard } from '../api/reviews'
 import { fetchTrailDetail } from '../api/trails'
+import { useTrailShare } from '../composables/useTrailShare'
 import { useTrailGeo } from '../composables/useTrailGeo'
 import { useTrailWeather } from '../composables/useTrailWeather'
 import { useFlashStore } from '../stores/useFlashStore'
@@ -29,6 +30,7 @@ const router = useRouter()
 const route = useRoute()
 const flashStore = useFlashStore()
 const trailInteractionStore = useTrailInteractionStore()
+const { shareTrail } = useTrailShare()
 
 const reviews = ref<ReviewItem[]>([])
 const trailData = ref<TrailListItem | null>(null)
@@ -323,27 +325,11 @@ function closeUserCard() {
 
 async function handleShare() {
   if (!displayTrail.value) return
-
-  const shareUrl = window.location.href
-  const canUseNativeShare = typeof navigator.share === 'function'
-
-  try {
-    if (canUseNativeShare) {
-      await navigator.share({
-        title: displayTrail.value.name,
-        text: `${displayTrail.value.name} · ${displayTrail.value.location}`,
-        url: shareUrl,
-      })
-    } else {
-      await navigator.clipboard.writeText(shareUrl)
-    }
-    flashStore.showSuccess(canUseNativeShare ? '已打开系统分享' : '路线链接已复制')
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      return
-    }
-    flashStore.showError('分享失败，请稍后重试')
-  }
+  await shareTrail({
+    id: displayTrail.value.id,
+    name: displayTrail.value.name,
+    location: displayTrail.value.location,
+  })
 }
 
 function insertReview(review: ReviewItem) {

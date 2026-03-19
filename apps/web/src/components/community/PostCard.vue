@@ -14,6 +14,7 @@ const props = defineProps<{
 defineEmits<{
   (event: 'toggle-like'): void
   (event: 'toggle-favorite'): void
+  (event: 'share'): void
 }>()
 </script>
 
@@ -77,7 +78,11 @@ defineEmits<{
             <BaseIcon name="MessageCircle" :size="16" />
             {{ post.reviewCount >= 1000 ? (post.reviewCount / 1000).toFixed(1) + 'k' : post.reviewCount }}
           </button>
-          <button class="flex items-center gap-1.5 text-xs transition-colors hover:text-primary-500" style="color: var(--text-secondary);">
+          <button
+            class="flex items-center gap-1.5 text-xs transition-colors hover:text-primary-500"
+            style="color: var(--text-secondary);"
+            @click="$emit('share')"
+          >
             <BaseIcon name="Share2" :size="16" />
             <span>分享</span>
           </button>

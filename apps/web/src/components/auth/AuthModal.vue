@@ -17,6 +17,7 @@ const username = ref('')
 const password = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
+const errorCode = ref('')
 const hikingProfileForm = ref<HikingProfileFormValue>({
   experienceLevel: '',
   trailStyle: '',
@@ -56,6 +57,7 @@ function resetAll() {
   username.value = ''
   password.value = ''
   errorMessage.value = ''
+  errorCode.value = ''
   isLoading.value = false
   hikingProfileForm.value = {
     experienceLevel: '',
@@ -67,16 +69,19 @@ function resetAll() {
 
 function goToRegisterProfile() {
   errorMessage.value = ''
+  errorCode.value = ''
   currentView.value = 'register-profile'
 }
 
 function goToLogin() {
   errorMessage.value = ''
+  errorCode.value = ''
   currentView.value = 'login'
 }
 
 function skipToRegister() {
   errorMessage.value = ''
+  errorCode.value = ''
   hikingProfileForm.value = {
     ...hikingProfileForm.value,
     experienceLevel: '',
@@ -91,11 +96,21 @@ function continueToRegister() {
     return
   }
   errorMessage.value = ''
+  errorCode.value = ''
   currentView.value = 'register-account'
 }
 
 function backToProfile() {
   errorMessage.value = ''
+  errorCode.value = ''
+  currentView.value = 'register-profile'
+}
+
+function continueRegisterFromMissingUser() {
+  errorMessage.value = ''
+  errorCode.value = ''
+  password.value = ''
+  username.value = ''
   currentView.value = 'register-profile'
 }
 
@@ -104,6 +119,7 @@ async function handleSubmit() {
     if (!canSubmitLogin.value) return
     isLoading.value = true
     errorMessage.value = ''
+    errorCode.value = ''
     const result = await userStore.login(email.value, password.value)
     isLoading.value = false
     if (result.success) {
@@ -111,6 +127,7 @@ async function handleSubmit() {
       return
     }
     errorMessage.value = result.message || '操作失败'
+    errorCode.value = result.code || ''
     return
   }
 
@@ -120,6 +137,7 @@ async function handleSubmit() {
 
   isLoading.value = true
   errorMessage.value = ''
+  errorCode.value = ''
   const hikingProfile = buildCompleteHikingProfile(hikingProfileForm.value)
   const result = await userStore.register({
     email: email.value,
@@ -148,6 +166,8 @@ function buildCompleteHikingProfile(form: HikingProfileFormValue): HikingProfile
     packPreference: form.packPreference,
   }
 }
+
+const isUserNotFoundError = computed(() => currentView.value === 'login' && errorCode.value === 'USER_NOT_FOUND')
 </script>
 
 <template>
@@ -167,6 +187,32 @@ function buildCompleteHikingProfile(form: HikingProfileFormValue): HikingProfile
           <div v-if="errorMessage" class="mb-4 flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm" style="background-color: var(--bg-tag); color: var(--color-hard);">
             <BaseIcon name="AlertCircle" :size="16" />
             <span>{{ errorMessage }}</span>
+          </div>
+
+          <div
+            v-if="isUserNotFoundError"
+            class="rounded-2xl border px-4 py-4"
+            style="border-color: var(--border-default); background-color: var(--bg-tag);"
+          >
+            <div class="flex items-start gap-3">
+              <div class="flex h-9 w-9 items-center justify-center rounded-full" style="background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--primary-500);">
+                <BaseIcon name="UserPlus" :size="18" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-semibold" style="color: var(--text-primary);">这个邮箱还没有注册</p>
+                <p class="mt-1 text-sm" style="color: var(--text-secondary);">
+                  继续注册时会保留当前邮箱，并先进入补充信息页。
+                </p>
+                <button
+                  type="button"
+                  class="mt-3 inline-flex items-center gap-2 rounded-xl bg-primary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600"
+                  @click="continueRegisterFromMissingUser"
+                >
+                  <BaseIcon name="ArrowRight" :size="16" />
+                  <span>去注册</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="space-y-1">

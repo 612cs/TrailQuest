@@ -27,6 +27,7 @@ export interface UserProfile {
 interface AuthActionResult {
   success: boolean
   message?: string
+  code?: string
 }
 
 interface SaveProfilePayload {
@@ -102,7 +103,7 @@ export const useUserStore = defineStore('user', () => {
       showAuthModal.value = false
       return { success: true }
     } catch (error) {
-      return { success: false, message: getErrorMessage(error) }
+      return getAuthErrorResult(error)
     }
   }
 
@@ -119,7 +120,7 @@ export const useUserStore = defineStore('user', () => {
       showAuthModal.value = false
       return { success: true }
     } catch (error) {
-      return { success: false, message: getErrorMessage(error) }
+      return getAuthErrorResult(error)
     }
   }
 
@@ -225,6 +226,21 @@ export const useUserStore = defineStore('user', () => {
       return error.message
     }
     return '请求失败，请稍后重试'
+  }
+
+  function getAuthErrorResult(error: unknown): AuthActionResult {
+    if (error instanceof ApiError) {
+      return {
+        success: false,
+        message: error.message,
+        code: error.code,
+      }
+    }
+
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
   }
 
   return {

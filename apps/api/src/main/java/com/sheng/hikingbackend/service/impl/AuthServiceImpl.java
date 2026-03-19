@@ -54,9 +54,15 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest request) {
+        String normalizedEmail = request.getEmail().trim();
+        User existingUser = userMapper.selectByEmail(normalizedEmail);
+        if (existingUser == null) {
+            throw BusinessException.unauthorized("USER_NOT_FOUND", "这个邮箱还没有注册");
+        }
+
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                    new UsernamePasswordAuthenticationToken(normalizedEmail, request.getPassword()));
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             User user = userMapper.selectById(userDetails.getId());
             return LoginResponse.builder()

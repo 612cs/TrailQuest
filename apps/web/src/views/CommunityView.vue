@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import PostCard from '../components/community/PostCard.vue'
 import Pagination from '../components/common/Pagination.vue'
 import { fetchTrails } from '../api/trails'
+import { useTrailShare } from '../composables/useTrailShare'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
 import { toCommunityPost } from '../utils/trailAdapters'
@@ -14,6 +15,7 @@ const allPosts = ref<TrailListItem[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 const trailInteractionStore = useTrailInteractionStore()
+const { shareTrail } = useTrailShare()
 
 const currentPosts = computed(() => {
   return allPosts.value
@@ -54,6 +56,14 @@ async function loadPosts() {
     isLoading.value = false
   }
 }
+
+async function handleShare(post: TrailListItem) {
+  await shareTrail({
+    id: post.id,
+    name: post.name,
+    location: post.location,
+  })
+}
 </script>
 
 <template>
@@ -84,6 +94,7 @@ async function loadPosts() {
         :is-favorite-pending="trailInteractionStore.isFavoritePending(post.id)"
         @toggle-like="trailInteractionStore.toggleLike(post)"
         @toggle-favorite="trailInteractionStore.toggleFavorite(post)"
+        @share="handleShare(post)"
       />
     </div>
 
