@@ -21,6 +21,7 @@ import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { EntityId } from '../types/id'
 import type { TrailListItem } from '../types/trail'
 import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
+import { mapWeatherToTrackScene } from '../utils/trackWeatherScene'
 import type {
   CreateReviewPayload,
   ReviewItem,
@@ -157,8 +158,15 @@ const detailTrackViewerData = computed(() => createTrackViewerData({
   distanceMeters: typeof trailData.value?.track?.distanceMeters === 'number'
     ? trailData.value.track.distanceMeters
     : null,
+  elevationGainMeters: typeof trailData.value?.track?.elevationGainMeters === 'number'
+    ? trailData.value.track.elevationGainMeters
+    : null,
   geoJson: trailData.value?.track?.geoJson,
 }))
+const detailWeatherScene = computed(() => mapWeatherToTrackScene(
+  weather.value?.weather,
+  weather.value?.windPower,
+))
 const weatherAlertMessage = computed(() => {
   if (!weather.value) {
     return geoLoading.value || weatherLoading.value
@@ -412,6 +420,7 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
       <TrailTrackViewer
         v-if="detailTrackViewerData"
         :data="detailTrackViewerData"
+        :weather-scene="detailWeatherScene"
         mode="detail"
         :show-scroll-to-content-button="true"
         @scroll-to-content="scrollToDetailContent"

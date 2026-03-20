@@ -1,4 +1,5 @@
 export type TrackViewerMode = 'embedded' | 'detail' | 'fullscreen'
+export type TrackWeatherScene = 'clear' | 'partly_cloudy' | 'overcast' | 'rain' | 'snow' | 'windy'
 
 export interface TrackViewerPoint {
   lng: number
@@ -16,5 +17,8 @@ export interface TrackViewerData {
   title: string
   fileName?: string | null
   distanceMeters?: number | null
+  elevationGainMeters?: number | null
+  highestPoint?: TrackViewerPoint | null
+  mainPathIndex?: number
   paths: TrackViewerPath[]
 }

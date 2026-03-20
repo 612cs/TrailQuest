@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, shallowRef, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import toGeoJSON from '@mapbox/togeojson'
 
@@ -8,11 +8,14 @@ import ImagePreviewModal from '../components/common/ImagePreviewModal.vue'
 import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
 import { createTrail } from '../api/trails'
 import { useAmapLoader } from '../composables/useAmapLoader'
+import { useTrailGeo } from '../composables/useTrailGeo'
+import { useTrailWeather } from '../composables/useTrailWeather'
 import { useOssImageUploader } from '../composables/useOssImageUploader'
 import { useOssTrackUploader } from '../composables/useOssTrackUploader'
 import { useFlashStore } from '../stores/useFlashStore'
 import { presetTags } from '../mock/mockData'
 import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
+import { mapWeatherToTrackScene } from '../utils/trackWeatherScene'
 
 type TrackCoordinate = [number, number, number?]
 
@@ -43,10 +46,14 @@ const mapInstance = shallowRef<any>(null)
 const geoJsonData = ref<any>(null)
 const mapError = ref('')
 const mapLoading = ref(false)
+const locationResolveTimer = shallowRef<number | null>(null)
+const locationAbortController = shallowRef<AbortController | null>(null)
 
 const coverUploader = useOssImageUploader({ bizType: 'trail_cover', max: 1 })
 const galleryUploader = useOssImageUploader({ bizType: 'trail_gallery', max: 9 })
 const trackUploader = useOssTrackUploader()
+const { resolve: resolvePublishGeo } = useTrailGeo()
+const { weather: publishWeather, resolve: resolvePublishWeather } = useTrailWeather()
 
 const difficultyOptions = [
   { value: 'easy' as const, label: '简单', color: 'var(--color-easy)' },
@@ -78,8 +85,13 @@ const publishTrackViewerData = computed(() => createTrackViewerData({
   title: name.value.trim() || location.value.trim() || '未命名路线',
   fileName: trackItem.value?.fileName ?? null,
   distanceMeters: parseDistanceToMeters(distance.value),
+  elevationGainMeters: parseElevationGainToMeters(elevation.value),
   geoJson: geoJsonData.value,
 }))
+const publishWeatherScene = computed(() => mapWeatherToTrackScene(
+  publishWeather.value?.weather,
+  publishWeather.value?.windPower,
+))
 
 const isAnyUploading = computed(() =>
   coverUploader.isUploading.value || galleryUploader.isUploading.value || trackUploader.isUploading.value,
@@ -309,6 +321,55 @@ function parseDistanceToMeters(value: string) {
   }
   return null
 }
+
+function parseElevationGainToMeters(value: string) {
+  const normalized = value.trim().toLowerCase()
+  if (!normalized) return null
+  const numberValue = Number(normalized.replace(/[^0-9.]/g, ''))
+  if (!Number.isFinite(numberValue)) return null
+  return numberValue
+}
+
+watch(location, (nextLocation) => {
+  if (locationResolveTimer.value != null) {
+    window.clearTimeout(locationResolveTimer.value)
+    locationResolveTimer.value = null
+  }
+  locationAbortController.value?.abort()
+  locationAbortController.value = null
+
+  if (!nextLocation.trim()) {
+    return
+  }
+
+  locationResolveTimer.value = window.setTimeout(() => {
+    const controller = new AbortController()
+    locationAbortController.value = controller
+
+    void (async () => {
+      const geo = await resolvePublishGeo({
+        locationLabel: nextLocation.trim(),
+        signal: controller.signal,
+      })
+
+      if (!geo?.adcode) {
+        return
+      }
+
+      await resolvePublishWeather({
+        adcode: geo.adcode,
+        signal: controller.signal,
+      })
+    })()
+  }, 420)
+})
+
+onBeforeUnmount(() => {
+  if (locationResolveTimer.value != null) {
+    window.clearTimeout(locationResolveTimer.value)
+  }
+  locationAbortController.value?.abort()
+})
 
 async function handleSubmit() {
   if (!isFormValid.value) return
@@ -543,6 +604,7 @@ function getImageSources(items: { localUrl: string; remoteUrl: string }[]) {
         <TrailTrackViewer
           v-if="publishTrackViewerData"
           :data="publishTrackViewerData"
+          :weather-scene="publishWeatherScene"
           mode="embedded"
           :show-fullscreen-button="true"
           @request-fullscreen="showTrackFullscreen = true"
@@ -697,6 +759,7 @@ function getImageSources(items: { localUrl: string; remoteUrl: string }[]) {
             </div>
             <TrailTrackViewer
               :data="publishTrackViewerData"
+              :weather-scene="publishWeatherScene"
               mode="fullscreen"
               @exit-fullscreen="showTrackFullscreen = false"
             />

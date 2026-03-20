@@ -8,7 +8,7 @@ export interface TrailGeo {
 }
 
 interface ResolveGeoOptions {
-  ip: string
+  ip?: string
   locationLabel: string
   signal?: AbortSignal
 }
@@ -95,10 +95,12 @@ export function useTrailGeo() {
     geo.value = null
 
     try {
-      const ipGeo = await fetchIpGeo(options.ip, options.signal)
-      if (ipGeo) {
-        geo.value = ipGeo
-        return ipGeo
+      if (options.ip) {
+        const ipGeo = await fetchIpGeo(options.ip, options.signal)
+        if (ipGeo) {
+          geo.value = ipGeo
+          return ipGeo
+        }
       }
 
       const geocodeGeo = await fetchGeocode(options.locationLabel, options.signal)

@@ -91,10 +91,64 @@ function resolveDistanceMeters(paths: TrackViewerPath[], explicitDistanceMeters?
   }, 0)
 }
 
+function resolveMainPathIndex(paths: TrackViewerPath[]) {
+  let longestIndex = -1
+  let longestLength = 0
+
+  for (let index = 0; index < paths.length; index += 1) {
+    const path = paths[index]
+    const length = path?.points.length ?? 0
+    if (length > longestLength) {
+      longestLength = length
+      longestIndex = index
+    }
+  }
+
+  return longestIndex >= 0 ? longestIndex : 0
+}
+
+function resolveElevationGain(path: TrackViewerPath | undefined, explicitGain?: number | null) {
+  if (typeof explicitGain === 'number' && Number.isFinite(explicitGain) && explicitGain >= 0) {
+    return explicitGain
+  }
+  if (!path) return 0
+
+  let gain = 0
+  for (let index = 1; index < path.points.length; index += 1) {
+    const previous = path.points[index - 1]
+    const current = path.points[index]
+    if (!previous || !current) continue
+    if (typeof previous.ele !== 'number' || typeof current.ele !== 'number') continue
+    if (current.ele > previous.ele) {
+      gain += current.ele - previous.ele
+    }
+  }
+
+  return gain
+}
+
+function resolveHighestPoint(path: TrackViewerPath | undefined) {
+  if (!path?.points.length) return null
+
+  let highestPoint = path.points[0] ?? null
+  if (!highestPoint) return null
+
+  for (const point of path.points) {
+    const elevation = typeof point.ele === 'number' ? point.ele : 0
+    const currentHighest = typeof highestPoint.ele === 'number' ? highestPoint.ele : 0
+    if (elevation > currentHighest) {
+      highestPoint = point
+    }
+  }
+
+  return highestPoint
+}
+
 export function createTrackViewerData(input: {
   title?: string | null
   fileName?: string | null
   distanceMeters?: number | null
+  elevationGainMeters?: number | null
   geoJson?: unknown
 }): TrackViewerData | null {
   const paths = extractPaths(input.geoJson)
@@ -103,10 +157,15 @@ export function createTrackViewerData(input: {
   }
 
   const displayTitle = normalizeName(input.fileName ?? input.title)
+  const mainPathIndex = resolveMainPathIndex(paths)
+  const mainPath = paths[mainPathIndex]
   return {
     title: displayTitle,
     fileName: input.fileName ?? null,
     distanceMeters: resolveDistanceMeters(paths, input.distanceMeters),
+    elevationGainMeters: resolveElevationGain(mainPath, input.elevationGainMeters),
+    highestPoint: resolveHighestPoint(mainPath),
+    mainPathIndex,
     paths,
   }
 }
