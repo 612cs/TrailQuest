@@ -90,30 +90,32 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
         {{ name }}
       </h3>
 
-      <!-- Rating -->
-      <div class="flex items-center gap-1.5">
-        <BaseIcon name="Star" :size="14" class="text-primary-500 fill-current" />
-        <span class="text-sm font-semibold text-primary-500">{{ rating }}</span>
-        <span class="text-xs" style="color: var(--text-tertiary);">{{ reviews }}</span>
-      </div>
+      <!-- Rating + Interactions -->
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-1.5">
+          <BaseIcon name="Star" :size="14" class="text-primary-500 fill-current" />
+          <span class="text-sm font-semibold text-primary-500">{{ rating }}</span>
+          <span class="text-xs" style="color: var(--text-tertiary);">{{ reviews }}</span>
+        </div>
 
-      <div class="flex items-center gap-4 text-xs" style="color: var(--text-secondary);">
-        <button
-          class="flex items-center gap-1.5 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="props.isLikePending"
-          @click.prevent="$emit('toggle-like')"
-        >
-          <BaseIcon name="Heart" :size="14" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
-          <span>{{ likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
-        </button>
-        <button
-          class="flex items-center gap-1.5 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="props.isFavoritePending"
-          @click.prevent="$emit('toggle-favorite')"
-        >
-          <BaseIcon name="Bookmark" :size="14" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
-          <span>{{ favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
-        </button>
+        <div class="flex items-center gap-4 text-xs" style="color: var(--text-secondary);">
+          <button
+            class="flex items-center gap-1.5 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            :disabled="props.isLikePending"
+            @click.prevent="$emit('toggle-like')"
+          >
+            <BaseIcon name="Heart" :size="14" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
+            <span>{{ likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
+          </button>
+          <button
+            class="flex items-center gap-1.5 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            :disabled="props.isFavoritePending"
+            @click.prevent="$emit('toggle-favorite')"
+          >
+            <BaseIcon name="Bookmark" :size="14" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
+            <span>{{ favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
+          </button>
+        </div>
       </div>
 
       <!-- Stats -->
