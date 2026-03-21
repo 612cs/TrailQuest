@@ -29,6 +29,8 @@
 
 - `backend/backend-handoff.md`
 - `backend/backend-development-checklist.md`
+- `backend/lightweight-ai-retrieval-layer.md`
+- `backend/landscape-prediction-system.md`
 
 ### `database`
 
