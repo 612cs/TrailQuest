@@ -104,14 +104,14 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
         <span v-if="reviewCount" class="text-xs" style="color: var(--text-tertiary);">({{ reviewCount >= 1000 ? (reviewCount / 1000).toFixed(1) + 'k' : reviewCount }} 条评论)</span>
       </div>
       <div class="flex items-center gap-3 flex-wrap justify-end">
-        <button
+        <!-- <button
           class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
           @click="$emit('share')"
           style="color: var(--text-secondary);"
         >
           <BaseIcon name="Share2" :size="16" />
           <span class="font-medium">分享</span>
-        </button>
+        </button> -->
         <button
           v-if="likes !== undefined"
           class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
