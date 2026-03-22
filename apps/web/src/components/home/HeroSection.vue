@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
+import homeHeroImage from '../../assets/shouye.jpg'
 
 const router = useRouter()
 const searchQuery = ref('')
@@ -16,15 +17,15 @@ const handleSearch = () => {
 </script>
 
 <template>
-  <section class="relative min-h-[70vh] sm:min-h-[80vh] flex items-end overflow-hidden">
+  <section class="relative h-screen min-h-[100vh] flex items-end overflow-hidden">
     <!-- Background Image -->
     <div class="absolute inset-0">
-      <img src="/hero-mountain.png" alt="壮丽山景" class="w-full h-full object-cover" />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+      <img :src="homeHeroImage" alt="壮丽山景" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10"></div>
     </div>
 
     <!-- Content Overlay -->
-    <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pb-12 sm:pb-20">
+    <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pb-12 sm:pb-20 pt-24 sm:pt-28">
       <div class="max-w-2xl space-y-5 sm:space-y-6">
         <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight animate-fade-in-up" style="text-shadow: 0 2px 16px rgba(0,0,0,0.3);">
           冒险在召唤。

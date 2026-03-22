@@ -66,13 +66,13 @@ defineEmits<{
       <div class="flex items-center justify-between pt-2 border-t" style="border-color: var(--border-default);">
         <div class="flex items-center gap-5">
           <button
-            class="flex items-center gap-1.5 text-xs transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            class="group flex items-center gap-1.5 text-xs transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300/60 rounded-md"
             :disabled="props.isLikePending"
             @click="$emit('toggle-like')"
             style="color: var(--text-secondary);"
           >
-            <BaseIcon name="Heart" :size="16" :class="post.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
-            {{ post.likes >= 1000 ? (post.likes / 1000).toFixed(1) + 'k' : post.likes }}
+            <BaseIcon name="Heart" :size="16" :class="post.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'group-hover:text-red-400'" />
+            <span class="group-hover:text-red-400">{{ post.likes >= 1000 ? (post.likes / 1000).toFixed(1) + 'k' : post.likes }}</span>
           </button>
           <button class="flex items-center gap-1.5 text-xs transition-colors hover:text-primary-500" style="color: var(--text-secondary);">
             <BaseIcon name="MessageCircle" :size="16" />
@@ -88,13 +88,13 @@ defineEmits<{
           </button>
         </div>
         <button
-          class="flex items-center gap-1.5 hover:text-primary-500 transition-colors text-xs disabled:opacity-60 disabled:cursor-not-allowed"
+          class="group flex items-center gap-1.5 transition-colors text-xs disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/60 rounded-md"
           :disabled="props.isFavoritePending"
           @click="$emit('toggle-favorite')"
           style="color: var(--text-tertiary);"
         >
-          <BaseIcon name="Bookmark" :size="18" :class="post.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
-          <span>{{ post.favorites >= 1000 ? (post.favorites / 1000).toFixed(1) + 'k' : post.favorites }}</span>
+          <BaseIcon name="Bookmark" :size="18" :class="post.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'group-hover:text-primary-500'" />
+          <span class="group-hover:text-primary-500">{{ post.favorites >= 1000 ? (post.favorites / 1000).toFixed(1) + 'k' : post.favorites }}</span>
         </button>
       </div>
     </div>

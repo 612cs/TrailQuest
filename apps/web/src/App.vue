@@ -8,11 +8,14 @@ import FlashToast from './components/common/FlashToast.vue'
 const route = useRoute()
 const hideHeaderRoutes = ['TrailDetail']
 const showHeader = computed(() => !hideHeaderRoutes.includes(route.name as string))
+const headerVariant = computed<'default' | 'overlay'>(() => (
+  route.meta.headerVariant === 'overlay' ? 'overlay' : 'default'
+))
 </script>
 
 <template>
   <div class="min-h-screen" style="background-color: var(--bg-page); color: var(--text-primary);">
-    <AppHeader v-if="showHeader" />
+    <AppHeader v-if="showHeader" :variant="headerVariant" />
     <RouterView v-slot="{ Component, route }">
       <transition name="fade" mode="out-in">
         <keep-alive>

@@ -55,7 +55,7 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
       </div>
 
       <!-- Content -->
-      <div class="flex-1 p-4 sm:p-5 space-y-3">
+      <div class="flex-1 p-4 sm:p-5 space-y-3 flex flex-col justify-between">
         <!-- Title & Badge -->
         <div class="flex items-start justify-between gap-3">
           <div class="space-y-1.5">
@@ -70,20 +70,20 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
           </div>
           <div class="flex items-center gap-1 shrink-0">
             <button
-              class="p-1.5 hover:text-primary-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              class="group p-1.5 rounded-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300/60"
               :disabled="props.isLikePending"
               @click.prevent="$emit('toggle-like')"
               style="color: var(--text-tertiary)"
             >
-              <BaseIcon name="Heart" :size="20" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
+              <BaseIcon name="Heart" :size="20" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'group-hover:text-red-400'" />
             </button>
             <button
-              class="p-1.5 hover:text-primary-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              class="group p-1.5 rounded-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/60"
               :disabled="props.isFavoritePending"
               @click.prevent="$emit('toggle-favorite')"
               style="color: var(--text-tertiary)"
             >
-              <BaseIcon name="Bookmark" :size="20" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
+              <BaseIcon name="Bookmark" :size="20" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'group-hover:text-primary-500'" />
             </button>
           </div>
         </div>
@@ -118,20 +118,20 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
           </div>
           <div class="flex items-center gap-3 text-xs sm:text-sm" style="color: var(--text-secondary);">
             <button
-              class="flex items-center gap-1 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+              class="group flex items-center gap-1 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300/60 rounded-md"
               :disabled="props.isLikePending"
               @click.prevent="$emit('toggle-like')"
             >
-              <BaseIcon name="Heart" :size="14" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
-              <span>{{ likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
+              <BaseIcon name="Heart" :size="14" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'group-hover:text-red-400'" />
+              <span class="group-hover:text-red-400">{{ likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
             </button>
             <button
-              class="flex items-center gap-1 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+              class="group flex items-center gap-1 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/60 rounded-md"
               :disabled="props.isFavoritePending"
               @click.prevent="$emit('toggle-favorite')"
             >
-              <BaseIcon name="Bookmark" :size="14" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
-              <span>{{ favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
+              <BaseIcon name="Bookmark" :size="14" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'group-hover:text-primary-500'" />
+              <span class="group-hover:text-primary-500">{{ favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
             </button>
           </div>
           <span class="flex items-center gap-1 text-sm font-medium text-primary-500">

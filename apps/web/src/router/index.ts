@@ -6,7 +6,7 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'Home',
     component: () => import('../views/HomeView.vue'),
-    meta: { title: '首页', keepAlive: true },
+    meta: { title: '首页', keepAlive: true, headerVariant: 'overlay' },
   },
   {
     path: '/search',

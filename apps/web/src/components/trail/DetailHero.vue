@@ -54,7 +54,7 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
     <div class="relative aspect-[16/9] overflow-hidden">
       <img :src="image" :alt="name" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-      <div class="absolute bottom-4 left-4 right-4">
+      <div class="absolute bottom-4 left-4 right-4 hidden sm:block">
         <div class="flex flex-wrap items-center gap-2">
           <TagBadge :label="difficultyLabel" />
           <TagBadge :label="packLabels[packType]" />
@@ -88,6 +88,20 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
         关注
       </button>
     </div>
+    <div class="sm:hidden px-4 py-4 border-b space-y-3" style="border-color: var(--border-default); background-color: var(--bg-card);">
+      <div class="flex flex-wrap items-center gap-2">
+        <TagBadge :label="difficultyLabel" />
+        <TagBadge :label="packLabels[packType]" />
+        <TagBadge :label="durationLabels[durationType]" />
+      </div>
+      <div class="flex items-center justify-between gap-3">
+        <h1 class="text-xl font-bold leading-tight min-w-0 truncate" style="color: var(--text-primary);">{{ name }}</h1>
+        <p class="text-sm flex items-center gap-1 shrink-0 whitespace-nowrap" style="color: var(--text-secondary);">
+          <BaseIcon name="MapPin" :size="14" />
+          {{ location }}
+        </p>
+      </div>
+    </div>
     <!-- Rating & Favorites Row -->
     <div v-if="rating || favorites" class="flex items-center justify-between px-4 py-3 border-b" style="border-color: var(--border-default);">
       <div v-if="rating" class="flex items-center gap-2">
@@ -114,25 +128,25 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
         </button> -->
         <button
           v-if="likes !== undefined"
-          class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
+          class="group flex items-center gap-1 text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300/60 rounded-md"
           :disabled="props.isLikePending"
           @click="$emit('toggle-like')"
           style="color: var(--text-secondary);"
         >
-          <BaseIcon name="Heart" :size="16" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
-          <span class="font-medium">{{ likes >= 10000 ? (likes / 10000).toFixed(1) + 'w' : likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
-          <span class="text-xs" style="color: var(--text-tertiary);">喜爱</span>
+          <BaseIcon name="Heart" :size="16" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'group-hover:text-red-400'" />
+          <span class="font-medium group-hover:text-red-400">{{ likes >= 10000 ? (likes / 10000).toFixed(1) + 'w' : likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
+          <span class="text-xs group-hover:text-red-400/80" style="color: var(--text-tertiary);">喜爱</span>
         </button>
         <button
           v-if="favorites !== undefined"
-          class="flex items-center gap-1 text-sm transition-opacity hover:opacity-80 disabled:opacity-60 disabled:cursor-not-allowed"
+          class="group flex items-center gap-1 text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/60 rounded-md"
           :disabled="props.isFavoritePending"
           @click="$emit('toggle-favorite')"
           style="color: var(--text-secondary);"
         >
-          <BaseIcon name="Bookmark" :size="16" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
-          <span class="font-medium">{{ favorites >= 10000 ? (favorites / 10000).toFixed(1) + 'w' : favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
-          <span class="text-xs" style="color: var(--text-tertiary);">收藏</span>
+          <BaseIcon name="Bookmark" :size="16" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'group-hover:text-primary-500'" />
+          <span class="font-medium group-hover:text-primary-500">{{ favorites >= 10000 ? (favorites / 10000).toFixed(1) + 'w' : favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
+          <span class="text-xs group-hover:text-primary-500/80" style="color: var(--text-tertiary);">收藏</span>
         </button>
       </div>
     </div>

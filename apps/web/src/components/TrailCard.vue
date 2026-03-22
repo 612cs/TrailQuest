@@ -51,7 +51,7 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
       <img :src="image" :alt="name" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
       <div class="absolute top-3 right-3 flex items-center gap-2">
         <button
-          class="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-90 disabled:opacity-60 disabled:cursor-not-allowed"
+          class="group w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200 active:scale-90 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300/60"
           style="background-color: rgba(255,255,255,0.88); box-shadow: 0 2px 8px rgba(0,0,0,0.15);"
           :disabled="props.isLikePending"
           @click.prevent="$emit('toggle-like')"
@@ -59,11 +59,11 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
           <BaseIcon
             name="Heart"
             :size="16"
-            :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'text-surface-500'"
+            :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'text-surface-500 group-hover:text-red-400'"
           />
         </button>
         <button
-          class="w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200 hover:scale-110 active:scale-90 disabled:opacity-60 disabled:cursor-not-allowed"
+          class="group w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200 active:scale-90 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/60"
           style="background-color: rgba(255,255,255,0.88); box-shadow: 0 2px 8px rgba(0,0,0,0.15);"
           :disabled="props.isFavoritePending"
           @click.prevent="$emit('toggle-favorite')"
@@ -71,7 +71,7 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
           <BaseIcon
             name="Bookmark"
             :size="16"
-            :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'text-surface-500'"
+            :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'text-surface-500 group-hover:text-primary-500'"
           />
         </button>
       </div>
@@ -100,20 +100,20 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
 
         <div class="flex items-center gap-4 text-xs" style="color: var(--text-secondary);">
           <button
-            class="flex items-center gap-1.5 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            class="group flex items-center gap-1.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300/60 rounded-md"
             :disabled="props.isLikePending"
             @click.prevent="$emit('toggle-like')"
           >
-            <BaseIcon name="Heart" :size="14" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : ''" />
-            <span>{{ likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
+            <BaseIcon name="Heart" :size="14" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'group-hover:text-red-400'" />
+            <span class="group-hover:text-red-400">{{ likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
           </button>
           <button
-            class="flex items-center gap-1.5 transition-colors hover:text-primary-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            class="group flex items-center gap-1.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/60 rounded-md"
             :disabled="props.isFavoritePending"
             @click.prevent="$emit('toggle-favorite')"
           >
-            <BaseIcon name="Bookmark" :size="14" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : ''" />
-            <span>{{ favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
+            <BaseIcon name="Bookmark" :size="14" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'group-hover:text-primary-500'" />
+            <span class="group-hover:text-primary-500">{{ favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
           </button>
         </div>
       </div>
