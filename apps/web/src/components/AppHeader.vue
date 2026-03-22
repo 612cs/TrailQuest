@@ -137,7 +137,13 @@ function isActive(path: string): boolean {
 
     <!-- Mobile Menu -->
     <transition name="slide">
-      <div v-if="mobileMenuOpen" class="md:hidden border-t" style="border-color: var(--border-default); background-color: var(--bg-card);">
+      <div
+        v-if="mobileMenuOpen"
+        class="md:hidden border-t"
+        :style="props.variant === 'overlay'
+          ? 'border-color: rgba(255,255,255,0.18); background-color: rgba(255,255,255,0.16); backdrop-filter: blur(14px);'
+          : 'border-color: var(--border-default); background-color: var(--bg-card);'"
+      >
         <nav class="px-4 py-3 space-y-1">
           <RouterLink
             v-for="link in navLinks"
@@ -145,8 +151,12 @@ function isActive(path: string): boolean {
             :to="link.path"
             @click="mobileMenuOpen = false"
             class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors"
-            :class="isActive(link.path) ? 'bg-primary-500/10 text-primary-500' : ''"
-            :style="!isActive(link.path) ? 'color: var(--text-secondary)' : ''"
+            :class="isActive(link.path)
+              ? (props.variant === 'overlay' ? 'bg-white/18 text-white' : 'bg-primary-500/10 text-primary-500')
+              : ''"
+            :style="!isActive(link.path)
+              ? (props.variant === 'overlay' ? 'color: rgba(255,255,255,0.88);' : 'color: var(--text-secondary)')
+              : ''"
           >
             <BaseIcon :name="link.icon" :size="18" />
             {{ link.name }}

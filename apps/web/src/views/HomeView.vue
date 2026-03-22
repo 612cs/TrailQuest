@@ -4,6 +4,7 @@ import TrailCard from '../components/TrailCard.vue'
 import HeroSection from '../components/home/HeroSection.vue'
 import ActivityGrid from '../components/home/ActivityGrid.vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
+import DraggableChatButton from '../components/common/DraggableChatButton.vue'
 import SectionHeader from '../components/common/SectionHeader.vue'
 import { fetchTrails } from '../api/trails'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
@@ -90,10 +91,6 @@ async function loadTrails() {
     <ActivityGrid />
 
     <!-- AI Assistant Floating Button -->
-    <div class="fixed bottom-6 right-6 z-40">
-      <RouterLink to="/chat" class="w-14 h-14 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-lg hover:bg-primary-600 hover:shadow-xl hover:scale-105 transition-all duration-200">
-        <BaseIcon name="MessageSquare" :size="24" />
-      </RouterLink>
-    </div>
+    <DraggableChatButton />
   </main>
 </template>
