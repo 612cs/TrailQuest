@@ -45,6 +45,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '路线详情' },
   },
   {
+    path: '/trail/:id/gallery',
+    name: 'TrailGallery',
+    component: () => import('../views/TrailGalleryView.vue'),
+    meta: { title: '图片漫游' },
+  },
+  {
     path: '/oss-upload-test',
     name: 'OssUploadTest',
     component: () => import('../views/OssUploadTestView.vue'),
