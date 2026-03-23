@@ -31,6 +31,7 @@ public class TrailQueryRow {
     private Boolean favoritedByCurrentUser;
     private Long authorId;
     private LocalDateTime createdAt;
+    private String status;
     private String tagsCsv;
     private String authorUsername;
     private String authorAvatar;

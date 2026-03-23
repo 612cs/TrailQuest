@@ -12,6 +12,7 @@ import lombok.Getter;
 public class TrailTrackVo {
 
     private Boolean hasTrack;
+    private Long mediaFileId;
     private String sourceFormat;
     private String originalFileName;
     private String downloadUrl;

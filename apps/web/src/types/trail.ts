@@ -9,6 +9,7 @@ export interface TrailAuthor {
 
 export interface TrailTrackDetail {
   hasTrack: boolean
+  mediaFileId?: EntityId | null
   sourceFormat?: 'gpx' | 'kml' | string
   originalFileName?: string | null
   downloadUrl?: string | null
@@ -31,6 +32,11 @@ export interface TrailTrackDetail {
   elevationGainMeters?: number | null
   elevationLossMeters?: number | null
   durationSeconds?: number | null
+}
+
+export interface TrailGalleryItem {
+  mediaId: EntityId | null
+  url: string
 }
 
 export interface TrailInteractionState {
@@ -67,6 +73,10 @@ export interface TrailListItem {
   authorId: EntityId
   publishTime: string
   createdAt: string
+  ownedByCurrentUser?: boolean
+  editableByCurrentUser?: boolean
+  coverMediaId?: EntityId | null
+  gallery?: TrailGalleryItem[]
   author: TrailAuthor
   track?: TrailTrackDetail | null
 }

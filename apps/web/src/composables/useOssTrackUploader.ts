@@ -17,6 +17,14 @@ export interface UploadedTrackFile {
   errorMessage: string
 }
 
+interface ExistingTrackItem {
+  mediaId: string | number | null
+  fileName: string
+  remoteUrl: string
+  mimeType?: string
+  extension?: string
+}
+
 function buildItemId() {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID()
@@ -129,6 +137,26 @@ export function useOssTrackUploader() {
     item.value = null
   }
 
+  function setExistingItem(existing: ExistingTrackItem | null) {
+    clear()
+    if (!existing) {
+      return
+    }
+
+    item.value = {
+      id: buildItemId(),
+      fileName: existing.fileName,
+      localUrl: existing.remoteUrl,
+      remoteUrl: existing.remoteUrl,
+      mediaId: existing.mediaId == null ? null : String(existing.mediaId),
+      mimeType: existing.mimeType ?? inferMimeType(new File([], existing.fileName)),
+      extension: existing.extension ?? getExtension(new File([], existing.fileName)),
+      progress: 100,
+      status: 'success',
+      errorMessage: '',
+    }
+  }
+
   function getErrorMessage(error: unknown) {
     if (error instanceof ApiError) {
       return `${error.message}（${error.code}）`
@@ -148,5 +176,6 @@ export function useOssTrackUploader() {
     isUploading,
     setFile,
     clear,
+    setExistingItem,
   }
 }

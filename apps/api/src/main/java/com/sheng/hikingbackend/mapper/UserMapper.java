@@ -33,6 +33,7 @@ public interface UserMapper extends BaseMapper<User> {
                 SELECT COUNT(*)
                 FROM trails t
                 WHERE t.author_id = u.id
+                  AND t.status = 'active'
               ) AS post_count,
               (
                 SELECT COUNT(*)
@@ -52,8 +53,9 @@ public interface UserMapper extends BaseMapper<User> {
                 SELECT COUNT(*)
                 FROM trails t
                 WHERE t.author_id = #{userId}
+                  AND t.status = 'active'
               ) AS post_count,
-              (
+            (
                 SELECT COUNT(*)
                 FROM trail_favorites tf
                 WHERE tf.user_id = #{userId}

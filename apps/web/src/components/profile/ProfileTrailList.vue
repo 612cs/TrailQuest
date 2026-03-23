@@ -16,6 +16,8 @@ const emit = defineEmits<{
   (event: 'load-more'): void
   (event: 'open-trail', item: UserTrailListItem): void
   (event: 'toggle-favorite', item: UserTrailListItem): void
+  (event: 'edit-trail', item: UserTrailListItem): void
+  (event: 'delete-trail', item: UserTrailListItem): void
 }>()
 
 const ROW_HEIGHT = 96
@@ -139,7 +141,26 @@ function getSubtitle(item: UserTrailListItem) {
         >
           <BaseIcon name="Bookmark" :size="18" class="fill-current" />
         </button>
-        <BaseIcon v-else name="ChevronRight" :size="16" style="color: var(--text-tertiary);" />
+        <div v-else class="flex items-center gap-1">
+          <button
+            v-if="item.editableByCurrentUser"
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-primary-500/10"
+            style="color: var(--primary-500);"
+            @click.stop="$emit('edit-trail', item)"
+          >
+            <BaseIcon name="Pencil" :size="16" />
+          </button>
+          <button
+            type="button"
+            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-red-500/10"
+            style="color: var(--color-hard);"
+            @click.stop="$emit('delete-trail', item)"
+          >
+            <BaseIcon name="Trash2" :size="16" />
+          </button>
+          <BaseIcon name="ChevronRight" :size="16" style="color: var(--text-tertiary);" />
+        </div>
       </div>
 
       <div

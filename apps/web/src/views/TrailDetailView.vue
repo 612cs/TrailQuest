@@ -12,12 +12,13 @@ import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
 import WeatherAlert from '../components/trail/WeatherAlert.vue'
 import WeatherSection from '../components/trail/WeatherSection.vue'
 import { createReview, deleteReview, fetchTrailReviews, fetchUserCard } from '../api/reviews'
-import { fetchTrailDetail } from '../api/trails'
+import { deleteTrail, fetchTrailDetail } from '../api/trails'
 import { useTrailShare } from '../composables/useTrailShare'
 import { useTrailGeo } from '../composables/useTrailGeo'
 import { useTrailWeather } from '../composables/useTrailWeather'
 import { useFlashStore } from '../stores/useFlashStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
+import { useUserStore } from '../stores/useUserStore'
 import type { EntityId } from '../types/id'
 import type { TrailListItem } from '../types/trail'
 import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
@@ -34,6 +35,7 @@ const router = useRouter()
 const route = useRoute()
 const flashStore = useFlashStore()
 const trailInteractionStore = useTrailInteractionStore()
+const userStore = useUserStore()
 const { shareTrail } = useTrailShare()
 
 const reviews = ref<ReviewItem[]>([])
@@ -55,6 +57,8 @@ const activeUserCardId = ref<string | null>(null)
 const isUserCardVisible = ref(false)
 const isUserCardLoading = ref(false)
 const userCardErrorMessage = ref('')
+const pendingDeleteTrail = ref(false)
+const isDeletingTrail = ref(false)
 const detailContentAnchorRef = useTemplateRef<HTMLDivElement>('detailContentAnchor')
 const { geo, isLoading: geoLoading, resolve: resolveGeo } = useTrailGeo()
 const { weather, isLoading: weatherLoading, resolve: resolveWeather } = useTrailWeather()
@@ -182,6 +186,8 @@ const weatherAlertMessage = computed(() => {
   }
   return '天气条件良好，注意补水与防晒。'
 })
+const canManageTrail = computed(() => !!displayTrail.value?.ownedByCurrentUser)
+const canEditTrail = computed(() => !!displayTrail.value?.editableByCurrentUser)
 
 async function handleCreateReview(payload: { rating?: number; text: string; images: string[] }) {
   if (!trailData.value || isSubmittingReview.value) return
@@ -356,6 +362,56 @@ async function handleShare() {
   })
 }
 
+function handleEditTrail() {
+  if (!displayTrail.value || !canEditTrail.value) {
+    flashStore.showError('路线发布超过48小时，不能再编辑')
+    return
+  }
+
+  void router.push({
+    name: 'Publish',
+    query: { edit: String(displayTrail.value.id) },
+  })
+}
+
+function handleDeleteTrail() {
+  pendingDeleteTrail.value = true
+}
+
+async function confirmDeleteTrail() {
+  if (!displayTrail.value || isDeletingTrail.value) {
+    return
+  }
+
+  isDeletingTrail.value = true
+
+  try {
+    await deleteTrail(displayTrail.value.id)
+    flashStore.showSuccess('路线删除成功')
+
+    if (userStore.profile) {
+      userStore.profile.postCount = Math.max(userStore.profile.postCount - 1, 0)
+    }
+
+    void router.replace({
+      name: 'Profile',
+      query: { tab: 'posts' },
+    })
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '路线删除失败')
+  } finally {
+    isDeletingTrail.value = false
+    pendingDeleteTrail.value = false
+  }
+}
+
+function closeDeleteTrailDialog() {
+  if (isDeletingTrail.value) {
+    return
+  }
+  pendingDeleteTrail.value = false
+}
+
 function scrollToDetailContent() {
   detailContentAnchorRef.value?.scrollIntoView({
     behavior: 'smooth',
@@ -405,14 +461,36 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
   <main v-if="trailData">
     <div class="glass-header sticky top-0 z-40 px-4 py-3">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
-        <button @click="router.back()" class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500" style="color: var(--text-secondary);">
+        <button @click="router.back()" class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500 cursor-pointer" style="color: var(--text-secondary);">
           <BaseIcon name="ChevronLeft" :size="20" />
           返回
         </button>
         <h2 class="text-sm font-semibold" style="color: var(--text-primary);">路线详情</h2>
-        <button class="p-1.5" style="color: var(--text-secondary);" @click="handleShare">
-          <BaseIcon name="Share" :size="20" />
-        </button>
+        <div class="flex items-center gap-1">
+          <button
+            v-if="canManageTrail"
+            type="button"
+            class="p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
+            :class="canEditTrail ? 'text-secondary hover:text-primary-500' : 'text-tertiary'"
+            :disabled="!canEditTrail"
+            :title="canEditTrail ? '编辑路线' : '发布超过48小时后不能再编辑'"
+            @click="handleEditTrail"
+          >
+            <BaseIcon name="Pencil" :size="20" />
+          </button>
+          <button
+            v-if="canManageTrail"
+            type="button"
+            class="p-1.5 text-secondary transition-colors hover:text-primary-500 cursor-pointer"
+            title="删除路线"
+            @click="handleDeleteTrail"
+          >
+            <BaseIcon name="Trash2" :size="20" />
+          </button>
+          <button class="p-1.5 text-secondary transition-colors hover:text-primary-500 cursor-pointer" @click="handleShare">
+            <BaseIcon name="Share" :size="20" />
+          </button>
+        </div>
       </div>
     </div>
 
@@ -503,6 +581,19 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
       @update:show="(value) => { if (!value) closeDeleteConfirm() }"
       @cancel="closeDeleteConfirm"
       @confirm="confirmDeleteReview"
+    />
+
+    <ConfirmDialog
+      :show="pendingDeleteTrail"
+      title="删除路线"
+      message="确认删除这条路线吗？删除后将不会再出现在前台列表和详情页。"
+      confirm-text="确认删除"
+      cancel-text="暂不删除"
+      tone="danger"
+      :confirm-loading="isDeletingTrail"
+      @update:show="(value) => { if (!value) closeDeleteTrailDialog() }"
+      @cancel="closeDeleteTrailDialog"
+      @confirm="confirmDeleteTrail"
     />
   </main>
   <main v-else class="max-w-4xl mx-auto px-4 sm:px-6 py-10">

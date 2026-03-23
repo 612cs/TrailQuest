@@ -36,6 +36,10 @@ public class TrailDetailVo {
     private Long authorId;
     private String publishTime;
     private LocalDateTime createdAt;
+    private Boolean ownedByCurrentUser;
+    private Boolean editableByCurrentUser;
+    private Long coverMediaId;
+    private List<TrailGalleryItemVo> gallery;
     private UserSummaryVo author;
     private TrailTrackVo track;
 }

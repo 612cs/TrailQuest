@@ -56,6 +56,7 @@ public interface TrailMapper extends BaseMapper<Trail> {
               </choose>
               t.author_id,
               t.created_at,
+              t.status,
               tag_summary.tags_csv,
               u.username AS author_username,
               u.avatar AS author_avatar,
@@ -71,6 +72,7 @@ public interface TrailMapper extends BaseMapper<Trail> {
               GROUP BY tt.trail_id
             ) tag_summary ON tag_summary.trail_id = t.id
             <where>
+              AND t.status = 'active'
               <if test="query.keyword != null and query.keyword != ''">
                 AND (
                   t.name LIKE CONCAT('%', #{query.keyword}, '%')
@@ -163,6 +165,7 @@ public interface TrailMapper extends BaseMapper<Trail> {
               </choose>
               t.author_id,
               t.created_at,
+              t.status,
               tag_summary.tags_csv,
               u.username AS author_username,
               u.avatar AS author_avatar,
@@ -178,6 +181,7 @@ public interface TrailMapper extends BaseMapper<Trail> {
               GROUP BY tt.trail_id
             ) tag_summary ON tag_summary.trail_id = t.id
             WHERE t.id = #{id}
+              AND t.status = 'active'
             LIMIT 1
             </script>
             """)
@@ -209,6 +213,7 @@ public interface TrailMapper extends BaseMapper<Trail> {
               </choose>
             FROM trails t
             WHERE t.id = #{trailId}
+              AND t.status = 'active'
             LIMIT 1
             </script>
             """)
@@ -243,10 +248,12 @@ public interface TrailMapper extends BaseMapper<Trail> {
               </choose>
               t.author_id,
               t.created_at,
+              t.status,
               u.username AS author_username
             FROM trails t
             JOIN users u ON u.id = t.author_id
             WHERE t.author_id = #{currentUserId}
+              AND t.status = 'active'
             ORDER BY t.created_at DESC
             </script>
             """)
@@ -284,11 +291,13 @@ public interface TrailMapper extends BaseMapper<Trail> {
               </choose>
               t.author_id,
               t.created_at,
+              t.status,
               u.username AS author_username
             FROM trail_favorites favorite
             JOIN trails t ON t.id = favorite.trail_id
             JOIN users u ON u.id = t.author_id
             WHERE favorite.user_id = #{currentUserId}
+              AND t.status = 'active'
             ORDER BY favorite.created_at DESC, favorite.id DESC
             </script>
             """)
@@ -296,6 +305,15 @@ public interface TrailMapper extends BaseMapper<Trail> {
             Page<TrailQueryRow> page,
             @Param("currentUserId") Long currentUserId,
             @Param("userId") Long userId);
+
+    @Select("""
+            SELECT *
+            FROM trails
+            WHERE id = #{trailId}
+              AND status = 'active'
+            LIMIT 1
+            """)
+    Trail selectActiveById(@Param("trailId") Long trailId);
 
     @Update("""
             UPDATE trails

@@ -1,10 +1,12 @@
 package com.sheng.hikingbackend.service.impl;
 
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -19,9 +21,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.common.enums.MediaBizType;
 import com.sheng.hikingbackend.common.enums.MediaFileStatus;
+import com.sheng.hikingbackend.common.enums.TrailStatus;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.dto.trail.CreateTrailRequest;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
+import com.sheng.hikingbackend.dto.trail.UpdateTrailRequest;
 import com.sheng.hikingbackend.entity.MediaFile;
 import com.sheng.hikingbackend.entity.Trail;
 import com.sheng.hikingbackend.entity.TrailTrack;
@@ -38,6 +42,7 @@ import com.sheng.hikingbackend.service.TrailService;
 import com.sheng.hikingbackend.service.impl.support.TrackParseResult;
 import com.sheng.hikingbackend.vo.common.UserSummaryVo;
 import com.sheng.hikingbackend.vo.trail.TrailDetailVo;
+import com.sheng.hikingbackend.vo.trail.TrailGalleryItemVo;
 import com.sheng.hikingbackend.vo.trail.TrailInteractionVo;
 import com.sheng.hikingbackend.vo.trail.TrailQueryRow;
 import com.sheng.hikingbackend.vo.trail.TrailTrackVo;
@@ -47,6 +52,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class TrailServiceImpl implements TrailService {
+
+    private static final long EDIT_WINDOW_HOURS = 48;
 
     private final TrailMapper trailMapper;
     private final TrailLikeMapper trailLikeMapper;
@@ -65,7 +72,7 @@ public class TrailServiceImpl implements TrailService {
         Page<TrailQueryRow> page = Page.of(request.getPageNum(), request.getPageSize());
         IPage<TrailQueryRow> pageResult = trailMapper.selectTrailPage(page, request, currentUserId);
         List<TrailDetailVo> list = pageResult.getRecords().stream()
-                .map(this::toTrailDetailVo)
+                .map(row -> toTrailDetailVo(row, null, currentUserId, false))
                 .toList();
         return PageResponse.of(list, pageResult.getCurrent(), pageResult.getSize(), pageResult.getTotal());
     }
@@ -76,87 +83,59 @@ public class TrailServiceImpl implements TrailService {
         if (row == null) {
             throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
         }
-        return toTrailDetailVo(row, buildTrackVo(id));
+        return toTrailDetailVo(row, buildTrackVo(id), currentUserId, true);
     }
 
     @Override
     @Transactional
     public TrailDetailVo createTrail(Long currentUserId, String requestIp, CreateTrailRequest request) {
+        TrackMutation mutation = resolveTrackMutation(currentUserId, request.getTrackMediaId());
+        List<MediaFile> galleryMedia = resolveGalleryMedia(currentUserId, request.getGalleryMediaIds());
         MediaFile coverMedia = requireOwnedMedia(currentUserId, request.getCoverMediaId(), MediaBizType.TRAIL_COVER);
-        List<MediaFile> galleryMedia = request.getGalleryMediaIds() == null
-                ? Collections.emptyList()
-                : request.getGalleryMediaIds().stream()
-                        .map(mediaId -> requireOwnedMedia(currentUserId, mediaId, MediaBizType.TRAIL_GALLERY))
-                        .toList();
-
-        TrackParseResult parsedTrack = null;
-        MediaFile trackMedia = null;
-        if (request.getTrackMediaId() != null) {
-            trackMedia = requireOwnedMedia(currentUserId, request.getTrackMediaId(), MediaBizType.TRAIL_TRACK);
-            parsedTrack = trackParseService.parse(trackMedia);
-        }
 
         Trail trail = new Trail();
-        trail.setImage(coverMedia.getUrl());
-        trail.setName(request.getName().trim());
-        trail.setLocation(request.getLocation().trim());
-        trail.setIp(StringUtils.hasText(requestIp) ? requestIp.trim() : "127.0.0.1");
-        trail.setDifficulty(normalizeDifficulty(request.getDifficulty()));
-        trail.setDifficultyLabel(resolveDifficultyLabel(trail.getDifficulty()));
-        trail.setPackType(normalizePackType(request.getPackType()));
-        trail.setDurationType(normalizeDurationType(request.getDurationType()));
-        trail.setDistance(resolveDistance(request.getDistance(), parsedTrack));
-        trail.setElevation(resolveElevation(request.getElevation(), parsedTrack));
-        trail.setDuration(resolveDuration(request.getDuration(), parsedTrack));
-        trail.setDescription(request.getDescription().trim());
+        trail.setAuthorId(currentUserId);
         trail.setFavorites(0);
         trail.setLikes(0);
         trail.setRating(java.math.BigDecimal.ZERO.setScale(1));
         trail.setReviewCount(0);
-        trail.setAuthorId(currentUserId);
+        trail.setStatus(TrailStatus.ACTIVE.getCode());
+        applyTrailFields(trail, request, requestIp, coverMedia, mutation.parsedTrack());
         trailMapper.insert(trail);
 
-        int sortOrder = 1;
-        for (MediaFile mediaFile : galleryMedia) {
-            trailImageMapper.insertImage(trail.getId(), mediaFile.getUrl(), sortOrder++);
-        }
+        replaceGalleryImages(trail.getId(), galleryMedia);
+        replaceTags(trail.getId(), request.getTags());
+        replaceTrack(trail.getId(), currentUserId, mutation);
 
-        for (String tagName : request.getTags()) {
-            Long tagId = findOrCreateTagId(tagName);
-            trailTagMapper.insertRelation(trail.getId(), tagId);
-        }
+        return getTrailDetail(trail.getId(), currentUserId);
+    }
 
-        if (trackMedia != null && parsedTrack != null) {
-            TrailTrack trailTrack = new TrailTrack();
-            trailTrack.setTrailId(trail.getId());
-            trailTrack.setMediaFileId(trackMedia.getId());
-            trailTrack.setUserId(currentUserId);
-            trailTrack.setSourceFormat(parsedTrack.getSourceFormat());
-            trailTrack.setOriginalFileName(trackMedia.getOriginalName());
-            trailTrack.setTrackGeoJson(parsedTrack.getGeoJson());
-            trailTrack.setTrackPointsCount(parsedTrack.getTrackPointsCount());
-            trailTrack.setWaypointCount(parsedTrack.getWaypointCount());
-            trailTrack.setStartLng(parsedTrack.getStartLng());
-            trailTrack.setStartLat(parsedTrack.getStartLat());
-            trailTrack.setEndLng(parsedTrack.getEndLng());
-            trailTrack.setEndLat(parsedTrack.getEndLat());
-            trailTrack.setBboxMinLng(parsedTrack.getBboxMinLng());
-            trailTrack.setBboxMinLat(parsedTrack.getBboxMinLat());
-            trailTrack.setBboxMaxLng(parsedTrack.getBboxMaxLng());
-            trailTrack.setBboxMaxLat(parsedTrack.getBboxMaxLat());
-            trailTrack.setDistanceMeters(parsedTrack.getDistanceMeters());
-            trailTrack.setElevationGainMeters(parsedTrack.getElevationGainMeters());
-            trailTrack.setElevationLossMeters(parsedTrack.getElevationLossMeters());
-            trailTrack.setDurationSeconds(parsedTrack.getDurationSeconds());
-            trailTrack.setStatus("parsed");
-            trailTrackMapper.insert(trailTrack);
-        }
+    @Override
+    @Transactional
+    public TrailDetailVo updateTrail(Long trailId, Long currentUserId, String requestIp, UpdateTrailRequest request) {
+        Trail trail = requireOwnedTrail(trailId, currentUserId);
+        ensureEditable(trail);
 
-        TrailQueryRow created = trailMapper.selectTrailDetailById(trail.getId(), currentUserId);
-        if (created == null) {
-            throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
-        }
-        return toTrailDetailVo(created, buildTrackVo(trail.getId()));
+        TrackMutation mutation = resolveTrackMutation(currentUserId, request.getTrackMediaId());
+        List<MediaFile> galleryMedia = resolveGalleryMedia(currentUserId, request.getGalleryMediaIds());
+        MediaFile coverMedia = requireOwnedMedia(currentUserId, request.getCoverMediaId(), MediaBizType.TRAIL_COVER);
+
+        applyTrailFields(trail, request, requestIp, coverMedia, mutation.parsedTrack());
+        trailMapper.updateById(trail);
+
+        replaceGalleryImages(trailId, galleryMedia);
+        replaceTags(trailId, request.getTags());
+        replaceTrack(trailId, currentUserId, mutation);
+
+        return getTrailDetail(trailId, currentUserId);
+    }
+
+    @Override
+    @Transactional
+    public void deleteTrail(Long trailId, Long currentUserId) {
+        Trail trail = requireOwnedTrail(trailId, currentUserId);
+        trail.setStatus(TrailStatus.DELETED.getCode());
+        trailMapper.updateById(trail);
     }
 
     @Override
@@ -203,10 +182,14 @@ public class TrailServiceImpl implements TrailService {
 
     @Override
     public TrailDetailVo toTrailDetailVo(TrailQueryRow row) {
-        return toTrailDetailVo(row, null);
+        return toTrailDetailVo(row, null, null, false);
     }
 
-    private TrailDetailVo toTrailDetailVo(TrailQueryRow row, TrailTrackVo track) {
+    private TrailDetailVo toTrailDetailVo(
+            TrailQueryRow row,
+            TrailTrackVo track,
+            Long currentUserId,
+            boolean includeEditMedia) {
         return TrailDetailVo.builder()
                 .id(row.getId())
                 .image(row.getImage())
@@ -231,6 +214,12 @@ public class TrailServiceImpl implements TrailService {
                 .authorId(row.getAuthorId())
                 .publishTime(formatPublishTime(row.getCreatedAt()))
                 .createdAt(row.getCreatedAt())
+                .ownedByCurrentUser(isOwnedByCurrentUser(row, currentUserId))
+                .editableByCurrentUser(isEditableByCurrentUser(row, currentUserId))
+                .coverMediaId(includeEditMedia
+                        ? resolveMediaIdByUrl(row.getAuthorId(), row.getImage(), MediaBizType.TRAIL_COVER)
+                        : null)
+                .gallery(includeEditMedia ? loadGallery(row.getId(), row.getAuthorId()) : List.of())
                 .author(UserSummaryVo.builder()
                         .id(row.getAuthorId())
                         .username(row.getAuthorUsername())
@@ -241,10 +230,154 @@ public class TrailServiceImpl implements TrailService {
                 .build();
     }
 
-    private void ensureTrailExists(Long trailId) {
-        if (trailMapper.selectById(trailId) == null) {
+    private void applyTrailFields(
+            Trail trail,
+            CreateTrailRequest request,
+            String requestIp,
+            MediaFile coverMedia,
+            TrackParseResult parsedTrack) {
+        trail.setImage(coverMedia.getUrl());
+        trail.setName(request.getName().trim());
+        trail.setLocation(request.getLocation().trim());
+        if (StringUtils.hasText(requestIp)) {
+            trail.setIp(requestIp.trim());
+        } else if (!StringUtils.hasText(trail.getIp())) {
+            trail.setIp("127.0.0.1");
+        }
+        trail.setDifficulty(normalizeDifficulty(request.getDifficulty()));
+        trail.setDifficultyLabel(resolveDifficultyLabel(trail.getDifficulty()));
+        trail.setPackType(normalizePackType(request.getPackType()));
+        trail.setDurationType(normalizeDurationType(request.getDurationType()));
+        trail.setDistance(resolveDistance(request.getDistance(), parsedTrack));
+        trail.setElevation(resolveElevation(request.getElevation(), parsedTrack));
+        trail.setDuration(resolveDuration(request.getDuration(), parsedTrack));
+        trail.setDescription(request.getDescription().trim());
+    }
+
+    private void replaceGalleryImages(Long trailId, List<MediaFile> galleryMedia) {
+        trailImageMapper.deleteByTrailId(trailId);
+        int sortOrder = 1;
+        for (MediaFile mediaFile : galleryMedia) {
+            trailImageMapper.insertImage(trailId, mediaFile.getUrl(), sortOrder++);
+        }
+    }
+
+    private void replaceTags(Long trailId, List<String> tags) {
+        trailTagMapper.deleteByTrailId(trailId);
+        for (String tagName : tags) {
+            Long tagId = findOrCreateTagId(tagName);
+            trailTagMapper.insertRelation(trailId, tagId);
+        }
+    }
+
+    private void replaceTrack(Long trailId, Long currentUserId, TrackMutation mutation) {
+        trailTrackMapper.deleteByTrailId(trailId);
+        if (mutation.trackMedia() == null || mutation.parsedTrack() == null) {
+            return;
+        }
+
+        TrailTrack trailTrack = new TrailTrack();
+        trailTrack.setTrailId(trailId);
+        trailTrack.setMediaFileId(mutation.trackMedia().getId());
+        trailTrack.setUserId(currentUserId);
+        trailTrack.setSourceFormat(mutation.parsedTrack().getSourceFormat());
+        trailTrack.setOriginalFileName(mutation.trackMedia().getOriginalName());
+        trailTrack.setTrackGeoJson(mutation.parsedTrack().getGeoJson());
+        trailTrack.setTrackPointsCount(mutation.parsedTrack().getTrackPointsCount());
+        trailTrack.setWaypointCount(mutation.parsedTrack().getWaypointCount());
+        trailTrack.setStartLng(mutation.parsedTrack().getStartLng());
+        trailTrack.setStartLat(mutation.parsedTrack().getStartLat());
+        trailTrack.setEndLng(mutation.parsedTrack().getEndLng());
+        trailTrack.setEndLat(mutation.parsedTrack().getEndLat());
+        trailTrack.setBboxMinLng(mutation.parsedTrack().getBboxMinLng());
+        trailTrack.setBboxMinLat(mutation.parsedTrack().getBboxMinLat());
+        trailTrack.setBboxMaxLng(mutation.parsedTrack().getBboxMaxLng());
+        trailTrack.setBboxMaxLat(mutation.parsedTrack().getBboxMaxLat());
+        trailTrack.setDistanceMeters(mutation.parsedTrack().getDistanceMeters());
+        trailTrack.setElevationGainMeters(mutation.parsedTrack().getElevationGainMeters());
+        trailTrack.setElevationLossMeters(mutation.parsedTrack().getElevationLossMeters());
+        trailTrack.setDurationSeconds(mutation.parsedTrack().getDurationSeconds());
+        trailTrack.setStatus("parsed");
+        trailTrackMapper.insert(trailTrack);
+    }
+
+    private List<MediaFile> resolveGalleryMedia(Long userId, List<Long> galleryMediaIds) {
+        if (galleryMediaIds == null || galleryMediaIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return galleryMediaIds.stream()
+                .map(mediaId -> requireOwnedMedia(userId, mediaId, MediaBizType.TRAIL_GALLERY))
+                .toList();
+    }
+
+    private TrackMutation resolveTrackMutation(Long userId, Long trackMediaId) {
+        if (trackMediaId == null) {
+            return new TrackMutation(null, null);
+        }
+
+        MediaFile trackMedia = requireOwnedMedia(userId, trackMediaId, MediaBizType.TRAIL_TRACK);
+        TrackParseResult parsedTrack = trackParseService.parse(trackMedia);
+        return new TrackMutation(trackMedia, parsedTrack);
+    }
+
+    private Trail requireOwnedTrail(Long trailId, Long currentUserId) {
+        Trail trail = ensureTrailExists(trailId);
+        if (!Objects.equals(trail.getAuthorId(), currentUserId)) {
+            throw BusinessException.forbidden("TRAIL_EDIT_FORBIDDEN", "只能编辑或删除自己发布的路线");
+        }
+        return trail;
+    }
+
+    private void ensureEditable(Trail trail) {
+        if (!isWithinEditWindow(trail.getCreatedAt())) {
+            throw BusinessException.badRequest("TRAIL_EDIT_EXPIRED", "路线发布超过48小时，不能再编辑");
+        }
+    }
+
+    private boolean isOwnedByCurrentUser(TrailQueryRow row, Long currentUserId) {
+        return currentUserId != null && Objects.equals(row.getAuthorId(), currentUserId);
+    }
+
+    private boolean isEditableByCurrentUser(TrailQueryRow row, Long currentUserId) {
+        return isOwnedByCurrentUser(row, currentUserId) && isWithinEditWindow(row.getCreatedAt());
+    }
+
+    private boolean isWithinEditWindow(LocalDateTime createdAt) {
+        if (createdAt == null) {
+            return false;
+        }
+        return !createdAt.isBefore(LocalDateTime.now().minusHours(EDIT_WINDOW_HOURS));
+    }
+
+    private List<TrailGalleryItemVo> loadGallery(Long trailId, Long authorId) {
+        return trailImageMapper.selectByTrailId(trailId).stream()
+                .map(image -> TrailGalleryItemVo.builder()
+                        .mediaId(resolveMediaIdByUrl(authorId, image.getImage(), MediaBizType.TRAIL_GALLERY))
+                        .url(image.getImage())
+                        .build())
+                .toList();
+    }
+
+    private Long resolveMediaIdByUrl(Long userId, String url, MediaBizType bizType) {
+        if (userId == null || !StringUtils.hasText(url)) {
+            return null;
+        }
+
+        MediaFile mediaFile = mediaFileMapper.selectOne(new LambdaQueryWrapper<MediaFile>()
+                .eq(MediaFile::getUserId, userId)
+                .eq(MediaFile::getUrl, url)
+                .eq(MediaFile::getBizType, bizType.getCode())
+                .eq(MediaFile::getStatus, MediaFileStatus.ACTIVE.getCode())
+                .last("LIMIT 1"));
+        return mediaFile == null ? null : mediaFile.getId();
+    }
+
+    private Trail ensureTrailExists(Long trailId) {
+        Trail trail = trailMapper.selectActiveById(trailId);
+        if (trail == null) {
             throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
         }
+        return trail;
     }
 
     private TrailInteractionVo getTrailInteraction(Long trailId, Long currentUserId) {
@@ -392,7 +525,7 @@ public class TrailServiceImpl implements TrailService {
             return normalized;
         }
         if (parsedTrack != null && parsedTrack.getElevationGainMeters() != null) {
-            return "+" + parsedTrack.getElevationGainMeters().setScale(0, java.math.RoundingMode.HALF_UP).toPlainString() + " m";
+            return "+" + parsedTrack.getElevationGainMeters().setScale(0, RoundingMode.HALF_UP).toPlainString() + " m";
         }
         throw BusinessException.badRequest("ELEVATION_REQUIRED", "请填写海拔爬升或上传轨迹自动补全");
     }
@@ -413,7 +546,7 @@ public class TrailServiceImpl implements TrailService {
     }
 
     private String formatDistance(java.math.BigDecimal distanceMeters) {
-        return distanceMeters.divide(java.math.BigDecimal.valueOf(1000), 1, java.math.RoundingMode.HALF_UP)
+        return distanceMeters.divide(java.math.BigDecimal.valueOf(1000), 1, RoundingMode.HALF_UP)
                 .stripTrailingZeros()
                 .toPlainString() + " km";
     }
@@ -447,6 +580,7 @@ public class TrailServiceImpl implements TrailService {
 
         return TrailTrackVo.builder()
                 .hasTrack(true)
+                .mediaFileId(track.getMediaFileId())
                 .sourceFormat(track.getSourceFormat())
                 .originalFileName(track.getOriginalFileName())
                 .downloadUrl(mediaFile == null ? null : mediaFile.getUrl())
@@ -470,5 +604,8 @@ public class TrailServiceImpl implements TrailService {
                 .elevationLossMeters(track.getElevationLossMeters())
                 .durationSeconds(track.getDurationSeconds())
                 .build();
+    }
+
+    private record TrackMutation(MediaFile trackMedia, TrackParseResult parsedTrack) {
     }
 }

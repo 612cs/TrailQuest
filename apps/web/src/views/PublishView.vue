@@ -1,24 +1,27 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import toGeoJSON from '@mapbox/togeojson'
 
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ImagePreviewModal from '../components/common/ImagePreviewModal.vue'
 import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
-import { createTrail } from '../api/trails'
+import { createTrail, fetchTrailDetail, updateTrail } from '../api/trails'
 import { useAmapLoader } from '../composables/useAmapLoader'
 import { useTrailGeo } from '../composables/useTrailGeo'
 import { useTrailWeather } from '../composables/useTrailWeather'
 import { useOssImageUploader } from '../composables/useOssImageUploader'
 import { useOssTrackUploader } from '../composables/useOssTrackUploader'
 import { useFlashStore } from '../stores/useFlashStore'
+import type { EntityId } from '../types/id'
+import type { TrailListItem } from '../types/trail'
 import { presetTags } from '../mock/mockData'
 import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
 import { mapWeatherToTrackScene } from '../utils/trackWeatherScene'
 
 type TrackCoordinate = [number, number, number?]
 
+const route = useRoute()
 const router = useRouter()
 const flashStore = useFlashStore()
 
@@ -35,11 +38,13 @@ const selectedTags = ref<string[]>([])
 const customTag = ref('')
 
 const isSubmitting = ref(false)
+const isLoadingDraft = ref(false)
 const showSuccess = ref(false)
 const previewImages = ref<string[]>([])
 const previewIndex = ref(0)
 const showPreview = ref(false)
 const showTrackFullscreen = ref(false)
+const loadedTrail = ref<TrailListItem | null>(null)
 
 const mapRef = useTemplateRef<HTMLDivElement>('mapContainer')
 const mapInstance = shallowRef<any>(null)
@@ -105,6 +110,31 @@ const isFormValid = computed(() => {
     && !!coverUploader.items.value[0]?.mediaId
     && !isAnyUploading.value
 })
+const editTrailId = computed<EntityId | null>(() => {
+  const rawEdit = route.query.edit
+  if (Array.isArray(rawEdit)) {
+    return rawEdit[0] ?? null
+  }
+  return rawEdit ?? null
+})
+const isEditMode = computed(() => !!editTrailId.value)
+const submitLabel = computed(() => {
+  if (isSubmitting.value) {
+    return isEditMode.value ? '更新中...' : '发布中...'
+  }
+  return isEditMode.value ? '保存修改' : '发布路线'
+})
+const successMessage = computed(() => (isEditMode.value ? '路线更新成功' : '路线发布成功'))
+
+watch(editTrailId, async (nextEditId) => {
+  if (!nextEditId) {
+    loadedTrail.value = null
+    resetForm()
+    return
+  }
+
+  await loadEditTrail(nextEditId)
+}, { immediate: true })
 
 function toggleTag(tag: string) {
   const idx = selectedTags.value.indexOf(tag)
@@ -175,6 +205,81 @@ async function renderMapWithGeoJSON() {
     mapInstance.value.add(geojsonObj)
     mapInstance.value.setFitView()
   })
+}
+
+function resetForm() {
+  name.value = ''
+  location.value = ''
+  difficulty.value = 'moderate'
+  packType.value = 'light'
+  durationType.value = 'single_day'
+  distance.value = ''
+  elevation.value = ''
+  duration.value = ''
+  description.value = ''
+  selectedTags.value = []
+  customTag.value = ''
+  coverUploader.setExistingItems([])
+  galleryUploader.setExistingItems([])
+  trackUploader.setExistingItem(null)
+  geoJsonData.value = null
+  mapError.value = ''
+  showTrackFullscreen.value = false
+}
+
+async function loadEditTrail(targetTrailId: EntityId) {
+  isLoadingDraft.value = true
+
+  try {
+    const detail = await fetchTrailDetail(targetTrailId)
+    if (!detail.ownedByCurrentUser) {
+      throw new Error('只能编辑自己发布的路线')
+    }
+    if (!detail.editableByCurrentUser) {
+      throw new Error('路线发布超过48小时，不能再编辑')
+    }
+
+    loadedTrail.value = detail
+    name.value = detail.name
+    location.value = detail.location
+    difficulty.value = detail.difficulty
+    packType.value = detail.packType
+    durationType.value = detail.durationType
+    distance.value = detail.distance
+    elevation.value = detail.elevation
+    duration.value = detail.duration
+    description.value = detail.description
+    selectedTags.value = [...detail.tags]
+    customTag.value = ''
+
+    coverUploader.setExistingItems(detail.coverMediaId
+      ? [{ mediaId: detail.coverMediaId, url: detail.image }]
+      : [])
+    galleryUploader.setExistingItems((detail.gallery ?? []).map((item) => ({
+      mediaId: item.mediaId,
+      url: item.url,
+    })))
+
+    if (detail.track?.hasTrack && detail.track.mediaFileId && detail.track.downloadUrl) {
+      trackUploader.setExistingItem({
+        mediaId: detail.track.mediaFileId,
+        fileName: detail.track.originalFileName ?? 'track.gpx',
+        remoteUrl: detail.track.downloadUrl,
+        extension: detail.track.sourceFormat ?? undefined,
+      })
+      geoJsonData.value = detail.track.geoJson ?? null
+      await renderMapWithGeoJSON()
+    } else {
+      trackUploader.setExistingItem(null)
+      geoJsonData.value = null
+      mapError.value = ''
+    }
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '路线草稿加载失败')
+    void router.replace(editTrailId.value ? `/trail/${editTrailId.value}` : '/profile')
+  } finally {
+    isLoadingDraft.value = false
+  }
 }
 
 async function handleCoverChange(event: Event) {
@@ -372,7 +477,7 @@ onBeforeUnmount(() => {
 })
 
 async function handleSubmit() {
-  if (!isFormValid.value) return
+  if (!isFormValid.value || isLoadingDraft.value) return
 
   isSubmitting.value = true
 
@@ -388,7 +493,7 @@ async function handleSubmit() {
 
     const trackMediaId = trackItem.value?.mediaId ?? null
 
-    const created = await createTrail({
+    const payload = {
       name: name.value.trim(),
       location: location.value.trim(),
       difficulty: difficulty.value,
@@ -403,10 +508,14 @@ async function handleSubmit() {
       galleryMediaIds,
       trackMediaId,
       tags: selectedTags.value,
-    })
+    }
+
+    const created = isEditMode.value && editTrailId.value
+      ? await updateTrail(editTrailId.value, payload)
+      : await createTrail(payload)
 
     showSuccess.value = true
-    flashStore.showSuccess('路线发布成功')
+    flashStore.showSuccess(successMessage.value)
     setTimeout(() => {
       showSuccess.value = false
       void router.push(`/trail/${created.id}`)
@@ -435,12 +544,17 @@ function getImageSources(items: { localUrl: string; remoteUrl: string }[]) {
           <BaseIcon name="ChevronLeft" :size="20" />
           返回
         </button>
-        <h2 class="text-sm font-semibold" style="color: var(--text-primary);">发布路线</h2>
+        <h2 class="text-sm font-semibold" style="color: var(--text-primary);">{{ isEditMode ? '编辑路线' : '发布路线' }}</h2>
         <div class="w-12" />
       </div>
     </div>
 
     <div class="mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-6">
+      <section v-if="isLoadingDraft" class="card flex items-center gap-3 p-4 sm:p-5">
+        <BaseIcon name="Loader2" :size="18" class="animate-spin text-primary-500" />
+        <p class="text-sm" style="color: var(--text-secondary);">正在加载路线信息...</p>
+      </section>
+
       <section class="card animate-fade-in-up p-4 sm:p-5">
         <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
           <BaseIcon name="Image" :size="16" class="text-primary-500" />
@@ -719,12 +833,12 @@ function getImageSources(items: { localUrl: string; remoteUrl: string }[]) {
         <button
           class="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-white transition-all disabled:cursor-not-allowed disabled:opacity-40"
           :class="isFormValid && !isSubmitting ? 'bg-primary-500 hover:bg-primary-600 hover:shadow-md active:scale-[0.98]' : 'bg-gray-400'"
-          :disabled="!isFormValid || isSubmitting"
+          :disabled="!isFormValid || isSubmitting || isLoadingDraft"
           @click="handleSubmit"
         >
           <BaseIcon v-if="isSubmitting" name="Loader2" :size="16" class="animate-spin" />
           <BaseIcon v-else name="Send" :size="16" />
-          {{ isSubmitting ? '发布中...' : '发布路线' }}
+          {{ submitLabel }}
         </button>
       </div>
     </div>
@@ -732,7 +846,7 @@ function getImageSources(items: { localUrl: string; remoteUrl: string }[]) {
     <transition name="toast">
       <div v-if="showSuccess" class="fixed left-1/2 top-20 z-50 flex -translate-x-1/2 items-center gap-2 rounded-xl bg-primary-500 px-5 py-3 text-sm font-medium text-white shadow-lg">
         <BaseIcon name="CheckCircle" :size="18" />
-        发布成功！即将跳转...
+        {{ isEditMode ? '修改已保存！即将跳转...' : '发布成功！即将跳转...' }}
       </div>
     </transition>
 

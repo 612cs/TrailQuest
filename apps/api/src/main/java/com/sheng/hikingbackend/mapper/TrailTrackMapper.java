@@ -2,6 +2,7 @@ package com.sheng.hikingbackend.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Select;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -17,4 +18,10 @@ public interface TrailTrackMapper extends BaseMapper<TrailTrack> {
             LIMIT 1
             """)
     TrailTrack selectByTrailId(@Param("trailId") Long trailId);
+
+    @Delete("""
+            DELETE FROM trail_tracks
+            WHERE trail_id = #{trailId}
+            """)
+    int deleteByTrailId(@Param("trailId") Long trailId);
 }

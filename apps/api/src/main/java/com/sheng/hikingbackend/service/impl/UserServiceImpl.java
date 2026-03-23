@@ -188,6 +188,8 @@ public class UserServiceImpl implements UserService {
                 .createdAt(row.getCreatedAt())
                 .favoritedByCurrentUser(Boolean.TRUE.equals(row.getFavoritedByCurrentUser()))
                 .likedByCurrentUser(Boolean.TRUE.equals(row.getLikedByCurrentUser()))
+                .editableByCurrentUser(row.getCreatedAt() != null
+                        && !row.getCreatedAt().isBefore(java.time.LocalDateTime.now().minusHours(48)))
                 .favorites(row.getFavorites() == null ? 0 : row.getFavorites())
                 .likes(row.getLikes() == null ? 0 : row.getLikes())
                 .build();

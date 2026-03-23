@@ -21,6 +21,11 @@ interface UseOssImageUploaderOptions {
   max?: number
 }
 
+interface ExistingImageItem {
+  mediaId: string | number | null
+  url: string
+}
+
 function getExtension(file: File) {
   const index = file.name.lastIndexOf('.')
   return index >= 0 ? file.name.slice(index + 1).toLowerCase() : ''
@@ -157,6 +162,19 @@ export function useOssImageUploader(options: UseOssImageUploaderOptions) {
     items.value = []
   }
 
+  function setExistingItems(nextItems: ExistingImageItem[]) {
+    clear()
+    items.value = nextItems.map((item) => ({
+      id: buildItemId(),
+      localUrl: item.url,
+      remoteUrl: item.url,
+      mediaId: item.mediaId == null ? null : String(item.mediaId),
+      progress: 100,
+      status: 'success',
+      errorMessage: '',
+    }))
+  }
+
   function patchItem(id: string, patch: Partial<UploadedImageItem>) {
     items.value = items.value.map((item) => (item.id === id ? { ...item, ...patch } : item))
   }
@@ -183,5 +201,6 @@ export function useOssImageUploader(options: UseOssImageUploaderOptions) {
     addFiles,
     removeItem,
     clear,
+    setExistingItems,
   }
 }

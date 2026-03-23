@@ -49,6 +49,8 @@ public class Trail {
     @TableField("author_id")
     private Long authorId;
 
+    private String status;
+
     @TableField("created_at")
     private LocalDateTime createdAt;
 

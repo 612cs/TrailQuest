@@ -19,6 +19,7 @@ public class UserTrailListItemVo {
     private LocalDateTime createdAt;
     private Boolean favoritedByCurrentUser;
     private Boolean likedByCurrentUser;
+    private Boolean editableByCurrentUser;
     private Integer favorites;
     private Integer likes;
 }

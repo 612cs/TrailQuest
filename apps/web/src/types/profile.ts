@@ -11,6 +11,7 @@ export interface UserTrailListItem {
   createdAt: string
   favoritedByCurrentUser: boolean
   likedByCurrentUser: boolean
+  editableByCurrentUser?: boolean
   favorites: number
   likes: number
 }

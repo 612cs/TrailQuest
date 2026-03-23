@@ -3,7 +3,9 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import * as authApi from '../api/auth'
+import { deleteTrail } from '../api/trails'
 import BaseIcon from '../components/common/BaseIcon.vue'
+import ConfirmDialog from '../components/common/ConfirmDialog.vue'
 import AccountSettingsModal from '../components/profile/AccountSettingsModal.vue'
 import EditProfileModal from '../components/profile/EditProfileModal.vue'
 import HikingProfileModal from '../components/profile/HikingProfileModal.vue'
@@ -26,6 +28,8 @@ const activeTab = ref<ProfileTab>(resolveTab(route.query.tab))
 const showEditModal = ref(false)
 const showHikingProfileModal = ref(false)
 const showSettingsModal = ref(false)
+const pendingDeleteTrail = ref<UserTrailListItem | null>(null)
+const isDeletingTrail = ref(false)
 
 const feeds = reactive<Record<ProfileTab, ProfileTrailFeedState>>({
   posts: createFeedState(),
@@ -146,6 +150,50 @@ function openTrail(item: UserTrailListItem) {
   void router.push(`/trail/${item.id}`)
 }
 
+function handleEditTrail(item: UserTrailListItem) {
+  if (!item.editableByCurrentUser) {
+    return
+  }
+  void router.push({
+    name: 'Publish',
+    query: { edit: String(item.id) },
+  })
+}
+
+function handleDeleteTrail(item: UserTrailListItem) {
+  pendingDeleteTrail.value = item
+}
+
+async function confirmDeleteTrail() {
+  if (!pendingDeleteTrail.value || isDeletingTrail.value) {
+    return
+  }
+
+  isDeletingTrail.value = true
+
+  try {
+    await deleteTrail(pendingDeleteTrail.value.id)
+    feeds.posts.items = feeds.posts.items.filter((item) => item.id !== pendingDeleteTrail.value?.id)
+    feeds.posts.total = Math.max(feeds.posts.total - 1, 0)
+
+    if (userStore.profile) {
+      userStore.profile.postCount = Math.max(userStore.profile.postCount - 1, 0)
+    }
+  } catch (error) {
+    feeds.posts.errorMessage = error instanceof Error ? error.message : '路线删除失败'
+  } finally {
+    isDeletingTrail.value = false
+    pendingDeleteTrail.value = null
+  }
+}
+
+function closeDeleteTrailDialog() {
+  if (isDeletingTrail.value) {
+    return
+  }
+  pendingDeleteTrail.value = null
+}
+
 async function handleToggleFavorite(item: UserTrailListItem) {
   const didToggle = await trailInteractionStore.toggleFavorite(item)
   if (!didToggle || activeTab.value !== 'saved' || !item.favoritedByCurrentUser) {
@@ -235,8 +283,23 @@ function syncTabQuery(tab: ProfileTab) {
           @load-more="handleLoadMore"
           @open-trail="openTrail"
           @toggle-favorite="handleToggleFavorite"
+          @edit-trail="handleEditTrail"
+          @delete-trail="handleDeleteTrail"
         />
       </div>
+
+      <ConfirmDialog
+        :show="!!pendingDeleteTrail"
+        title="删除路线"
+        message="确认删除这条路线吗？删除后将不会再出现在前台列表和详情页。"
+        confirm-text="确认删除"
+        cancel-text="暂不删除"
+        tone="danger"
+        :confirm-loading="isDeletingTrail"
+        @update:show="(value) => { if (!value) closeDeleteTrailDialog() }"
+        @cancel="closeDeleteTrailDialog"
+        @confirm="confirmDeleteTrail"
+      />
     </template>
 
     <template v-else>

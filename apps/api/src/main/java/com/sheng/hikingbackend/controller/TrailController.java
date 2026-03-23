@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.config.CustomUserDetails;
 import com.sheng.hikingbackend.dto.trail.CreateTrailRequest;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
+import com.sheng.hikingbackend.dto.trail.UpdateTrailRequest;
 import com.sheng.hikingbackend.service.TrailService;
 import com.sheng.hikingbackend.vo.trail.TrailDetailVo;
 import com.sheng.hikingbackend.vo.trail.TrailInteractionVo;
@@ -53,6 +55,25 @@ public class TrailController {
         return ApiResponse.success(
                 "路线发布成功",
                 trailService.createTrail(userDetails.getId(), resolveRequestIp(httpServletRequest), request));
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<TrailDetailVo> updateTrail(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long id,
+            HttpServletRequest httpServletRequest,
+            @Valid @RequestBody UpdateTrailRequest request) {
+        return ApiResponse.success(
+                "路线更新成功",
+                trailService.updateTrail(id, userDetails.getId(), resolveRequestIp(httpServletRequest), request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteTrail(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long id) {
+        trailService.deleteTrail(id, userDetails.getId());
+        return ApiResponse.success("路线删除成功", null);
     }
 
     @PostMapping("/{id}/like")

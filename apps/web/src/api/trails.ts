@@ -19,12 +19,22 @@ export interface CreateTrailPayload {
   tags: string[]
 }
 
+export interface UpdateTrailPayload extends CreateTrailPayload {}
+
 export function fetchTrails(params: TrailListParams = {}) {
   return http.get<PageResponse<TrailListItem>>('/api/trails', { params })
 }
 
 export function fetchTrailDetail(id: EntityId) {
   return http.get<TrailListItem>(`/api/trails/${id}`)
+}
+
+export function updateTrail(id: EntityId, payload: UpdateTrailPayload) {
+  return http.put<TrailListItem>(`/api/trails/${id}`, payload)
+}
+
+export function deleteTrail(id: EntityId) {
+  return http.delete<void>(`/api/trails/${id}`)
 }
 
 export function likeTrail(id: EntityId) {
