@@ -1,30 +1,44 @@
 <script setup lang="ts">
-import SectionHeader from '../common/SectionHeader.vue'
+import BaseIcon from '../common/BaseIcon.vue'
 </script>
 
 <template>
-  <section class="animate-fade-in-up stagger-3">
-    <SectionHeader title="景观预测" />
-    <div class="grid grid-cols-2 gap-3">
-      <div class="card p-4">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium" style="color: var(--text-primary);">云海概率</span>
-          <span class="text-sm font-bold text-primary-500">78%</span>
+  <section class="animate-fade-in-up stagger-3 mt-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Sea of clouds -->
+      <div class="p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col items-center gap-2 hover:bg-white/10 transition-colors group">
+        <div class="p-2 rounded-xl bg-primary-500/10 text-primary-500 group-hover:scale-110 transition-transform">
+          <BaseIcon name="Cloud" :size="20" />
         </div>
-        <div class="w-full h-2 rounded-full overflow-hidden" style="background-color: var(--bg-tag);">
-          <div class="h-full rounded-full bg-primary-500 transition-all duration-1000" style="width: 78%"></div>
-        </div>
-        <p class="text-xs mt-2" style="color: var(--text-tertiary);">最佳时间：06:00 - 08:00</p>
+        <span class="text-xl font-bold" style="color: var(--text-primary);">78%</span>
+        <span class="text-xs font-medium" style="color: var(--text-tertiary);">云海</span>
       </div>
-      <div class="card p-4">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-medium" style="color: var(--text-primary);">日出可见度</span>
-          <span class="text-sm font-bold text-primary-500">92%</span>
+
+      <!-- Sunrise -->
+      <div class="p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col items-center gap-2 hover:bg-white/10 transition-colors group">
+        <div class="p-2 rounded-xl bg-yellow-500/10 text-yellow-500 group-hover:scale-110 transition-transform">
+          <BaseIcon name="Sunrise" :size="20" />
         </div>
-        <div class="w-full h-2 rounded-full overflow-hidden" style="background-color: var(--bg-tag);">
-          <div class="h-full rounded-full bg-primary-500 transition-all duration-1000" style="width: 92%"></div>
+        <span class="text-xl font-bold" style="color: var(--text-primary);">92%</span>
+        <span class="text-xs font-medium" style="color: var(--text-tertiary);">日出</span>
+      </div>
+
+      <!-- Sunset -->
+      <div class="p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col items-center gap-2 hover:bg-white/10 transition-colors group">
+        <div class="p-2 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform">
+          <BaseIcon name="Sunset" :size="20" />
         </div>
-        <p class="text-xs mt-2" style="color: var(--text-tertiary);">日出时间：06:15</p>
+        <span class="text-xl font-bold" style="color: var(--text-primary);">85%</span>
+        <span class="text-xs font-medium" style="color: var(--text-tertiary);">日落</span>
+      </div>
+
+      <!-- Rime (雾凇) -->
+      <div class="p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-col items-center gap-2 hover:bg-white/10 transition-colors group">
+        <div class="p-2 rounded-xl bg-blue-400/10 text-blue-400 group-hover:scale-110 transition-transform">
+          <BaseIcon name="CloudSnow" :size="20" />
+        </div>
+        <span class="text-xl font-bold" style="color: var(--text-primary);">15%</span>
+        <span class="text-xs font-medium" style="color: var(--text-tertiary);">雾凇</span>
       </div>
     </div>
   </section>

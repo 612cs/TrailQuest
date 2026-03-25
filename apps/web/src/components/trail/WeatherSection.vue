@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import BaseIcon from '../common/BaseIcon.vue'
-import SectionHeader from '../common/SectionHeader.vue'
 import type { TrailWeather } from '../../composables/useTrailWeather'
 
 const props = defineProps<{
@@ -20,54 +19,33 @@ const subtitle = computed(() => {
   return props.fallbackCity ? `${props.fallbackCity} · 暂无实时数据` : '暂无实时数据'
 })
 
-const weatherData = computed(() => {
-  if (!props.weather) {
-    const placeholder = props.isLoading ? '加载中' : '—'
-    return [
-      { label: '温度', value: placeholder, desc: '实时气温', icon: 'ThermometerSun' },
-      { label: '湿度', value: placeholder, desc: '空气湿度', icon: 'Droplets' },
-      { label: '风向', value: placeholder, desc: '风向风力', icon: 'Wind' },
-    ]
-  }
-
-  const temp = `${props.weather.temperature}°C`
-  const humidity = `${props.weather.humidity}%`
-  const wind = `${props.weather.windDirection}${props.weather.windPower}`
-
-  return [
-    {
-      label: '温度',
-      value: temp,
-      desc: `天气：${props.weather.weather}`,
-      icon: 'ThermometerSun',
-    },
-    {
-      label: '湿度',
-      value: humidity,
-      desc: '相对湿度',
-      icon: 'Droplets',
-    },
-    {
-      label: '风向',
-      value: wind,
-      desc: '实时风况',
-      icon: 'Wind',
-    },
-  ]
-})
 </script>
 
 <template>
   <section class="animate-fade-in-up stagger-1">
-    <SectionHeader title="当前天气状况" :subtitle="subtitle" />
-    <div class="grid grid-cols-3 gap-3">
-      <div v-for="w in weatherData" :key="w.label" class="card p-4 text-center group hover:border-primary-500/30 transition-colors">
-        <div class="flex justify-center text-primary-500 group-hover:scale-110 transition-transform">
-          <BaseIcon :name="w.icon" :size="28" />
+    <div class="flex items-start justify-between">
+      <div>
+        <h3 class="text-sm font-medium" style="color: var(--text-primary);">当前天气</h3>
+        <div class="flex items-baseline gap-2 mt-2">
+          <span class="text-5xl font-bold tracking-tighter" style="color: var(--text-primary);">{{ weather?.temperature || '--' }}°</span>
+          <span class="text-lg font-medium" style="color: var(--text-secondary);">{{ weather?.weather || '加载中' }}</span>
         </div>
-        <p class="text-lg font-bold mt-2" style="color: var(--text-primary);">{{ w.value }}</p>
-        <p class="text-xs mt-0.5" style="color: var(--text-tertiary);">{{ w.label }}</p>
-        <p class="text-xs mt-1" style="color: var(--text-secondary);">{{ w.desc }}</p>
+        <p class="text-sm mt-1 flex items-center gap-1" style="color: var(--text-tertiary);">
+          <BaseIcon name="MapPin" :size="14" />
+          {{ subtitle }}
+        </p>
+      </div>
+      
+      <!-- Right side compact metrics -->
+      <div class="flex flex-col gap-2 text-sm text-right mt-1">
+        <div class="flex items-center justify-end gap-2" style="color: var(--text-secondary);">
+          <BaseIcon name="Droplets" :size="14" />
+          <span>湿度 {{ weather?.humidity || '--' }}%</span>
+        </div>
+        <div class="flex items-center justify-end gap-2" style="color: var(--text-secondary);">
+          <BaseIcon name="Wind" :size="14" />
+          <span>{{ weather?.windDirection || '' }}风 {{ weather?.windPower || '--' }}级</span>
+        </div>
       </div>
     </div>
   </section>
