@@ -12,6 +12,7 @@ const emit = defineEmits<{
 }>()
 
 const currentIndex = ref(props.initialIndex ?? 0)
+const isVisible = ref(false)
 
 function next() {
   if (currentIndex.value < props.images.length - 1) {
@@ -25,13 +26,19 @@ function prev() {
   }
 }
 
+function handleClose() {
+  isVisible.value = false
+  setTimeout(() => emit('close'), 300)
+}
+
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') emit('close')
+  if (e.key === 'Escape') handleClose()
   if (e.key === 'ArrowRight') next()
   if (e.key === 'ArrowLeft') prev()
 }
 
 onMounted(() => {
+  isVisible.value = true
   document.addEventListener('keydown', onKeydown)
   document.body.style.overflow = 'hidden'
 })
@@ -48,17 +55,18 @@ watch(() => props.initialIndex, (val) => {
 
 <template>
   <Teleport to="body">
-    <div class="fixed inset-0 z-[100] flex items-center justify-center" @click.self="emit('close')">
-      <!-- Backdrop -->
-      <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="emit('close')" />
+    <transition name="modal-fade" appear>
+      <div v-if="isVisible" class="fixed inset-0 z-[100] flex items-center justify-center" @click.self="handleClose">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="handleClose" />
 
-      <!-- Close Button -->
-      <button
-        @click="emit('close')"
-        class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur text-white flex items-center justify-center hover:bg-white/20 transition-colors"
-      >
-        <BaseIcon name="X" :size="22" />
-      </button>
+        <!-- Close Button -->
+        <button
+          @click="handleClose"
+          class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+        >
+          <BaseIcon name="X" :size="22" />
+        </button>
 
       <!-- Counter -->
       <div class="absolute top-4 left-4 z-10 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur text-white text-sm font-medium">
@@ -107,7 +115,8 @@ watch(() => props.initialIndex, (val) => {
           <img :src="src" alt="" class="w-full h-full object-cover" />
         </button>
       </div>
-    </div>
+      </div>
+    </transition>
   </Teleport>
 </template>
 
@@ -119,5 +128,16 @@ watch(() => props.initialIndex, (val) => {
 .image-fade-enter-from,
 .image-fade-leave-to {
   opacity: 0;
+}
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+  transform-origin: center center;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.96);
 }
 </style>
