@@ -130,23 +130,26 @@ const tooltip = ref<TooltipState>({
 const prefersHover = typeof window !== 'undefined'
   ? window.matchMedia('(hover: hover) and (pointer: fine)')
   : null
-
-const statusText = computed(() => {
-  if (!props.data) return '等待轨迹载入'
-  const distanceKm = ((props.data.distanceMeters ?? 0) / 1000).toFixed(2)
-  return `欢迎来到 ${props.data.title} 岛屿！全长 ${distanceKm} km`
-})
-
 const containerClass = computed(() => {
   if (props.mode === 'fullscreen') return 'viewer-shell viewer-shell-fullscreen'
   if (props.mode === 'detail') return 'viewer-shell viewer-shell-detail'
   return 'viewer-shell viewer-shell-embedded'
 })
 
-const viewerTitle = computed(() => props.mode === 'detail' ? '轨迹沉浸浏览' : '轨迹三维预览')
-const viewerSubtitle = computed(() => props.mode === 'detail'
-  ? '可俯瞰轨迹全貌，继续向下浏览路线详情'
-  : '上传轨迹后会在这里生成沉浸式岛屿预览')
+watch(() => props.mode, (newMode) => {
+  if (newMode === 'fullscreen') {
+    // Wait for the container to be ready in the new DOM location
+    setTimeout(() => {
+      setOverviewView()
+    }, 100)
+  }
+})
+
+onMounted(() => {
+  if (props.mode === 'fullscreen') {
+    setTimeout(setOverviewView, 500)
+  }
+})
 
 function buildWeatherPreset(sceneType: TrackWeatherScene): WeatherPreset {
   switch (sceneType) {
@@ -808,7 +811,7 @@ function createBirdMesh() {
 
   const beak = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 6), new THREE.MeshToonMaterial({ color: '#f39c12' }))
   beak.position.set(0.26, -0.01, 0)
-  beak.rotation.z = -Math.PI / 2
+  beak.rotation.z = -Math.PI / / 2
 
   bird.add(wingLeft, wingRight, beak)
   return bird
@@ -1215,11 +1218,10 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="track-viewer-frame animate-fade-in-up">
-    <div class="track-viewer-header">
-      <div>
-        <h3 class="track-viewer-title">{{ viewerTitle }}</h3>
-        <p class="track-viewer-subtitle">{{ viewerSubtitle }}</p>
-      </div>
+    <div
+      v-if="showFullscreenButton || mode === 'fullscreen'"
+      class="track-viewer-controls"
+    >
       <button
         v-if="showFullscreenButton && mode !== 'fullscreen'"
         type="button"
@@ -1250,9 +1252,7 @@ onBeforeUnmount(() => {
     >
       <div ref="container" class="viewer-canvas-host"></div>
 
-      <div class="status-pill">
-        {{ statusText }}
-      </div>
+
 
       <div
         v-if="tooltip.visible"
@@ -1264,7 +1264,21 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="viewer-actions">
-        <button type="button" class="overview-button" @click="setOverviewView">
+        <button
+          v-if="mode === 'detail'"
+          type="button"
+          class="overview-button"
+          @click="emit('requestFullscreen')"
+        >
+          <BaseIcon name="Maximize2" :size="16" />
+          进入全屏
+        </button>
+        <button
+          v-else-if="mode === 'fullscreen'"
+          type="button"
+          class="overview-button"
+          @click="setOverviewView"
+        >
           <BaseIcon name="Plane" :size="16" />
           俯瞰全景
         </button>
