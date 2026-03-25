@@ -56,8 +56,11 @@ const backgroundRows = computed(() =>
 )
 
 watch(
-  trailId,
-  async (nextId) => {
+  () => route.params.id,
+  async (newId) => {
+    const nextId = Array.isArray(newId) ? newId[0] : newId
+    console.log('[Gallery] Route ID changed:', nextId)
+    
     if (!nextId) {
       trailData.value = null
       return
@@ -67,8 +70,11 @@ watch(
     errorMessage.value = ''
 
     try {
+      console.log('[Gallery] Fetching detail for:', nextId)
       trailData.value = await fetchTrailDetail(nextId)
+      console.log('[Gallery] Data fetched:', !!trailData.value)
     } catch (error) {
+      console.error('[Gallery] Fetch error:', error)
       trailData.value = null
       errorMessage.value = error instanceof Error ? error.message : '图片漫游加载失败'
     } finally {
