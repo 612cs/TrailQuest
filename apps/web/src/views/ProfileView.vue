@@ -147,7 +147,11 @@ async function handleLoadMore() {
 }
 
 function openTrail(item: UserTrailListItem) {
-  void router.push(`/trail/${item.id}`)
+  void router.push({
+    name: 'TrailDetail',
+    params: { id: item.id },
+    query: { from: route.fullPath },
+  })
 }
 
 function handleEditTrail(item: UserTrailListItem) {

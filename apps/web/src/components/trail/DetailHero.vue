@@ -10,6 +10,7 @@ const userStore = useUserStore()
 const props = defineProps<{
   id: EntityId
   image: string
+  galleryCount?: number
   name: string
   location: string
   difficulty: string
@@ -35,6 +36,7 @@ defineEmits<{
   (event: 'toggle-like'): void
   (event: 'toggle-favorite'): void
   (event: 'share'): void
+  (event: 'open-gallery'): void
 }>()
 
 const packLabels: Record<'light' | 'heavy' | 'both', string> = {
@@ -54,6 +56,15 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
     <div class="relative aspect-[16/9] overflow-hidden">
       <img :src="image" :alt="name" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+      <button
+        v-if="(galleryCount ?? 0) > 0"
+        type="button"
+        class="absolute bottom-4 right-4 z-[1] flex items-center gap-2 rounded-full border border-white/20 bg-black/35 px-3 py-2 text-sm font-medium text-white backdrop-blur-md transition hover:bg-black/50"
+        @click="$emit('open-gallery')"
+      >
+        <BaseIcon name="Play" :size="16" />
+        图片漫游
+      </button>
       <div class="absolute bottom-4 left-4 right-4 hidden sm:block">
         <div class="flex flex-wrap items-center gap-2">
           <TagBadge :label="difficultyLabel" />

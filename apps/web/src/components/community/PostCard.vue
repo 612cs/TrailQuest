@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useRoute } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
 import TagBadge from '../common/TagBadge.vue'
 import type { TrailListItem } from '../../types/trail'
+
+const route = useRoute()
 
 const props = defineProps<{
   post: TrailListItem
@@ -16,6 +20,12 @@ defineEmits<{
   (event: 'toggle-favorite'): void
   (event: 'share'): void
 }>()
+
+const detailLink = computed(() => ({
+  name: 'TrailDetail',
+  params: { id: props.post.id },
+  query: { from: route.fullPath },
+}))
 </script>
 
 <template>
@@ -43,7 +53,7 @@ defineEmits<{
     </div>
 
     <!-- Post Image with Link to Trail -->
-    <RouterLink :to="`/trail/${post.id}`" class="block relative aspect-[16/10] overflow-hidden group cursor-pointer">
+    <RouterLink :to="detailLink" class="block relative aspect-[16/10] overflow-hidden group cursor-pointer">
       <img :src="post.image" :alt="post.description" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
       <!-- AI Tags -->
       <div class="absolute bottom-3 left-3 flex gap-2">

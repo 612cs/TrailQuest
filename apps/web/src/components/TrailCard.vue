@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
 import BaseIcon from './common/BaseIcon.vue'
 import TagBadge from './common/TagBadge.vue'
 import type { EntityId } from '../types/id'
+
+const route = useRoute()
 
 const props = defineProps<{
   image: string
@@ -39,11 +44,17 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
   single_day: '单日',
   multi_day: '多日',
 }
+
+const detailLink = computed(() => ({
+  name: 'TrailDetail',
+  params: { id: props.id || 1 },
+  query: { from: route.fullPath },
+}))
 </script>
 
 <template>
   <RouterLink
-    :to="`/trail/${id || 1}`"
+    :to="detailLink"
     class="card card-hover block overflow-hidden min-w-[280px] sm:min-w-[320px] cursor-pointer"
   >
     <!-- Image -->

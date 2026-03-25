@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import TrailCard from '../components/TrailCard.vue'
 import HeroSection from '../components/home/HeroSection.vue'
 import ActivityGrid from '../components/home/ActivityGrid.vue'
@@ -7,6 +7,7 @@ import BaseIcon from '../components/common/BaseIcon.vue'
 import DraggableChatButton from '../components/common/DraggableChatButton.vue'
 import SectionHeader from '../components/common/SectionHeader.vue'
 import { fetchTrails } from '../api/trails'
+import { useTrailFeedRefreshStore } from '../stores/useTrailFeedRefreshStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
 import { toHomeTrailCard } from '../utils/trailAdapters'
@@ -16,6 +17,7 @@ const isInitialLoad = ref(true)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const trailInteractionStore = useTrailInteractionStore()
+const trailFeedRefreshStore = useTrailFeedRefreshStore()
 
 const popularTrails = computed(() => trails.value
   .map((trail) => trailInteractionStore.applyToTrail(trail))
@@ -29,7 +31,18 @@ onMounted(() => {
   void loadTrails()
 })
 
+watch(
+  () => trailFeedRefreshStore.version,
+  () => {
+    void loadTrails()
+  },
+)
+
 async function loadTrails() {
+  if (isLoading.value) {
+    return
+  }
+
   isLoading.value = true
   errorMessage.value = ''
 

@@ -7,6 +7,7 @@ import ViewToggle from '../components/search/ViewToggle.vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import TrailHorizontalCard from '../components/trail/TrailHorizontalCard.vue'
 import { fetchTrails } from '../api/trails'
+import { useTrailFeedRefreshStore } from '../stores/useTrailFeedRefreshStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
 import { toSearchTrailCard } from '../utils/trailAdapters'
@@ -19,6 +20,7 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 const trails = ref<TrailListItem[]>([])
 const trailInteractionStore = useTrailInteractionStore()
+const trailFeedRefreshStore = useTrailFeedRefreshStore()
 
 const filterModel = ref<Record<string, string>>({
   difficulty: 'all',
@@ -111,7 +113,18 @@ watch(
   { deep: true },
 )
 
+watch(
+  () => trailFeedRefreshStore.version,
+  () => {
+    void loadTrails()
+  },
+)
+
 async function loadTrails() {
+  if (isLoading.value) {
+    return
+  }
+
   isLoading.value = true
   errorMessage.value = ''
 

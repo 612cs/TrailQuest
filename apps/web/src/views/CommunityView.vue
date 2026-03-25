@@ -4,6 +4,7 @@ import PostCard from '../components/community/PostCard.vue'
 import Pagination from '../components/common/Pagination.vue'
 import { fetchTrails } from '../api/trails'
 import { useTrailShare } from '../composables/useTrailShare'
+import { useTrailFeedRefreshStore } from '../stores/useTrailFeedRefreshStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
 import { toCommunityPost } from '../utils/trailAdapters'
@@ -15,6 +16,7 @@ const allPosts = ref<TrailListItem[]>([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 const trailInteractionStore = useTrailInteractionStore()
+const trailFeedRefreshStore = useTrailFeedRefreshStore()
 const { shareTrail } = useTrailShare()
 
 const currentPosts = computed(() => {
@@ -37,7 +39,18 @@ watch(currentPage, () => {
   void loadPosts()
 })
 
+watch(
+  () => trailFeedRefreshStore.version,
+  () => {
+    void loadPosts()
+  },
+)
+
 async function loadPosts() {
+  if (isLoading.value) {
+    return
+  }
+
   isLoading.value = true
   errorMessage.value = ''
 

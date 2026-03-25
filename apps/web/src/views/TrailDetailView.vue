@@ -67,6 +67,7 @@ const trailId = computed<EntityId>(() => {
   const rawId = route.params.id
   return Array.isArray(rawId) ? rawId[0] ?? '' : String(rawId ?? '')
 })
+const detailFrom = computed(() => normalizeInternalPath(route.query.from))
 const displayTrail = computed(() => {
   if (!trailData.value) return null
   return trailInteractionStore.applyToTrail(trailData.value)
@@ -74,6 +75,12 @@ const displayTrail = computed(() => {
 const activeUserCard = computed(() => {
   if (!activeUserCardId.value) return null
   return userCardCache.value[activeUserCardId.value] ?? null
+})
+const detailImages = computed(() => {
+  const urls = [trailData.value?.image, ...(trailData.value?.gallery?.map((item) => item.url) ?? [])]
+    .filter((item): item is string => !!item)
+
+  return urls.filter((url, index) => urls.indexOf(url) === index)
 })
 
 watch(trailId, async (newId) => {
@@ -419,6 +426,44 @@ function scrollToDetailContent() {
   })
 }
 
+function normalizeInternalPath(value: unknown) {
+  if (typeof value !== 'string' || !value.startsWith('/')) {
+    return null
+  }
+
+  return value
+}
+
+function handleBack() {
+  if (detailFrom.value) {
+    void router.push(detailFrom.value)
+    return
+  }
+
+  void router.back()
+}
+
+function openGalleryExperience() {
+  if (!detailImages.value.length || !trailData.value) {
+    return
+  }
+
+  const detailPath = router.resolve({
+    name: 'TrailDetail',
+    params: { id: trailData.value.id },
+    query: detailFrom.value ? { from: detailFrom.value } : {},
+  }).fullPath
+
+  void router.push({
+    name: 'TrailGallery',
+    params: { id: trailData.value.id },
+    query: {
+      from: detailPath,
+      ...(detailFrom.value ? { detailFrom: detailFrom.value } : {}),
+    },
+  })
+}
+
 function insertReview(review: ReviewItem) {
   const normalizedReview: ReviewItem = {
     ...review,
@@ -461,7 +506,7 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
   <main v-if="trailData">
     <div class="glass-header sticky top-0 z-40 px-4 py-3">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
-        <button @click="router.back()" class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500 cursor-pointer" style="color: var(--text-secondary);">
+        <button @click="handleBack" class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500 cursor-pointer" style="color: var(--text-secondary);">
           <BaseIcon name="ChevronLeft" :size="20" />
           返回
         </button>
@@ -508,9 +553,11 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
 
       <DetailHero
         v-bind="heroProps"
+        :gallery-count="detailImages.length"
         @toggle-like="displayTrail && trailInteractionStore.toggleLike(displayTrail)"
         @toggle-favorite="displayTrail && trailInteractionStore.toggleFavorite(displayTrail)"
         @share="handleShare"
+        @open-gallery="openGalleryExperience"
       />
 
       <div class="card p-5 space-y-3">
@@ -595,6 +642,7 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
       @cancel="closeDeleteTrailDialog"
       @confirm="confirmDeleteTrail"
     />
+
   </main>
   <main v-else class="max-w-4xl mx-auto px-4 sm:px-6 py-10">
     <div class="card p-8 text-center">

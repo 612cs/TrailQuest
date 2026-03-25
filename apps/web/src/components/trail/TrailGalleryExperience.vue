@@ -220,17 +220,16 @@ function tick() {
     const rotateY = gsap.utils.clamp(-12, 12, normalized * -12)
     const translateY = rowOffset + focusLift + driftOffset
     
-    // Position on screen anchor + screenX - width/2 to center the card anchor point
-    // We already have container relative center. 
-    // Wait, the anchor is going to be absolute 50/50. 
-    // So distance = screenX is the exact X translation from center.
-    const transformX = screenX - width / 2
+    // Position exactly at screenX and translateY, then let GSAP center the anchor with xPercent/yPercent.
+    const transformX = screenX
     
     // Only render cards that are generally close to screen limits (optional optimization)
     // But setting invisible ones is essentially free in CSS3D
     gsap.set(el, {
       x: transformX,
       y: translateY,
+      xPercent: -50,
+      yPercent: -50,
       scale: scale,
       rotationY: rotateY,
       zIndex: 300 - Math.round(distanceFactor * 100),
