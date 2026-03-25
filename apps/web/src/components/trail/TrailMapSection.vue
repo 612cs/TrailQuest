@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onUnmounted, shallowRef, watch, useTemplateRef, nextTick } from 'vue'
-import BaseIcon from '../common/BaseIcon.vue'
 import SectionHeader from '../common/SectionHeader.vue'
 import { useAmapLoader } from '../../composables/useAmapLoader'
 
@@ -133,23 +132,8 @@ onUnmounted(() => {
 
 <template>
   <section class="animate-fade-in-up stagger-1">
-    <SectionHeader title="路线地图" :subtitle="city ? `${city} 定位` : '定位中...'" />
-    <div class="card p-4 space-y-3">
-      <div class="flex items-center justify-between text-xs" style="color: var(--text-tertiary);">
-        <span>定位来源</span>
-          <span>{{ hasTrack ? '轨迹文件解析' : hasCenter ? '高德 IP/地理解析' : '定位失败' }}</span>
-      </div>
-      <div v-if="trackDownloadUrl" class="flex justify-end">
-        <a
-          :href="trackDownloadUrl"
-          target="_blank"
-          rel="noreferrer"
-          class="inline-flex items-center gap-1 rounded-full bg-primary-500/10 px-3 py-1 text-xs font-medium text-primary-500 transition-colors hover:bg-primary-500/15"
-        >
-          <BaseIcon name="Download" :size="14" />
-          下载轨迹
-        </a>
-      </div>
+    <SectionHeader title="路线地图" />
+    <div class="card p-4 space-y-4">
       <div class="map-shell" :class="{ 'is-empty': (!hasCenter && !hasTrack) || !mapReady }">
         <!-- 始终挂载 DOM，如果还没有准备好通过 z-index 置于下层或隐藏视觉内容 -->
         <div ref="map" class="map-canvas" :style="{ display: (mapReady && (hasCenter || hasTrack) && !mapError) ? 'block' : 'none' }"></div>
@@ -171,7 +155,7 @@ onUnmounted(() => {
 .map-shell {
   position: relative;
   width: 100%;
-  height: 260px;
+  height: 375px;
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--primary-500) 18%, transparent);
