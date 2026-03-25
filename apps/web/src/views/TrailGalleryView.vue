@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ImagePreviewModal from '../components/common/ImagePreviewModal.vue'
@@ -55,34 +55,39 @@ const backgroundRows = computed(() =>
   })),
 )
 
-watch(
-  () => route.params.id,
-  async (newId) => {
-    const nextId = Array.isArray(newId) ? newId[0] : newId
-    console.log('[Gallery] Route ID changed:', nextId)
-    
-    if (!nextId) {
-      trailData.value = null
-      return
-    }
+async function loadTrailDetail(id: string) {
+  if (!id) {
+    trailData.value = null
+    return
+  }
 
-    isLoading.value = true
-    errorMessage.value = ''
+  isLoading.value = true
+  errorMessage.value = ''
 
-    try {
-      console.log('[Gallery] Fetching detail for:', nextId)
-      trailData.value = await fetchTrailDetail(nextId)
-      console.log('[Gallery] Data fetched:', !!trailData.value)
-    } catch (error) {
-      console.error('[Gallery] Fetch error:', error)
-      trailData.value = null
-      errorMessage.value = error instanceof Error ? error.message : '图片漫游加载失败'
-    } finally {
-      isLoading.value = false
-    }
-  },
-  { immediate: true },
-)
+  try {
+    console.log('[Gallery] Fetching detail for:', id)
+    trailData.value = await fetchTrailDetail(id)
+    console.log('[Gallery] Data fetched:', !!trailData.value)
+  } catch (error) {
+    console.error('[Gallery] Fetch error:', error)
+    trailData.value = null
+    errorMessage.value = error instanceof Error ? error.message : '图片漫游加载失败'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 使用 onBeforeRouteUpdate 处理路由参数变化
+onBeforeRouteUpdate(async (to) => {
+  const rawId = to.params.id
+  const nextId = (Array.isArray(rawId) ? rawId[0] : rawId) || ''
+  await loadTrailDetail(nextId)
+})
+
+// 初始加载
+;(async () => {
+  await loadTrailDetail(String(trailId.value))
+})()
 
 function handleCameraMove(payload: { x: number; max: number }) {
   const getGsap = () => (window as any).gsap
