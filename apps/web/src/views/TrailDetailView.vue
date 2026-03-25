@@ -1,317 +1,711 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { 
-  ArrowLeft, 
-  Share2, 
-  Heart, 
-  MapPin, 
-  Navigation, 
-  Calendar, 
-  Clock, 
-  TrendingUp, 
-  MessageSquare,
-  ChevronRight,
-  Info,
-  Maximize2
-} from 'lucide-vue-next'
-import ActionButton from '../components/common/ActionButton.vue'
+import { storeToRefs } from 'pinia'
+import {
+  fetchTrailDetail,
+  fetchTrailReviews,
+  createReview,
+  deleteReview,
+  fetchUserCard,
+  deleteTrail,
+} from '../mock/mockData'
+import type { TrailDetail, ReviewItem, UserCard, CreateReviewPayload } from '../mock/mockData'
+import type { EntityId } from '../mock/mockData'
+import { useTrailWeather } from '../composables/useTrailWeather'
+import { useTrailInteractionStore } from '../stores/trailInteraction'
+import { useUserStore } from '../stores/useUserStore'
+import { useFlashStore } from '../stores/flash'
+import { shareTrail } from '../utils/share'
 import BaseIcon from '../components/common/BaseIcon.vue'
-import { mockTrails } from '../mock/mockData'
-import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
+import DetailHero from '../components/trail/DetailHero.vue'
+import TrailMapSection from '../components/trail/TrailMapSection.vue'
 import WeatherSection from '../components/trail/WeatherSection.vue'
 import WeatherForecast from '../components/trail/WeatherForecast.vue'
 import LandscapePrediction from '../components/trail/LandscapePrediction.vue'
-import { useTrailWeather } from '../composables/useTrailWeather'
+import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
+import ReviewList from '../components/trail/ReviewList.vue'
+import ConfirmDialog from '../components/common/ConfirmDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
-const trailId = route.params.id as string
-const trail = computed(() => mockTrails.find(t => t.id === trailId))
+const trailInteractionStore = useTrailInteractionStore()
+const userStore = useUserStore()
+const flashStore = useFlashStore()
 
-const isLiked = ref(false)
-const activeTab = ref('overview')
+const trailId = computed(() => route.params.id as string)
+const trailData = ref<TrailDetail | null>(null)
+const isLoading = ref(true)
+const errorMessage = ref('')
 
-// Fullscreen Viewer State
 const isViewerFullscreen = ref(false)
 
-const { weather, forecast, isLoading, resolve } = useTrailWeather()
+const reviews = ref<ReviewItem[]>([])
+const isLoadingMoreReviews = ref(false)
+const hasMoreReviews = ref(false)
+const nextReviewCursor = ref<string | null>(null)
+const REVIEWS_PAGE_SIZE = 10
+const reviewsErrorMessage = ref('')
+const loadMoreErrorMessage = ref('')
+const isSubmittingReview = ref(false)
 
-onMounted(() => {
-  if (trail.value?.adcode) {
-    resolve({ adcode: trail.value.adcode })
-  }
+const reviewFormResetKey = ref(0)
+const replyFormResetKey = ref(0)
+
+const isUserCardVisible = ref(false)
+const activeUserCardId = ref<string | null>(null)
+const isUserCardLoading = ref(false)
+const userCardErrorMessage = ref('')
+const userCardCache = ref<Record<string, UserCard>>({})
+
+const pendingDeleteReview = ref<ReviewItem | null>(null)
+const deletingIds = ref<string[]>([])
+
+const pendingDeleteTrail = ref(false)
+const isDeletingTrail = ref(false)
+
+const detailFrom = computed(() => normalizeInternalPath(route.query.from))
+
+const {
+  weather,
+  forecast,
+  isLoading: weatherLoading,
+  resolveGeo,
+  resolveWeather,
+  geo,
+} = useTrailWeather()
+
+const activeUserCard = computed(() => {
+  if (!activeUserCardId.value) return null
+  return userCardCache.value[activeUserCardId.value] || null
 })
 
-// Watch for route changes to refresh data
-watch(() => route.params.id, (newId) => {
-  const newTrail = mockTrails.find(t => t.id === newId)
-  if (newTrail?.adcode) {
-    resolve({ adcode: newTrail.adcode })
+function createTrackViewerData(t: TrailDetail) {
+  return {
+    id: t.id,
+    name: t.name,
+    difficulty: t.difficulty,
+    distance: t.distance,
+    elevation: t.elevation,
+    track: t.track,
   }
-})
-
-const goBack = () => router.back()
-const toggleLike = () => { isLiked.value = !isLiked.value }
-
-const tabs = [
-  { id: 'overview', label: '详情' },
-  { id: 'reviews', label: '评价' }
-]
-
-const difficultyLabel = computed(() => {
-  switch (trail.value?.difficulty) {
-    case 'Easy': return '轻松'
-    case 'Moderate': return '进阶'
-    case 'Hard': return '挑战'
-    default: return '未知'
-  }
-})
-
-const difficultyClass = computed(() => {
-  switch (trail.value?.difficulty) {
-    case 'Easy': return 'badge-easy'
-    case 'Moderate': return 'badge-moderate'
-    case 'Hard': return 'badge-hard'
-    default: return ''
-  }
-})
-
-// Fullscreen Handlers
-const requestFullscreen = () => {
-  isViewerFullscreen.value = true
 }
 
-const exitFullscreen = () => {
-  isViewerFullscreen.value = false
+const displayTrail = computed(() => {
+  const t = trailData.value
+  if (!t) return null
+
+  return {
+    id: t.id,
+    name: t.name,
+    title: t.title,
+    description: t.description,
+    image: t.image,
+    location: t.location,
+    difficulty: t.difficulty,
+    packType: t.packType,
+    durationType: t.durationType,
+    distance: t.distance,
+    elevation: t.elevation,
+    duration: t.duration,
+    rating: t.rating,
+    reviewCount: t.reviewCount,
+    likes: t.likes,
+    favorites: t.favorites,
+    likedByCurrentUser: t.likedByCurrentUser,
+    favoritedByCurrentUser: t.favoritedByCurrentUser,
+    isLikePending: trailInteractionStore.isLikePending(t.id),
+    isFavoritePending: trailInteractionStore.isFavoritePending(t.id),
+    author: t.author,
+    publishTime: t.publishTime,
+  }
+})
+
+const mapCenter = computed(() => geo.value?.center ?? null)
+const locationCity = computed(() => geo.value?.city ?? trailData.value?.location ?? '')
+const detailTrackViewerData = computed(() => trailData.value ? createTrackViewerData(trailData.value) : null)
+
+const detailWeatherScene = computed(() => {
+  if (!weather.value) return 'partly_cloudy'
+  // Simplified mapping for demo
+  const desc = weather.value.weather
+  if (desc.includes('雨')) return 'rainy'
+  if (desc.includes('雪')) return 'snowy'
+  if (desc.includes('晴')) return 'sunny'
+  return 'partly_cloudy'
+})
+
+const canManageTrail = computed(() => !!displayTrail.value?.ownedByCurrentUser)
+const canEditTrail = computed(() => !!displayTrail.value?.editableByCurrentUser)
+
+async function handleCreateReview(payload: { rating?: number; text: string; images: string[] }) {
+  if (!trailData.value || isSubmittingReview.value) return
+
+  await submitReview({
+    trailId: trailData.value.id,
+    rating: payload.rating,
+    text: payload.text,
+    images: payload.images,
+  })
 }
+
+async function handleCreateReply(payload: { parentId: string; text: string; replyTo?: string; images: string[] }) {
+  if (!trailData.value || isSubmittingReview.value) return
+
+  await submitReview({
+    trailId: trailData.value.id,
+    parentId: payload.parentId,
+    text: payload.text,
+    replyTo: payload.replyTo,
+    images: payload.images,
+  })
+}
+
+async function submitReview(payload: CreateReviewPayload) {
+  isSubmittingReview.value = true
+  reviewsErrorMessage.value = ''
+
+  try {
+    const result = await createReview(payload)
+    trailData.value = trailData.value
+      ? {
+        ...trailData.value,
+        rating: result.trailRating,
+        reviewCount: result.trailReviewCount,
+      }
+      : trailData.value
+
+    const inserted = insertReview(result.review)
+    if (!inserted && trailData.value) {
+      await loadInitialReviews(trailData.value.id)
+    }
+
+    if (payload.parentId) {
+      replyFormResetKey.value += 1
+    } else {
+      reviewFormResetKey.value += 1
+    }
+  } catch (error) {
+    reviewsErrorMessage.value = error instanceof Error ? error.message : '评论提交失败'
+  } finally {
+    isSubmittingReview.value = false
+  }
+}
+
+async function loadInitialReviews(targetTrailId: EntityId) {
+  reviews.value = []
+  nextReviewCursor.value = null
+  hasMoreReviews.value = false
+  reviewsErrorMessage.value = ''
+  loadMoreErrorMessage.value = ''
+
+  try {
+    const result = await fetchTrailReviews(targetTrailId, { limit: REVIEWS_PAGE_SIZE })
+    reviews.value = result.list
+    nextReviewCursor.value = result.nextCursor ?? null
+    hasMoreReviews.value = result.hasMore
+    return true
+  } catch (error) {
+    reviews.value = []
+    reviewsErrorMessage.value = error instanceof Error ? error.message : '评论加载失败'
+    return false
+  }
+}
+
+async function loadMoreReviews() {
+  if (!trailData.value || !hasMoreReviews.value || isLoadingMoreReviews.value || !nextReviewCursor.value) return
+
+  isLoadingMoreReviews.value = true
+  loadMoreErrorMessage.value = ''
+
+  try {
+    const result = await fetchTrailReviews(trailData.value.id, {
+      limit: REVIEWS_PAGE_SIZE,
+      cursor: nextReviewCursor.value,
+    })
+    reviews.value = [...reviews.value, ...result.list]
+    nextReviewCursor.value = result.nextCursor ?? null
+    hasMoreReviews.value = result.hasMore
+  } catch (error) {
+    loadMoreErrorMessage.value = error instanceof Error ? error.message : '加载更多评论失败'
+  } finally {
+    isLoadingMoreReviews.value = false
+  }
+}
+
+async function retryLoadMoreReviews() {
+  await loadMoreReviews()
+}
+
+async function handleDeleteReview(review: ReviewItem) {
+  if (!trailData.value) return
+  pendingDeleteReview.value = review
+}
+
+async function confirmDeleteReview() {
+  if (!trailData.value || !pendingDeleteReview.value) return
+
+  const review = pendingDeleteReview.value
+
+  deletingIds.value = [...deletingIds.value, String(review.id)]
+
+  try {
+    const result = await deleteReview(review.id)
+    reviews.value = removeReviewNode(reviews.value, result.deletedReviewId)
+    trailData.value = {
+      ...trailData.value,
+      reviewCount: result.trailReviewCount,
+      rating: result.trailRating,
+    }
+    pendingDeleteReview.value = null
+    flashStore.showSuccess('评论已删除')
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '评论删除失败')
+  } finally {
+    deletingIds.value = deletingIds.value.filter((id) => id !== String(review.id))
+  }
+}
+
+function closeDeleteConfirm() {
+  if (pendingDeleteReview.value && deletingIds.value.includes(String(pendingDeleteReview.value.id))) {
+    return
+  }
+  pendingDeleteReview.value = null
+}
+
+async function openUserCard(userId: EntityId) {
+  const normalizedUserId = String(userId)
+  activeUserCardId.value = normalizedUserId
+  isUserCardVisible.value = true
+  userCardErrorMessage.value = ''
+
+  if (userCardCache.value[normalizedUserId]) {
+    return
+  }
+
+  isUserCardLoading.value = true
+  try {
+    const card = await fetchUserCard(normalizedUserId)
+    userCardCache.value = {
+      ...userCardCache.value,
+      [normalizedUserId]: card,
+    }
+  } catch (error) {
+    userCardErrorMessage.value = error instanceof Error ? error.message : '用户卡片加载失败'
+  } finally {
+    isUserCardLoading.value = false
+  }
+}
+
+function closeUserCard() {
+  isUserCardVisible.value = false
+  userCardErrorMessage.value = ''
+}
+
+async function handleShare() {
+  if (!displayTrail.value) return
+  await shareTrail({
+    id: displayTrail.value.id,
+    name: displayTrail.value.name,
+    location: displayTrail.value.location,
+  })
+}
+
+function handleEditTrail() {
+  if (!displayTrail.value || !canEditTrail.value) {
+    flashStore.showError('路线发布超过48小时，不能再编辑')
+    return
+  }
+
+  void router.push({
+    name: 'Publish',
+    query: { edit: String(displayTrail.value.id) },
+  })
+}
+
+function handleDeleteTrail() {
+  pendingDeleteTrail.value = true
+}
+
+async function confirmDeleteTrail() {
+  if (!displayTrail.value || isDeletingTrail.value) {
+    return
+  }
+
+  isDeletingTrail.value = true
+
+  try {
+    await deleteTrail(displayTrail.value.id)
+    flashStore.showSuccess('路线删除成功')
+
+    if (userStore.profile) {
+      userStore.profile.postCount = Math.max(userStore.profile.postCount - 1, 0)
+    }
+
+    void router.replace({
+      name: 'Profile',
+      query: { tab: 'posts' },
+    })
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '路线删除失败')
+  } finally {
+    isDeletingTrail.value = false
+    pendingDeleteTrail.value = false
+  }
+}
+
+function closeDeleteTrailDialog() {
+  if (isDeletingTrail.value) {
+    return
+  }
+  pendingDeleteTrail.value = false
+}
+
+
+
+function normalizeInternalPath(value: unknown) {
+  if (typeof value !== 'string' || !value.startsWith('/')) {
+    return null
+  }
+
+  return value
+}
+
+function handleBack() {
+  if (detailFrom.value) {
+    void router.push(detailFrom.value)
+    return
+  }
+
+  void router.back()
+}
+
+function openGalleryExperience() {
+  if (!detailImages.value.length || !trailData.value) {
+    return
+  }
+
+  const detailPath = router.resolve({
+    name: 'TrailDetail',
+    params: { id: trailData.value.id },
+    query: detailFrom.value ? { from: detailFrom.value } : {},
+  }).fullPath
+
+  void router.push({
+    name: 'TrailGallery',
+    params: { id: trailData.value.id },
+    query: {
+      from: detailPath,
+      ...(detailFrom.value ? { detailFrom: detailFrom.value } : {}),
+    },
+  })
+}
+
+function insertReview(review: ReviewItem) {
+  const normalizedReview: ReviewItem = {
+    ...review,
+    images: review.images ?? [],
+    replies: review.replies ?? [],
+  }
+
+  if (!normalizedReview.parentId) {
+    reviews.value = [normalizedReview, ...reviews.value]
+    return true
+  }
+
+  return insertReply(reviews.value, normalizedReview)
+}
+
+function insertReply(items: ReviewItem[], review: ReviewItem): boolean {
+  for (const item of items) {
+    if (item.id === review.parentId) {
+      item.replies = [...item.replies, review]
+      return true
+    }
+    if (insertReply(item.replies, review)) {
+      return true
+    }
+  }
+  return false
+}
+
+function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[] {
+  return items
+    .filter((item) => String(item.id) !== String(reviewId))
+    .map((item) => ({
+      ...item,
+      replies: removeReviewNode(item.replies, reviewId),
+    }))
+}
+
+const heroProps = computed(() => {
+  const t = displayTrail.value
+  if (!t) return null
+  return {
+    id: t.id,
+    title: t.title,
+    author: t.author,
+    publishTime: t.publishTime,
+    location: t.location,
+    difficulty: t.difficulty,
+    distance: t.distance,
+    elevation: t.elevation,
+    duration: t.duration,
+    rating: t.rating,
+    reviewCount: t.reviewCount,
+    likes: t.likes,
+    likedByCurrentUser: t.likedByCurrentUser,
+    favorites: t.favorites,
+    favoritedByCurrentUser: t.favoritedByCurrentUser,
+    isLikePending: t.isLikePending,
+    isFavoritePending: t.isFavoritePending,
+    image: t.image,
+  }
+})
+
+watch(trailId, async (newId) => {
+  if (!newId) {
+    reviews.value = []
+    nextReviewCursor.value = null
+    hasMoreReviews.value = false
+    return
+  }
+
+  await loadInitialReviews(newId)
+}, { immediate: true })
+
+watch(trailId, async (newId) => {
+  if (!newId) {
+    trailData.value = null
+    return
+  }
+
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const data = await fetchTrailDetail(newId)
+    trailData.value = data
+    trailInteractionStore.hydrateTrail(data)
+  } catch (error) {
+    trailData.value = null
+    errorMessage.value = error instanceof Error ? error.message : '路线详情加载失败'
+  } finally {
+    isLoading.value = false
+  }
+}, { immediate: true })
+
+watch(trailData, async (trail, _prev, onCleanup) => {
+  if (!trail) return
+  const controller = new AbortController()
+  onCleanup(() => controller.abort())
+
+  await resolveGeo({
+    ip: trail.ip,
+    locationLabel: `${trail.location} ${trail.name}`,
+    signal: controller.signal,
+  })
+
+  await resolveWeather({
+    city: geo.value?.city || trail.location,
+    signal: controller.signal,
+  })
+}, { immediate: true })
+
 </script>
 
 <template>
-  <div class="page-container pb-20 bg-slate-50 dark:bg-slate-950 min-h-screen">
-    <!-- Fullscreen Viewer Overlay -->
-    <Transition name="fade-in-up">
-      <div v-if="isViewerFullscreen" class="fixed inset-0 z-[100] bg-slate-950 flex flex-col">
-        <div class="h-12 flex items-center justify-between px-4 bg-slate-900/80 backdrop-blur-md border-b border-white/5">
-          <span class="text-white font-medium text-sm">{{ trail?.title }} - 3D轨迹</span>
-          <button 
-            @click="exitFullscreen"
-            class="p-1 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs transition-colors"
+  <main v-if="trailData">
+    <div class="glass-header sticky top-0 z-40 px-4 py-3">
+      <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <button @click="handleBack" class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500 cursor-pointer" style="color: var(--text-secondary);">
+          <BaseIcon name="ChevronLeft" :size="20" />
+          返回
+        </button>
+        <h2 class="text-sm font-semibold" style="color: var(--text-primary);">路线详情</h2>
+        <div class="flex items-center gap-1">
+          <button
+            v-if="canManageTrail"
+            type="button"
+            class="p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
+            :class="canEditTrail ? 'text-secondary hover:text-primary-500' : 'text-tertiary'"
+            :disabled="!canEditTrail"
+            :title="canEditTrail ? '编辑路线' : '发布超过48小时后不能再编辑'"
+            @click="handleEditTrail"
           >
-            退出全屏
+            <BaseIcon name="Pencil" :size="20" />
+          </button>
+          <button
+            v-if="canManageTrail"
+            type="button"
+            class="p-1.5 text-secondary transition-colors hover:text-primary-500 cursor-pointer"
+            title="删除路线"
+            @click="handleDeleteTrail"
+          >
+            <BaseIcon name="Trash2" :size="20" />
+          </button>
+          <button class="p-1.5 text-secondary transition-colors hover:text-primary-500 cursor-pointer" @click="handleShare">
+            <BaseIcon name="Share" :size="20" />
           </button>
         </div>
-        <div class="flex-1 relative overflow-hidden">
-          <TrailTrackViewer 
-            v-if="trail"
-            :data="trail.trackData" 
-            mode="fullscreen"
-            :weather-scene="'partly_cloudy'"
-            @exit-fullscreen="exitFullscreen"
-          />
-        </div>
-      </div>
-    </Transition>
-
-    <!-- Header Overlay -->
-    <div class="fixed top-0 left-0 right-0 z-50 h-16 flex items-center justify-between px-4 glass-header border-b border-black/5 dark:border-white/5">
-      <button @click="goBack" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-        <ArrowLeft :size="20" />
-      </button>
-      <div class="flex gap-2">
-        <button @click="toggleLike" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors" :class="{ 'text-red-500': isLiked }">
-          <Heart :size="20" :fill="isLiked ? 'currentColor' : 'none'" />
-        </button>
-        <button class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-          <Share2 :size="20" />
-        </button>
       </div>
     </div>
 
-    <div v-if="trail" class="max-w-7xl mx-auto px-4 pt-20">
-      <!-- Title Section -->
-      <div class="mb-6 animate-fade-in-up">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="badge" :class="difficultyClass">{{ difficultyLabel }}</span>
-          <div class="flex items-center text-slate-500 dark:text-slate-400 text-sm">
-            <MapPin :size="14" class="mr-1" />
-            {{ trail.location }}
-          </div>
-        </div>
-        <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">{{ trail.title }}</h1>
-        <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-          <div class="flex items-center">
-            <BaseIcon name="Star" :size="14" class="text-amber-400 mr-1" fill="currentColor" />
-            <span class="font-bold text-slate-900 dark:text-white mr-1">{{ trail.rating }}</span>
-            <span>({{ trail.reviews }} 评价)</span>
-          </div>
-        </div>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-24 space-y-8">
+      
+      <!-- Top Section: Hero & Stats -->
+      <DetailHero
+        v-if="heroProps"
+        v-bind="heroProps"
+        :gallery-count="detailImages.length"
+        @toggle-like="displayTrail && trailInteractionStore.toggleLike(displayTrail)"
+        @toggle-favorite="displayTrail && trailInteractionStore.toggleFavorite(displayTrail)"
+        @share="handleShare"
+        @open-gallery="openGalleryExperience"
+      />
+
+      <!-- Description Section -->
+      <div class="card p-5 space-y-3">
+        <h3 class="text-base font-semibold flex items-center gap-2" style="color: var(--text-primary);">
+          <BaseIcon name="Info" :size="18" class="text-primary-500" />
+          路线介绍
+        </h3>
+        <p class="text-sm leading-relaxed whitespace-pre-line" style="color: var(--text-secondary);">
+          {{ displayTrail?.description ?? trailData.description }}
+        </p>
       </div>
 
-      <!-- Main Content Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <!-- Left Column: Weather & Forecast (4/12) -->
-        <div class="lg:col-span-5 space-y-8 animate-fade-in-up stagger-1">
-          <!-- Real-time Weather -->
-          <div class="card p-6">
-            <WeatherSection :weather="weather" :is-loading="isLoading" :fallback-city="trail.location" />
-            
-            <div class="mt-8 pt-6 border-t border-black/5 dark:border-white/5">
-              <h3 class="text-sm font-medium mb-4 flex items-center gap-2" style="color: var(--text-primary);">
-                <BaseIcon name="CloudRain" :size="16" class="text-primary-500" />
-                景观与环境预测
-              </h3>
-              <LandscapePrediction />
-            </div>
+      <!-- Map Section -->
+      <TrailMapSection
+        :center="mapCenter"
+        :label="displayTrail?.name ?? trailData.name"
+        :city="locationCity"
+        :track-geo-json="trailData.track?.geoJson"
+        :track-download-url="trailData.track?.downloadUrl"
+      />
 
-            <div class="mt-8 pt-6 border-t border-black/5 dark:border-white/5">
-              <h3 class="text-sm font-medium mb-4 flex items-center gap-2" style="color: var(--text-primary);">
-                <BaseIcon name="Calendar" :size="16" class="text-primary-500" />
-                未来六天天气预报
-              </h3>
+      <!-- Conditions & 3D Viewer Section (Side-by-Side on Desktop) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <!-- Left: Weather Dashboard -->
+        <div class="card p-6 flex flex-col h-full">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-primary);">
+              <BaseIcon name="CloudSun" :size="22" class="text-primary-500" />
+              路线环境与天气
+            </h3>
+          </div>
+
+          <div class="space-y-6 flex-1">
+            <!-- Current Weather -->
+            <WeatherSection
+              :weather="weather"
+              :is-loading="weatherLoading"
+              :fallback-city="locationCity"
+            />
+
+            <!-- Landscape Predictions -->
+            <LandscapePrediction />
+
+            <!-- Forecast List -->
+            <div class="mt-6 border-t border-white/5">
+              <h4 class="text-sm font-medium mb-4" style="color: var(--text-secondary);">未来七天预报</h4>
               <WeatherForecast :forecast="forecast" />
             </div>
           </div>
-
-          <!-- Trail Highlights -->
-          <div class="card p-6">
-            <h3 class="text-lg font-bold mb-4">路线亮点</h3>
-            <div class="space-y-4">
-              <div v-for="(highlight, index) in ['壮丽的云海景观', '原始森林穿越', '高山草甸牧场', '清澈的溪流水源']" :key="index" class="flex gap-3">
-                <div class="w-6 h-6 rounded-full bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0 text-primary-600 dark:text-primary-400 font-bold text-xs">
-                  {{ index + 1 }}
-                </div>
-                <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">{{ highlight }}</p>
-              </div>
-            </div>
-          </div>
         </div>
 
-        <!-- Right Column: 3D Model & Specs (7/12) -->
-        <div class="lg:col-span-7 space-y-8 animate-fade-in-up stagger-2">
-          <!-- 3D Track Viewer Card -->
-          <div class="card overflow-hidden h-[600px] flex flex-col group relative">
-            <div class="absolute top-4 left-4 z-10 p-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-black/5 dark:border-white/10 shadow-sm">
-              <h3 class="text-sm font-bold flex items-center gap-2">
-                <Navigation :size="16" class="text-primary-500" />
-                3D 轨迹建模
-              </h3>
-            </div>
-            
-            <TrailTrackViewer 
-              v-if="trail.trackData" 
-              :data="trail.trackData" 
-              mode="detail"
-              :weather-scene="weather?.weather.includes('雨') ? 'rain' : weather?.weather.includes('云') ? 'partly_cloudy' : 'clear'"
-              @request-fullscreen="requestFullscreen"
-            />
-          </div>
-
-          <!-- Quick Stats Row -->
-          <div class="grid grid-cols-3 gap-4">
-            <div class="card p-4 flex flex-col items-center justify-center text-center">
-              <BaseIcon name="Route" :size="20" class="text-primary-500 mb-2" />
-              <span class="text-lg font-bold">{{ trail.distance }}</span>
-              <span class="text-xs text-slate-500">全长</span>
-            </div>
-            <div class="card p-4 flex flex-col items-center justify-center text-center">
-              <BaseIcon name="TrendingUp" :size="20" class="text-blue-500 mb-2" />
-              <span class="text-lg font-bold">{{ trail.elevationGainMeters }}m</span>
-              <span class="text-xs text-slate-500">爬升</span>
-            </div>
-            <div class="card p-4 flex flex-col items-center justify-center text-center">
-              <BaseIcon name="Clock" :size="20" class="text-amber-500 mb-2" />
-              <span class="text-lg font-bold">{{ trail.duration }}</span>
-              <span class="text-xs text-slate-500">用时</span>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <div class="card p-6">
-            <div class="flex items-center gap-2 mb-4">
-              <Info :size="20" class="text-primary-500" />
-              <h3 class="text-lg font-bold">路线简介</h3>
-            </div>
-            <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
-              {{ trail.description }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Full Width: Comments Row -->
-        <div class="lg:col-span-12 animate-fade-in-up stagger-3">
-          <div class="card p-8">
-            <div class="flex items-center justify-between mb-8">
-              <div class="flex items-center gap-3">
-                <MessageSquare :size="24" class="text-primary-500" />
-                <h3 class="text-xl font-bold">社区评价</h3>
-                <span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-500">{{ trail.reviews }}</span>
-              </div>
-              <ActionButton class="btn-primary px-6">写评价</ActionButton>
-            </div>
-            
-            <!-- Mock reviews list -->
-            <div class="space-y-8">
-              <div v-for="i in 3" :key="i" class="pb-8 border-b border-black/5 dark:border-white/5 last:border-0 last:pb-0">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="flex items-center gap-3">
-                    <img :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`" class="w-10 h-10 rounded-full bg-slate-200" />
-                    <div>
-                      <h4 class="font-bold text-sm">驴友_{{ i }}829</h4>
-                      <div class="flex items-center mt-0.5">
-                        <div class="flex text-amber-400 mr-2">
-                          <BaseIcon v-for="s in 5" :key="s" name="Star" :size="10" :fill="s <= 5 - i ? 'currentColor' : 'none'" />
-                        </div>
-                        <span class="text-[10px] text-slate-400">2024-03-{{ 10 + i }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-                  这条路线非常有挑战性，尤其是最后的冲刺阶段。建议带够水和补给。山顶的云海真的绝了！
-                </p>
-                <div class="flex gap-2">
-                  <img v-for="j in 3" :key="j" :src="`https://picsum.photos/seed/trail_${i}_${j}/200/200`" class="w-20 h-20 rounded-xl object-cover hover:scale-105 transition-transform cursor-pointer" />
-                </div>
-              </div>
-            </div>
-            
-            <div class="mt-8 text-center">
-              <button class="text-primary-500 text-sm font-bold flex items-center gap-1 mx-auto hover:gap-2 transition-all">
-                查看全部评价 <ChevronRight :size="16" />
-              </button>
-            </div>
-          </div>
+        <!-- Right: 3D Track Viewer -->
+        <div class="h-[500px] lg:h-auto min-h-[500px]">
+          <TrailTrackViewer
+            v-if="detailTrackViewerData"
+            class="h-full rounded-2xl overflow-hidden shadow-2xl border border-white/5"
+            :data="detailTrackViewerData"
+            :weather-scene="detailWeatherScene"
+            mode="detail"
+            :show-scroll-to-content-button="false"
+            @request-fullscreen="isViewerFullscreen = true"
+          />
         </div>
       </div>
+
+      <!-- Reviews Section (Full Width) -->
+      <div class="pt-8 border-t border-white/5">
+        <ReviewList
+          :reviews="reviews"
+          :average-rating="trailData.rating"
+          :total-reviews="trailData.reviewCount"
+          :is-submitting="isSubmittingReview"
+          :is-loading-more="isLoadingMoreReviews"
+          :has-more="hasMoreReviews"
+          :error-message="reviewsErrorMessage"
+          :load-more-error="loadMoreErrorMessage"
+          :review-form-reset-key="reviewFormResetKey"
+          :reply-form-reset-key="replyFormResetKey"
+          :active-user-card="activeUserCard"
+          :is-user-card-loading="isUserCardLoading"
+          :user-card-error-message="userCardErrorMessage"
+          :deleting-ids="deletingIds"
+          :user-card-visible="isUserCardVisible"
+          @submit-review="handleCreateReview"
+          @submit-reply="handleCreateReply"
+          @load-more="loadMoreReviews"
+          @retry-load-more="retryLoadMoreReviews"
+          @delete-review="handleDeleteReview"
+          @open-user-card="openUserCard"
+          @close-user-card="closeUserCard"
+        />
+      </div>
+
+
     </div>
+
+    <ConfirmDialog
+      :show="!!pendingDeleteReview"
+      title="删除评论"
+      message="确认删除这条评论吗？删除后无法恢复。"
+      confirm-text="确认删除"
+      cancel-text="暂不删除"
+      tone="danger"
+      :confirm-loading="!!pendingDeleteReview && deletingIds.includes(String(pendingDeleteReview.id))"
+      @update:show="(value) => { if (!value) closeDeleteConfirm() }"
+      @cancel="closeDeleteConfirm"
+      @confirm="confirmDeleteReview"
+    />
+
+    <ConfirmDialog
+      :show="pendingDeleteTrail"
+      title="删除路线"
+      message="确认删除这条路线吗？删除后将不会再出现在前台列表和详情页。"
+      confirm-text="确认删除"
+      cancel-text="暂不删除"
+      tone="danger"
+      :confirm-loading="isDeletingTrail"
+      @update:show="(value) => { if (!value) closeDeleteTrailDialog() }"
+      @cancel="closeDeleteTrailDialog"
+      @confirm="confirmDeleteTrail"
+    />
+
+  </main>
+  <main v-else class="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+    <div class="card p-8 text-center">
+      <p v-if="isLoading" class="text-sm" style="color: var(--text-secondary);">正在加载路线详情...</p>
+      <p v-else-if="errorMessage" class="text-sm" style="color: var(--color-hard);">{{ errorMessage }}</p>
+      <p v-else class="text-sm" style="color: var(--text-secondary);">未找到该路线</p>
+    </div>
+  </main>
+
+  <!-- Fullscreen Track Viewer -->
+  <div
+    v-if="isViewerFullscreen"
+    class="fixed inset-0 z-[100] bg-black animate-fade-in"
+  >
+    <TrailTrackViewer
+      v-if="detailTrackViewerData"
+      class="h-full w-full"
+      mode="fullscreen"
+      :data="detailTrackViewerData"
+      :weather-scene="detailWeatherScene"
+      @exit-fullscreen="isViewerFullscreen = false"
+    />
   </div>
 </template>
-
-<style scoped>
-.glass-header {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(12px);
-}
-
-.dark .glass-header {
-  background: rgba(15, 23, 42, 0.82);
-}
-
-.badge {
-  @apply px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider;
-}
-
-.badge-easy {
-  @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400;
-}
-
-.badge-moderate {
-  @apply bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400;
-}
-
-.badge-hard {
-  @apply bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400;
-}
-</style>
