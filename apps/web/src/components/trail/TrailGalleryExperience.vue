@@ -103,27 +103,6 @@ function pauseAutoPan(delay = AUTO_PAN_RESUME_DELAY) {
   autoPanResumeAt.value = performance.now() + delay
 }
 
-function handlePointerDown(event: PointerEvent) {
-  if (!props.images.length || !containerRef.value) return
-  const gsap = getGsap()
-  gsap?.killTweensOf(scrollProxy)
-  
-  pauseAutoPan()
-  isDragging.value = true
-  pointerId.value = event.pointerId
-  lastPointerX.value = event.clientX
-  containerRef.value.setPointerCapture(event.pointerId)
-}
-
-function handlePointerMove(event: PointerEvent) {
-  if (!isDragging.value || pointerId.value !== event.pointerId) return
-  pauseAutoPan()
-  const deltaX = event.clientX - lastPointerX.value
-  lastPointerX.value = event.clientX
-  scrollProxy.x -= deltaX * 1.5 // multiplier for faster dragging
-}
-
-
 
 function handleWheel(event: WheelEvent) {
   if (!props.images.length) return
@@ -162,35 +141,6 @@ function jumpToOffset(offset: number) {
   })
 }
 
-const dragStartX = ref(0)
-let activeClickIndex: number | null = null
-
-function handlePointerDownWithDragStart(event: PointerEvent) {
-  dragStartX.value = event.clientX
-  
-  const target = event.target as HTMLElement
-  const shell = target.closest('.gallery-card-image-shell') as HTMLElement
-  if (shell && shell.dataset.index) {
-    activeClickIndex = parseInt(shell.dataset.index, 10)
-  } else {
-    activeClickIndex = null
-  }
-  
-  handlePointerDown(event)
-}
-
-function handlePointerUp(event: PointerEvent) {
-  if (pointerId.value !== event.pointerId) return
-  pauseAutoPan()
-  isDragging.value = false
-  pointerId.value = null
-  containerRef.value?.releasePointerCapture(event.pointerId)
-
-  if (activeClickIndex !== null && Math.abs(event.clientX - dragStartX.value) < 10) {
-    emit('preview', activeClickIndex)
-  }
-  activeClickIndex = null
-}
 
 function tick() {
   const gsap = getGsap()
@@ -292,10 +242,6 @@ function tick() {
   <div
     ref="container"
     class="gallery-experience"
-    @pointerdown="handlePointerDownWithDragStart"
-    @pointermove="handlePointerMove"
-    @pointerup="handlePointerUp"
-    @pointercancel="handlePointerUp"
     @wheel.prevent="handleWheel"
   >
     <div class="gallery-background">
@@ -323,7 +269,7 @@ function tick() {
           :style="{ width: `${cardWidth}px` }"
         >
           <div class="gallery-card-frame">
-            <div class="gallery-card-image-shell group cursor-pointer" :data-index="card.originalIndex">
+            <div class="gallery-card-image-shell group cursor-pointer" @click="emit('preview', card.originalIndex)">
               <img
                 :src="card.image"
                 :alt="`${props.title} 图片 ${card.originalIndex + 1}`"
