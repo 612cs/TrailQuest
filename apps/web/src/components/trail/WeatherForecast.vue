@@ -68,7 +68,7 @@ const formatItems = computed(() => {
     <div 
       v-for="item in formatItems" 
       :key="item.id" 
-      class="p-3.5 bg-white/3 rounded-2xl border border-white/5 flex flex-col gap-3 hover:bg-white/5 transition-colors"
+      class="p-3.5 bg-white/3 rounded-2xl border border-primary-500/10 flex flex-col gap-3 hover:bg-white/5 transition-colors"
     >
       <div class="flex items-center justify-between">
         <div class="flex flex-col">
