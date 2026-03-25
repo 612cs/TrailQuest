@@ -186,9 +186,8 @@ function tick() {
   const totalW = multiplier.value * setW
 
   // Emit camera-move for background parallax in TrailGalleryView
-  // We module wrap it into [0, setW] to keep the background loop matching 1 set length.
-  const bgWrapped = gsap.utils.wrap(0, setW, scrollProxy.x)
-  emit('camera-move', { x: bgWrapped, max: setW })
+  // Emit the raw un-wrapped value so the background can continuously slide without snapping!
+  emit('camera-move', { x: scrollProxy.x, max: setW })
 
   let closestIndex = 0
   let minDistance = Infinity

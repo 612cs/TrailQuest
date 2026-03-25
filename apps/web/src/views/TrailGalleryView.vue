@@ -86,10 +86,9 @@ function handleCameraMove(payload: { x: number; max: number }) {
     const offset = payload.x * PARALLAX_FACTOR
     const translateX = isOdd ? offset : -offset
     
-    // We wrap it securely to avoid running out of text.
-    // Assuming each word is ~500-2000px, rendering 100 words generates a huge line.
-    // Wrap around 10000px to ensure we never hit the bound visually.
-    const wrappedOffset = gsap.utils.wrap(-20000, 20000, translateX)
+    // Ensure the background scroll space is massively wide enough to be practically infinite 
+    // without hitting the GSAP wrap jump
+    const wrappedOffset = gsap.utils.wrap(-50000, 50000, translateX)
 
     gsap.set(el, { x: wrappedOffset })
   })
@@ -101,7 +100,7 @@ function handleCameraMove(payload: { x: number; max: number }) {
     const offset = payload.x * PARALLAX_FACTOR * 0.5 // Slower on mobile
     const translateX = isOdd ? offset : -offset
     
-    const wrappedOffset = gsap.utils.wrap(-10000, 10000, translateX)
+    const wrappedOffset = gsap.utils.wrap(-50000, 50000, translateX)
     gsap.set(el, { x: wrappedOffset })
   })
 }
