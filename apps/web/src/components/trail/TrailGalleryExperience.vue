@@ -10,6 +10,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'active-change', index: number): void
   (event: 'camera-move', payload: { x: number, max: number }): void
+  (event: 'preview', index: number): void
 }>()
 
 const getGsap = () => (window as any).gsap
@@ -31,10 +32,10 @@ const AUTO_PAN_RESUME_DELAY = 2200
 let tickerFn: (() => void) | null = null
 
 const cardWidth = computed(() => {
-  if (viewportWidth.value <= 0) return 640
-  if (viewportWidth.value < 768) return Math.min(viewportWidth.value * 0.82, 440)
-  if (viewportWidth.value < 1280) return Math.min(viewportWidth.value * 0.5, 640)
-  return Math.min(viewportWidth.value * 0.44, 720)
+  if (viewportWidth.value <= 0) return 560
+  if (viewportWidth.value < 768) return Math.min(viewportWidth.value * 0.7, 360)
+  if (viewportWidth.value < 1280) return Math.min(viewportWidth.value * 0.4, 480)
+  return Math.min(viewportWidth.value * 0.35, 560)
 })
 
 const cardGap = computed(() => {
@@ -167,6 +168,18 @@ function jumpToOffset(offset: number) {
   })
 }
 
+const dragStartX = ref(0)
+function handlePointerDownWithDragStart(event: PointerEvent) {
+  dragStartX.value = event.clientX
+  handlePointerDown(event)
+}
+
+function handleCardClick(event: MouseEvent, index: number) {
+  if (Math.abs(event.clientX - dragStartX.value) < 10) {
+    emit('preview', index)
+  }
+}
+
 function tick() {
   const gsap = getGsap()
   if (!gsap || !cardRefs.value?.length || viewportWidth.value === 0) return
@@ -267,7 +280,7 @@ function tick() {
   <div
     ref="container"
     class="gallery-experience"
-    @pointerdown="handlePointerDown"
+    @pointerdown="handlePointerDownWithDragStart"
     @pointermove="handlePointerMove"
     @pointerup="handlePointerUp"
     @pointercancel="handlePointerUp"
@@ -298,11 +311,11 @@ function tick() {
           :style="{ width: `${cardWidth}px` }"
         >
           <div class="gallery-card-frame">
-            <div class="gallery-card-image-shell">
+            <div class="gallery-card-image-shell group cursor-pointer" @click="handleCardClick($event, card.originalIndex)">
               <img
                 :src="card.image"
                 :alt="`${props.title} 图片 ${card.originalIndex + 1}`"
-                class="gallery-card-image"
+                class="gallery-card-image transition-transform duration-700 ease-out group-hover:scale-105"
                 draggable="false"
               />
               <div class="gallery-card-veil"></div>

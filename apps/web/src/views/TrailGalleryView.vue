@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import BaseIcon from '../components/common/BaseIcon.vue'
+import ImagePreviewModal from '../components/common/ImagePreviewModal.vue'
 import TrailGalleryExperience from '../components/trail/TrailGalleryExperience.vue'
 import { fetchTrailDetail } from '../api/trails'
 import type { EntityId } from '../types/id'
@@ -14,6 +15,9 @@ const router = useRouter()
 const trailData = ref<TrailListItem | null>(null)
 const isLoading = ref(false)
 const errorMessage = ref('')
+
+const showPreview = ref(false)
+const previewIndex = ref(0)
 
 const trailId = computed<EntityId>(() => {
   const rawId = route.params.id
@@ -105,6 +109,11 @@ function handleCameraMove(payload: { x: number; max: number }) {
   })
 }
 
+function handlePreview(index: number) {
+  previewIndex.value = index
+  showPreview.value = true
+}
+
 function handleBack() {
   if (returnTo.value) {
     void router.push(returnTo.value)
@@ -144,6 +153,7 @@ function handleBack() {
               :images="galleryImages"
               :title="trailData.name"
               @camera-move="handleCameraMove"
+              @preview="handlePreview"
             />
           </section>
 
@@ -187,6 +197,14 @@ function handleBack() {
         </div>
       </div>
     </div>
+
+    <!-- Fullscreen Image Preview -->
+    <ImagePreviewModal
+      v-if="showPreview"
+      :images="galleryImages"
+      :initial-index="previewIndex"
+      @close="showPreview = false"
+    />
   </main>
 </template>
 
