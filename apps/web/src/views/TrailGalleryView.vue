@@ -88,9 +88,9 @@ function handleCameraMove(payload: { x: number; max: number }) {
     
     // Ensure the background scroll space is massively wide enough to be practically infinite 
     // without hitting the GSAP wrap jump
-    const wrappedOffset = gsap.utils.wrap(-50000, 50000, translateX)
+    const wrappedOffset = gsap.utils.wrap(-40000, 40000, translateX)
 
-    gsap.set(el, { x: wrappedOffset })
+    gsap.set(el, { xPercent: -50, x: wrappedOffset })
   })
 
   // Handle mobile poster words
@@ -100,8 +100,8 @@ function handleCameraMove(payload: { x: number; max: number }) {
     const offset = payload.x * PARALLAX_FACTOR * 0.5 // Slower on mobile
     const translateX = isOdd ? offset : -offset
     
-    const wrappedOffset = gsap.utils.wrap(-50000, 50000, translateX)
-    gsap.set(el, { x: wrappedOffset })
+    const wrappedOffset = gsap.utils.wrap(-40000, 40000, translateX)
+    gsap.set(el, { xPercent: -50, x: wrappedOffset })
   })
 }
 
