@@ -123,13 +123,7 @@ function handlePointerMove(event: PointerEvent) {
   scrollProxy.x -= deltaX * 1.5 // multiplier for faster dragging
 }
 
-function handlePointerUp(event: PointerEvent) {
-  if (pointerId.value !== event.pointerId) return
-  pauseAutoPan()
-  isDragging.value = false
-  pointerId.value = null
-  containerRef.value?.releasePointerCapture(event.pointerId)
-}
+
 
 function handleWheel(event: WheelEvent) {
   if (!props.images.length) return
@@ -169,15 +163,33 @@ function jumpToOffset(offset: number) {
 }
 
 const dragStartX = ref(0)
+let activeClickIndex: number | null = null
+
 function handlePointerDownWithDragStart(event: PointerEvent) {
   dragStartX.value = event.clientX
+  
+  const target = event.target as HTMLElement
+  const shell = target.closest('.gallery-card-image-shell') as HTMLElement
+  if (shell && shell.dataset.index) {
+    activeClickIndex = parseInt(shell.dataset.index, 10)
+  } else {
+    activeClickIndex = null
+  }
+  
   handlePointerDown(event)
 }
 
-function handleCardClick(event: MouseEvent, index: number) {
-  if (Math.abs(event.clientX - dragStartX.value) < 10) {
-    emit('preview', index)
+function handlePointerUp(event: PointerEvent) {
+  if (pointerId.value !== event.pointerId) return
+  pauseAutoPan()
+  isDragging.value = false
+  pointerId.value = null
+  containerRef.value?.releasePointerCapture(event.pointerId)
+
+  if (activeClickIndex !== null && Math.abs(event.clientX - dragStartX.value) < 10) {
+    emit('preview', activeClickIndex)
   }
+  activeClickIndex = null
 }
 
 function tick() {
@@ -311,7 +323,7 @@ function tick() {
           :style="{ width: `${cardWidth}px` }"
         >
           <div class="gallery-card-frame">
-            <div class="gallery-card-image-shell group cursor-pointer" @click="handleCardClick($event, card.originalIndex)">
+            <div class="gallery-card-image-shell group cursor-pointer" :data-index="card.originalIndex">
               <img
                 :src="card.image"
                 :alt="`${props.title} 图片 ${card.originalIndex + 1}`"
