@@ -21,10 +21,6 @@ const cardRefs = ref<HTMLElement[]>([])
 const viewportWidth = ref(0)
 const scrollProxy = { x: 0 }
 const activeIndex = ref(0)
-const isDragging = ref(false)
-const pointerId = ref<number | null>(null)
-const lastPointerX = ref(0)
-
 const autoPanResumeAt = ref(0)
 const AUTO_PAN_SPEED = 0.5
 const AUTO_PAN_RESUME_DELAY = 2200
@@ -63,7 +59,7 @@ const wrappedImages = computed(() => {
 })
 
 const statusText = computed(() => props.images.length
-  ? '按住拖拽、滚轮或方向键横向穿梭图片空间'
+  ? '使用滚轮、触控板或方向键横向穿梭图片空间'
   : '当前路线暂无可展示图片')
 
 watch(() => props.images, () => {
@@ -149,7 +145,7 @@ function tick() {
   const originalCount = props.images.length
   if (originalCount === 0) return
   
-  if (!isDragging.value && performance.now() >= autoPanResumeAt.value) {
+  if (performance.now() >= autoPanResumeAt.value) {
     if (!gsap.isTweening(scrollProxy)) {
       scrollProxy.x += AUTO_PAN_SPEED
     }
@@ -316,13 +312,8 @@ function tick() {
   height: 100vh;
   min-height: 100vh;
   overflow: hidden;
-  cursor: grab;
   user-select: none;
   touch-action: none; /* Prevent browser pan/zoom on mobile */
-}
-
-.gallery-experience:active {
-  cursor: grabbing;
 }
 
 .gallery-background,
