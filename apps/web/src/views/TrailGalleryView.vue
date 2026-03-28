@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ImagePreviewModal from '../components/common/ImagePreviewModal.vue'
@@ -26,6 +26,17 @@ const trailId = computed<EntityId>(() => {
 
 const returnTo = computed(() => {
   const raw = route.query.from
+  const value = Array.isArray(raw) ? raw[0] : raw
+
+  if (typeof value !== 'string' || !value.startsWith('/')) {
+    return null
+  }
+
+  return value
+})
+
+const detailFrom = computed(() => {
+  const raw = route.query.detailFrom
   const value = Array.isArray(raw) ? raw[0] : raw
 
   if (typeof value !== 'string' || !value.startsWith('/')) {
@@ -65,11 +76,8 @@ async function loadTrailDetail(id: string) {
   errorMessage.value = ''
 
   try {
-    console.log('[Gallery] Fetching detail for:', id)
     trailData.value = await fetchTrailDetail(id)
-    console.log('[Gallery] Data fetched:', !!trailData.value)
   } catch (error) {
-    console.error('[Gallery] Fetch error:', error)
     trailData.value = null
     errorMessage.value = error instanceof Error ? error.message : '图片漫游加载失败'
   } finally {
@@ -77,45 +85,25 @@ async function loadTrailDetail(id: string) {
   }
 }
 
-// 使用 onBeforeRouteUpdate 处理路由参数变化
-onBeforeRouteUpdate(async (to) => {
-  const rawId = to.params.id
-  const nextId = (Array.isArray(rawId) ? rawId[0] : rawId) || ''
-  await loadTrailDetail(nextId)
-})
-
-// 初始加载
-;(async () => {
-  await loadTrailDetail(String(trailId.value))
-})()
+watch(
+  trailId,
+  async (nextId) => {
+    await loadTrailDetail(String(nextId))
+  },
+  { immediate: true },
+)
 
 function handleCameraMove(payload: { x: number; max: number }) {
   const getGsap = () => (window as any).gsap
   const gsap = getGsap()
   if (!gsap) return
-  // Handle desktop poster words
   const desktopRows = document.querySelectorAll('.gallery-poster-desktop .gallery-poster-word')
   desktopRows.forEach((el, index) => {
     const isOdd = index % 2 === 0
-    // Use raw GSAP x to drive infinite text
     const offset = payload.x * PARALLAX_FACTOR
     const translateX = isOdd ? offset : -offset
-    
-    // Ensure the background scroll space is massively wide enough to be practically infinite 
-    // without hitting the GSAP wrap jump
     const wrappedOffset = gsap.utils.wrap(-40000, 40000, translateX)
 
-    gsap.set(el, { xPercent: -50, x: wrappedOffset })
-  })
-
-  // Handle mobile poster words
-  const mobileRows = document.querySelectorAll('.gallery-poster-mobile .gallery-mobile-word')
-  mobileRows.forEach((el, index) => {
-    const isOdd = index % 2 === 0
-    const offset = payload.x * PARALLAX_FACTOR * 0.5 // Slower on mobile
-    const translateX = isOdd ? offset : -offset
-    
-    const wrappedOffset = gsap.utils.wrap(-40000, 40000, translateX)
     gsap.set(el, { xPercent: -50, x: wrappedOffset })
   })
 }
@@ -127,7 +115,10 @@ function handlePreview(index: number) {
 
 function handleBack() {
   if (returnTo.value) {
-    void router.push(returnTo.value)
+    void router.push({
+      path: returnTo.value,
+      query: detailFrom.value ? { from: detailFrom.value } : {},
+    })
     return
   }
 
@@ -167,21 +158,6 @@ function handleBack() {
               @preview="handlePreview"
             />
           </section>
-
-          <section class="gallery-mobile-letters" aria-hidden="true">
-            <div class="gallery-poster gallery-poster-mobile">
-              <div class="gallery-poster-grid"></div>
-
-              <p
-                v-for="row in backgroundRows"
-                :key="`mobile-${row.index}`"
-                class="gallery-mobile-word"
-                :class="row.isOdd ? 'gallery-poster-word-green' : 'gallery-poster-word-white'"
-              >
-                {{ row.text }}
-              </p>
-            </div>
-          </section>
         </div>
 
         <div class="gallery-topbar">
@@ -196,16 +172,12 @@ function handleBack() {
         </div>
       </template>
 
-      <div v-else class="gallery-fallback">
-        <div class="gallery-fallback-card">
-          <BaseIcon v-if="isLoading" name="Loader2" :size="22" class="animate-spin gallery-fallback-icon" />
-          <BaseIcon v-else name="ImageOff" :size="22" class="gallery-fallback-icon" />
-          <p class="gallery-fallback-title">{{ isLoading ? '正在加载图片漫游...' : '暂时无法进入图片漫游' }}</p>
-          <p class="gallery-fallback-text">{{ errorMessage || '当前路线暂无可展示的图片。' }}</p>
-          <button type="button" class="gallery-action gallery-action-solid" @click="handleBack">
-            返回详情
-          </button>
-        </div>
+      <div v-else class="gallery-fallback" aria-live="polite">
+        <BaseIcon
+          name="Loader2"
+          :size="32"
+          class="animate-spin gallery-fallback-icon"
+        />
       </div>
     </div>
 
@@ -265,11 +237,6 @@ function handleBack() {
     linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent 18%, rgba(0, 0, 0, 0.14));
 }
 
-.gallery-poster-mobile {
-  position: relative;
-  min-height: 100%;
-}
-
 .gallery-poster-grid {
   position: absolute;
   inset: 0;
@@ -311,22 +278,6 @@ function handleBack() {
   text-transform: uppercase;
   user-select: none;
   will-change: transform;
-}
-
-.gallery-mobile-letters {
-  display: none;
-}
-
-.gallery-mobile-word {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  font-size: clamp(4.5rem, 18vw, 7rem);
-  line-height: 0.86;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-align: center;
 }
 
 .gallery-poster-word-green {
@@ -417,37 +368,14 @@ function handleBack() {
   place-items: center;
   padding: 2rem;
   background:
-    radial-gradient(circle at 50% 18%, rgba(255, 228, 212, 0.08), transparent 28%),
-    linear-gradient(180deg, #220606 0%, #120202 100%);
-}
-
-.gallery-fallback-card {
-  width: min(30rem, 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
-  text-align: center;
-  padding: 2rem;
-  border-radius: 1.6rem;
-  border: 1px solid rgba(255, 244, 236, 0.12);
-  background: rgba(25, 6, 6, 0.88);
-  color: rgba(255, 244, 236, 0.94);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+    radial-gradient(circle at 50% 52%, rgba(45, 89, 39, 0.12), transparent 24%),
+    radial-gradient(circle at 18% 78%, rgba(79, 154, 72, 0.08), transparent 20%),
+    radial-gradient(circle at 84% 20%, rgba(127, 186, 121, 0.06), transparent 18%),
+    linear-gradient(180deg, #020503 0%, #050806 48%, #030503 100%);
 }
 
 .gallery-fallback-icon {
   color: rgba(255, 228, 212, 0.92);
-}
-
-.gallery-fallback-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.gallery-fallback-text {
-  color: rgba(255, 239, 231, 0.7);
-  line-height: 1.6;
 }
 
 .gallery-stage:deep(.gallery-experience.gallery-experience) {
@@ -475,38 +403,9 @@ function handleBack() {
 }
 
 @media (max-width: 768px) {
-  .gallery-main {
-    min-height: 100vh;
-    display: grid;
-    grid-template-rows: minmax(58vh, 1fr) minmax(42vh, auto);
-  }
-
-  .gallery-poster-desktop {
-    display: none;
-  }
-
-  .gallery-stage-panel {
-    min-height: 0;
-  }
-
   .gallery-stage:deep(.gallery-experience.gallery-experience) {
-    height: 100%;
-    min-height: 0;
-  }
-
-  .gallery-mobile-letters {
-    position: relative;
-    display: block;
-    min-height: 42vh;
-    overflow: hidden;
-    padding: 2rem 1.25rem 2.5rem;
-  }
-
-  .gallery-poster-mobile {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.6rem;
+    min-height: 100vh;
+    height: 100vh;
   }
 
   .gallery-topbar {

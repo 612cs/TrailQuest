@@ -60,16 +60,16 @@ export function useTrailWeather() {
           temperature: '22',
           humidity: '45',
           windDirection: '东南',
-          windPower: '3级',
+          windPower: '3',
           reportTime: new Date().toISOString(),
         }
         weather.value = mockWeather
-        
+
         const mockForecast: TrailWeatherForecastDay[] = []
         const today = new Date().toISOString().split('T')[0]!
         let currentDayLabel = today
         let currentWeek = '1'
-        
+
         for (let i = 0; i < 7; i++) {
           mockForecast.push({
             date: currentDayLabel,
@@ -88,7 +88,7 @@ export function useTrailWeather() {
 
       const urlBase = `https://restapi.amap.com/v3/weather/weatherInfo?key=${amapKey}&city=${encodeURIComponent(options.adcode)}&extensions=base`
       const urlAll = `https://restapi.amap.com/v3/weather/weatherInfo?key=${amapKey}&city=${encodeURIComponent(options.adcode)}&extensions=all`
-      
+
       const [resBase, resAll] = await Promise.all([
         fetch(urlBase, { signal: options.signal }),
         fetch(urlAll, { signal: options.signal })
@@ -144,7 +144,7 @@ export function useTrailWeather() {
           })
         }
       }
-      
+
       forecast.value = resultForecast
 
       return { weather: resultWeather, forecast: resultForecast }

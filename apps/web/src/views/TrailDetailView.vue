@@ -29,50 +29,114 @@ import type {
   UserCard,
 } from '../types/review'
 
+const REVIEWS_PAGE_SIZE = 10
+
 const router = useRouter()
 const route = useRoute()
 const flashStore = useFlashStore()
-const interactionStore = useTrailInteractionStore()
+const trailInteractionStore = useTrailInteractionStore()
 const userStore = useUserStore()
 const { shareTrail } = useTrailShare()
+
+const reviews = ref<ReviewItem[]>([])
+const trailData = ref<TrailListItem | null>(null)
+const isLoading = ref(false)
+const isLoadingMoreReviews = ref(false)
+const isSubmittingReview = ref(false)
+const errorMessage = ref('')
+const reviewsErrorMessage = ref('')
+const loadMoreErrorMessage = ref('')
+const reviewFormResetKey = ref(0)
+const replyFormResetKey = ref(0)
+const nextReviewCursor = ref<string | null>(null)
+const hasMoreReviews = ref(false)
+const deletingIds = ref<string[]>([])
+const pendingDeleteReview = ref<ReviewItem | null>(null)
+const userCardCache = ref<Record<string, UserCard>>({})
+const activeUserCardId = ref<string | null>(null)
+const isUserCardVisible = ref(false)
+const isUserCardLoading = ref(false)
+const userCardErrorMessage = ref('')
+const pendingDeleteTrail = ref(false)
+const isDeletingTrail = ref(false)
+const isViewerFullscreen = ref(false)
+
+const { geo, resolve: resolveGeo } = useTrailGeo()
+const { weather, forecast, isLoading: weatherLoading, resolve: resolveWeather } = useTrailWeather()
 
 const trailId = computed<EntityId>(() => {
   const rawId = route.params.id
   return Array.isArray(rawId) ? rawId[0] ?? '' : String(rawId ?? '')
 })
-
-const detailFrom = computed(() => {
-  const raw = route.query.from
-  return Array.isArray(raw) ? raw[0] : raw
-})
-
-const trailData = ref<TrailListItem | null>(null)
-const isLoading = ref(true)
-const isDeleting = ref(false)
-const showDeleteConfirm = ref(false)
-
-const canEditTrail = computed(() => {
-  if (!trailData.value || !userStore.isAuthenticated) return false
-  return trailData.value.authorId === userStore.user?.id
-})
-
-// 地理与天气
-const { locationCity, locationAdcode } = useTrailGeo(computed(() => trailData.value?.location))
-const { weather, forecast, isLoading: weatherLoading } = useTrailWeather(locationAdcode)
-
-const detailImages = computed(() => {
-  if (!trailData.value) return []
-  return [trailData.value.image, ...(trailData.value.gallery?.map(i => i.url) || [])].filter(Boolean)
-})
-
+const detailFrom = computed(() => normalizeInternalPath(route.query.from))
 const displayTrail = computed(() => {
   if (!trailData.value) return null
-  const t = trailData.value
+  return trailInteractionStore.applyToTrail(trailData.value)
+})
+const activeUserCard = computed(() => {
+  if (!activeUserCardId.value) return null
+  return userCardCache.value[activeUserCardId.value] ?? null
+})
+const detailImages = computed(() => {
+  const urls = [trailData.value?.image, ...(trailData.value?.gallery?.map((item) => item.url) ?? [])]
+    .filter((item): item is string => !!item)
+
+  return urls.filter((url, index) => urls.indexOf(url) === index)
+})
+
+watch(trailId, async (newId) => {
+  if (!newId) {
+    reviews.value = []
+    nextReviewCursor.value = null
+    hasMoreReviews.value = false
+    return
+  }
+
+  await loadInitialReviews(newId)
+}, { immediate: true })
+
+watch(trailId, async (newId) => {
+  if (!newId) {
+    trailData.value = null
+    return
+  }
+
+  isLoading.value = true
+  errorMessage.value = ''
+
+  try {
+    const data = await fetchTrailDetail(newId)
+    trailData.value = data
+    trailInteractionStore.hydrateTrail(data)
+  } catch (error) {
+    trailData.value = null
+    errorMessage.value = error instanceof Error ? error.message : '路线详情加载失败'
+  } finally {
+    isLoading.value = false
+  }
+}, { immediate: true })
+
+watch(trailData, async (trail, _prev, onCleanup) => {
+  if (!trail) return
+  const controller = new AbortController()
+  onCleanup(() => controller.abort())
+
+  await resolveGeo({
+    ip: trail.ip,
+    locationLabel: `${trail.location} ${trail.name}`,
+    signal: controller.signal,
+  })
+
+  await resolveWeather({
+    adcode: geo.value?.adcode ?? '',
+    signal: controller.signal,
+  })
+}, { immediate: true })
+
+const heroProps = computed(() => {
+  const t = displayTrail.value!
   return {
     id: t.id,
-    authorId: t.authorId,
-    ownedByCurrentUser: userStore.isAuthenticated && t.authorId === userStore.user?.id,
-    editableByCurrentUser: userStore.isAuthenticated && t.authorId === userStore.user?.id,
     image: t.image,
     name: t.name,
     location: t.location,
@@ -89,135 +153,32 @@ const displayTrail = computed(() => {
     favorites: t.favorites,
     likedByCurrentUser: t.likedByCurrentUser,
     favoritedByCurrentUser: t.favoritedByCurrentUser,
-    isLikePending: interactionStore.isLikePending(t.id),
-    isFavoritePending: interactionStore.isFavoritePending(t.id),
+    isLikePending: trailInteractionStore.isLikePending(t.id),
+    isFavoritePending: trailInteractionStore.isFavoritePending(t.id),
     author: t.author,
     publishTime: t.publishTime,
   }
 })
 
-const geo = useTrailGeo(computed(() => trailData.value?.location))
-const mapCenter = computed(() => geo.location.value?.center ?? null)
-const detailTrackViewerData = computed(() => {
-  if (!trailData.value?.track) return null
-  return createTrackViewerData(trailData.value)
-})
-
-const detailWeatherScene = computed(() => mapWeatherToTrackScene(weather.value))
-
-const isViewerFullscreen = ref(false)
-
-const heroProps = computed(() => {
-  if (!displayTrail.value) return {}
-  const t = displayTrail.value
-  return {
-    image: t.image,
-    name: t.name,
-    location: t.location,
-    difficultyLabel: t.difficultyLabel,
-    packType: t.packType,
-    durationType: t.durationType,
-    distance: t.distance,
-    elevation: t.elevation,
-    duration: t.duration,
-    rating: t.rating,
-    likes: t.likes,
-    favorites: t.favorites,
-    isLiked: t.likedByCurrentUser,
-    isFavorited: t.favoritedByCurrentUser,
-    author: t.author,
-    publishTime: t.publishTime,
-  }
-})
-
-const reviews = ref<ReviewItem[]>([])
-const nextReviewCursor = ref<string | null>(null)
-const hasMoreReviews = ref(false)
-const REVIEWS_PAGE_SIZE = 5
-
-const isSubmittingReview = ref(false)
-const reviewsErrorMessage = ref('')
-const loadMoreErrorMessage = ref('')
-const reviewFormResetKey = ref(0)
-const replyFormResetKey = ref(0)
-
-async function fetchDetail() {
-  if (!trailId.value) return
-
-  isLoading.value = true
-  try {
-    const data = await fetchTrailDetail(trailId.value)
-    trailData.value = data
-    if (data) {
-      await loadInitialReviews(data.id)
-    }
-  } catch (error) {
-    flashStore.showError('路线详情加载失败')
-    console.error(error)
-  } finally {
-    isLoading.value = false
-  }
-}
-
-function handleBack() {
-  if (detailFrom.value) {
-    router.push(detailFrom.value)
-  } else {
-    router.push('/')
-  }
-}
-
-async function handleShare() {
-  if (!trailData.value) return
-  await shareTrail({
-    id: trailData.value.id,
-    name: trailData.value.name,
-    location: trailData.value.location,
-  })
-}
-
-function handleDownloadTrack() {
-  if (trailData.value?.track?.downloadUrl) {
-    window.open(trailData.value.track.downloadUrl, '_blank')
-  }
-}
-
-function handleEditTrail() {
-  if (!trailData.value || !canEditTrail.value) {
-    flashStore.showError('路线发布超过48小时，不能再编辑')
-    return
-  }
-  router.push({ name: 'Publish', query: { id: trailData.value.id, from: route.fullPath } })
-}
-
-const isDeleting = ref(false)
-async function handleDeleteTrail() {
-  if (!trailData.value) return
-  isDeleting.value = true
-  try {
-    await deleteTrail(trailData.value.id)
-    flashStore.showSuccess('路线已成功删除')
-    router.push('/')
-  } catch (error) {
-    flashStore.showError('路线删除失败')
-  } finally {
-    isDeleting.value = false
-  }
-}
-
-function openGalleryExperience() {
-  if (!detailImages.value.length || !trailData.value) {
-    return
-  }
-
-  void router.push({
-    name: 'TrailGallery',
-    params: { id: trailData.value.id },
-    query: {
-      from: route.fullPath,
-    },
-  })
-}
+const mapCenter = computed(() => geo.value?.center ?? null)
+const locationCity = computed(() => geo.value?.city ?? trailData.value?.location ?? '')
+const detailTrackViewerData = computed(() => createTrackViewerData({
+  title: trailData.value?.name ?? null,
+  fileName: trailData.value?.track?.originalFileName ?? null,
+  distanceMeters: typeof trailData.value?.track?.distanceMeters === 'number'
+    ? trailData.value.track.distanceMeters
+    : null,
+  elevationGainMeters: typeof trailData.value?.track?.elevationGainMeters === 'number'
+    ? trailData.value.track.elevationGainMeters
+    : null,
+  geoJson: trailData.value?.track?.geoJson,
+}))
+const detailWeatherScene = computed(() => mapWeatherToTrackScene(
+  weather.value?.weather,
+  weather.value?.windPower,
+))
+const canManageTrail = computed(() => !!displayTrail.value?.ownedByCurrentUser)
+const canEditTrail = computed(() => !!displayTrail.value?.editableByCurrentUser)
 
 async function handleCreateReview(payload: { rating?: number; text: string; images: string[] }) {
   if (!trailData.value || isSubmittingReview.value) return
@@ -287,31 +248,206 @@ async function loadInitialReviews(targetTrailId: EntityId) {
     hasMoreReviews.value = result.hasMore
     return true
   } catch (error) {
-    reviewsErrorMessage.value = '加载评论失败'
+    reviews.value = []
+    reviewsErrorMessage.value = error instanceof Error ? error.message : '评论加载失败'
     return false
   }
 }
 
 async function loadMoreReviews() {
-  if (!trailData.value || !hasMoreReviews.value || !nextReviewCursor.value) return
+  if (!trailData.value || !hasMoreReviews.value || isLoadingMoreReviews.value || !nextReviewCursor.value) return
+
+  isLoadingMoreReviews.value = true
+  loadMoreErrorMessage.value = ''
 
   try {
     const result = await fetchTrailReviews(trailData.value.id, {
-      cursor: nextReviewCursor.value,
       limit: REVIEWS_PAGE_SIZE,
+      cursor: nextReviewCursor.value,
     })
     reviews.value = [...reviews.value, ...result.list]
     nextReviewCursor.value = result.nextCursor ?? null
     hasMoreReviews.value = result.hasMore
   } catch (error) {
-    loadMoreErrorMessage.value = '加载更多评论失败'
+    loadMoreErrorMessage.value = error instanceof Error ? error.message : '加载更多评论失败'
+  } finally {
+    isLoadingMoreReviews.value = false
   }
 }
 
-function insertReview(normalizedReview: ReviewItem): boolean {
-  if (!reviews.value.length) {
-    reviews.value = [normalizedReview]
-    return true
+async function retryLoadMoreReviews() {
+  await loadMoreReviews()
+}
+
+async function handleDeleteReview(review: ReviewItem) {
+  if (!trailData.value) return
+  pendingDeleteReview.value = review
+}
+
+async function confirmDeleteReview() {
+  if (!trailData.value || !pendingDeleteReview.value) return
+
+  const review = pendingDeleteReview.value
+
+  deletingIds.value = [...deletingIds.value, String(review.id)]
+
+  try {
+    const result = await deleteReview(review.id)
+    reviews.value = removeReviewNode(reviews.value, result.deletedReviewId)
+    trailData.value = {
+      ...trailData.value,
+      reviewCount: result.trailReviewCount,
+      rating: result.trailRating,
+    }
+    pendingDeleteReview.value = null
+    flashStore.showSuccess('评论已删除')
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '评论删除失败')
+  } finally {
+    deletingIds.value = deletingIds.value.filter((id) => id !== String(review.id))
+  }
+}
+
+function closeDeleteConfirm() {
+  if (pendingDeleteReview.value && deletingIds.value.includes(String(pendingDeleteReview.value.id))) {
+    return
+  }
+  pendingDeleteReview.value = null
+}
+
+async function openUserCard(userId: EntityId) {
+  const normalizedUserId = String(userId)
+  activeUserCardId.value = normalizedUserId
+  isUserCardVisible.value = true
+  userCardErrorMessage.value = ''
+
+  if (userCardCache.value[normalizedUserId]) {
+    return
+  }
+
+  isUserCardLoading.value = true
+  try {
+    const card = await fetchUserCard(normalizedUserId)
+    userCardCache.value = {
+      ...userCardCache.value,
+      [normalizedUserId]: card,
+    }
+  } catch (error) {
+    userCardErrorMessage.value = error instanceof Error ? error.message : '用户卡片加载失败'
+  } finally {
+    isUserCardLoading.value = false
+  }
+}
+
+function closeUserCard() {
+  isUserCardVisible.value = false
+  userCardErrorMessage.value = ''
+}
+
+async function handleShare() {
+  if (!displayTrail.value) return
+  await shareTrail({
+    id: displayTrail.value.id,
+    name: displayTrail.value.name,
+    location: displayTrail.value.location,
+  })
+}
+
+function handleDownloadTrack() {
+  if (trailData.value?.track?.downloadUrl) {
+    window.open(trailData.value.track.downloadUrl, '_blank')
+  }
+}
+
+function handleEditTrail() {
+  if (!displayTrail.value || !canEditTrail.value) {
+    flashStore.showError('路线发布超过48小时，不能再编辑')
+    return
+  }
+
+  void router.push({
+    name: 'Publish',
+    query: { edit: String(displayTrail.value.id) },
+  })
+}
+
+function handleDeleteTrail() {
+  pendingDeleteTrail.value = true
+}
+
+async function confirmDeleteTrail() {
+  if (!displayTrail.value || isDeletingTrail.value) {
+    return
+  }
+
+  isDeletingTrail.value = true
+
+  try {
+    await deleteTrail(displayTrail.value.id)
+    flashStore.showSuccess('路线删除成功')
+
+    if (userStore.profile) {
+      userStore.profile.postCount = Math.max(userStore.profile.postCount - 1, 0)
+    }
+
+    void router.replace({
+      name: 'Profile',
+      query: { tab: 'posts' },
+    })
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '路线删除失败')
+  } finally {
+    isDeletingTrail.value = false
+    pendingDeleteTrail.value = false
+  }
+}
+
+function closeDeleteTrailDialog() {
+  if (isDeletingTrail.value) {
+    return
+  }
+  pendingDeleteTrail.value = false
+}
+
+
+
+function normalizeInternalPath(value: unknown) {
+  if (typeof value !== 'string' || !value.startsWith('/')) {
+    return null
+  }
+
+  return value
+}
+
+function handleBack() {
+  if (detailFrom.value) {
+    void router.push(detailFrom.value)
+    return
+  }
+
+  void router.back()
+}
+
+function openGalleryExperience() {
+  if (!detailImages.value.length || !trailData.value) {
+    return
+  }
+
+  void router.push({
+    name: 'TrailGallery',
+    params: { id: trailData.value.id },
+    query: {
+      from: `/trail/${trailData.value.id}`,
+      ...(detailFrom.value ? { detailFrom: detailFrom.value } : {}),
+    },
+  })
+}
+
+function insertReview(review: ReviewItem) {
+  const normalizedReview: ReviewItem = {
+    ...review,
+    images: review.images ?? [],
+    replies: review.replies ?? [],
   }
 
   if (!normalizedReview.parentId) {
@@ -343,15 +479,11 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
       replies: removeReviewNode(item.replies, reviewId),
     }))
 }
-
-watch(trailId, () => {
-  fetchDetail()
-}, { immediate: true })
 </script>
 
 <template>
   <main v-if="trailData">
-    <div class="glass-header sticky top-0 left-0 w-full z-40 px-4 py-3">
+    <div class="glass-header sticky top-0 z-40 px-4 py-3">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
         <button @click="handleBack" class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500 cursor-pointer" style="color: var(--text-secondary);">
           <BaseIcon name="ChevronLeft" :size="20" />
@@ -400,29 +532,33 @@ watch(trailId, () => {
       <DetailHero
         v-bind="heroProps"
         :gallery-count="detailImages.length"
-        @toggle-like="displayTrail && interactionStore.toggleLike(displayTrail)"
-        @toggle-favorite="displayTrail && interactionStore.toggleFavorite(displayTrail)"
+        @toggle-like="displayTrail && trailInteractionStore.toggleLike(displayTrail)"
+        @toggle-favorite="displayTrail && trailInteractionStore.toggleFavorite(displayTrail)"
         @share="handleShare"
         @open-gallery="openGalleryExperience"
       />
 
       <!-- Description Section -->
-      <section class="card p-6 space-y-4">
-        <div class="flex items-center gap-2 mb-2">
-          <BaseIcon name="Info" :size="22" class="text-primary-500" />
-          <h3 class="text-lg font-bold" style="color: var(--text-primary);">路线概览</h3>
-        </div>
-        <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">
-          {{ trailData.description }}
+      <div class="card p-5 space-y-3">
+        <h3 class="text-base font-semibold flex items-center gap-2" style="color: var(--text-primary);">
+          <BaseIcon name="Info" :size="18" class="text-primary-500" />
+          路线介绍
+        </h3>
+        <p class="text-sm leading-relaxed whitespace-pre-line" style="color: var(--text-secondary);">
+          {{ displayTrail?.description ?? trailData.description }}
         </p>
-        <div class="flex flex-wrap gap-2 pt-2">
-          <span v-for="tag in trailData.tags" :key="tag" class="badge">
-            {{ tag }}
-          </span>
-        </div>
-      </section>
+      </div>
 
-      <!-- Weather & Track Grid -->
+      <!-- Map Section -->
+      <TrailMapSection
+        :center="mapCenter"
+        :label="displayTrail?.name ?? trailData.name"
+        :city="locationCity"
+        :track-geo-json="trailData.track?.geoJson"
+        :track-download-url="trailData.track?.downloadUrl"
+      />
+
+      <!-- Conditions & 3D Viewer Section (Side-by-Side on Desktop) -->
       <div :class="['grid grid-cols-1 gap-6 items-stretch', detailTrackViewerData ? 'lg:grid-cols-2' : '']">
         <!-- Left: Weather Dashboard -->
         <div class="card p-6 flex flex-col h-full">
@@ -460,85 +596,89 @@ watch(trailId, () => {
             :weather-scene="detailWeatherScene"
             mode="detail"
             :show-scroll-to-content-button="false"
+            @request-fullscreen="isViewerFullscreen = true"
           />
         </div>
       </div>
 
-      <!-- Map Detail -->
-       <TrailMapSection
-        :center="mapCenter"
-        :label="trailData.name"
-        :city="locationCity"
-        :track-geo-json="trailData.track?.geoJson"
-        :track-download-url="trailData.track?.downloadUrl"
-      />
-
-      <!-- Reviews Section -->
-      <section class="space-y-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <BaseIcon name="MessageSquare" :size="22" class="text-primary-500" />
-            <h3 class="text-lg font-bold" style="color: var(--text-primary);">路线动态 ({{ trailData.reviewCount }})</h3>
-          </div>
-        </div>
-
+      <!-- Reviews Section (Full Width) -->
+      <div class="pt-8 border-t border-white/5">
         <ReviewList
-          :trail-id="trailData.id"
-          :initial-reviews="reviews"
+          :reviews="reviews"
+          :average-rating="trailData.rating"
+          :total-reviews="trailData.reviewCount"
+          :is-submitting="isSubmittingReview"
+          :is-loading-more="isLoadingMoreReviews"
           :has-more="hasMoreReviews"
-          :is-loading="isLoading"
           :error-message="reviewsErrorMessage"
           :load-more-error="loadMoreErrorMessage"
-          :reset-key="reviewFormResetKey"
-          :reply-reset-key="replyFormResetKey"
+          :review-form-reset-key="reviewFormResetKey"
+          :reply-form-reset-key="replyFormResetKey"
+          :active-user-card="activeUserCard"
+          :is-user-card-loading="isUserCardLoading"
+          :user-card-error-message="userCardErrorMessage"
+          :deleting-ids="deletingIds"
+          :user-card-visible="isUserCardVisible"
           @submit-review="handleCreateReview"
           @submit-reply="handleCreateReply"
           @load-more="loadMoreReviews"
+          @retry-load-more="retryLoadMoreReviews"
+          @delete-review="handleDeleteReview"
+          @open-user-card="openUserCard"
+          @close-user-card="closeUserCard"
         />
-      </section>
+      </div>
+
+
+    </div>
+
+    <ConfirmDialog
+      :show="!!pendingDeleteReview"
+      title="删除评论"
+      message="确认删除这条评论吗？删除后无法恢复。"
+      confirm-text="确认删除"
+      cancel-text="暂不删除"
+      tone="danger"
+      :confirm-loading="!!pendingDeleteReview && deletingIds.includes(String(pendingDeleteReview.id))"
+      @update:show="(value) => { if (!value) closeDeleteConfirm() }"
+      @cancel="closeDeleteConfirm"
+      @confirm="confirmDeleteReview"
+    />
+
+    <ConfirmDialog
+      :show="pendingDeleteTrail"
+      title="删除路线"
+      message="确认删除这条路线吗？删除后将不会再出现在前台列表和详情页。"
+      confirm-text="确认删除"
+      cancel-text="暂不删除"
+      tone="danger"
+      :confirm-loading="isDeletingTrail"
+      @update:show="(value) => { if (!value) closeDeleteTrailDialog() }"
+      @cancel="closeDeleteTrailDialog"
+      @confirm="confirmDeleteTrail"
+    />
+
+  </main>
+  <main v-else class="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+    <div class="card p-8 text-center">
+      <p v-if="isLoading" class="text-sm" style="color: var(--text-secondary);">正在加载路线详情...</p>
+      <p v-else-if="errorMessage" class="text-sm" style="color: var(--color-hard);">{{ errorMessage }}</p>
+      <p v-else class="text-sm" style="color: var(--text-secondary);">未找到该路线</p>
     </div>
   </main>
-  
-  <div v-else-if="isLoading" class="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-    <BaseIcon name="Loader2" :size="32" class="animate-spin text-primary-500" />
-    <p class="text-sm font-medium text-secondary">加载路线详情...</p>
-  </div>
-  
-  <div v-else class="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 text-center">
-    <div class="p-4 rounded-full bg-red-500/10">
-      <BaseIcon name="AlertCircle" :size="32" class="text-red-500" />
-    </div>
-    <h2 class="text-lg font-bold" style="color: var(--text-primary);">未找到路线</h2>
-    <p class="text-sm text-secondary max-w-xs">
-      该路线可能已被删除或地址输入有误。
-    </p>
-    <button class="btn btn-primary mt-4" @click="handleBack">
-      返回上一页
-    </button>
+
+  <!-- Fullscreen Track Viewer -->
+  <div
+    v-if="isViewerFullscreen"
+    class="fixed inset-0 z-[100] bg-black animate-fade-in"
+  >
+    <TrailTrackViewer
+      v-if="detailTrackViewerData"
+      class="h-full w-full"
+      mode="fullscreen"
+      :data="detailTrackViewerData"
+      :weather-scene="detailWeatherScene"
+      @exit-fullscreen="isViewerFullscreen = false"
+    />
   </div>
 </template>
-
-<style scoped>
-.glass-header {
-  background: color-mix(in srgb, var(--surface) 80%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.card {
-  background: var(--surface);
-  border-radius: 1.5rem;
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
-}
-
-.badge {
-  background: var(--surface-50);
-  color: var(--text-secondary);
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border: 1px solid var(--border-subtle);
-}
-</style>

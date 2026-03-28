@@ -24,12 +24,15 @@ const activeIndex = ref(0)
 const autoPanResumeAt = ref(0)
 const AUTO_PAN_SPEED = 0.5
 const AUTO_PAN_RESUME_DELAY = 2200
+const MOBILE_BREAKPOINT = 768
 
 let tickerFn: (() => void) | null = null
 
+const isMobileLayout = computed(() => viewportWidth.value > 0 && viewportWidth.value <= MOBILE_BREAKPOINT)
+
 const cardWidth = computed(() => {
   if (viewportWidth.value <= 0) return 560
-  if (viewportWidth.value < 768) return Math.min(viewportWidth.value * 0.7, 360)
+  if (viewportWidth.value < MOBILE_BREAKPOINT) return Math.min(viewportWidth.value - 32, 460)
   if (viewportWidth.value < 1280) return Math.min(viewportWidth.value * 0.4, 480)
   return Math.min(viewportWidth.value * 0.35, 560)
 })
@@ -41,6 +44,7 @@ const cardGap = computed(() => {
 })
 
 const multiplier = computed(() => {
+  if (isMobileLayout.value) return 1
   if (!props.images.length) return 1
   const setW = props.images.length * (cardWidth.value + cardGap.value)
   const viewW = viewportWidth.value || window.innerWidth || 1920
@@ -49,6 +53,13 @@ const multiplier = computed(() => {
 
 const wrappedImages = computed(() => {
   if (!props.images.length) return []
+  if (isMobileLayout.value) {
+    return props.images.map((image, index) => ({
+      id: `mobile-img${index}`,
+      image,
+      originalIndex: index,
+    }))
+  }
   const arr = []
   for (let i = 0; i < multiplier.value; i++) {
     for (let j = 0; j < props.images.length; j++) {
@@ -59,7 +70,7 @@ const wrappedImages = computed(() => {
 })
 
 const statusText = computed(() => props.images.length
-  ? '使用滚轮、触控板或方向键横向穿梭图片空间'
+  ? (isMobileLayout.value ? '向上或向下滑动浏览整组图片' : '使用滚轮、触控板或方向键横向穿梭图片空间')
   : '当前路线暂无可展示图片')
 
 watch(() => props.images, () => {
@@ -67,6 +78,15 @@ watch(() => props.images, () => {
   activeIndex.value = 0
   autoPanResumeAt.value = 0
 }, { immediate: true })
+
+watch(isMobileLayout, (mobile) => {
+  if (!mobile) return
+  const gsap = getGsap()
+  cardRefs.value.forEach((el) => {
+    if (!el) return
+    gsap?.set(el, { clearProps: 'transform,x,y,xPercent,yPercent,scale,rotationY,zIndex,opacity' })
+  })
+})
 
 onMounted(() => {
   measureViewport()
@@ -101,6 +121,7 @@ function pauseAutoPan(delay = AUTO_PAN_RESUME_DELAY) {
 
 
 function handleWheel(event: WheelEvent) {
+  if (isMobileLayout.value) return
   if (!props.images.length) return
   event.preventDefault()
   pauseAutoPan()
@@ -112,6 +133,7 @@ function handleWheel(event: WheelEvent) {
 }
 
 function handleKeydown(event: KeyboardEvent) {
+  if (isMobileLayout.value) return
   if (!props.images.length) return
   const key = event.key.toLowerCase()
   if (event.key === 'ArrowRight' || key === 'd') {
@@ -144,6 +166,12 @@ function tick() {
   
   const originalCount = props.images.length
   if (originalCount === 0) return
+
+  if (isMobileLayout.value) {
+    emit('camera-move', { x: 0, max: Math.max(originalCount, 1) })
+    activeIndex.value = 0
+    return
+  }
   
   if (performance.now() >= autoPanResumeAt.value) {
     if (!gsap.isTweening(scrollProxy)) {
@@ -238,6 +266,7 @@ function tick() {
   <div
     ref="container"
     class="gallery-experience"
+    :class="{ 'gallery-experience-mobile': isMobileLayout }"
     @wheel.prevent="handleWheel"
   >
     <div class="gallery-background">
@@ -254,14 +283,15 @@ function tick() {
       <p class="gallery-subtitle">把整条路线的影像展开成一条横向长廊。你不是在翻页，而是在穿过它。</p>
     </div>
 
-    <div class="gallery-viewport">
+    <div class="gallery-viewport" :class="{ 'gallery-viewport-mobile': isMobileLayout }">
       <!-- GSAP Absolute Wrapper -->
-      <div class="gallery-rail">
+      <div class="gallery-rail" :class="{ 'gallery-rail-mobile': isMobileLayout }">
         <article
           v-for="card in wrappedImages"
           :key="card.id"
           ref="cardRefs"
           class="gallery-card"
+          :class="{ 'gallery-card-mobile': isMobileLayout }"
           :style="{ width: `${cardWidth}px` }"
         >
           <div class="gallery-card-frame">
@@ -314,6 +344,12 @@ function tick() {
   overflow: hidden;
   user-select: none;
   touch-action: none; /* Prevent browser pan/zoom on mobile */
+}
+
+.gallery-experience-mobile {
+  overflow-y: auto;
+  overflow-x: hidden;
+  touch-action: pan-y;
 }
 
 .gallery-background,
@@ -416,9 +452,15 @@ function tick() {
   overflow: hidden;
 }
 
+.gallery-viewport-mobile {
+  position: relative;
+  inset: auto;
+  min-height: 100%;
+  overflow: visible;
+}
+
 .gallery-rail {
   position: absolute;
-  /* Make the anchor point exactly center screen */
   left: 50%;
   top: 50%;
   width: 0;
@@ -427,12 +469,33 @@ function tick() {
   perspective: 1600px;
 }
 
+.gallery-rail-mobile {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 5.5rem 1rem 2rem;
+  perspective: none;
+}
+
 .gallery-card {
   position: absolute;
   left: 0;
   top: 0;
   transform-style: preserve-3d;
   will-change: transform;
+}
+
+.gallery-card-mobile {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform-style: flat;
 }
 
 .gallery-card-frame {
@@ -588,6 +651,10 @@ function tick() {
     width: calc(100vw - 2rem);
     right: 1rem;
     bottom: 5.4rem;
+  }
+
+  .gallery-card-frame {
+    box-shadow: 0 18px 42px rgba(3, 7, 18, 0.26);
   }
 }
 </style>

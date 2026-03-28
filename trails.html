@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,8 @@
         :root {
             --primary: #ff9cee;
             --secondary: #b28dff;
-            --bg: #82c8fa; /* 匹配海洋背景色 */
+            --bg: #82c8fa;
+            /* 匹配海洋背景色 */
             --text: #5a5a5a;
         }
 
@@ -38,7 +40,7 @@
             padding: 20px 40px;
             border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1),
-                        inset 0 0 0 4px rgba(255, 255, 255, 0.5);
+                inset 0 0 0 4px rgba(255, 255, 255, 0.5);
             text-align: center;
             z-index: 10;
             border: 2px solid #fff;
@@ -90,7 +92,7 @@
             opacity: 0;
             transition: opacity 0.2s;
             z-index: 20;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             transform: translate(-50%, -100%);
             line-height: 1.5;
         }
@@ -161,8 +163,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
     </style>
 
@@ -176,6 +185,7 @@
         }
     </script>
 </head>
+
 <body>
 
     <div class="decoration" style="top: 20px; left: 20px; animation-delay: 0s;">☁️</div>
@@ -206,6 +216,20 @@
     <div id="canvas-container"></div>
 
     <script type="module">
+
+        let obj = {
+            name: 'cs'
+        }
+
+        function changeName(obj) {
+            obj = {
+
+            }
+        }
+
+        changeName(obj)
+        console.log(obj)
+
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
@@ -254,15 +278,15 @@
         let skyGroup = new THREE.Group();
         scene.add(currentSceneGroup);
         scene.add(skyGroup);
-        
-        let mainPathCurve = null; 
-        let travelerData = null; 
+
+        let mainPathCurve = null;
+        let travelerData = null;
         let animationTime = 0;
         let globalTotalDistance = 0;
         let globalMinEle = 0;
         let globalEleRange = 1;
         let globalTerrainRefPoints = []; // 保存地形参考点，用于相机的实时防穿模检测
-        
+
         // 交互与状态变量
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2(-100, -100);
@@ -297,7 +321,7 @@
             const cam = camera.position;
             const tgt = controls.target;
             const textToCopy = `camera.position.set(${cam.x.toFixed(2)}, ${cam.y.toFixed(2)}, ${cam.z.toFixed(2)});\ncontrols.target.set(${tgt.x.toFixed(2)}, ${tgt.y.toFixed(2)}, ${tgt.z.toFixed(2)});`;
-            
+
             const textArea = document.createElement("textarea");
             textArea.value = textToCopy;
             document.body.appendChild(textArea);
@@ -318,22 +342,22 @@
             // 提取用户给出的相对高度特征：高度在 55 左右，目标点高度在 4 左右。
             // 因为我们的地图缩放中心永远固定在 (x:0, z:0)，所以完美复刻该视角的通用坐标如下：
             // Z轴微小的 0.1 偏移是为了防止 Three.js 在完全垂直时发生 Gimbal Lock（万向节死锁导致画面翻转）
-            camera.position.set(0, 56, 0.1); 
+            camera.position.set(0, 56, 0.1);
             controls.target.set(0, 4, 0);
             controls.update();
         });
 
         // --- 地理计算工具 ---
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; 
+            const R = 6371e3;
             const φ1 = lat1 * Math.PI / 180;
             const φ2 = lat2 * Math.PI / 180;
             const Δφ = (lat2 - lat1) * Math.PI / 180;
             const Δλ = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                      Math.cos(φ1) * Math.cos(φ2) *
-                      Math.sin(Δλ/2) * Math.sin(Δλ/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
         // --- 4. 生成可爱的 3D 资产 ---
@@ -358,15 +382,15 @@
 
             // 天空浮云
             const cloudMat = new THREE.MeshToonMaterial({ color: '#ffffff', flatShading: true });
-            for(let i=0; i<15; i++) {
+            for (let i = 0; i < 15; i++) {
                 const cloud = new THREE.Group();
-                const numPuffs = 3 + Math.random()*3;
-                for(let j=0; j<numPuffs; j++){
-                    const puff = new THREE.Mesh(new THREE.SphereGeometry(2 + Math.random()*2, 8, 8), cloudMat);
+                const numPuffs = 3 + Math.random() * 3;
+                for (let j = 0; j < numPuffs; j++) {
+                    const puff = new THREE.Mesh(new THREE.SphereGeometry(2 + Math.random() * 2, 8, 8), cloudMat);
                     puff.position.set(
-                        (Math.random()-0.5)*4, 
-                        (Math.random()-0.5)*2, 
-                        (Math.random()-0.5)*4
+                        (Math.random() - 0.5) * 4,
+                        (Math.random() - 0.5) * 2,
+                        (Math.random() - 0.5) * 4
                     );
                     cloud.add(puff);
                 }
@@ -378,7 +402,7 @@
                     Math.sin(angle) * radius
                 );
                 // 存储角度以备动画使用
-                cloud.userData = { angle: angle, radius: radius, speed: 0.05 + Math.random()*0.1 };
+                cloud.userData = { angle: angle, radius: radius, speed: 0.05 + Math.random() * 0.1 };
                 skyGroup.add(cloud);
             }
         }
@@ -388,7 +412,7 @@
             const canvas = document.createElement('canvas');
             canvas.width = 400; canvas.height = 250;
             const ctx = canvas.getContext('2d');
-            
+
             ctx.textAlign = 'center';
             // 画可爱的卡通云朵背景
             ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
@@ -399,23 +423,23 @@
             ctx.arc(320, 130, 50, Math.PI * 1.5, Math.PI * 0.5);
             ctx.moveTo(100, 180); ctx.lineTo(320, 180);
             ctx.fill();
-            
+
             // 绘制文字
             ctx.fillStyle = '#ff6b6b';
             ctx.font = 'bold 36px "Comic Sans MS", sans-serif';
             ctx.fillText(`🎉 达到 ${km} 公里 !`, 200, 95);
-            
+
             ctx.fillStyle = '#5a5a5a';
             ctx.font = 'bold 30px "Comic Sans MS", sans-serif';
             ctx.fillText(`🏔️ 海拔: ${Math.round(ele)} m`, 200, 140);
-            
+
             ctx.fillStyle = '#4ecdc4';
             ctx.fillText(`🎯 剩余: ${remain.toFixed(1)} km`, 200, 180);
 
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({ map: texture, transparent: true, opacity: 1 });
             const sprite = new THREE.Sprite(material);
-            
+
             // 将气泡稍微偏上一点，避免挡住小人
             sprite.position.copy(position3D).add(new THREE.Vector3(0, 3, 0));
             sprite.scale.set(3, 1.875, 1);
@@ -490,11 +514,11 @@
             const texture = new THREE.CanvasTexture(canvas); texture.minFilter = THREE.LinearFilter;
             const material = new THREE.SpriteMaterial({ map: texture });
             const sprite = new THREE.Sprite(material);
-            sprite.position.y = isHighest ? 1.2 : 0.8; sprite.scale.set(isHighest ? 1.0 : 0.8, isHighest ? 0.44 : 0.4, 1); 
+            sprite.position.y = isHighest ? 1.2 : 0.8; sprite.scale.set(isHighest ? 1.0 : 0.8, isHighest ? 0.44 : 0.4, 1);
             group.add(sprite);
 
             const hitMesh = new THREE.Mesh(new THREE.SphereGeometry(1.2, 8, 8), new THREE.MeshBasicMaterial({ visible: false }));
-            hitMesh.position.y = isHighest ? 0.8 : 0.6; 
+            hitMesh.position.y = isHighest ? 0.8 : 0.6;
             // 记录数据以供 Tooltip 交互使用
             hitMesh.userData = { isMilestone: true, distance: distanceMeters, elevation: elevation, isHighest: isHighest };
             group.add(hitMesh);
@@ -512,7 +536,7 @@
             document.getElementById('status-text').innerText = '正在施展魔法解析文件... 🪄';
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 setTimeout(() => {
                     const parsedData = (ext === 'kml') ? parseKML(e.target.result) : parseGPX(e.target.result);
                     if (parsedData.paths.length === 0) {
@@ -528,7 +552,7 @@
 
         function getElementsByLocalName(parent, name) { return Array.from(parent.getElementsByTagName('*')).filter(el => el.localName === name); }
         function parseKmlColor(kmlColor) {
-            if (!kmlColor || kmlColor.length !== 8) return '#ff3366'; 
+            if (!kmlColor || kmlColor.length !== 8) return '#ff3366';
             return `#${kmlColor.substring(6, 8)}${kmlColor.substring(4, 6)}${kmlColor.substring(2, 4)}`;
         }
 
@@ -550,14 +574,14 @@
                 ['LineString', 'Track'].forEach(tagName => {
                     getElementsByLocalName(pm, tagName).forEach(el => {
                         const points = [];
-                        (tagName === 'LineString' ? [getElementsByLocalName(el, 'coordinates')[0]?.textContent] : getElementsByLocalName(el, 'coord').map(c=>c.textContent)).forEach(text => {
-                            if(!text) return;
+                        (tagName === 'LineString' ? [getElementsByLocalName(el, 'coordinates')[0]?.textContent] : getElementsByLocalName(el, 'coord').map(c => c.textContent)).forEach(text => {
+                            if (!text) return;
                             text.trim().split(tagName === 'LineString' ? /\s+/ : undefined).forEach(coord => {
                                 const parts = coord.split(tagName === 'LineString' ? ',' : /\s+/).map(Number);
                                 if (parts.length >= 2 && !isNaN(parts[0])) points.push({ lon: parts[0], lat: parts[1], ele: parts[2] || 0 });
                             });
                         });
-                        if (points.length > 0) data.paths.push({ name: nameNode?.textContent||'路线', color, points });
+                        if (points.length > 0) data.paths.push({ name: nameNode?.textContent || '路线', color, points });
                     });
                 });
             });
@@ -573,7 +597,7 @@
                 parent.forEach(p => {
                     const points = [];
                     getElementsByLocalName(p, 'trkpt').forEach(pt => points.push({ lat: parseFloat(pt.getAttribute('lat')), lon: parseFloat(pt.getAttribute('lon')), ele: parseFloat(getElementsByLocalName(pt, 'ele')[0]?.textContent || 0) }));
-                    if (points.length > 0) data.paths.push({ name: getElementsByLocalName(p, 'name')[0]?.textContent||'轨迹', color: '#ff3366', points });
+                    if (points.length > 0) data.paths.push({ name: getElementsByLocalName(p, 'name')[0]?.textContent || '轨迹', color: '#ff3366', points });
                 });
             });
             return data;
@@ -582,7 +606,7 @@
         // --- 6. 构建 3D 世界 ---
         function build3DWorld(parsedData, fileName) {
             controls.enabled = true;
-            
+
             scene.remove(currentSceneGroup);
             currentSceneGroup = new THREE.Group();
             scene.add(currentSceneGroup);
@@ -594,7 +618,7 @@
             let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
             globalMinEle = Infinity;
             let maxEle = -Infinity;
-            
+
             const allPoints = [];
             parsedData.paths.forEach(path => path.points.forEach(p => allPoints.push(p)));
 
@@ -604,7 +628,7 @@
                 globalMinEle = Math.min(globalMinEle, p.ele); maxEle = Math.max(maxEle, p.ele);
             });
 
-            const mapSize = 50; 
+            const mapSize = 50;
             globalEleRange = maxEle - globalMinEle || 1;
             const scale = mapSize / Math.max(maxLat - minLat || 1, maxLon - minLon || 1);
             const centerLat = (minLat + maxLat) / 2; const centerLon = (minLon + maxLon) / 2;
@@ -613,13 +637,13 @@
             const flat3DPoints = allPoints.map(toLocal3D);
 
             // 限制视角
-            controls.maxDistance = mapSize * 2.2; 
+            controls.maxDistance = mapSize * 2.2;
 
             // 生成环境与岛屿
             buildEnvironment(mapSize);
             const step = Math.ceil(flat3DPoints.length / 800);
             const terrainRefPoints = flat3DPoints.filter((_, i) => i % step === 0);
-            
+
             globalTerrainRefPoints = terrainRefPoints; // 赋值给全局变量，供相机碰撞使用
 
             if (terrainRefPoints.length > 0) {
@@ -629,13 +653,13 @@
 
             milestoneHitBoxes = [];
             let longestPathData = null;
-            
+
             parsedData.paths.forEach(path => {
                 const vecPoints = (path.points.length > 2000 ? path.points.filter((_, i) => i % Math.ceil(path.points.length / 1000) === 0) : path.points).map(toLocal3D);
-                if(vecPoints.length < 2) return;
+                if (vecPoints.length < 2) return;
                 const curve = new THREE.CatmullRomCurve3(vecPoints);
                 const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, vecPoints.length * 2, 0.08, 6, false), new THREE.MeshToonMaterial({ color: path.color, emissive: path.color, emissiveIntensity: 0.1 }));
-                tube.castShadow = true; tube.position.y += 0.05; 
+                tube.castShadow = true; tube.position.y += 0.05;
                 currentSceneGroup.add(tube);
                 if (!longestPathData || path.points.length > longestPathData.points.length) { longestPathData = path; mainPathCurve = curve; }
             });
@@ -653,13 +677,13 @@
 
                 for (let i = 1; i < pts.length; i++) {
                     if (pts[i].ele > highestPoint.ele) highestPoint = pts[i];
-                    const dist = calculateDistance(pts[i-1].lat, pts[i-1].lon, pts[i].lat, pts[i].lon);
+                    const dist = calculateDistance(pts[i - 1].lat, pts[i - 1].lon, pts[i].lat, pts[i].lon);
                     accumulatedDistance += dist;
                     globalTotalDistance += dist;
 
                     if (accumulatedDistance >= nextMarkerAt) {
                         const poster = createMilestonePoster(nextMarkerAt, pts[i].ele, false, milestoneIndex);
-                        poster.group.position.copy(toLocal3D(pts[i])).add(new THREE.Vector3(0,0.1,0)); 
+                        poster.group.position.copy(toLocal3D(pts[i])).add(new THREE.Vector3(0, 0.1, 0));
                         currentSceneGroup.add(poster.group);
                         milestoneHitBoxes.push(poster.hitMesh);
                         nextMarkerAt += 1000; milestoneIndex++;
@@ -667,7 +691,7 @@
                 }
 
                 const highestPoster = createMilestonePoster(0, highestPoint.ele, true);
-                highestPoster.group.position.copy(toLocal3D(highestPoint)).add(new THREE.Vector3(0,0.2,0));
+                highestPoster.group.position.copy(toLocal3D(highestPoint)).add(new THREE.Vector3(0, 0.2, 0));
                 currentSceneGroup.add(highestPoster.group);
                 milestoneHitBoxes.push(highestPoster.hitMesh);
 
@@ -676,26 +700,26 @@
             }
 
             controls.target.set(0, 4, 0); camera.position.set(0, 30, 45); animationTime = 0;
-            document.getElementById('status-text').innerText = `✨ 欢迎来到 ${fileName} 岛屿！全长 ${(globalTotalDistance/1000).toFixed(2)} km ✨`;
+            document.getElementById('status-text').innerText = `✨ 欢迎来到 ${fileName} 岛屿！全长 ${(globalTotalDistance / 1000).toFixed(2)} km ✨`;
         }
 
         // --- 7. 山体生成 ---
         function getTerrainHeight(vx, vz, terrainRefPoints) {
             let num = 0, den = 0, minDist = Infinity;
             for (let p of terrainRefPoints) {
-                const d2 = (vx - p.x)**2 + (vz - p.z)**2;
+                const d2 = (vx - p.x) ** 2 + (vz - p.z) ** 2;
                 minDist = Math.min(minDist, d2);
-                const weight = 1.0 / (Math.pow(d2, 1.2) + 0.1); 
+                const weight = 1.0 / (Math.pow(d2, 1.2) + 0.1);
                 num += p.y * weight; den += weight;
             }
             const distToTrack = Math.sqrt(minDist);
-            let finalY = (num / den) - (distToTrack * 0.3 + Math.pow(distToTrack / 6, 2.5)) - 0.15; 
-            if (distToTrack > 15) finalY -= (distToTrack - 15) * 5; 
+            let finalY = (num / den) - (distToTrack * 0.3 + Math.pow(distToTrack / 6, 2.5)) - 0.15;
+            if (distToTrack > 15) finalY -= (distToTrack - 15) * 5;
             return { y: finalY, distToTrack };
         }
 
         function generateTerrain(terrainRefPoints, mapSize) {
-            const segments = 120; 
+            const segments = 120;
             const terrainGeo = new THREE.PlaneGeometry(mapSize * 2.5, mapSize * 2.5, segments, segments);
             terrainGeo.rotateX(-Math.PI / 2);
 
@@ -712,12 +736,12 @@
 
                 let c = new THREE.Color();
                 if (y < -3) {
-                    c.lerpColors(colorRock, colorOcean, Math.min(1, (-y - 3) / 10)); 
+                    c.lerpColors(colorRock, colorOcean, Math.min(1, (-y - 3) / 10));
                 } else if (y < 2) {
                     const noise = (Math.sin(vx * 5) + Math.cos(vz * 5)) * 0.03;
                     c.copy(colorGrass); c.r += noise; c.g += noise; c.b += noise;
-                } else if (y < 8) c.lerpColors(colorGrass, colorRock, (y - 2) / 6); 
-                else c.lerpColors(colorRock, colorSnow, Math.min(1, (y - 8) / 4)); 
+                } else if (y < 8) c.lerpColors(colorGrass, colorRock, (y - 2) / 6);
+                else c.lerpColors(colorRock, colorSnow, Math.min(1, (y - 8) / 4));
                 colorAttr.setXYZ(i, c.r, c.g, c.b);
             }
             terrainGeo.computeVertexNormals();
@@ -726,10 +750,10 @@
         }
 
         function generateDecorations(terrainRefPoints, mapSize) {
-            const treeLeafMat = new THREE.MeshToonMaterial({ color: '#5eb376', flatShading: true }); 
-            const treeTrunkMat = new THREE.MeshToonMaterial({ color: '#8b5a2b' }); 
-            const rockMat = new THREE.MeshToonMaterial({ color: '#b0bec5', flatShading: true }); 
-            const leafGeo = new THREE.IcosahedronGeometry(0.3, 0), trunkGeo = new THREE.CylinderGeometry(0.06, 0.1, 0.4, 6), rockGeo = new THREE.DodecahedronGeometry(0.25, 0); 
+            const treeLeafMat = new THREE.MeshToonMaterial({ color: '#5eb376', flatShading: true });
+            const treeTrunkMat = new THREE.MeshToonMaterial({ color: '#8b5a2b' });
+            const rockMat = new THREE.MeshToonMaterial({ color: '#b0bec5', flatShading: true });
+            const leafGeo = new THREE.IcosahedronGeometry(0.3, 0), trunkGeo = new THREE.CylinderGeometry(0.06, 0.1, 0.4, 6), rockGeo = new THREE.DodecahedronGeometry(0.25, 0);
 
             for (let i = 0; i < 450; i++) {
                 const vx = (Math.random() - 0.5) * 2 * mapSize, vz = (Math.random() - 0.5) * 2 * mapSize;
@@ -739,12 +763,12 @@
                     const obj = new THREE.Group(), rand = Math.random();
                     if (rand > 0.5) {
                         const trunk = new THREE.Mesh(trunkGeo, treeTrunkMat); trunk.position.y = 0.2; trunk.castShadow = true;
-                        const leaf = new THREE.Mesh(leafGeo, treeLeafMat); leaf.position.y = 0.5; leaf.scale.set(1+Math.random()*0.5, 1+Math.random()*0.5, 1+Math.random()*0.5); leaf.rotation.set(Math.random(), Math.random(), Math.random()); leaf.castShadow = true;
+                        const leaf = new THREE.Mesh(leafGeo, treeLeafMat); leaf.position.y = 0.5; leaf.scale.set(1 + Math.random() * 0.5, 1 + Math.random() * 0.5, 1 + Math.random() * 0.5); leaf.rotation.set(Math.random(), Math.random(), Math.random()); leaf.castShadow = true;
                         obj.add(trunk, leaf);
                     } else if (rand > 0.2) {
-                        const rock = new THREE.Mesh(rockGeo, rockMat); rock.position.y = 0.1; rock.scale.set(1+Math.random(), 0.5+Math.random()*0.5, 1+Math.random()); rock.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0); rock.castShadow = true; obj.add(rock);
+                        const rock = new THREE.Mesh(rockGeo, rockMat); rock.position.y = 0.1; rock.scale.set(1 + Math.random(), 0.5 + Math.random() * 0.5, 1 + Math.random()); rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0); rock.castShadow = true; obj.add(rock);
                     } else {
-                        const bush = new THREE.Mesh(rockGeo, treeLeafMat); bush.position.y = 0.05; bush.scale.set(1.5, 0.6, 1.5); bush.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0); bush.castShadow = true; obj.add(bush);
+                        const bush = new THREE.Mesh(rockGeo, treeLeafMat); bush.position.y = 0.05; bush.scale.set(1.5, 0.6, 1.5); bush.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0); bush.castShadow = true; obj.add(bush);
                     }
                     obj.position.set(vx, y, vz); const scale = 0.5 + Math.random() * 0.7; obj.scale.set(scale, scale, scale);
                     currentSceneGroup.add(obj);
@@ -765,7 +789,7 @@
 
             // 旋转天空背景里的云
             skyGroup.children.forEach(child => {
-                if(child.userData && child.userData.angle !== undefined) {
+                if (child.userData && child.userData.angle !== undefined) {
                     child.userData.angle += delta * child.userData.speed;
                     child.position.x = Math.cos(child.userData.angle) * child.userData.radius;
                     child.position.z = Math.sin(child.userData.angle) * child.userData.radius;
@@ -774,7 +798,7 @@
 
             // 小人行走
             if (mainPathCurve && travelerData) {
-                animationTime += delta * 0.01; 
+                animationTime += delta * 0.01;
                 if (animationTime > 1) {
                     animationTime = 0;
                     nextPopupKm = 1; // 跑完一圈重置气泡公里数
@@ -782,10 +806,10 @@
 
                 const pos = mainPathCurve.getPointAt(animationTime);
                 travelerData.group.position.copy(pos);
-                
+
                 const nextTime = Math.min(1, animationTime + 0.01);
                 const nextPos = mainPathCurve.getPointAt(nextTime);
-                
+
                 // 【平滑转身优化】为了防止绑在背上的相机抖动，这里使用 Slerp 球面插值让小人温柔地转身
                 rotationDummy.position.copy(pos);
                 rotationDummy.lookAt(new THREE.Vector3(nextPos.x, pos.y, nextPos.z));
@@ -810,10 +834,10 @@
             for (let i = popups.length - 1; i >= 0; i--) {
                 const p = popups[i];
                 p.age += delta;
-                p.sprite.position.y += delta * 1.5; 
-                
+                p.sprite.position.y += delta * 1.5;
+
                 if (p.age > 2) {
-                    p.sprite.material.opacity -= delta * 0.8; 
+                    p.sprite.material.opacity -= delta * 0.8;
                     if (p.sprite.material.opacity <= 0) {
                         currentSceneGroup.remove(p.sprite);
                         popups.splice(i, 1);
@@ -828,11 +852,11 @@
                 if (intersects.length > 0) {
                     currentIntersected = intersects[0].object;
                     container.style.cursor = 'pointer';
-                    
+
                     const data = currentIntersected.userData;
                     let distText = data.distance >= 1000 ? `${(data.distance / 1000).toFixed(1)} km` : `${data.distance} m`;
                     if (data.isHighest) distText = "最高峰";
-                    
+
                     tooltip.innerHTML = `🚩 里程: ${distText}<br>🏔️ 海拔: ${Math.round(data.elevation)} m`;
                     tooltip.style.opacity = 1;
                     tooltip.style.left = pointerClientX + 'px';
@@ -842,7 +866,7 @@
                     container.style.cursor = 'default';
                     tooltip.style.opacity = 0;
                 }
-                
+
                 // Q弹缩放
                 milestoneHitBoxes.forEach(hitMesh => {
                     const targetScale = (hitMesh === currentIntersected) ? 1.4 : 1.0;
@@ -864,4 +888,5 @@
         animate();
     </script>
 </body>
+
 </html>
