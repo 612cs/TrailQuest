@@ -118,6 +118,15 @@ const isFormValid = computed(() => {
     && draft.trackItem?.status !== 'missing'
 })
 const canSubmitDraft = computed(() => !isLoadingDraft.value && isFormValid.value && !isSubmissionRunning.value)
+const selectedCustomTags = computed(() => {
+  const draft = currentDraft.value
+  if (!draft) {
+    return []
+  }
+
+  const presetTagSet = new Set(presetTags)
+  return draft.fields.selectedTags.filter((tag) => !presetTagSet.has(tag))
+})
 
 watch(
   currentScopeKey,
@@ -937,6 +946,19 @@ async function handleSubmit() {
               @click="toggleTag(tag)"
             >
               {{ tag }}
+            </button>
+          </div>
+          <div v-if="selectedCustomTags.length" class="flex flex-wrap gap-2">
+            <button
+              v-for="tag in selectedCustomTags"
+              :key="`custom-${tag}`"
+              type="button"
+              class="inline-flex items-center gap-1 rounded-full border border-primary-500/30 bg-primary-500/10 px-3 py-1.5 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-500/15 disabled:cursor-not-allowed disabled:opacity-40"
+              :disabled="isSubmissionRunning"
+              @click="toggleTag(tag)"
+            >
+              <span>{{ tag }}</span>
+              <BaseIcon name="X" :size="12" />
             </button>
           </div>
           <div class="flex gap-2">
