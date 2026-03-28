@@ -19,8 +19,10 @@ import com.sheng.hikingbackend.dto.trail.CreateTrailRequest;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
 import com.sheng.hikingbackend.dto.trail.UpdateTrailRequest;
 import com.sheng.hikingbackend.service.TrailService;
+import com.sheng.hikingbackend.service.TrailWeatherService;
 import com.sheng.hikingbackend.vo.trail.TrailDetailVo;
 import com.sheng.hikingbackend.vo.trail.TrailInteractionVo;
+import com.sheng.hikingbackend.vo.weather.TrailWeatherResponseVo;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class TrailController {
 
     private final TrailService trailService;
+    private final TrailWeatherService trailWeatherService;
 
     @GetMapping
     public ApiResponse<PageResponse<TrailDetailVo>> page(
@@ -45,6 +48,11 @@ public class TrailController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long id) {
         return ApiResponse.success(trailService.getTrailDetail(id, userDetails == null ? null : userDetails.getId()));
+    }
+
+    @GetMapping("/{id}/weather")
+    public ApiResponse<TrailWeatherResponseVo> weather(@PathVariable Long id) {
+        return ApiResponse.success("未来七天天气加载成功", trailWeatherService.getTrailWeather(id));
     }
 
     @PostMapping

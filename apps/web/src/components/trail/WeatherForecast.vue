@@ -1,21 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import BaseIcon from '../common/BaseIcon.vue'
-import type { TrailWeatherForecastDay } from '../../composables/useTrailWeather'
+import type { TrailWeatherForecastDay } from '../../types/weather'
 
 const props = defineProps<{
   forecast: TrailWeatherForecastDay[]
 }>()
-
-const weekMap: Record<string, string> = {
-  '1': '周一',
-  '2': '周二',
-  '3': '周三',
-  '4': '周四',
-  '5': '周五',
-  '6': '周六',
-  '7': '周日',
-}
 
 function getWeatherIcon(weatherDesc: string) {
   if (weatherDesc.includes('晴')) return 'Sun'
@@ -42,8 +32,8 @@ const formatItems = computed(() => {
   const remainingForecast = props.forecast.slice(1)
 
   return remainingForecast.map((day) => {
-    const minT = Math.min(day.dayTemp, day.nightTemp)
-    const maxT = Math.max(day.dayTemp, day.nightTemp)
+    const minT = Math.min(day.tempMax ?? 0, day.tempMin ?? 0)
+    const maxT = Math.max(day.tempMax ?? 0, day.tempMin ?? 0)
     
     // Format date string (YYYY-MM-DD -> MM-DD)
     const dateParts = day.date.split('-')
@@ -52,10 +42,10 @@ const formatItems = computed(() => {
     return {
       id: day.date,
       date: formattedDate,
-      weekday: weekMap[day.week] || day.week,
-      weather: day.dayWeather,
-      icon: getWeatherIcon(day.dayWeather),
-      iconColor: getWeatherColor(day.dayWeather),
+      weekday: day.week,
+      weather: day.textDay || day.textNight || '未知',
+      icon: getWeatherIcon(day.textDay || day.textNight || ''),
+      iconColor: getWeatherColor(day.textDay || day.textNight || ''),
       minTemp: minT,
       maxTemp: maxT,
     }

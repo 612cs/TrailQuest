@@ -11,16 +11,17 @@ import TrailMapSection from '../components/trail/TrailMapSection.vue'
 import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
 import WeatherSection from '../components/trail/WeatherSection.vue'
 import WeatherForecast from '../components/trail/WeatherForecast.vue'
+import { fetchTrailWeather } from '../api/weather'
 import { createReview, deleteReview, fetchTrailReviews, fetchUserCard } from '../api/reviews'
 import { deleteTrail, fetchTrailDetail } from '../api/trails'
 import { useTrailShare } from '../composables/useTrailShare'
 import { useTrailGeo } from '../composables/useTrailGeo'
-import { useTrailWeather } from '../composables/useTrailWeather'
 import { useFlashStore } from '../stores/useFlashStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import { useUserStore } from '../stores/useUserStore'
 import type { EntityId } from '../types/id'
 import type { TrailListItem } from '../types/trail'
+import type { TrailWeatherForecastDay, TrailWeatherResponse } from '../types/weather'
 import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
 import { mapWeatherToTrackScene } from '../utils/trackWeatherScene'
 import type {
@@ -60,9 +61,11 @@ const userCardErrorMessage = ref('')
 const pendingDeleteTrail = ref(false)
 const isDeletingTrail = ref(false)
 const isViewerFullscreen = ref(false)
+const trailWeather = ref<TrailWeatherResponse | null>(null)
+const weatherLoading = ref(false)
+const weatherErrorMessage = ref('')
 
 const { geo, resolve: resolveGeo } = useTrailGeo()
-const { weather, forecast, isLoading: weatherLoading, resolve: resolveWeather } = useTrailWeather()
 
 const trailId = computed<EntityId>(() => {
   const rawId = route.params.id
@@ -117,20 +120,35 @@ watch(trailId, async (newId) => {
 }, { immediate: true })
 
 watch(trailData, async (trail, _prev, onCleanup) => {
-  if (!trail) return
+  if (!trail) {
+    trailWeather.value = null
+    weatherErrorMessage.value = ''
+    weatherLoading.value = false
+    return
+  }
   const controller = new AbortController()
   onCleanup(() => controller.abort())
 
-  await resolveGeo({
+  void resolveGeo({
     ip: trail.ip,
     locationLabel: `${trail.location} ${trail.name}`,
     signal: controller.signal,
   })
 
-  await resolveWeather({
-    adcode: geo.value?.adcode ?? '',
-    signal: controller.signal,
-  })
+  weatherLoading.value = true
+  weatherErrorMessage.value = ''
+  trailWeather.value = null
+
+  try {
+    trailWeather.value = await fetchTrailWeather(trail.id, controller.signal)
+  } catch (error) {
+    if (!(error instanceof DOMException && error.name === 'AbortError')) {
+      weatherErrorMessage.value = error instanceof Error ? error.message : '天气加载失败'
+      trailWeather.value = null
+    }
+  } finally {
+    weatherLoading.value = false
+  }
 }, { immediate: true })
 
 const heroProps = computed(() => {
@@ -162,6 +180,8 @@ const heroProps = computed(() => {
 
 const mapCenter = computed(() => geo.value?.center ?? null)
 const locationCity = computed(() => geo.value?.city ?? trailData.value?.location ?? '')
+const forecast = computed<TrailWeatherForecastDay[]>(() => trailWeather.value?.forecast ?? [])
+const weatherOverview = computed<TrailWeatherForecastDay | null>(() => forecast.value[0] ?? null)
 const detailTrackViewerData = computed(() => createTrackViewerData({
   title: trailData.value?.name ?? null,
   fileName: trailData.value?.track?.originalFileName ?? null,
@@ -174,8 +194,8 @@ const detailTrackViewerData = computed(() => createTrackViewerData({
   geoJson: trailData.value?.track?.geoJson,
 }))
 const detailWeatherScene = computed(() => mapWeatherToTrackScene(
-  weather.value?.weather,
-  weather.value?.windPower,
+  weatherOverview.value?.textDay,
+  weatherOverview.value?.windScaleDay,
 ))
 const canManageTrail = computed(() => !!displayTrail.value?.ownedByCurrentUser)
 const canEditTrail = computed(() => !!displayTrail.value?.editableByCurrentUser)
@@ -572,9 +592,10 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
           <div class="space-y-6 flex-1">
             <!-- Current Weather -->
             <WeatherSection
-              :weather="weather"
+              :day="weatherOverview"
               :is-loading="weatherLoading"
               :fallback-city="locationCity"
+              :error-message="weatherErrorMessage"
             />
 
             <!-- Landscape Predictions -->
