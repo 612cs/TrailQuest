@@ -21,6 +21,8 @@ public class TrailTrackVo {
     private TrackPointVo endPoint;
     private TrackBoundsVo bounds;
     private BigDecimal distanceMeters;
+    private BigDecimal elevationMinMeters;
+    private BigDecimal elevationPeakMeters;
     private BigDecimal elevationGainMeters;
     private BigDecimal elevationLossMeters;
     private Long durationSeconds;

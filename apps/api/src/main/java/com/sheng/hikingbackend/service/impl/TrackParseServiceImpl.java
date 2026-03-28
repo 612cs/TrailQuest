@@ -200,6 +200,8 @@ public class TrackParseServiceImpl implements TrackParseService {
         int trackPointsCount = 0;
         Bounds bounds = new Bounds();
         BigDecimal distanceMeters = BigDecimal.ZERO;
+        BigDecimal elevationMinMeters = null;
+        BigDecimal elevationPeakMeters = null;
         BigDecimal elevationGainMeters = BigDecimal.ZERO;
         BigDecimal elevationLossMeters = BigDecimal.ZERO;
         Instant startTime = null;
@@ -225,6 +227,15 @@ public class TrackParseServiceImpl implements TrackParseService {
                     if (endTime == null || current.time.isAfter(endTime)) {
                         endTime = current.time;
                     }
+                }
+
+                if (current.ele != null) {
+                    elevationMinMeters = elevationMinMeters == null || current.ele.compareTo(elevationMinMeters) < 0
+                            ? current.ele
+                            : elevationMinMeters;
+                    elevationPeakMeters = elevationPeakMeters == null || current.ele.compareTo(elevationPeakMeters) > 0
+                            ? current.ele
+                            : elevationPeakMeters;
                 }
 
                 if (i == 0) {
@@ -277,6 +288,8 @@ public class TrackParseServiceImpl implements TrackParseService {
                 .bboxMaxLng(scale(bounds.maxLng))
                 .bboxMaxLat(scale(bounds.maxLat))
                 .distanceMeters(scale(distanceMeters))
+                .elevationMinMeters(scale(elevationMinMeters))
+                .elevationPeakMeters(scale(elevationPeakMeters))
                 .elevationGainMeters(scale(elevationGainMeters))
                 .elevationLossMeters(scale(elevationLossMeters))
                 .durationSeconds(startTime != null && endTime != null && !endTime.isBefore(startTime)

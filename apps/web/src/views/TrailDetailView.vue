@@ -11,6 +11,7 @@ import TrailMapSection from '../components/trail/TrailMapSection.vue'
 import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
 import WeatherSection from '../components/trail/WeatherSection.vue'
 import WeatherForecast from '../components/trail/WeatherForecast.vue'
+import { fetchTrailLandscapePrediction } from '../api/landscape'
 import { fetchTrailWeather } from '../api/weather'
 import { createReview, deleteReview, fetchTrailReviews, fetchUserCard } from '../api/reviews'
 import { deleteTrail, fetchTrailDetail } from '../api/trails'
@@ -20,6 +21,7 @@ import { useFlashStore } from '../stores/useFlashStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import { useUserStore } from '../stores/useUserStore'
 import type { EntityId } from '../types/id'
+import type { TrailLandscapePredictionResponse } from '../types/landscape'
 import type { TrailListItem } from '../types/trail'
 import type { TrailWeatherForecastDay, TrailWeatherResponse } from '../types/weather'
 import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
@@ -64,6 +66,9 @@ const isViewerFullscreen = ref(false)
 const trailWeather = ref<TrailWeatherResponse | null>(null)
 const weatherLoading = ref(false)
 const weatherErrorMessage = ref('')
+const landscapePrediction = ref<TrailLandscapePredictionResponse | null>(null)
+const landscapeLoading = ref(false)
+const landscapeErrorMessage = ref('')
 
 const { geo, resolve: resolveGeo } = useTrailGeo()
 
@@ -124,6 +129,9 @@ watch(trailData, async (trail, _prev, onCleanup) => {
     trailWeather.value = null
     weatherErrorMessage.value = ''
     weatherLoading.value = false
+    landscapePrediction.value = null
+    landscapeErrorMessage.value = ''
+    landscapeLoading.value = false
     return
   }
   const controller = new AbortController()
@@ -138,16 +146,38 @@ watch(trailData, async (trail, _prev, onCleanup) => {
   weatherLoading.value = true
   weatherErrorMessage.value = ''
   trailWeather.value = null
+  landscapeLoading.value = true
+  landscapeErrorMessage.value = ''
+  landscapePrediction.value = null
 
   try {
-    trailWeather.value = await fetchTrailWeather(trail.id, controller.signal)
+    const [weatherResult, landscapeResult] = await Promise.allSettled([
+      fetchTrailWeather(trail.id, controller.signal),
+      fetchTrailLandscapePrediction(trail.id, 7, controller.signal),
+    ])
+
+    if (weatherResult.status === 'fulfilled') {
+      trailWeather.value = weatherResult.value
+    } else if (!(weatherResult.reason instanceof DOMException && weatherResult.reason.name === 'AbortError')) {
+      weatherErrorMessage.value = weatherResult.reason instanceof Error ? weatherResult.reason.message : '天气数据加载失败'
+      trailWeather.value = null
+    }
+
+    if (landscapeResult.status === 'fulfilled') {
+      landscapePrediction.value = landscapeResult.value
+    } else if (!(landscapeResult.reason instanceof DOMException && landscapeResult.reason.name === 'AbortError')) {
+      landscapeErrorMessage.value = landscapeResult.reason instanceof Error ? landscapeResult.reason.message : '景观预测加载失败'
+      landscapePrediction.value = null
+    }
   } catch (error) {
     if (!(error instanceof DOMException && error.name === 'AbortError')) {
-      weatherErrorMessage.value = error instanceof Error ? error.message : '天气加载失败'
-      trailWeather.value = null
+      const message = error instanceof Error ? error.message : '环境数据加载失败'
+      weatherErrorMessage.value = message
+      landscapeErrorMessage.value = message
     }
   } finally {
     weatherLoading.value = false
+    landscapeLoading.value = false
   }
 }, { immediate: true })
 
@@ -599,7 +629,11 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
             />
 
             <!-- Landscape Predictions -->
-            <LandscapePrediction />
+            <LandscapePrediction
+              :prediction="landscapePrediction"
+              :is-loading="landscapeLoading"
+              :error-message="landscapeErrorMessage"
+            />
 
             <!-- Forecast List -->
             <div class="mt-6 border-t border-white/5">

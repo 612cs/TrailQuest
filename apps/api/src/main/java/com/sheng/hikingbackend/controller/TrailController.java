@@ -18,8 +18,10 @@ import com.sheng.hikingbackend.config.CustomUserDetails;
 import com.sheng.hikingbackend.dto.trail.CreateTrailRequest;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
 import com.sheng.hikingbackend.dto.trail.UpdateTrailRequest;
+import com.sheng.hikingbackend.service.LandscapePredictionService;
 import com.sheng.hikingbackend.service.TrailService;
 import com.sheng.hikingbackend.service.TrailWeatherService;
+import com.sheng.hikingbackend.vo.landscape.LandscapePredictionResponseVo;
 import com.sheng.hikingbackend.vo.trail.TrailDetailVo;
 import com.sheng.hikingbackend.vo.trail.TrailInteractionVo;
 import com.sheng.hikingbackend.vo.weather.TrailWeatherResponseVo;
@@ -35,6 +37,7 @@ public class TrailController {
 
     private final TrailService trailService;
     private final TrailWeatherService trailWeatherService;
+    private final LandscapePredictionService landscapePredictionService;
 
     @GetMapping
     public ApiResponse<PageResponse<TrailDetailVo>> page(
@@ -53,6 +56,13 @@ public class TrailController {
     @GetMapping("/{id}/weather")
     public ApiResponse<TrailWeatherResponseVo> weather(@PathVariable Long id) {
         return ApiResponse.success("未来七天天气加载成功", trailWeatherService.getTrailWeather(id));
+    }
+
+    @GetMapping("/{id}/landscape-prediction")
+    public ApiResponse<LandscapePredictionResponseVo> landscapePrediction(
+            @PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "7") int days) {
+        return ApiResponse.success("景观预测加载成功", landscapePredictionService.getTrailPrediction(id, days));
     }
 
     @PostMapping

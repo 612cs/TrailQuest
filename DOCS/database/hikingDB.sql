@@ -208,6 +208,8 @@ CREATE TABLE `trail_tracks` (
   `bbox_max_lng` decimal(10,6) DEFAULT NULL COMMENT '边界框最大经度',
   `bbox_max_lat` decimal(10,6) DEFAULT NULL COMMENT '边界框最大纬度',
   `distance_meters` decimal(12,2) DEFAULT NULL COMMENT '总距离(米)',
+  `elevation_min_meters` decimal(12,2) DEFAULT NULL COMMENT '最低海拔(米)',
+  `elevation_peak_meters` decimal(12,2) DEFAULT NULL COMMENT '最高海拔(米)',
   `elevation_gain_meters` decimal(12,2) DEFAULT NULL COMMENT '累计爬升(米)',
   `elevation_loss_meters` decimal(12,2) DEFAULT NULL COMMENT '累计下降(米)',
   `duration_seconds` bigint DEFAULT NULL COMMENT '轨迹时长(秒)',
@@ -223,6 +225,47 @@ CREATE TABLE `trail_tracks` (
   CONSTRAINT `trail_tracks_ibfk_2` FOREIGN KEY (`media_file_id`) REFERENCES `media_files` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `trail_tracks_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='路线轨迹解析表';
+
+-- ----------------------------
+-- Table structure for landscape_feature_snapshots
+-- ----------------------------
+DROP TABLE IF EXISTS `landscape_feature_snapshots`;
+CREATE TABLE `landscape_feature_snapshots` (
+  `id` bigint NOT NULL COMMENT '特征快照ID',
+  `trail_id` bigint NOT NULL COMMENT '路线ID',
+  `prediction_date` date NOT NULL COMMENT '预测日期',
+  `landscape_type` enum('cloud_sea','rime','icicle') NOT NULL COMMENT '景观类型',
+  `feature_version` varchar(32) NOT NULL DEFAULT 'v1' COMMENT '特征版本',
+  `feature_payload` json NOT NULL COMMENT '特征向量快照',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_landscape_feature_trail_date` (`trail_id`,`prediction_date`),
+  KEY `idx_landscape_feature_type_date` (`landscape_type`,`prediction_date`),
+  CONSTRAINT `landscape_feature_snapshots_ibfk_1` FOREIGN KEY (`trail_id`) REFERENCES `trails` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='景观预测训练/调试特征快照表';
+
+-- ----------------------------
+-- Table structure for landscape_observation_labels
+-- ----------------------------
+DROP TABLE IF EXISTS `landscape_observation_labels`;
+CREATE TABLE `landscape_observation_labels` (
+  `id` bigint NOT NULL COMMENT '景观标签ID',
+  `trail_id` bigint NOT NULL COMMENT '路线ID',
+  `user_id` bigint DEFAULT NULL COMMENT '标注用户ID',
+  `observation_date` date NOT NULL COMMENT '观测日期',
+  `landscape_type` enum('cloud_sea','rime','icicle','sunrise_sunset','milky_way') NOT NULL COMMENT '景观类型',
+  `observed` tinyint(1) NOT NULL COMMENT '是否观测到',
+  `confidence` decimal(4,2) DEFAULT NULL COMMENT '人工标注置信度',
+  `evidence` json DEFAULT NULL COMMENT '图片、备注等证据',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_landscape_label_trail_date` (`trail_id`,`observation_date`),
+  KEY `idx_landscape_label_type_date` (`landscape_type`,`observation_date`),
+  KEY `idx_landscape_label_user` (`user_id`),
+  CONSTRAINT `landscape_observation_labels_ibfk_1` FOREIGN KEY (`trail_id`) REFERENCES `trails` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `landscape_observation_labels_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='景观观测人工标签表';
 
 -- ----------------------------
 -- Table structure for trails

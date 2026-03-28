@@ -70,6 +70,12 @@ public class TrailTrack {
     @TableField("distance_meters")
     private BigDecimal distanceMeters;
 
+    @TableField("elevation_min_meters")
+    private BigDecimal elevationMinMeters;
+
+    @TableField("elevation_peak_meters")
+    private BigDecimal elevationPeakMeters;
+
     @TableField("elevation_gain_meters")
     private BigDecimal elevationGainMeters;
 

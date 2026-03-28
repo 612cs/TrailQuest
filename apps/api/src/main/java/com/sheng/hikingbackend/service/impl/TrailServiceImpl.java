@@ -299,6 +299,8 @@ public class TrailServiceImpl implements TrailService {
         trailTrack.setBboxMaxLng(mutation.parsedTrack().getBboxMaxLng());
         trailTrack.setBboxMaxLat(mutation.parsedTrack().getBboxMaxLat());
         trailTrack.setDistanceMeters(mutation.parsedTrack().getDistanceMeters());
+        trailTrack.setElevationMinMeters(mutation.parsedTrack().getElevationMinMeters());
+        trailTrack.setElevationPeakMeters(mutation.parsedTrack().getElevationPeakMeters());
         trailTrack.setElevationGainMeters(mutation.parsedTrack().getElevationGainMeters());
         trailTrack.setElevationLossMeters(mutation.parsedTrack().getElevationLossMeters());
         trailTrack.setDurationSeconds(mutation.parsedTrack().getDurationSeconds());
@@ -605,6 +607,8 @@ public class TrailServiceImpl implements TrailService {
                         .maxLat(track.getBboxMaxLat())
                         .build())
                 .distanceMeters(track.getDistanceMeters())
+                .elevationMinMeters(track.getElevationMinMeters())
+                .elevationPeakMeters(track.getElevationPeakMeters())
                 .elevationGainMeters(track.getElevationGainMeters())
                 .elevationLossMeters(track.getElevationLossMeters())
                 .durationSeconds(track.getDurationSeconds())
