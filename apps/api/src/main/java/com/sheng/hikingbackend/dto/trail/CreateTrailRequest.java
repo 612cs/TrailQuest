@@ -3,7 +3,6 @@ package com.sheng.hikingbackend.dto.trail;
 import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,13 +33,11 @@ public class CreateTrailRequest {
     private String elevation;
     private String duration;
 
-    @NotBlank(message = "路线描述不能为空")
     private String description;
 
     @NotNull(message = "封面文件不能为空")
     private Long coverMediaId;
 
-    @NotEmpty(message = "请至少选择一个标签")
     private List<String> tags;
 
     private List<Long> galleryMediaIds;

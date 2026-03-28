@@ -23,6 +23,10 @@ public class Trail {
     private String name;
     private String location;
     private String ip;
+    @TableField("start_lng")
+    private BigDecimal startLng;
+    @TableField("start_lat")
+    private BigDecimal startLat;
     private String difficulty;
 
     @TableField("difficulty_label")

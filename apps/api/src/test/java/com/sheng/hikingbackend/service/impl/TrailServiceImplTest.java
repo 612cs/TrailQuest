@@ -34,6 +34,7 @@ import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.TrailTagMapper;
 import com.sheng.hikingbackend.mapper.TrailTrackMapper;
 import com.sheng.hikingbackend.service.TrackParseService;
+import com.sheng.hikingbackend.service.impl.support.TrackParseResult;
 import com.sheng.hikingbackend.vo.trail.TrailQueryRow;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,19 +85,27 @@ class TrailServiceImplTest {
         Trail trail = buildTrail(USER_ID, LocalDateTime.now().minusHours(2));
         MediaFile coverMedia = buildMedia(COVER_MEDIA_ID, MediaBizType.TRAIL_COVER.getCode(), "https://img.example.com/cover.png");
         TrailQueryRow row = buildTrailRow();
+        TrackParseResult parseResult = TrackParseResult.builder()
+                .startLng(new BigDecimal("120.123456"))
+                .startLat(new BigDecimal("30.654321"))
+                .build();
 
         when(trailMapper.selectActiveById(TRAIL_ID)).thenReturn(trail);
         when(mediaFileMapper.selectOne(any())).thenReturn(coverMedia);
         when(trailMapper.selectTrailDetailById(TRAIL_ID, USER_ID)).thenReturn(row);
         when(trailImageMapper.selectByTrailId(TRAIL_ID)).thenReturn(List.of());
+        when(trackParseService.parse(any())).thenReturn(parseResult);
 
         UpdateTrailRequest request = buildUpdateRequest();
+        request.setTrackMediaId(5001L);
         var result = trailService.updateTrail(TRAIL_ID, USER_ID, "127.0.0.9", request);
 
         assertEquals("测试路线（更新）", result.getName());
         assertEquals(Boolean.TRUE, result.getOwnedByCurrentUser());
         assertEquals(Boolean.TRUE, result.getEditableByCurrentUser());
         assertEquals("127.0.0.9", trail.getIp());
+        assertEquals(new BigDecimal("120.123456"), trail.getStartLng());
+        assertEquals(new BigDecimal("30.654321"), trail.getStartLat());
         assertEquals("测试路线（更新）", trail.getName());
         verify(trailMapper).updateById(trail);
         verify(trailImageMapper).deleteByTrailId(TRAIL_ID);

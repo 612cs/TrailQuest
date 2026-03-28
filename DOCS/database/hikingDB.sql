@@ -234,6 +234,8 @@ CREATE TABLE `trails` (
   `name` varchar(100) NOT NULL COMMENT '路线名称',
   `location` varchar(100) NOT NULL COMMENT '位置描述',
   `ip` varchar(45) NOT NULL COMMENT '用于定位的IP',
+  `start_lng` decimal(10,6) DEFAULT NULL COMMENT '路线起点经度',
+  `start_lat` decimal(10,6) DEFAULT NULL COMMENT '路线起点纬度',
   `difficulty` enum('easy','moderate','hard') NOT NULL COMMENT '难度枚举',
   `difficulty_label` varchar(10) NOT NULL COMMENT '难度中文',
   `pack_type` enum('light','heavy','both') NOT NULL COMMENT '轻装/重装/皆可',

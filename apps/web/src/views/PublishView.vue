@@ -6,6 +6,7 @@ import toGeoJSON from '@mapbox/togeojson'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ImagePreviewModal from '../components/common/ImagePreviewModal.vue'
 import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
+import { reverseGeo } from '../api/geo'
 import { fetchTrailDetail } from '../api/trails'
 import { useAmapLoader } from '../composables/useAmapLoader'
 import { useTrailGeo } from '../composables/useTrailGeo'
@@ -34,12 +35,15 @@ const previewIndex = ref(0)
 const showPreview = ref(false)
 const showTrackFullscreen = ref(false)
 const isLoadingDraft = ref(false)
+const hasAttemptedSubmit = ref(false)
 
 const mapRef = useTemplateRef<HTMLDivElement>('mapContainer')
 const mapInstance = shallowRef<any>(null)
 const mapLoading = ref(false)
 const locationResolveTimer = shallowRef<number | null>(null)
 const locationAbortController = shallowRef<AbortController | null>(null)
+const reverseGeoRequestId = shallowRef(0)
+const trackLocationHint = ref('')
 const { resolve: resolvePublishGeo } = useTrailGeo()
 const { weather: publishWeather, resolve: resolvePublishWeather } = useTrailWeather()
 
@@ -102,22 +106,25 @@ const publishWeatherScene = computed(() => mapWeatherToTrackScene(
   publishWeather.value?.weather,
   publishWeather.value?.windPower,
 ))
-const isFormValid = computed(() => {
+const missingRequiredFields = computed(() => {
   const draft = currentDraft.value
   if (!draft) {
-    return false
+    return []
   }
 
-  return !!draft.fields.name.trim()
-    && !!draft.fields.location.trim()
-    && !!draft.fields.description.trim()
-    && draft.fields.selectedTags.length > 0
-    && !!draft.coverItems[0]
-    && !draft.coverItems.some((item) => item.status === 'missing')
-    && !draft.galleryItems.some((item) => item.status === 'missing')
-    && draft.trackItem?.status !== 'missing'
+  const missing: string[] = []
+  if (!draft.coverItems[0] || draft.coverItems.some((item) => item.status === 'missing')) {
+    missing.push('封面图片')
+  }
+  if (!draft.fields.name.trim()) {
+    missing.push('路线名称')
+  }
+  if (!draft.fields.location.trim()) {
+    missing.push('所在位置')
+  }
+  return missing
 })
-const canSubmitDraft = computed(() => !isLoadingDraft.value && isFormValid.value && !isSubmissionRunning.value)
+const canSubmitDraft = computed(() => !isLoadingDraft.value && !isSubmissionRunning.value)
 const selectedCustomTags = computed(() => {
   const draft = currentDraft.value
   if (!draft) {
@@ -213,6 +220,23 @@ async function prepareDraft() {
     void router.replace(editTrailId.value ? `/trail/${editTrailId.value}` : '/profile')
   } finally {
     isLoadingDraft.value = false
+  }
+}
+
+function hasFieldError(field: 'cover' | 'name' | 'location') {
+  if (!hasAttemptedSubmit.value) {
+    return false
+  }
+
+  switch (field) {
+    case 'cover':
+      return missingRequiredFields.value.includes('封面图片')
+    case 'name':
+      return missingRequiredFields.value.includes('路线名称')
+    case 'location':
+      return missingRequiredFields.value.includes('所在位置')
+    default:
+      return false
   }
 }
 
@@ -418,6 +442,7 @@ async function handleTrackChange(event: Event) {
 
 async function parseTrackPreview(file: File) {
   mapLoading.value = true
+  trackLocationHint.value = ''
 
   try {
     const text = await file.text()
@@ -425,10 +450,13 @@ async function parseTrackPreview(file: File) {
     const extension = file.name.split('.').pop()?.toLowerCase()
     const geoJson = extension === 'kml' ? toGeoJSON.kml(doc) : toGeoJSON.gpx(doc)
     publishUploadStore.setTrackPreview(currentScopeKey.value, geoJson, '')
-    applyTrackSummary(geoJson)
+    const coordinates = extractCoordinates(geoJson)
+    applyTrackSummary(coordinates)
+    await autofillTrackLocation(coordinates)
     await renderMapWithGeoJSON()
   } catch (error) {
     console.error(error)
+    trackLocationHint.value = ''
     publishUploadStore.setTrackPreview(currentScopeKey.value, null, '解析轨迹文件失败，请检查 GPX/KML 格式。')
     clearMapRender()
   } finally {
@@ -436,13 +464,12 @@ async function parseTrackPreview(file: File) {
   }
 }
 
-function applyTrackSummary(geoJson: { features?: unknown[] }) {
+function applyTrackSummary(coordinates: TrackCoordinate[]) {
   const draft = currentDraft.value
   if (!draft) {
     return
   }
 
-  const coordinates = extractCoordinates(geoJson)
   if (coordinates.length < 2) {
     return
   }
@@ -470,6 +497,41 @@ function applyTrackSummary(geoJson: { features?: unknown[] }) {
   }
   if (!draft.fields.elevation.trim() && gain > 0) {
     draft.fields.elevation = `+${Math.round(gain)} m`
+  }
+}
+
+async function autofillTrackLocation(coordinates: TrackCoordinate[]) {
+  const draft = currentDraft.value
+  const start = coordinates[0]
+  if (!draft || !start) {
+    return
+  }
+
+  const [lng, lat] = start
+  if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+    return
+  }
+
+  const requestId = reverseGeoRequestId.value + 1
+  reverseGeoRequestId.value = requestId
+
+  try {
+    const result = await reverseGeo({ lng, lat })
+    if (reverseGeoRequestId.value !== requestId) {
+      return
+    }
+
+    if (result.formattedLocation.trim()) {
+      draft.fields.location = result.formattedLocation.trim()
+      trackLocationHint.value = '已根据轨迹起点自动识别所在市县'
+    }
+  } catch (error) {
+    if (reverseGeoRequestId.value !== requestId) {
+      return
+    }
+    trackLocationHint.value = error instanceof Error
+      ? `轨迹位置识别失败，请手动填写地点：${error.message}`
+      : '轨迹位置识别失败，请手动填写地点'
   }
 }
 
@@ -558,6 +620,7 @@ function clearTrack() {
     revokeLocalUrl(draft.trackItem.localUrl)
   }
   draft.trackItem = null
+  trackLocationHint.value = ''
   publishUploadStore.setTrackPreview(currentScopeKey.value, null, '')
   clearMapRender()
   showTrackFullscreen.value = false
@@ -633,6 +696,13 @@ async function handleSubmit() {
     return
   }
 
+  hasAttemptedSubmit.value = true
+
+  if (!canRetrySubmission.value && missingRequiredFields.value.length > 0) {
+    flashStore.showError(`请先补充：${missingRequiredFields.value.join('、')}`, 3200)
+    return
+  }
+
   try {
     if (canRetrySubmission.value) {
       await publishUploadStore.retryDraft(currentScopeKey.value)
@@ -674,6 +744,7 @@ async function handleSubmit() {
           <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
             <BaseIcon name="Image" :size="16" class="text-primary-500" />
             封面图片
+            <span class="text-[11px] font-medium text-red-500">必填</span>
           </h3>
           <div class="space-y-3">
             <div v-if="coverItems.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -707,7 +778,7 @@ async function handleSubmit() {
             <label
               v-if="!coverItems.length"
               class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 transition-colors hover:border-primary-500 hover:bg-primary-500/5"
-              style="border-color: var(--border-default);"
+              :style="hasFieldError('cover') ? 'border-color: var(--color-hard); background-color: color-mix(in srgb, var(--color-hard) 8%, transparent);' : 'border-color: var(--border-default);'"
             >
               <div class="flex h-10 w-10 items-center justify-center rounded-full" style="background-color: var(--bg-tag);">
                 <BaseIcon name="ImagePlus" :size="20" class="text-primary-500" />
@@ -715,6 +786,7 @@ async function handleSubmit() {
               <p class="text-sm font-medium" style="color: var(--text-secondary);">上传路线封面</p>
               <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" :disabled="isSubmissionRunning" @change="handleCoverChange" />
             </label>
+            <p v-if="hasFieldError('cover')" class="text-xs text-red-500">请先上传封面图片</p>
           </div>
         </section>
 
@@ -725,13 +797,22 @@ async function handleSubmit() {
           </h3>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线名称</label>
-            <input v-model="currentDraft.fields.name" type="text" placeholder="例如：龙脊梯田精华线" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线名称 <span class="text-red-500">必填</span></label>
+            <input v-model="currentDraft.fields.name" type="text" placeholder="例如：龙脊梯田精华线" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" :style="hasFieldError('name') ? 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--color-hard);' : 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);'" :disabled="isSubmissionRunning" />
+            <p v-if="hasFieldError('name')" class="mt-1.5 text-xs text-red-500">请填写路线名称</p>
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">所在位置</label>
-            <input v-model="currentDraft.fields.location" type="text" placeholder="例如：广西 桂林 龙胜" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">所在位置 <span class="text-red-500">必填</span></label>
+            <input v-model="currentDraft.fields.location" type="text" placeholder="例如：广西 桂林 龙胜" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" :style="hasFieldError('location') ? 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--color-hard);' : 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);'" :disabled="isSubmissionRunning" />
+            <p
+              v-if="trackLocationHint"
+              class="mt-1.5 text-xs"
+              :style="trackLocationHint.includes('失败') ? 'color: var(--color-hard);' : 'color: var(--text-tertiary);'"
+            >
+              {{ trackLocationHint }}
+            </p>
+            <p v-if="hasFieldError('location')" class="mt-1.5 text-xs text-red-500">请填写所在位置</p>
           </div>
 
           <div>
@@ -981,7 +1062,7 @@ async function handleSubmit() {
             {{ submitButtonLabel }}
           </button>
           <p class="mt-3 text-center text-xs" style="color: var(--text-secondary);">
-            提交后页面不会锁定，系统会在后台继续上传，并通过全局提示通知你结果。
+            目前仅封面图片、路线名称、所在位置为必填。其余信息都可选，点击按钮后会提示你缺少的内容。
           </p>
         </div>
       </template>

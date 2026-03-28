@@ -239,6 +239,8 @@ public class TrailServiceImpl implements TrailService {
         trail.setImage(coverMedia.getUrl());
         trail.setName(request.getName().trim());
         trail.setLocation(request.getLocation().trim());
+        trail.setStartLng(parsedTrack == null ? null : parsedTrack.getStartLng());
+        trail.setStartLat(parsedTrack == null ? null : parsedTrack.getStartLat());
         if (StringUtils.hasText(requestIp)) {
             trail.setIp(requestIp.trim());
         } else if (!StringUtils.hasText(trail.getIp())) {
@@ -251,7 +253,7 @@ public class TrailServiceImpl implements TrailService {
         trail.setDistance(resolveDistance(request.getDistance(), parsedTrack));
         trail.setElevation(resolveElevation(request.getElevation(), parsedTrack));
         trail.setDuration(resolveDuration(request.getDuration(), parsedTrack));
-        trail.setDescription(request.getDescription().trim());
+        trail.setDescription(normalizeOptional(request.getDescription()));
     }
 
     private void replaceGalleryImages(Long trailId, List<MediaFile> galleryMedia) {
@@ -264,6 +266,9 @@ public class TrailServiceImpl implements TrailService {
 
     private void replaceTags(Long trailId, List<String> tags) {
         trailTagMapper.deleteByTrailId(trailId);
+        if (tags == null || tags.isEmpty()) {
+            return;
+        }
         for (String tagName : tags) {
             Long tagId = findOrCreateTagId(tagName);
             trailTagMapper.insertRelation(trailId, tagId);
@@ -516,7 +521,7 @@ public class TrailServiceImpl implements TrailService {
         if (parsedTrack != null && parsedTrack.getDistanceMeters() != null) {
             return formatDistance(parsedTrack.getDistanceMeters());
         }
-        throw BusinessException.badRequest("DISTANCE_REQUIRED", "请填写路线距离或上传轨迹自动补全");
+        return null;
     }
 
     private String resolveElevation(String manualValue, TrackParseResult parsedTrack) {
@@ -527,7 +532,7 @@ public class TrailServiceImpl implements TrailService {
         if (parsedTrack != null && parsedTrack.getElevationGainMeters() != null) {
             return "+" + parsedTrack.getElevationGainMeters().setScale(0, RoundingMode.HALF_UP).toPlainString() + " m";
         }
-        throw BusinessException.badRequest("ELEVATION_REQUIRED", "请填写海拔爬升或上传轨迹自动补全");
+        return null;
     }
 
     private String resolveDuration(String manualValue, TrackParseResult parsedTrack) {
@@ -538,7 +543,7 @@ public class TrailServiceImpl implements TrailService {
         if (parsedTrack != null && parsedTrack.getDurationSeconds() != null && parsedTrack.getDurationSeconds() > 0) {
             return formatDurationSeconds(parsedTrack.getDurationSeconds());
         }
-        throw BusinessException.badRequest("DURATION_REQUIRED", "请填写预计时长或上传包含时间信息的轨迹");
+        return null;
     }
 
     private String normalizeOptional(String value) {
