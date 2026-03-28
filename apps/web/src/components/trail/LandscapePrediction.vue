@@ -19,7 +19,6 @@ type LandscapeItem = LandscapePredictionCard & {
   icon: string
   accent: string
   accentBg: string
-  meta?: string
 }
 
 function toPercent(value?: number | null) {
@@ -27,19 +26,9 @@ function toPercent(value?: number | null) {
   return `${Math.round(value * 100)}%`
 }
 
-function toLevelLabel(level?: string | null) {
-  switch (level) {
-    case 'excellent':
-      return '极佳'
-    case 'good':
-      return '良好'
-    case 'medium':
-      return '一般'
-    case 'poor':
-      return '较低'
-    default:
-      return '待评估'
-  }
+function toWindowLabel(value?: string | null) {
+  if (typeof value !== 'string' || !value.trim()) return '--'
+  return value.trim()
 }
 
 const cards = computed<LandscapeItem[]>(() => {
@@ -52,7 +41,6 @@ const cards = computed<LandscapeItem[]>(() => {
       icon: 'Sunrise',
       accent: 'text-orange-400',
       accentBg: 'bg-orange-500/10',
-      meta: `${props.prediction.sunriseSunset.sunriseTime ?? '--'} / ${props.prediction.sunriseSunset.sunsetTime ?? '--'}`,
       ...props.prediction.sunriseSunset,
     },
     {
@@ -61,7 +49,6 @@ const cards = computed<LandscapeItem[]>(() => {
       icon: 'Stars',
       accent: 'text-sky-300',
       accentBg: 'bg-sky-500/10',
-      meta: props.prediction.source.lightPollutionReady ? '已校准光污染' : '光污染保守估计',
       ...props.prediction.milkyWay,
     },
     {
@@ -94,7 +81,7 @@ const cards = computed<LandscapeItem[]>(() => {
 
 <template>
   <section class="animate-fade-in-up stagger-3 mt-4">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center justify-between mb-4 gap-3">
       <div>
         <h4 class="text-sm font-semibold" style="color: var(--text-primary);">景观预测</h4>
         <p class="text-xs mt-1" style="color: var(--text-tertiary);">
@@ -103,24 +90,26 @@ const cards = computed<LandscapeItem[]>(() => {
       </div>
       <div
         v-if="prediction"
-        class="text-[11px] px-2.5 py-1 rounded-full border"
+        class="text-[11px] px-2.5 py-1 rounded-full border shrink-0"
         style="color: var(--text-secondary); border-color: color-mix(in srgb, var(--primary-500) 18%, transparent); background: color-mix(in srgb, var(--primary-500) 8%, transparent);"
       >
-        {{ prediction.source.provider }}
+        {{ prediction.source.astroReady ? prediction.source.provider : '天文数据未就绪' }}
       </div>
     </div>
 
-    <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+    <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-4">
       <div
         v-for="index in 5"
         :key="index"
-        class="rounded-2xl border p-4 animate-pulse"
+        class="rounded-2xl border p-5 animate-pulse"
         style="border-color: color-mix(in srgb, var(--primary-500) 14%, transparent); background: color-mix(in srgb, white 4%, transparent);"
       >
-        <div class="h-5 w-20 rounded bg-white/10 mb-4"></div>
-        <div class="h-8 w-16 rounded bg-white/10 mb-3"></div>
-        <div class="h-4 w-full rounded bg-white/10 mb-2"></div>
-        <div class="h-4 w-3/4 rounded bg-white/10"></div>
+        <div class="h-5 w-24 rounded bg-white/10 mb-6"></div>
+        <div class="h-10 w-20 rounded bg-white/10 mb-5"></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="h-16 rounded bg-white/10"></div>
+          <div class="h-16 rounded bg-white/10"></div>
+        </div>
       </div>
     </div>
 
@@ -136,63 +125,43 @@ const cards = computed<LandscapeItem[]>(() => {
       </div>
     </div>
 
-    <div v-else-if="cards.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+    <div v-else-if="cards.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-4">
       <article
         v-for="item in cards"
         :key="item.key"
-        class="rounded-2xl border p-4 flex flex-col gap-3 min-h-[220px]"
+        class="rounded-2xl border p-5 flex flex-col gap-5 min-h-[220px]"
         style="border-color: color-mix(in srgb, var(--primary-500) 14%, transparent); background: color-mix(in srgb, white 4%, transparent);"
       >
-        <div class="flex items-start justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <div :class="['p-2 rounded-xl', item.accentBg, item.accent]">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div :class="['p-2 rounded-xl shrink-0', item.accentBg, item.accent]">
               <BaseIcon :name="item.icon" :size="18" />
             </div>
-            <div>
-              <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ item.name }}</p>
-              <p class="text-[11px]" style="color: var(--text-tertiary);">{{ item.meta || item.bestWindow || '待计算' }}</p>
-            </div>
-          </div>
-          <span
-            class="text-[11px] px-2 py-0.5 rounded-full border"
-            style="color: var(--text-secondary); border-color: color-mix(in srgb, var(--primary-500) 18%, transparent);"
-          >
-            {{ toLevelLabel(item.level) }}
-          </span>
-        </div>
-
-        <div class="flex items-end justify-between gap-3">
-          <div>
-            <p class="text-2xl font-bold tracking-tight" style="color: var(--text-primary);">{{ toPercent(item.score) }}</p>
-            <p class="text-xs mt-1" style="color: var(--text-tertiary);">置信度 {{ toPercent(item.confidence) }}</p>
+            <p class="text-base font-semibold truncate" style="color: var(--text-primary);">{{ item.name }}</p>
           </div>
           <span
             v-if="item.experimental"
-            class="text-[11px] px-2 py-0.5 rounded-full"
+            class="text-[11px] px-2 py-0.5 rounded-full shrink-0"
             style="background: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--text-secondary);"
           >
             实验中
           </span>
         </div>
 
-        <p class="text-xs leading-6 flex-1" style="color: var(--text-secondary);">
-          {{ item.summary || '当前没有足够数据生成解释。' }}
-        </p>
+        <div>
+          <p class="text-xs mb-1.5" style="color: var(--text-tertiary);">概率</p>
+          <p class="text-4xl font-bold tracking-tight leading-none" style="color: var(--text-primary);">{{ toPercent(item.score) }}</p>
+        </div>
 
-        <div class="space-y-2">
-          <p class="text-[11px] font-medium" style="color: var(--text-tertiary);">风险提示</p>
-          <ul v-if="item.risks?.length" class="space-y-1.5">
-            <li
-              v-for="risk in item.risks.slice(0, 2)"
-              :key="risk"
-              class="text-[11px] leading-5 flex items-start gap-1.5"
-              style="color: var(--text-secondary);"
-            >
-              <BaseIcon name="Dot" :size="14" class="mt-0.5 shrink-0" />
-              <span>{{ risk }}</span>
-            </li>
-          </ul>
-          <p v-else class="text-[11px]" style="color: var(--text-secondary);">暂无明显风险提示</p>
+        <div class="grid grid-cols-2 gap-3 mt-auto">
+          <div class="rounded-xl px-3 py-3" style="background: color-mix(in srgb, var(--primary-500) 6%, transparent);">
+            <p class="text-[11px]" style="color: var(--text-tertiary);">置信度</p>
+            <p class="text-base font-semibold mt-1" style="color: var(--text-primary);">{{ toPercent(item.confidence) }}</p>
+          </div>
+          <div class="rounded-xl px-3 py-3" style="background: color-mix(in srgb, var(--primary-500) 6%, transparent);">
+            <p class="text-[11px]" style="color: var(--text-tertiary);">时间</p>
+            <p class="text-base font-semibold mt-1 truncate" style="color: var(--text-primary);">{{ toWindowLabel(item.bestWindow) }}</p>
+          </div>
         </div>
       </article>
     </div>
