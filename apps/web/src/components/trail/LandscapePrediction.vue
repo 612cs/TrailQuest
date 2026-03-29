@@ -120,31 +120,26 @@ const cards = computed<LandscapeItem[]>(() => {
         class="group relative flex flex-col p-4 rounded-2xl border overflow-hidden transition-all hover:bg-white/[0.02]"
         style="border-color: color-mix(in srgb, var(--primary-500) 12%, transparent); background: color-mix(in srgb, var(--primary-500) 2%, transparent);"
       >
-        <!-- Top row: Icon + Name -->
-        <div class="flex items-center gap-3 relative z-10">
-          <div :class="['p-2 rounded-xl shrink-0 flex items-center justify-center', item.accentBg, item.accent]">
-            <BaseIcon :name="item.icon" :size="20" />
+        <!-- Top row: Icon + Name + Percentage -->
+        <div class="flex items-center justify-between relative z-10 mb-2">
+          <div class="flex items-center gap-3">
+            <div :class="['p-2 rounded-xl shrink-0 flex items-center justify-center', item.accentBg, item.accent]">
+              <BaseIcon :name="item.icon" :size="20" />
+            </div>
+            <p class="text-base font-semibold" style="color: var(--text-primary);">{{ item.name }}</p>
           </div>
-          <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ item.name }}</p>
-        </div>
-
-        <!-- Middle row: Main Target Score -->
-        <div class="mt-4 mb-3 flex flex-col relative z-10">
-          <span class="text-[11px] font-medium uppercase tracking-wider mb-1" style="color: var(--text-tertiary);">预测概率</span>
-          <div class="flex items-baseline gap-1.5">
-            <span class="text-4xl font-bold tracking-tighter" :class="item.accent">{{ toPercent(item.score) }}</span>
-          </div>
+          <span class="text-3xl font-bold tracking-tighter" :class="item.accent">{{ toPercent(item.score) }}</span>
         </div>
 
         <!-- Bottom row: Details -->
-        <div class="grid grid-cols-2 gap-3 mt-auto relative z-10 pt-4 border-t" style="border-color: color-mix(in srgb, var(--primary-500) 8%, transparent);">
-          <div class="flex flex-col">
-            <span class="text-[10px] uppercase tracking-wider mb-1" style="color: var(--text-tertiary);">置信度</span>
-            <span class="text-lg font-medium leading-none" style="color: var(--text-secondary);">{{ toPercent(item.confidence) }}</span>
+        <div class="flex flex-col gap-2 mt-auto relative z-10 pt-4 border-t" style="border-color: color-mix(in srgb, var(--primary-500) 8%, transparent);">
+          <div class="flex items-center justify-between">
+            <span class="text-xs uppercase tracking-wider" style="color: var(--text-tertiary);">置信度</span>
+            <span class="text-sm font-medium" style="color: var(--text-secondary);">{{ toPercent(item.confidence) }}</span>
           </div>
-          <div class="flex flex-col border-l pl-3" style="border-color: color-mix(in srgb, var(--primary-500) 10%, transparent);">
-            <span class="text-[10px] uppercase tracking-wider mb-1" style="color: var(--text-tertiary);">最佳时间</span>
-            <span class="text-sm font-medium leading-tight line-clamp-2" style="color: var(--text-secondary);">{{ toWindowLabel(item.bestWindow) }}</span>
+          <div class="flex items-center justify-between">
+            <span class="text-xs uppercase tracking-wider" style="color: var(--text-tertiary);">最佳时间</span>
+            <span class="text-sm font-medium" style="color: var(--text-secondary);">{{ toWindowLabel(item.bestWindow) }}</span>
           </div>
         </div>
 
