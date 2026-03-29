@@ -106,6 +106,10 @@ function parseEventBlock(block: string): AiStreamEvent | null {
     return null
   }
 
-  const data = JSON.parse(dataLines.join('\n'))
-  return { event: eventName as AiStreamEvent['event'], data } as AiStreamEvent
+  try {
+    const data = JSON.parse(dataLines.join('\n'))
+    return { event: eventName as AiStreamEvent['event'], data } as AiStreamEvent
+  } catch {
+    return null
+  }
 }

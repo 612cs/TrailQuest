@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -84,6 +85,11 @@ public class AiChatServiceImpl implements AiChatService {
             sendEvent(emitter, "done", donePayload);
             emitter.complete();
         } catch (Exception ex) {
+            if (isClientDisconnected(ex)) {
+                log.info("AI stream client disconnected");
+                emitter.complete();
+                return;
+            }
             log.error("AI stream failed", ex);
             sendError(emitter, ex);
         }
@@ -161,5 +167,20 @@ public class AiChatServiceImpl implements AiChatService {
 
     private void sendEvent(SseEmitter emitter, String event, Object payload) throws java.io.IOException {
         emitter.send(SseEmitter.event().name(event).data(payload));
+    }
+
+    private boolean isClientDisconnected(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof ClientAbortException) {
+                return true;
+            }
+            if (current instanceof java.io.IOException && StringUtils.hasText(current.getMessage())
+                    && current.getMessage().toLowerCase().contains("broken pipe")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 }
