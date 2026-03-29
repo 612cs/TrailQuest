@@ -798,6 +798,70 @@ async function handleSubmit() {
         </section>
 
         <section class="card animate-fade-in-up space-y-4 p-4 sm:p-5">
+          <div class="flex items-center justify-between">
+            <h3 class="flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
+              <BaseIcon name="Map" :size="16" class="text-primary-500" />
+              路线轨迹 (GPX / KML)
+            </h3>
+            <label class="cursor-pointer rounded-lg bg-primary-500/10 px-3 py-1.5 text-xs font-medium text-primary-500 transition-colors hover:bg-primary-500/20" :class="isSubmissionRunning ? 'pointer-events-none opacity-40' : ''">
+              {{ trackItem ? '重新上传' : '上传轨迹' }}
+              <input type="file" accept=".gpx,.kml,application/gpx+xml,application/vnd.google-earth.kml+xml,text/xml,application/xml" class="hidden" :disabled="isSubmissionRunning" @change="handleTrackChange" />
+            </label>
+          </div>
+
+          <p class="text-xs" style="color: var(--text-secondary);">
+            轨迹文件为可选项。点击发布后才会真正上传，上传前会继续保留本地预览和解析结果。
+          </p>
+
+          <div v-if="trackItem" class="rounded-xl border p-3 text-sm" style="border-color: var(--border-default); background-color: var(--bg-tag);">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="truncate font-medium" style="color: var(--text-primary);">{{ trackItem.fileName }}</p>
+                <p class="mt-1 text-xs" :class="trackItem.status === 'error' || trackItem.status === 'missing' ? 'text-red-500' : ''" style="color: var(--text-secondary);">
+                  {{ assetStatusText(trackItem.status, trackItem) }}
+                </p>
+              </div>
+              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-primary-500/10 disabled:cursor-not-allowed disabled:opacity-40" :disabled="isSubmissionRunning" @click="clearTrack">
+                <BaseIcon name="X" :size="16" style="color: var(--text-secondary);" />
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <div class="relative overflow-hidden rounded-xl shadow-inner" style="height: 320px; background-color: var(--bg-input); border: 1px solid var(--border-default);">
+              <div ref="mapContainer" class="h-full w-full" :style="{ display: currentDraft.geoJsonData ? 'block' : 'none' }"></div>
+              <div v-if="mapLoading" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5 backdrop-blur-sm">
+                <BaseIcon name="Loader2" :size="20" class="animate-spin text-primary-500" />
+                <span class="text-xs font-medium" style="color: var(--text-secondary);">解析轨迹中...</span>
+              </div>
+              <div v-else-if="currentDraft.trackPreviewError" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5">
+                <BaseIcon name="AlertCircle" :size="20" class="text-red-500" />
+                <span class="px-4 text-center text-xs font-medium text-red-500">{{ currentDraft.trackPreviewError }}</span>
+              </div>
+              <div v-else-if="!currentDraft.geoJsonData" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5">
+                <BaseIcon name="Route" :size="24" style="color: var(--text-tertiary);" />
+                <span class="text-xs font-medium" style="color: var(--text-tertiary);">请上传 GPX / KML 轨迹文件以在地图中预览</span>
+              </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl" style="height: 320px; border: 1px solid var(--border-default); background-color: var(--bg-input);">
+              <TrailTrackViewer
+                v-if="publishTrackViewerData"
+                :data="publishTrackViewerData"
+                :weather-scene="publishWeatherScene"
+                mode="embedded"
+                :show-fullscreen-button="true"
+                @request-fullscreen="showTrackFullscreen = true"
+              />
+              <div v-else class="flex h-full flex-col items-center justify-center gap-2 bg-black/5">
+                <BaseIcon name="Box" :size="24" style="color: var(--text-tertiary);" />
+                <span class="text-xs font-medium" style="color: var(--text-tertiary);">上传轨迹后可在这里查看路线建模</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card animate-fade-in-up space-y-4 p-4 sm:p-5">
           <h3 class="flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
             <BaseIcon name="FileText" :size="16" class="text-primary-500" />
             基本信息
@@ -840,7 +904,7 @@ async function handleSubmit() {
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <div>
               <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">负重类型</label>
               <div class="flex gap-2">
@@ -876,70 +940,8 @@ async function handleSubmit() {
               </div>
             </div>
           </div>
-        </section>
 
-        <section class="card animate-fade-in-up space-y-4 p-4 sm:p-5">
-          <div class="flex items-center justify-between">
-            <h3 class="flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
-              <BaseIcon name="Map" :size="16" class="text-primary-500" />
-              路线轨迹 (GPX / KML)
-            </h3>
-            <label class="cursor-pointer rounded-lg bg-primary-500/10 px-3 py-1.5 text-xs font-medium text-primary-500 transition-colors hover:bg-primary-500/20" :class="isSubmissionRunning ? 'pointer-events-none opacity-40' : ''">
-              {{ trackItem ? '重新上传' : '上传轨迹' }}
-              <input type="file" accept=".gpx,.kml,application/gpx+xml,application/vnd.google-earth.kml+xml,text/xml,application/xml" class="hidden" :disabled="isSubmissionRunning" @change="handleTrackChange" />
-            </label>
-          </div>
-
-          <p class="text-xs" style="color: var(--text-secondary);">
-            轨迹文件为可选项。点击发布后才会真正上传，上传前会继续保留本地预览和解析结果。
-          </p>
-
-          <div v-if="trackItem" class="rounded-xl border p-3 text-sm" style="border-color: var(--border-default); background-color: var(--bg-tag);">
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <p class="truncate font-medium" style="color: var(--text-primary);">{{ trackItem.fileName }}</p>
-                <p class="mt-1 text-xs" :class="trackItem.status === 'error' || trackItem.status === 'missing' ? 'text-red-500' : ''" style="color: var(--text-secondary);">
-                  {{ assetStatusText(trackItem.status, trackItem) }}
-                </p>
-              </div>
-              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-primary-500/10 disabled:cursor-not-allowed disabled:opacity-40" :disabled="isSubmissionRunning" @click="clearTrack">
-                <BaseIcon name="X" :size="16" style="color: var(--text-secondary);" />
-              </button>
-            </div>
-          </div>
-
-          <div class="relative overflow-hidden rounded-xl shadow-inner" style="height: 240px; background-color: var(--bg-input); border: 1px solid var(--border-default);">
-            <div ref="mapContainer" class="h-full w-full" :style="{ display: currentDraft.geoJsonData ? 'block' : 'none' }"></div>
-            <div v-if="mapLoading" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5 backdrop-blur-sm">
-              <BaseIcon name="Loader2" :size="20" class="animate-spin text-primary-500" />
-              <span class="text-xs font-medium" style="color: var(--text-secondary);">解析轨迹中...</span>
-            </div>
-            <div v-else-if="currentDraft.trackPreviewError" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5">
-              <BaseIcon name="AlertCircle" :size="20" class="text-red-500" />
-              <span class="px-4 text-center text-xs font-medium text-red-500">{{ currentDraft.trackPreviewError }}</span>
-            </div>
-            <div v-else-if="!currentDraft.geoJsonData" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5">
-              <BaseIcon name="Route" :size="24" style="color: var(--text-tertiary);" />
-              <span class="text-xs font-medium" style="color: var(--text-tertiary);">请上传 GPX / KML 轨迹文件以在地图中预览</span>
-            </div>
-          </div>
-
-          <TrailTrackViewer
-            v-if="publishTrackViewerData"
-            :data="publishTrackViewerData"
-            :weather-scene="publishWeatherScene"
-            mode="embedded"
-            :show-fullscreen-button="true"
-            @request-fullscreen="showTrackFullscreen = true"
-          />
-        </section>
-
-        <section class="card animate-fade-in-up space-y-4 p-4 sm:p-5">
-          <h3 class="flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
-            <BaseIcon name="Ruler" :size="16" class="text-primary-500" />
-            路线参数
-          </h3>
-          <div class="grid grid-cols-3 gap-3">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">距离</label>
               <input v-model="currentDraft.fields.distance" type="text" placeholder="12.5 km" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
@@ -953,14 +955,11 @@ async function handleSubmit() {
               <input v-model="currentDraft.fields.duration" type="text" placeholder="4h 30m" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
             </div>
           </div>
-        </section>
 
-        <section class="card animate-fade-in-up space-y-3 p-4 sm:p-5">
-          <h3 class="flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
-            <BaseIcon name="AlignLeft" :size="16" class="text-primary-500" />
-            路线描述
-          </h3>
-          <textarea v-model="currentDraft.fields.description" rows="5" placeholder="描述这条路线的特色、注意事项、推荐理由..." class="w-full resize-none rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
+          <div>
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线描述</label>
+            <textarea v-model="currentDraft.fields.description" rows="5" placeholder="描述这条路线的特色、注意事项、推荐理由..." class="w-full resize-none rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
+          </div>
         </section>
 
         <section class="card animate-fade-in-up p-4 sm:p-5">
