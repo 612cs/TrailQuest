@@ -19,6 +19,7 @@ type LandscapeItem = LandscapePredictionCard & {
   icon: string
   accent: string
   accentBg: string
+  glow: string
 }
 
 function toPercent(value?: number | null) {
@@ -41,6 +42,7 @@ const cards = computed<LandscapeItem[]>(() => {
       icon: 'Cloud',
       accent: 'text-primary-400',
       accentBg: 'bg-primary-500/10',
+      glow: 'bg-primary-500',
       ...props.prediction.cloudSea,
     },
     {
@@ -49,6 +51,7 @@ const cards = computed<LandscapeItem[]>(() => {
       icon: 'CloudSnow',
       accent: 'text-cyan-300',
       accentBg: 'bg-cyan-500/10',
+      glow: 'bg-cyan-500',
       ...props.prediction.rime,
     },
     {
@@ -57,6 +60,7 @@ const cards = computed<LandscapeItem[]>(() => {
       icon: 'Snowflake',
       accent: 'text-blue-300',
       accentBg: 'bg-blue-500/10',
+      glow: 'bg-blue-500',
       ...props.prediction.icicle,
     },
   ]
@@ -113,40 +117,39 @@ const cards = computed<LandscapeItem[]>(() => {
       <article
         v-for="item in cards"
         :key="item.key"
-        class="rounded-2xl border p-5 flex flex-col gap-5 min-h-[220px]"
-        style="border-color: color-mix(in srgb, var(--primary-500) 14%, transparent); background: color-mix(in srgb, white 4%, transparent);"
+        class="group relative flex flex-col p-4 rounded-2xl border overflow-hidden transition-all hover:bg-white/[0.02]"
+        style="border-color: color-mix(in srgb, var(--primary-500) 12%, transparent); background: color-mix(in srgb, var(--primary-500) 2%, transparent);"
       >
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3 min-w-0">
-            <div :class="['p-2 rounded-xl shrink-0', item.accentBg, item.accent]">
-              <BaseIcon :name="item.icon" :size="18" />
-            </div>
-            <p class="text-base font-semibold truncate" style="color: var(--text-primary);">{{ item.name }}</p>
+        <!-- Top row: Icon + Name -->
+        <div class="flex items-center gap-3 relative z-10">
+          <div :class="['p-2 rounded-xl shrink-0 flex items-center justify-center', item.accentBg, item.accent]">
+            <BaseIcon :name="item.icon" :size="20" />
           </div>
-          <span
-            v-if="item.experimental"
-            class="text-[11px] px-2 py-0.5 rounded-full shrink-0"
-            style="background: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--text-secondary);"
-          >
-            实验中
-          </span>
+          <p class="text-sm font-semibold" style="color: var(--text-primary);">{{ item.name }}</p>
         </div>
 
-        <div>
-          <p class="text-xs mb-1.5" style="color: var(--text-tertiary);">概率</p>
-          <p class="text-4xl font-bold tracking-tight leading-none" style="color: var(--text-primary);">{{ toPercent(item.score) }}</p>
+        <!-- Middle row: Main Target Score -->
+        <div class="mt-4 mb-3 flex flex-col relative z-10">
+          <span class="text-[11px] font-medium uppercase tracking-wider mb-1" style="color: var(--text-tertiary);">预测概率</span>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-4xl font-bold tracking-tighter" :class="item.accent">{{ toPercent(item.score) }}</span>
+          </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mt-auto">
-          <div class="rounded-xl px-3 py-3" style="background: color-mix(in srgb, var(--primary-500) 6%, transparent);">
-            <p class="text-[11px]" style="color: var(--text-tertiary);">置信度</p>
-            <p class="text-base font-semibold mt-1" style="color: var(--text-primary);">{{ toPercent(item.confidence) }}</p>
+        <!-- Bottom row: Details -->
+        <div class="grid grid-cols-2 gap-3 mt-auto relative z-10 pt-4 border-t" style="border-color: color-mix(in srgb, var(--primary-500) 8%, transparent);">
+          <div class="flex flex-col">
+            <span class="text-[10px] uppercase tracking-wider mb-1" style="color: var(--text-tertiary);">置信度</span>
+            <span class="text-lg font-medium leading-none" style="color: var(--text-secondary);">{{ toPercent(item.confidence) }}</span>
           </div>
-          <div class="rounded-xl px-3 py-3" style="background: color-mix(in srgb, var(--primary-500) 6%, transparent);">
-            <p class="text-[11px]" style="color: var(--text-tertiary);">时间</p>
-            <p class="text-base font-semibold mt-1 truncate" style="color: var(--text-primary);">{{ toWindowLabel(item.bestWindow) }}</p>
+          <div class="flex flex-col border-l pl-3" style="border-color: color-mix(in srgb, var(--primary-500) 10%, transparent);">
+            <span class="text-[10px] uppercase tracking-wider mb-1" style="color: var(--text-tertiary);">最佳时间</span>
+            <span class="text-sm font-medium leading-tight line-clamp-2" style="color: var(--text-secondary);">{{ toWindowLabel(item.bestWindow) }}</span>
           </div>
         </div>
+
+        <!-- Decorative background elements -->
+        <div :class="['absolute -right-4 -top-4 w-32 h-32 blur-3xl opacity-[0.15] mix-blend-screen pointer-events-none transition-opacity duration-300 group-hover:opacity-30 rounded-full', item.glow]"></div>
       </article>
     </div>
   </section>
