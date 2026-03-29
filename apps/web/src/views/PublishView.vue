@@ -868,13 +868,13 @@ async function handleSubmit() {
 
           <div>
             <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线名称</label>
-            <input v-model="currentDraft.fields.name" type="text" placeholder="例如：龙脊梯田精华线" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" :style="hasFieldError('name') ? 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--color-hard);' : 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);'" :disabled="isSubmissionRunning" />
+            <input v-model="currentDraft.fields.name" type="text" placeholder="例如：龙脊梯田精华线" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :class="{ 'publish-input-error': hasFieldError('name') }" :disabled="isSubmissionRunning" />
             <p v-if="hasFieldError('name')" class="mt-1.5 text-xs text-red-500">请填写路线名称</p>
           </div>
 
           <div>
             <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">所在位置</label>
-            <input v-model="currentDraft.fields.location" type="text" placeholder="例如：广西 桂林 龙胜" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" :style="hasFieldError('location') ? 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--color-hard);' : 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);'" :disabled="isSubmissionRunning" />
+            <input v-model="currentDraft.fields.location" type="text" placeholder="例如：广西 桂林 龙胜" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :class="{ 'publish-input-error': hasFieldError('location') }" :disabled="isSubmissionRunning" />
             <p
               v-if="trackLocationHint"
               class="mt-1.5 text-xs"
@@ -943,21 +943,21 @@ async function handleSubmit() {
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">距离</label>
-              <input v-model="currentDraft.fields.distance" type="text" placeholder="12.5 km" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
+              <input v-model="currentDraft.fields.distance" type="text" placeholder="12.5 km" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
             </div>
             <div>
               <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">海拔</label>
-              <input v-model="currentDraft.fields.elevation" type="text" placeholder="+450 m" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
+              <input v-model="currentDraft.fields.elevation" type="text" placeholder="+450 m" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
             </div>
             <div>
               <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">时长</label>
-              <input v-model="currentDraft.fields.duration" type="text" placeholder="4h 30m" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
+              <input v-model="currentDraft.fields.duration" type="text" placeholder="4h 30m" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
             </div>
           </div>
 
           <div>
             <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线描述</label>
-            <textarea v-model="currentDraft.fields.description" rows="5" placeholder="描述这条路线的特色、注意事项、推荐理由..." class="w-full resize-none rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" />
+            <textarea v-model="currentDraft.fields.description" rows="5" placeholder="描述这条路线的特色、注意事项、推荐理由..." class="publish-input w-full resize-none rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
           </div>
         </section>
 
@@ -1048,7 +1048,7 @@ async function handleSubmit() {
             </button>
           </div>
           <div class="flex gap-2">
-            <input v-model="currentDraft.fields.customTag" type="text" placeholder="自定义标签..." class="flex-1 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);" :disabled="isSubmissionRunning" @keyup.enter="addCustomTag" />
+            <input v-model="currentDraft.fields.customTag" type="text" placeholder="自定义标签..." class="publish-input flex-1 rounded-lg px-3 py-2 text-sm" :disabled="isSubmissionRunning" @keyup.enter="addCustomTag" />
             <button class="rounded-lg border border-primary-500/30 px-3 py-2 text-sm font-medium text-primary-500 transition-colors hover:bg-primary-500/10 disabled:cursor-not-allowed disabled:opacity-40" :disabled="!currentDraft.fields.customTag.trim() || isSubmissionRunning" @click="addCustomTag">
               添加
             </button>
@@ -1106,3 +1106,31 @@ async function handleSubmit() {
     </Teleport>
   </main>
 </template>
+
+<style scoped>
+.publish-input {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.publish-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.publish-input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary-500) 65%, transparent);
+}
+
+.publish-input-error {
+  border-color: var(--color-hard);
+}
+
+.publish-input-error:focus {
+  border-color: var(--color-hard);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-hard) 55%, transparent);
+}
+</style>
