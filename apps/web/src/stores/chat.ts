@@ -217,6 +217,18 @@ export const useChatStore = defineStore('chat', () => {
     ))
   }
 
+  function failActiveStream(message: string) {
+    if (!activeAssistantMessageId.value) {
+      return
+    }
+    streamError.value = message
+    updateAssistantMessage(activeAssistantMessageId.value, (current) => ({
+      ...current,
+      content: current.content || message,
+      isStreaming: false,
+    }))
+  }
+
   async function ensureSocketReady() {
     if (socket.value && socket.value.readyState === WebSocket.OPEN) {
       return
@@ -265,7 +277,9 @@ export const useChatStore = defineStore('chat', () => {
       ws.onerror = () => {
         if (!authed) {
           reject(new ApiError('AI 连接建立失败，请稍后重试', 'AI_SOCKET_CONNECT_FAILED', 500))
+          return
         }
+        failActiveStream('AI 连接中断，请重新发送这条消息')
       }
 
       ws.onclose = () => {
@@ -273,6 +287,10 @@ export const useChatStore = defineStore('chat', () => {
         socketReadyPromise.value = null
         if (!authed) {
           reject(new ApiError('AI 连接已关闭，请重新尝试', 'AI_SOCKET_CLOSED', 500))
+          return
+        }
+        if (isStreaming.value) {
+          failActiveStream('AI 连接已断开，请重新发送这条消息')
         }
       }
     })
@@ -286,6 +304,7 @@ export const useChatStore = defineStore('chat', () => {
 
   function waitForStreamComplete(assistantMessageId: string) {
     return new Promise<void>((resolve, reject) => {
+      const startedAt = Date.now()
       const stop = window.setInterval(() => {
         const assistant = messages.value.find((item) => item.id === assistantMessageId)
         if (!assistant) {
@@ -301,6 +320,12 @@ export const useChatStore = defineStore('chat', () => {
         if (!assistant.isStreaming) {
           window.clearInterval(stop)
           resolve()
+          return
+        }
+        if (Date.now() - startedAt > 90000) {
+          window.clearInterval(stop)
+          failActiveStream('AI 响应超时，请稍后重试')
+          reject(new ApiError('AI 响应超时，请稍后重试', 'AI_STREAM_TIMEOUT', 504))
         }
       }, 60)
     })

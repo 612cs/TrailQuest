@@ -29,7 +29,7 @@ function handleKeydown(e: KeyboardEvent) {
 
 <template>
   <div class="border-t px-4 py-3" style="border-color: var(--border-default); background-color: var(--bg-card);">
-    <div class="mx-auto max-w-4xl">
+    <div class="w-full">
       <div class="flex items-end gap-3 rounded-[26px] border px-3 py-2.5 sm:px-4" style="border-color: var(--border-card); background-color: var(--bg-page);">
         <textarea
           v-model="text"
