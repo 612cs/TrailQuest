@@ -144,10 +144,18 @@ export const useChatStore = defineStore('chat', () => {
         },
       }))
       await waitForStreamComplete(assistantMessage.id)
-      await refreshActiveConversation()
+      try {
+        await refreshActiveConversation()
+      } catch (error) {
+        console.warn('Failed to refresh AI conversation after stream completion', error)
+      }
     } catch (error) {
+      const currentAssistant = messages.value.find((item) => item.id === assistantMessage.id)
+      const hasAssistantContent = Boolean(currentAssistant?.content?.trim())
       const message = error instanceof ApiError ? error.message : 'AI 对话暂时不可用，请稍后重试'
-      streamError.value = message
+      if (!hasAssistantContent) {
+        streamError.value = message
+      }
       updateAssistantMessage(assistantMessage.id, (current) => ({
         ...current,
         content: current.content || message,

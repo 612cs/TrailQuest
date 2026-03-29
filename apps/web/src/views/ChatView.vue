@@ -137,8 +137,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="min-h-[100vh] px-4 py-4 sm:px-6 lg:px-8">
-    <div class="mx-auto flex h-[96vh] max-w-7xl gap-4 lg:gap-5">
+  <main class="min-h-[100vh] p-0">
+    <div class="flex h-[100vh] w-full gap-0 p-0 lg:gap-4 lg:p-4">
       <div class="hidden w-[320px] shrink-0 lg:block">
         <ChatSidebar
           :conversations="chatStore.conversations"
