@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.entity.AiConversation;
@@ -109,9 +110,11 @@ public class AiConversationServiceImpl implements AiConversationService {
 
     @Override
     public void touchConversation(Long conversationId) {
-        AiConversation conversation = new AiConversation();
-        conversation.setId(conversationId);
-        aiConversationMapper.updateById(conversation);
+        aiConversationMapper.update(
+                null,
+                new LambdaUpdateWrapper<AiConversation>()
+                        .eq(AiConversation::getId, conversationId)
+                        .set(AiConversation::getUpdatedAt, java.time.LocalDateTime.now()));
     }
 
     @Override
