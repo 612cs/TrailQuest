@@ -11,5 +11,8 @@ public class TrailWeatherResponseVo {
 
     private TrailWeatherLocationContextVo locationContext;
     private List<TrailWeatherForecastDayVo> forecast;
+    private TrailWeatherCurrentVo current;
+    private List<TrailWeatherHourlyVo> hourly;
+    private TrailWeatherAstroVo astro;
     private TrailWeatherSourceVo source;
 }

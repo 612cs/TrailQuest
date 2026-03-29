@@ -13,6 +13,8 @@ public record CurrentWeatherSnapshot(
         Integer humidity,
         BigDecimal windSpeed,
         String windScale,
+        String windDir,
+        Integer wind360,
         BigDecimal pressure,
         Integer cloud,
         BigDecimal dew,

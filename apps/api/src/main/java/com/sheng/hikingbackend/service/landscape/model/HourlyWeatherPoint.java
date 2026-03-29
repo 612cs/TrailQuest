@@ -13,6 +13,8 @@ public record HourlyWeatherPoint(
         Integer humidity,
         BigDecimal windSpeed,
         String windScale,
+        String windDir,
+        Integer wind360,
         Integer pop,
         BigDecimal precip,
         BigDecimal pressure,
