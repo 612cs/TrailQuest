@@ -74,10 +74,19 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
         request.setPackType(parsedQuery.packType());
         request.setDurationType(parsedQuery.durationType());
         request.setDistance(parsedQuery.distance());
-        request.setKeyword(buildKeyword(parsedQuery, message));
+        request.setKeyword(buildPrimaryKeyword(parsedQuery, message));
 
-        PageResponse<TrailDetailVo> result = trailService.pageTrails(request, userId);
-        List<TrailDetailVo> ranked = result.getList().stream()
+        List<TrailDetailVo> candidates = trailService.pageTrails(request, userId).getList();
+        if (candidates.isEmpty() && StringUtils.hasText(parsedQuery.location())) {
+            TrailPageRequest fallbackRequest = new TrailPageRequest();
+            fallbackRequest.setPageNum(1);
+            fallbackRequest.setPageSize(12);
+            fallbackRequest.setSort("hot");
+            fallbackRequest.setKeyword(parsedQuery.location());
+            candidates = trailService.pageTrails(fallbackRequest, userId).getList();
+        }
+
+        List<TrailDetailVo> ranked = candidates.stream()
                 .sorted(Comparator.comparingDouble((TrailDetailVo trail) -> scoreTrail(trail, parsedQuery, profile, message)).reversed())
                 .limit(3)
                 .toList();
@@ -320,20 +329,18 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
         return parts.isEmpty() ? "用户暂未填写徒步画像，优先依据本轮消息进行推荐。" : String.join("，", parts);
     }
 
-    private String buildKeyword(AiParsedQuery parsedQuery, String message) {
-        Set<String> keywords = new LinkedHashSet<>();
+    private String buildPrimaryKeyword(AiParsedQuery parsedQuery, String message) {
         if (StringUtils.hasText(parsedQuery.location())) {
-            keywords.add(parsedQuery.location());
+            return parsedQuery.location();
         }
-        keywords.addAll(parsedQuery.tags());
-        keywords.addAll(parsedQuery.keywords());
-        if (keywords.isEmpty()) {
-            String core = extractCoreKeyword(message);
-            if (StringUtils.hasText(core)) {
-                keywords.add(core);
-            }
+        if (!parsedQuery.tags().isEmpty()) {
+            return parsedQuery.tags().get(0);
         }
-        return keywords.isEmpty() ? null : String.join(" ", keywords);
+        if (!parsedQuery.keywords().isEmpty()) {
+            return parsedQuery.keywords().get(0);
+        }
+        String core = extractCoreKeyword(message);
+        return StringUtils.hasText(core) ? core : null;
     }
 
     private List<String> readStringArray(JsonNode node) {
@@ -423,7 +430,7 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
     }
 
     private String detectLocation(String message) {
-        for (String marker : List.of("杭州", "临安", "湖州", "莫干山", "武功山", "大理", "牛背山", "神农架", "稻城", "江西", "浙江", "四川", "云南")) {
+        for (String marker : List.of("萍乡", "芦溪", "杭州", "临安", "湖州", "莫干山", "武功山", "大理", "牛背山", "神农架", "稻城", "江西", "浙江", "四川", "云南")) {
             if (message.contains(marker)) {
                 return marker;
             }
