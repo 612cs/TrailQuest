@@ -128,7 +128,7 @@ const cards = computed<LandscapeItem[]>(() => {
             </div>
             <p class="text-base font-semibold whitespace-nowrap" style="color: var(--text-primary);">{{ item.name }}</p>
           </div>
-          <span class="text-3xl font-bold tracking-tighter shrink-0" :class="item.accent">{{ toPercent(item.score) }}</span>
+          <span class="text-2xl font-bold tracking-tighter shrink-0" :class="item.accent">{{ toPercent(item.score) }}</span>
         </div>
 
         <!-- Bottom row: Details -->
