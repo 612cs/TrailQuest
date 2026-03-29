@@ -126,9 +126,9 @@ const cards = computed<LandscapeItem[]>(() => {
             <div :class="['p-2 rounded-xl shrink-0 flex items-center justify-center', item.accentBg, item.accent]">
               <BaseIcon :name="item.icon" :size="20" />
             </div>
-            <p class="text-sm font-semibold whitespace-nowrap shrink-0" style="color: var(--text-primary);">{{ item.name }}</p>
+            <p class="text-base font-semibold whitespace-nowrap" style="color: var(--text-primary);">{{ item.name }}</p>
           </div>
-          <span class="text-2xl font-bold tracking-tight shrink-0" :class="item.accent">{{ toPercent(item.score) }}</span>
+          <span class="text-3xl font-bold tracking-tighter shrink-0" :class="item.accent">{{ toPercent(item.score) }}</span>
         </div>
 
         <!-- Bottom row: Details -->
