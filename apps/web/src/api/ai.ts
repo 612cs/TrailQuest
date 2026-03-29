@@ -31,6 +31,7 @@ export async function streamAiChat(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(payload),
@@ -61,6 +62,7 @@ export async function streamAiChat(
       break
     }
     buffer += decoder.decode(value, { stream: true })
+    buffer = buffer.replace(/\r\n/g, '\n')
 
     let boundaryIndex = buffer.indexOf('\n\n')
     while (boundaryIndex >= 0) {
@@ -78,6 +80,7 @@ export async function streamAiChat(
   if (finalText) {
     buffer += finalText
   }
+  buffer = buffer.replace(/\r\n/g, '\n')
   const parsed = parseEventBlock(buffer)
   if (parsed) {
     handlers.onEvent(parsed)
