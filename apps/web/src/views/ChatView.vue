@@ -1,15 +1,36 @@
 <script setup lang="ts">
-import { ref, nextTick, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { useChatStore } from '../stores/chat'
+
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ChatBubble from '../components/chat/ChatBubble.vue'
 import ChatInput from '../components/chat/ChatInput.vue'
-import { mockSuggestedQuestions } from '../mock/mockData'
+import ChatSidebar from '../components/chat/ChatSidebar.vue'
+import { useChatStore } from '../stores/chat'
+import { useFlashStore } from '../stores/useFlashStore'
+import { useUserStore } from '../stores/useUserStore'
+import { ApiError } from '../types/api'
 
 const router = useRouter()
 const chatStore = useChatStore()
+const userStore = useUserStore()
+const flashStore = useFlashStore()
+
 const messagesContainer = ref<HTMLElement | null>(null)
+const mobileSidebarOpen = ref(false)
+
+const suggestions = [
+  { icon: 'Compass', text: '推荐杭州周边适合周末单日徒步的路线' },
+  { icon: 'Trees', text: '想找一条适合新手、风景好的森林路线' },
+  { icon: 'Camera', text: '有没有适合拍日出的轻装路线' },
+  { icon: 'Backpack', text: '春季徒步一般要准备哪些装备' },
+]
+
+const welcomeDescription = computed(() => (
+  userStore.isLoggedIn
+    ? '告诉我地点、难度、时长或你想看的风景，我会结合 TrailQuest 内部路线库给你建议。'
+    : '登录后可以保存会话、继续追问，并获得更贴近你徒步画像的路线建议。'
+))
 
 function scrollToBottom() {
   nextTick(() => {
@@ -19,113 +40,220 @@ function scrollToBottom() {
   })
 }
 
-function handleSend(text: string) {
-  chatStore.sendMessage(text)
+async function ensureBootstrapped() {
+  if (!userStore.isLoggedIn) {
+    chatStore.reset()
+    return
+  }
+  try {
+    await chatStore.bootstrap()
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'AI 会话加载失败'
+    flashStore.showError(message)
+  }
+}
+
+async function handleSend(text: string) {
+  if (!userStore.isLoggedIn) {
+    userStore.showAuthModal = true
+    return
+  }
+  try {
+    await chatStore.sendMessage(text, {
+      currentCity: userStore.profile?.location || null,
+    })
+    scrollToBottom()
+  } catch (error) {
+    if (error instanceof ApiError) {
+      flashStore.showError(error.message)
+      return
+    }
+    flashStore.showError(error instanceof Error ? error.message : 'AI 对话发送失败')
+  }
 }
 
 function handleSuggestion(text: string) {
-  chatStore.sendMessage(text)
+  handleSend(text)
 }
 
-// Auto scroll on new messages
+function handleFollowUp(text: string) {
+  handleSend(text)
+}
+
+async function handleCreateConversation() {
+  if (!userStore.isLoggedIn) {
+    userStore.showAuthModal = true
+    return
+  }
+  try {
+    await chatStore.createConversation()
+    mobileSidebarOpen.value = false
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '新建会话失败')
+  }
+}
+
+async function handleSelectConversation(conversationId: string | number) {
+  try {
+    await chatStore.selectConversation(conversationId)
+    mobileSidebarOpen.value = false
+    scrollToBottom()
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '读取会话失败')
+  }
+}
+
+watch(
+  () => userStore.isLoggedIn,
+  () => {
+    ensureBootstrapped()
+  },
+  { immediate: true },
+)
+
 watch(
   () => chatStore.messages.length,
   () => scrollToBottom(),
 )
 
-// Also scroll during typing effect
 watch(
   () => chatStore.messages[chatStore.messages.length - 1]?.content,
   () => scrollToBottom(),
 )
+
+onMounted(() => {
+  scrollToBottom()
+})
 </script>
 
 <template>
-  <main class="flex flex-col" style="height: calc(100vh - 56px);">
-    <!-- Chat Header -->
-    <div class="px-4 py-3 border-b flex items-center justify-between shrink-0" style="border-color: var(--border-default); background-color: var(--bg-card);">
-      <button
-        @click="router.back()"
-        class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500"
-        style="color: var(--text-secondary);"
-      >
-        <BaseIcon name="ChevronLeft" :size="20" />
-        返回
-      </button>
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white">
-          <BaseIcon name="Sparkles" :size="14" />
-        </div>
-        <span class="text-sm font-semibold" style="color: var(--text-primary);">AI 助手</span>
-      </div>
-      <button
-        v-if="chatStore.messages.length > 0"
-        @click="chatStore.clearMessages()"
-        class="text-xs px-2 py-1 rounded-md transition-colors hover:bg-red-500/10 hover:text-red-500"
-        style="color: var(--text-tertiary);"
-      >
-        清空
-      </button>
-      <div v-else class="w-10" />
-    </div>
-
-    <!-- Messages Area -->
-    <div ref="messagesContainer" class="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-      <!-- Empty State -->
-      <div v-if="chatStore.messages.length === 0" class="flex flex-col items-center justify-center h-full gap-6">
-        <!-- Welcome -->
-        <div class="text-center space-y-2">
-          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white mx-auto shadow-lg">
-            <BaseIcon name="Sparkles" :size="28" />
-          </div>
-          <h2 class="text-lg font-bold" style="color: var(--text-primary);">你好！我是 TrailQuest AI</h2>
-          <p class="text-sm max-w-xs" style="color: var(--text-secondary);">
-            我可以帮你推荐路线、提供装备建议、分析天气状况。试试下面的问题吧！
-          </p>
-        </div>
-
-        <!-- Suggested Questions -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-md">
-          <button
-            v-for="q in mockSuggestedQuestions"
-            :key="q.text"
-            @click="handleSuggestion(q.text)"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]"
-            style="background-color: var(--bg-card); border: 1px solid var(--border-card); color: var(--text-primary);"
-          >
-            <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background-color: var(--bg-tag);">
-              <BaseIcon :name="q.icon" :size="16" class="text-primary-500" />
-            </div>
-            <span>{{ q.text }}</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Message List -->
-      <template v-else>
-        <ChatBubble
-          v-for="msg in chatStore.messages"
-          :key="msg.id"
-          :message="msg"
+  <main class="min-h-[calc(100vh-56px)] px-4 py-4 sm:px-6 lg:px-8">
+    <div class="mx-auto flex h-[calc(100vh-88px)] max-w-7xl gap-4 lg:gap-5">
+      <div class="hidden w-[320px] shrink-0 lg:block">
+        <ChatSidebar
+          :conversations="chatStore.conversations"
+          :active-conversation-id="chatStore.activeConversationId"
+          :loading="chatStore.isBootstrapping"
+          @create="handleCreateConversation"
+          @select="handleSelectConversation"
         />
+      </div>
 
-        <!-- Typing Indicator -->
-        <div v-if="chatStore.isTyping && chatStore.messages[chatStore.messages.length - 1]?.role === 'user'" class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white shrink-0">
-            <BaseIcon name="Sparkles" :size="16" />
-          </div>
-          <div class="px-4 py-3 rounded-2xl rounded-bl-md" style="background-color: var(--bg-card); border: 1px solid var(--border-card);">
-            <div class="flex gap-1">
-              <span class="w-2 h-2 rounded-full bg-primary-400 animate-bounce" style="animation-delay: 0ms;" />
-              <span class="w-2 h-2 rounded-full bg-primary-400 animate-bounce" style="animation-delay: 150ms;" />
-              <span class="w-2 h-2 rounded-full bg-primary-400 animate-bounce" style="animation-delay: 300ms;" />
+      <section class="flex min-w-0 flex-1 flex-col overflow-hidden rounded-[32px] border" style="border-color: var(--border-card); background-color: var(--bg-card);">
+        <header class="flex items-center justify-between border-b px-4 py-4 sm:px-6" style="border-color: var(--border-default);">
+          <div class="flex items-center gap-3">
+            <button
+              @click="router.back()"
+              class="flex h-10 w-10 items-center justify-center rounded-2xl border transition-colors hover:bg-primary-500/5"
+              style="border-color: var(--border-default); color: var(--text-primary);"
+            >
+              <BaseIcon name="ChevronLeft" :size="20" />
+            </button>
+            <button
+              class="flex h-10 w-10 items-center justify-center rounded-2xl border lg:hidden"
+              style="border-color: var(--border-default); color: var(--text-primary);"
+              @click="mobileSidebarOpen = true"
+            >
+              <BaseIcon name="PanelLeft" :size="18" />
+            </button>
+            <div>
+              <p class="text-xs uppercase tracking-[0.24em] text-primary-500">TrailQuest AI</p>
+              <h1 class="mt-1 text-lg font-semibold sm:text-xl" style="color: var(--text-primary);">路线顾问</h1>
             </div>
           </div>
+
+          <div class="hidden items-center gap-2 rounded-full border px-4 py-2 text-xs sm:flex" style="border-color: var(--border-default); color: var(--text-secondary);">
+            <BaseIcon name="ShieldCheck" :size="14" class="text-primary-500" />
+            仅基于内部路线库生成建议
+          </div>
+        </header>
+
+        <div ref="messagesContainer" class="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+          <div v-if="chatStore.streamError" class="mb-4 rounded-2xl border px-4 py-3 text-sm" style="border-color: rgba(239, 68, 68, 0.25); background-color: rgba(239, 68, 68, 0.06); color: var(--text-secondary);">
+            {{ chatStore.streamError }}
+          </div>
+
+          <div v-if="!userStore.isLoggedIn" class="flex h-full flex-col items-center justify-center px-4 text-center">
+            <div class="flex h-16 w-16 items-center justify-center rounded-[24px] border" style="border-color: var(--border-default); background-color: color-mix(in srgb, var(--color-primary-500) 8%, var(--bg-card)); color: var(--color-primary-500);">
+              <BaseIcon name="Leaf" :size="28" />
+            </div>
+            <h2 class="mt-5 text-xl font-semibold" style="color: var(--text-primary);">登录后开启 TrailQuest AI</h2>
+            <p class="mt-3 max-w-md text-sm leading-7" style="color: var(--text-secondary);">
+              {{ welcomeDescription }}
+            </p>
+            <button
+              class="mt-6 rounded-full border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-primary-500/5"
+              style="border-color: var(--border-default); color: var(--text-primary);"
+              @click="userStore.showAuthModal = true"
+            >
+              立即登录
+            </button>
+          </div>
+
+          <div v-else-if="chatStore.messages.length === 0" class="flex h-full flex-col items-center justify-center px-4 text-center">
+            <div class="flex h-16 w-16 items-center justify-center rounded-[24px] border" style="border-color: var(--border-default); background-color: color-mix(in srgb, var(--color-primary-500) 8%, var(--bg-card)); color: var(--color-primary-500);">
+              <BaseIcon name="Leaf" :size="28" />
+            </div>
+            <h2 class="mt-5 text-xl font-semibold" style="color: var(--text-primary);">把路线问题交给我</h2>
+            <p class="mt-3 max-w-2xl text-sm leading-7" style="color: var(--text-secondary);">
+              {{ welcomeDescription }}
+            </p>
+            <div class="mt-8 grid w-full max-w-3xl grid-cols-1 gap-3 md:grid-cols-2">
+              <button
+                v-for="item in suggestions"
+                :key="item.text"
+                class="rounded-[24px] border px-4 py-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:bg-primary-500/5"
+                style="border-color: var(--border-card); background-color: var(--bg-page);"
+                @click="handleSuggestion(item.text)"
+              >
+                <div class="flex items-start gap-3">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border" style="border-color: var(--border-default); color: var(--color-primary-500);">
+                    <BaseIcon :name="item.icon" :size="18" />
+                  </div>
+                  <p class="text-sm leading-7" style="color: var(--text-primary);">{{ item.text }}</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="space-y-5">
+            <ChatBubble
+              v-for="msg in chatStore.messages"
+              :key="msg.id"
+              :message="msg"
+              @follow-up="handleFollowUp"
+            />
+          </div>
         </div>
-      </template>
+
+        <ChatInput :disabled="!userStore.isLoggedIn || chatStore.isStreaming" @send="handleSend" />
+      </section>
     </div>
 
-    <!-- Input Area -->
-    <ChatInput :disabled="chatStore.isTyping" @send="handleSend" />
+    <transition name="fade">
+      <div v-if="mobileSidebarOpen" class="fixed inset-0 z-40 bg-black/35 lg:hidden" @click="mobileSidebarOpen = false">
+        <aside class="absolute left-0 top-0 h-full w-[86vw] max-w-[360px] p-3" @click.stop>
+          <ChatSidebar
+            :conversations="chatStore.conversations"
+            :active-conversation-id="chatStore.activeConversationId"
+            :loading="chatStore.isBootstrapping"
+            @create="handleCreateConversation"
+            @select="handleSelectConversation"
+          />
+        </aside>
+      </div>
+    </transition>
   </main>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

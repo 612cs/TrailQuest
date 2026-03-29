@@ -8,6 +8,7 @@ const emit = defineEmits<{
 
 defineProps<{
   disabled?: boolean
+  placeholder?: string
 }>()
 
 const text = ref('')
@@ -27,35 +28,35 @@ function handleKeydown(e: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="px-4 py-3 border-t" style="border-color: var(--border-default); background-color: var(--bg-card);">
-    <div class="max-w-3xl mx-auto flex items-end gap-2">
-      <div class="flex-1 relative">
+  <div class="border-t px-4 py-4" style="border-color: var(--border-default); background-color: var(--bg-card);">
+    <div class="mx-auto max-w-4xl">
+      <div class="flex items-end gap-3 rounded-[28px] border px-3 py-3 sm:px-4" style="border-color: var(--border-card); background-color: var(--bg-page);">
         <textarea
           v-model="text"
           @keydown="handleKeydown"
           :disabled="disabled"
           rows="1"
-          placeholder="输入消息..."
-          class="w-full px-4 py-2.5 pr-4 rounded-xl text-sm resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/30 max-h-32"
+          :placeholder="placeholder || '描述你想去哪里、想走多久，或者直接问我装备和天气建议...'"
+          class="min-h-[96px] w-full resize-none bg-transparent px-2 py-2 text-sm leading-7 transition-colors focus:outline-none sm:text-[15px]"
           style="
-            background-color: var(--bg-input);
             color: var(--text-primary);
-            border: 1px solid var(--border-default);
           "
         />
+        <button
+          @click="handleSend"
+          :disabled="!text.trim() || disabled"
+          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
+          :style="text.trim() && !disabled
+            ? 'border-color: var(--color-primary-500); background-color: var(--color-primary-500); color: white;'
+            : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-tertiary);'"
+        >
+          <BaseIcon name="Send" :size="18" />
+        </button>
       </div>
-      <button
-        @click="handleSend"
-        :disabled="!text.trim() || disabled"
-        class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-        :class="
-          text.trim() && !disabled
-            ? 'bg-primary-500 text-white hover:bg-primary-600 active:scale-95'
-            : 'bg-gray-200 text-gray-400'
-        "
-      >
-        <BaseIcon name="Send" :size="18" />
-      </button>
+      <div class="mt-2 flex items-center justify-between px-1 text-[11px] sm:text-xs" style="color: var(--text-tertiary);">
+        <span>Enter 发送，Shift + Enter 换行</span>
+        <span>仅基于 TrailQuest 内部路线库生成推荐</span>
+      </div>
     </div>
   </div>
 </template>

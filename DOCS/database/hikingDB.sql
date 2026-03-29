@@ -44,6 +44,7 @@ CREATE TABLE `ai_messages` (
   `role` enum('user','assistant','system') NOT NULL COMMENT '消息角色',
   `content` text NOT NULL COMMENT '消息内容',
   `tokens` int DEFAULT '0' COMMENT '估算token数',
+  `metadata_json` json DEFAULT NULL COMMENT '结构化消息元数据',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`),
   KEY `idx_ai_messages_conversation_created` (`conversation_id`,`created_at`),

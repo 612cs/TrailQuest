@@ -23,7 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties({ JwtProperties.class, OssProperties.class, GeoProperties.class })
+@EnableConfigurationProperties({ JwtProperties.class, OssProperties.class, GeoProperties.class, AiProperties.class })
 public class SecurityConfig {
 
     @Bean
