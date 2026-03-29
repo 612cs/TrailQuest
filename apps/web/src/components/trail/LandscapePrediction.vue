@@ -36,22 +36,6 @@ const cards = computed<LandscapeItem[]>(() => {
 
   return [
     {
-      key: 'sunriseSunset',
-      name: '日出日落',
-      icon: 'Sunrise',
-      accent: 'text-orange-400',
-      accentBg: 'bg-orange-500/10',
-      ...props.prediction.sunriseSunset,
-    },
-    {
-      key: 'milkyWay',
-      name: '银河',
-      icon: 'Stars',
-      accent: 'text-sky-300',
-      accentBg: 'bg-sky-500/10',
-      ...props.prediction.milkyWay,
-    },
-    {
       key: 'cloudSea',
       name: '云海',
       icon: 'Cloud',
@@ -93,13 +77,13 @@ const cards = computed<LandscapeItem[]>(() => {
         class="text-[11px] px-2.5 py-1 rounded-full border shrink-0"
         style="color: var(--text-secondary); border-color: color-mix(in srgb, var(--primary-500) 18%, transparent); background: color-mix(in srgb, var(--primary-500) 8%, transparent);"
       >
-        {{ prediction.source.astroReady ? prediction.source.provider : '天文数据未就绪' }}
+        {{ prediction.source.provider }}
       </div>
     </div>
 
-    <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-4">
+    <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <div
-        v-for="index in 5"
+        v-for="index in 3"
         :key="index"
         class="rounded-2xl border p-5 animate-pulse"
         style="border-color: color-mix(in srgb, var(--primary-500) 14%, transparent); background: color-mix(in srgb, white 4%, transparent);"
@@ -125,7 +109,7 @@ const cards = computed<LandscapeItem[]>(() => {
       </div>
     </div>
 
-    <div v-else-if="cards.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-4">
+    <div v-else-if="cards.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <article
         v-for="item in cards"
         :key="item.key"
