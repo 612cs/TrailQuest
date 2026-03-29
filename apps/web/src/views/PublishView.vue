@@ -751,7 +751,6 @@ async function handleSubmit() {
           <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
             <BaseIcon name="Image" :size="16" class="text-primary-500" />
             封面图片
-            <span class="text-[11px] font-medium text-red-500">必填</span>
           </h3>
           <div class="space-y-3">
             <div v-if="coverItems.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -868,13 +867,13 @@ async function handleSubmit() {
           </h3>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线名称 <span class="text-red-500">必填</span></label>
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线名称</label>
             <input v-model="currentDraft.fields.name" type="text" placeholder="例如：龙脊梯田精华线" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" :style="hasFieldError('name') ? 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--color-hard);' : 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);'" :disabled="isSubmissionRunning" />
             <p v-if="hasFieldError('name')" class="mt-1.5 text-xs text-red-500">请填写路线名称</p>
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">所在位置 <span class="text-red-500">必填</span></label>
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">所在位置</label>
             <input v-model="currentDraft.fields.location" type="text" placeholder="例如：广西 桂林 龙胜" class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/30" :style="hasFieldError('location') ? 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--color-hard);' : 'background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);'" :disabled="isSubmissionRunning" />
             <p
               v-if="trackLocationHint"
@@ -1068,7 +1067,7 @@ async function handleSubmit() {
             {{ submitButtonLabel }}
           </button>
           <p class="mt-3 text-center text-xs" style="color: var(--text-secondary);">
-            目前仅封面图片、路线名称、所在位置为必填。其余信息都可选，点击按钮后会提示你缺少的内容。
+            可以先自由填写，点击按钮后我们会提示还缺少哪些关键信息。
           </p>
         </div>
       </template>
