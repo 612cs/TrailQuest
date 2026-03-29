@@ -24,6 +24,11 @@ public interface TrailMapper extends BaseMapper<Trail> {
               t.name,
               t.location,
               t.ip,
+              t.geo_country,
+              t.geo_province,
+              t.geo_city,
+              t.geo_district,
+              t.geo_source,
               t.difficulty,
               t.difficulty_label,
               t.pack_type,
@@ -73,10 +78,22 @@ public interface TrailMapper extends BaseMapper<Trail> {
             ) tag_summary ON tag_summary.trail_id = t.id
             <where>
               AND t.status = 'active'
+              <if test="query.geoDistrict != null and query.geoDistrict != ''">
+                AND t.geo_district = #{query.geoDistrict}
+              </if>
+              <if test="(query.geoDistrict == null or query.geoDistrict == '') and query.geoCity != null and query.geoCity != ''">
+                AND t.geo_city = #{query.geoCity}
+              </if>
+              <if test="(query.geoDistrict == null or query.geoDistrict == '') and (query.geoCity == null or query.geoCity == '') and query.geoProvince != null and query.geoProvince != ''">
+                AND t.geo_province = #{query.geoProvince}
+              </if>
               <if test="query.keyword != null and query.keyword != ''">
                 AND (
                   t.name LIKE CONCAT('%', #{query.keyword}, '%')
                   OR t.location LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.geo_province LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.geo_city LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.geo_district LIKE CONCAT('%', #{query.keyword}, '%')
                   OR t.description LIKE CONCAT('%', #{query.keyword}, '%')
                 )
               </if>
@@ -133,6 +150,11 @@ public interface TrailMapper extends BaseMapper<Trail> {
               t.name,
               t.location,
               t.ip,
+              t.geo_country,
+              t.geo_province,
+              t.geo_city,
+              t.geo_district,
+              t.geo_source,
               t.difficulty,
               t.difficulty_label,
               t.pack_type,

@@ -42,6 +42,9 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
 
     private static final Pattern DISTANCE_PATTERN = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(km|公里)", Pattern.CASE_INSENSITIVE);
     private static final List<String> SCENE_TAGS = List.of("日出", "日落", "云海", "摄影", "湖泊", "露营", "森林", "古道", "溪流", "亲子", "新手");
+    private static final Set<String> PROVINCES = Set.of("江西", "浙江", "四川", "云南");
+    private static final Set<String> CITIES = Set.of("萍乡", "杭州", "临安", "湖州", "大理");
+    private static final Set<String> DISTRICTS = Set.of("芦溪", "安福", "临安区");
 
     private final DashScopeChatService dashScopeChatService;
     private final TrailService trailService;
@@ -50,10 +53,13 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
 
     @Override
     public AiRecommendationResult planRecommendation(Long userId, String message) {
+        long startedAt = System.currentTimeMillis();
         UserHikingProfile profile = userHikingProfileMapper.selectByUserId(userId);
         String preferenceSummary = buildPreferenceSummary(profile);
         AiParsedQuery parsedQuery = parseQuery(message, preferenceSummary);
+        long intentParseMs = System.currentTimeMillis() - startedAt;
         if (parsedQuery.intent() != AiIntent.TRAIL_RECOMMENDATION) {
+            log.info("AI recommendation fast path intent=general_qa intent_parse_ms={}", intentParseMs);
             return AiRecommendationResult.builder()
                     .intent(AiIntent.GENERAL_QA)
                     .parsedQuery(parsedQuery)
@@ -74,10 +80,16 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
         request.setPackType(parsedQuery.packType());
         request.setDurationType(parsedQuery.durationType());
         request.setDistance(parsedQuery.distance());
+        request.setGeoProvince(parsedQuery.geoProvince());
+        request.setGeoCity(parsedQuery.geoCity());
+        request.setGeoDistrict(parsedQuery.geoDistrict());
         request.setKeyword(buildPrimaryKeyword(parsedQuery, message));
 
+        long searchStartedAt = System.currentTimeMillis();
         List<TrailDetailVo> candidates = trailService.pageTrails(request, userId).getList();
-        if (candidates.isEmpty() && StringUtils.hasText(parsedQuery.location())) {
+        boolean fallbackSearch = false;
+        if (candidates.isEmpty() && hasStructuredGeo(parsedQuery)) {
+            fallbackSearch = true;
             TrailPageRequest fallbackRequest = new TrailPageRequest();
             fallbackRequest.setPageNum(1);
             fallbackRequest.setPageSize(12);
@@ -85,6 +97,16 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
             fallbackRequest.setKeyword(parsedQuery.location());
             candidates = trailService.pageTrails(fallbackRequest, userId).getList();
         }
+        if (candidates.isEmpty() && StringUtils.hasText(parsedQuery.location())) {
+            fallbackSearch = true;
+            TrailPageRequest fallbackRequest = new TrailPageRequest();
+            fallbackRequest.setPageNum(1);
+            fallbackRequest.setPageSize(12);
+            fallbackRequest.setSort("hot");
+            fallbackRequest.setKeyword(parsedQuery.location());
+            candidates = trailService.pageTrails(fallbackRequest, userId).getList();
+        }
+        long searchMs = System.currentTimeMillis() - searchStartedAt;
 
         List<TrailDetailVo> ranked = candidates.stream()
                 .sorted(Comparator.comparingDouble((TrailDetailVo trail) -> scoreTrail(trail, parsedQuery, profile, message)).reversed())
@@ -94,6 +116,17 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
         List<AiTrailCardVo> cards = ranked.stream()
                 .map(trail -> toTrailCard(trail, parsedQuery, profile, message))
                 .toList();
+
+        log.info(
+                "AI recommendation intent=trail_recommendation intent_parse_ms={} search_ms={} result_count={} fallback_search={} geo_province={} geo_city={} geo_district={} keyword={}",
+                intentParseMs,
+                searchMs,
+                cards.size(),
+                fallbackSearch,
+                parsedQuery.geoProvince(),
+                parsedQuery.geoCity(),
+                parsedQuery.geoDistrict(),
+                request.getKeyword());
 
         return AiRecommendationResult.builder()
                 .intent(AiIntent.TRAIL_RECOMMENDATION)
@@ -106,6 +139,9 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
     }
 
     private AiParsedQuery parseQuery(String message, String preferenceSummary) {
+        if (!looksLikeRecommendationIntent(message)) {
+            return heuristicParse(message);
+        }
         AiParsedQuery llmParsed = tryLlmParse(message, preferenceSummary);
         if (llmParsed != null) {
             return llmParsed;
@@ -124,11 +160,15 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
                             .role("user")
                             .content("用户画像摘要：" + preferenceSummary + "\n用户消息：" + message)
                             .build());
-            String rawJson = dashScopeChatService.completeJson(messages);
+            String rawJson = dashScopeChatService.completeJson(messages, "qwen-plus");
             JsonNode node = objectMapper.readTree(rawJson);
+            GeoMatch geoMatch = resolveGeoMatch(asNullable(node.path("location").asText(null)));
             return AiParsedQuery.builder()
                     .intent("trail_recommendation".equalsIgnoreCase(node.path("intent").asText()) ? AiIntent.TRAIL_RECOMMENDATION : AiIntent.GENERAL_QA)
-                    .location(asNullable(node.path("location").asText(null)))
+                    .location(geoMatch.location())
+                    .geoProvince(geoMatch.province())
+                    .geoCity(geoMatch.city())
+                    .geoDistrict(geoMatch.district())
                     .difficulty(normalizeDifficulty(node.path("difficulty").asText(null)))
                     .packType(normalizePackType(node.path("packType").asText(null)))
                     .durationType(normalizeDurationType(node.path("durationType").asText(null)))
@@ -159,15 +199,18 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
                         : null;
         String distance = detectDistance(normalized);
         List<String> tags = SCENE_TAGS.stream().filter(normalized::contains).toList();
-        boolean recommendationIntent = normalized.contains("推荐") || normalized.contains("路线") || normalized.contains("徒步") || normalized.contains("哪里");
-        String location = detectLocation(normalized);
+        boolean recommendationIntent = looksLikeRecommendationIntent(normalized);
+        GeoMatch geoMatch = resolveGeoMatch(detectLocation(normalized));
         List<String> keywords = new ArrayList<>(tags);
-        if (StringUtils.hasText(location)) {
-            keywords.add(location);
+        if (StringUtils.hasText(geoMatch.location())) {
+            keywords.add(geoMatch.location());
         }
         return AiParsedQuery.builder()
                 .intent(recommendationIntent ? AiIntent.TRAIL_RECOMMENDATION : AiIntent.GENERAL_QA)
-                .location(location)
+                .location(geoMatch.location())
+                .geoProvince(geoMatch.province())
+                .geoCity(geoMatch.city())
+                .geoDistrict(geoMatch.district())
                 .difficulty(difficulty)
                 .packType(packType)
                 .durationType(durationType)
@@ -179,7 +222,13 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
 
     private double scoreTrail(TrailDetailVo trail, AiParsedQuery parsedQuery, UserHikingProfile profile, String message) {
         double score = 0;
-        if (StringUtils.hasText(parsedQuery.location()) && trail.getLocation() != null && trail.getLocation().contains(parsedQuery.location())) {
+        if (StringUtils.hasText(parsedQuery.geoDistrict()) && parsedQuery.geoDistrict().equals(trail.getGeoDistrict())) {
+            score += 42;
+        } else if (StringUtils.hasText(parsedQuery.geoCity()) && parsedQuery.geoCity().equals(trail.getGeoCity())) {
+            score += 35;
+        } else if (StringUtils.hasText(parsedQuery.geoProvince()) && parsedQuery.geoProvince().equals(trail.getGeoProvince())) {
+            score += 26;
+        } else if (StringUtils.hasText(parsedQuery.location()) && trail.getLocation() != null && trail.getLocation().contains(parsedQuery.location())) {
             score += 35;
         }
         if (StringUtils.hasText(parsedQuery.difficulty()) && parsedQuery.difficulty().equals(trail.getDifficulty())) {
@@ -246,7 +295,13 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
 
     private String buildReason(TrailDetailVo trail, AiParsedQuery parsedQuery, UserHikingProfile profile, String message) {
         List<String> reasons = new ArrayList<>();
-        if (StringUtils.hasText(parsedQuery.location()) && trail.getLocation().contains(parsedQuery.location())) {
+        if (StringUtils.hasText(parsedQuery.geoDistrict()) && parsedQuery.geoDistrict().equals(trail.getGeoDistrict())) {
+            reasons.add("区县位置与需求高度匹配");
+        } else if (StringUtils.hasText(parsedQuery.geoCity()) && parsedQuery.geoCity().equals(trail.getGeoCity())) {
+            reasons.add("位置接近你提到的城市");
+        } else if (StringUtils.hasText(parsedQuery.geoProvince()) && parsedQuery.geoProvince().equals(trail.getGeoProvince())) {
+            reasons.add("位于你想找的省份范围内");
+        } else if (StringUtils.hasText(parsedQuery.location()) && StringUtils.hasText(trail.getLocation()) && trail.getLocation().contains(parsedQuery.location())) {
             reasons.add("位置接近你提到的区域");
         }
         if (StringUtils.hasText(parsedQuery.difficulty()) && parsedQuery.difficulty().equals(trail.getDifficulty())) {
@@ -330,6 +385,9 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
     }
 
     private String buildPrimaryKeyword(AiParsedQuery parsedQuery, String message) {
+        if (StringUtils.hasText(parsedQuery.geoDistrict()) || StringUtils.hasText(parsedQuery.geoCity()) || StringUtils.hasText(parsedQuery.geoProvince())) {
+            return null;
+        }
         if (StringUtils.hasText(parsedQuery.location())) {
             return parsedQuery.location();
         }
@@ -472,5 +530,65 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
             return "(" + value.toPlainString() + "k 条评论)";
         }
         return "(" + safeCount + " 条评论)";
+    }
+
+    private boolean looksLikeRecommendationIntent(String message) {
+        if (!StringUtils.hasText(message)) {
+            return false;
+        }
+        return message.contains("推荐")
+                || message.contains("路线")
+                || message.contains("徒步")
+                || message.contains("有没有")
+                || message.contains("附近")
+                || message.contains("哪里");
+    }
+
+    private boolean hasStructuredGeo(AiParsedQuery parsedQuery) {
+        return StringUtils.hasText(parsedQuery.geoProvince())
+                || StringUtils.hasText(parsedQuery.geoCity())
+                || StringUtils.hasText(parsedQuery.geoDistrict());
+    }
+
+    private GeoMatch resolveGeoMatch(String location) {
+        if (!StringUtils.hasText(location)) {
+            return new GeoMatch(null, null, null, null);
+        }
+        String normalized = location.trim()
+                .replace("附近", "")
+                .replace("一带", "")
+                .replace("省", "")
+                .replace("市", "")
+                .replace("区", "")
+                .replace("县", "")
+                .trim();
+        for (String district : DISTRICTS) {
+            if (normalized.contains(district)) {
+                return new GeoMatch(district, null, null, district);
+            }
+        }
+        for (String city : CITIES) {
+            if (normalized.contains(city)) {
+                return new GeoMatch(city, null, city, null);
+            }
+        }
+        for (String province : PROVINCES) {
+            if (normalized.contains(province)) {
+                return new GeoMatch(province, province, null, null);
+            }
+        }
+        if (DISTRICTS.contains(normalized)) {
+            return new GeoMatch(normalized, null, null, normalized);
+        }
+        if (CITIES.contains(normalized)) {
+            return new GeoMatch(normalized, null, normalized, null);
+        }
+        if (PROVINCES.contains(normalized)) {
+            return new GeoMatch(normalized, normalized, null, null);
+        }
+        return new GeoMatch(normalized, null, null, null);
+    }
+
+    private record GeoMatch(String location, String province, String city, String district) {
     }
 }

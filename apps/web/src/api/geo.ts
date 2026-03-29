@@ -8,6 +8,7 @@ export interface ReverseGeoPayload {
 export interface ReverseGeoResult {
   lng: number
   lat: number
+  country?: string | null
   province?: string | null
   city?: string | null
   district?: string | null

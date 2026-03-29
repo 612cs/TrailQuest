@@ -35,6 +35,14 @@ export interface PublishDraftFields {
   customTag: string
 }
 
+export interface PublishDraftGeo {
+  country: string
+  province: string
+  city: string
+  district: string
+  source: string
+}
+
 export interface PublishImageAsset {
   id: string
   source: 'existing' | 'local'
@@ -84,5 +92,6 @@ export interface PublishDraftState {
   trackItem: PublishTrackAsset | null
   geoJsonData: unknown
   trackPreviewError: string
+  geo: PublishDraftGeo
   task: PublishTaskState
 }

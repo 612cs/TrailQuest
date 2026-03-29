@@ -57,9 +57,10 @@ export interface AiChatStreamPayload {
 }
 
 export type AiStreamEvent =
+  | { event: 'auth.ok'; data: { userId: EntityId; displayName: string } }
   | { event: 'session'; data: { conversationId: EntityId } }
   | { event: 'delta'; data: { content: string } }
   | { event: 'trail_cards'; data: AiTrailCard[] }
   | { event: 'follow_ups'; data: AiFollowUp[] }
-  | { event: 'done'; data: { conversationId: EntityId; intent: string; finishedAt: string; hasTrailCards: boolean } }
+  | { event: 'done'; data: { conversationId: EntityId; intent: string; finishedAt: string; hasTrailCards: boolean; modelFirstTokenMs?: number; modelTotalMs?: number; intentParseMs?: number } }
   | { event: 'error'; data: { code: string; message: string } }

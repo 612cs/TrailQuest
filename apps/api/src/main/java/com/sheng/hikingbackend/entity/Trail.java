@@ -27,6 +27,16 @@ public class Trail {
     private BigDecimal startLng;
     @TableField("start_lat")
     private BigDecimal startLat;
+    @TableField("geo_country")
+    private String geoCountry;
+    @TableField("geo_province")
+    private String geoProvince;
+    @TableField("geo_city")
+    private String geoCity;
+    @TableField("geo_district")
+    private String geoDistrict;
+    @TableField("geo_source")
+    private String geoSource;
     private String difficulty;
 
     @TableField("difficulty_label")

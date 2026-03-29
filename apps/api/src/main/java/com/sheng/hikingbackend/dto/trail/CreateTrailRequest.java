@@ -16,6 +16,11 @@ public class CreateTrailRequest {
 
     @NotBlank(message = "所在位置不能为空")
     private String location;
+    private String geoCountry;
+    private String geoProvince;
+    private String geoCity;
+    private String geoDistrict;
+    private String geoSource;
 
     @NotBlank(message = "难度不能为空")
     private String difficulty;

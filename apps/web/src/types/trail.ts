@@ -55,6 +55,11 @@ export interface TrailListItem {
   name: string
   location: string
   ip: string
+  geoCountry?: string | null
+  geoProvince?: string | null
+  geoCity?: string | null
+  geoDistrict?: string | null
+  geoSource?: string | null
   difficulty: 'easy' | 'moderate' | 'hard'
   difficultyLabel: string
   packType: 'light' | 'heavy' | 'both'

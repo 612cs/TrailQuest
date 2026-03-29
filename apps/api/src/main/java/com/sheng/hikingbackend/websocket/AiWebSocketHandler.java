@@ -1,4 +1,4 @@
-package com.sheng.hikingbackend.service.impl;
+package com.sheng.hikingbackend.websocket;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -7,19 +7,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.config.AiProperties;
+import com.sheng.hikingbackend.config.CustomUserDetails;
+import com.sheng.hikingbackend.config.CustomUserDetailsService;
+import com.sheng.hikingbackend.config.JwtTokenProvider;
+import com.sheng.hikingbackend.dto.ai.AiChatContextRequest;
 import com.sheng.hikingbackend.dto.ai.AiChatStreamRequest;
 import com.sheng.hikingbackend.entity.AiConversation;
 import com.sheng.hikingbackend.entity.AiMessage;
-import com.sheng.hikingbackend.service.AiChatService;
 import com.sheng.hikingbackend.service.AiConversationService;
 import com.sheng.hikingbackend.service.AiRouteRecommendationService;
 import com.sheng.hikingbackend.service.DashScopeChatService;
@@ -28,39 +34,106 @@ import com.sheng.hikingbackend.service.impl.ai.model.AiMessageMetadata;
 import com.sheng.hikingbackend.service.impl.ai.model.AiRecommendationResult;
 import com.sheng.hikingbackend.service.impl.ai.model.DashScopeMessage;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
-@RequiredArgsConstructor
-public class AiChatServiceImpl implements AiChatService {
+@Component
+public class AiWebSocketHandler extends TextWebSocketHandler {
 
+    private static final String USER_ID_KEY = "userId";
+
+    private final ObjectMapper objectMapper;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final CustomUserDetailsService customUserDetailsService;
     private final AiConversationService aiConversationService;
     private final AiRouteRecommendationService aiRouteRecommendationService;
     private final DashScopeChatService dashScopeChatService;
     private final AiProperties aiProperties;
-    private final ObjectMapper objectMapper;
-
-    @Qualifier("aiTaskExecutor")
     private final Executor aiTaskExecutor;
 
-    @Override
-    public SseEmitter streamChat(Long userId, AiChatStreamRequest request) {
-        SseEmitter emitter = new SseEmitter(0L);
-        aiTaskExecutor.execute(() -> handleStream(userId, request, emitter));
-        return emitter;
+    public AiWebSocketHandler(
+            ObjectMapper objectMapper,
+            JwtTokenProvider jwtTokenProvider,
+            CustomUserDetailsService customUserDetailsService,
+            AiConversationService aiConversationService,
+            AiRouteRecommendationService aiRouteRecommendationService,
+            DashScopeChatService dashScopeChatService,
+            AiProperties aiProperties,
+            @Qualifier("aiTaskExecutor") Executor aiTaskExecutor) {
+        this.objectMapper = objectMapper;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.customUserDetailsService = customUserDetailsService;
+        this.aiConversationService = aiConversationService;
+        this.aiRouteRecommendationService = aiRouteRecommendationService;
+        this.dashScopeChatService = dashScopeChatService;
+        this.aiProperties = aiProperties;
+        this.aiTaskExecutor = aiTaskExecutor;
     }
 
-    private void handleStream(Long userId, AiChatStreamRequest request, SseEmitter emitter) {
+    @Override
+    public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        JsonNode payload = objectMapper.readTree(message.getPayload());
+        String type = payload.path("type").asText("");
+        switch (type) {
+            case "auth" -> handleAuth(session, payload);
+            case "chat.send" -> handleChatSend(session, payload);
+            default -> sendEvent(session, "error", Map.of("code", "AI_WS_UNSUPPORTED", "message", "不支持的消息类型"));
+        }
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        log.info("AI websocket closed session_id={} code={}", session.getId(), status.getCode());
+    }
+
+    private void handleAuth(WebSocketSession session, JsonNode payload) throws Exception {
+        String token = payload.path("token").asText("");
+        if (!StringUtils.hasText(token) || !jwtTokenProvider.validateToken(token)) {
+            sendEvent(session, "error", Map.of("code", "UNAUTHORIZED", "message", "登录态已失效，请重新登录"));
+            return;
+        }
+        String email = jwtTokenProvider.getSubject(token);
+        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByUsername(email);
+        session.getAttributes().put(USER_ID_KEY, userDetails.getId());
+        sendEvent(session, "auth.ok", Map.of("userId", userDetails.getId(), "displayName", userDetails.getDisplayName()));
+    }
+
+    private void handleChatSend(WebSocketSession session, JsonNode payload) throws Exception {
+        Long userId = (Long) session.getAttributes().get(USER_ID_KEY);
+        if (userId == null) {
+            sendEvent(session, "error", Map.of("code", "UNAUTHORIZED", "message", "请先完成登录认证"));
+            return;
+        }
+
+        AiChatStreamRequest request = new AiChatStreamRequest();
+        if (payload.hasNonNull("conversationId")) {
+            request.setConversationId(payload.path("conversationId").asLong());
+        }
+        request.setMessage(payload.path("message").asText(""));
+        if (!StringUtils.hasText(request.getMessage())) {
+            sendEvent(session, "error", Map.of("code", "AI_MESSAGE_REQUIRED", "message", "消息内容不能为空"));
+            return;
+        }
+
+        if (payload.has("context") && !payload.path("context").isNull()) {
+            request.setContext(objectMapper.treeToValue(payload.path("context"), AiChatContextRequest.class));
+        }
+
+        aiTaskExecutor.execute(() -> handleChat(session, userId, request));
+    }
+
+    private void handleChat(WebSocketSession session, Long userId, AiChatStreamRequest request) {
         try {
             AiConversation conversation = resolveConversation(userId, request);
             aiConversationService.appendUserMessage(conversation.getId(), request.getMessage());
-            sendEvent(emitter, "session", Map.of("conversationId", conversation.getId()));
+            sendEvent(session, "session", Map.of("conversationId", conversation.getId()));
 
+            long recommendationStartedAt = System.currentTimeMillis();
             AiRecommendationResult recommendation = aiRouteRecommendationService.planRecommendation(userId, request.getMessage());
+            long recommendationMs = System.currentTimeMillis() - recommendationStartedAt;
+
             if (!recommendation.trailCards().isEmpty()) {
-                sendEvent(emitter, "trail_cards", recommendation.trailCards());
+                sendEvent(session, "trail_cards", recommendation.trailCards());
             }
 
             String metadataJson = objectMapper.writeValueAsString(AiMessageMetadata.builder()
@@ -78,7 +151,7 @@ public class AiChatServiceImpl implements AiChatService {
                         if (firstTokenMs[0] < 0) {
                             firstTokenMs[0] = System.currentTimeMillis() - modelStartedAt;
                         }
-                        sendEventQuietly(emitter, "delta", Map.of("content", delta));
+                        sendEvent(session, "delta", Map.of("content", delta));
                     });
             long modelTotalMs = System.currentTimeMillis() - modelStartedAt;
 
@@ -86,33 +159,29 @@ public class AiChatServiceImpl implements AiChatService {
                 aiConversationService.appendAssistantMessage(conversation.getId(), answer, metadataJson, null);
             }
             if (!recommendation.followUps().isEmpty()) {
-                sendEvent(emitter, "follow_ups", recommendation.followUps());
+                sendEvent(session, "follow_ups", recommendation.followUps());
             }
 
-            Map<String, Object> donePayload = new LinkedHashMap<>();
-            donePayload.put("conversationId", conversation.getId());
-            donePayload.put("intent", recommendation.intent().name().toLowerCase());
-            donePayload.put("finishedAt", LocalDateTime.now().toString());
-            donePayload.put("hasTrailCards", !recommendation.trailCards().isEmpty());
-            donePayload.put("modelFirstTokenMs", firstTokenMs[0]);
-            donePayload.put("modelTotalMs", modelTotalMs);
-            sendEvent(emitter, "done", donePayload);
+            sendEvent(session, "done", Map.of(
+                    "conversationId", conversation.getId(),
+                    "intent", recommendation.intent().name().toLowerCase(),
+                    "finishedAt", LocalDateTime.now().toString(),
+                    "hasTrailCards", !recommendation.trailCards().isEmpty(),
+                    "intentParseMs", recommendationMs,
+                    "modelFirstTokenMs", firstTokenMs[0],
+                    "modelTotalMs", modelTotalMs));
+
             log.info(
-                    "AI chat completed conversation_id={} intent={} model_first_token_ms={} model_total_ms={} trail_cards={}",
+                    "AI websocket completed conversation_id={} intent={} recommendation_ms={} model_first_token_ms={} model_total_ms={} trail_cards={}",
                     conversation.getId(),
                     recommendation.intent().name().toLowerCase(),
+                    recommendationMs,
                     firstTokenMs[0],
                     modelTotalMs,
                     recommendation.trailCards().size());
-            emitter.complete();
         } catch (Exception ex) {
-            if (isClientDisconnected(ex)) {
-                log.info("AI stream client disconnected");
-                emitter.complete();
-                return;
-            }
-            log.error("AI stream failed", ex);
-            sendError(emitter, ex);
+            log.error("AI websocket chat failed", ex);
+            sendError(session, ex);
         }
     }
 
@@ -177,42 +246,23 @@ public class AiChatServiceImpl implements AiChatService {
                 : aiProperties.getModel();
     }
 
-    private void sendError(SseEmitter emitter, Exception ex) {
-        try {
-            String message = ex instanceof BusinessException ? ex.getMessage() : "AI 对话暂时不可用，请稍后重试";
-            String code = ex instanceof BusinessException businessException ? businessException.getCode() : "AI_STREAM_FAILED";
-            sendEvent(emitter, "error", Map.of("code", code, "message", message));
-            emitter.complete();
-        } catch (Exception inner) {
-            log.warn("Failed to send AI stream error event", inner);
-            emitter.completeWithError(ex);
-        }
+    private void sendError(WebSocketSession session, Exception ex) {
+        String message = ex instanceof BusinessException ? ex.getMessage() : "AI 对话暂时不可用，请稍后重试";
+        String code = ex instanceof BusinessException businessException ? businessException.getCode() : "AI_STREAM_FAILED";
+        sendEvent(session, "error", Map.of("code", code, "message", message));
     }
 
-    private void sendEventQuietly(SseEmitter emitter, String event, Object payload) {
+    private void sendEvent(WebSocketSession session, String type, Object data) {
+        if (!session.isOpen()) {
+            return;
+        }
         try {
-            sendEvent(emitter, event, payload);
+            String payload = objectMapper.writeValueAsString(Map.of("type", type, "data", data));
+            synchronized (session) {
+                session.sendMessage(new TextMessage(payload));
+            }
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
-    }
-
-    private void sendEvent(SseEmitter emitter, String event, Object payload) throws java.io.IOException {
-        emitter.send(SseEmitter.event().name(event).data(payload));
-    }
-
-    private boolean isClientDisconnected(Throwable throwable) {
-        Throwable current = throwable;
-        while (current != null) {
-            if (current instanceof ClientAbortException) {
-                return true;
-            }
-            if (current instanceof java.io.IOException && StringUtils.hasText(current.getMessage())
-                    && current.getMessage().toLowerCase().contains("broken pipe")) {
-                return true;
-            }
-            current = current.getCause();
-        }
-        return false;
     }
 }

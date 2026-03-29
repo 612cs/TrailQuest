@@ -15,6 +15,28 @@ export function fetchAiMessages(conversationId: string | number) {
   return http.get<AiMessage[]>(`/api/ai/conversations/${conversationId}/messages`)
 }
 
+export function buildAiWebSocketUrl() {
+  return API_BASE_URL.replace(/^http/i, 'ws') + '/ws/ai'
+}
+
+export function getAiAccessToken() {
+  return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY)
+}
+
+export function parseAiSocketMessage(raw: string): AiStreamEvent | null {
+  if (!raw.trim()) {
+    return null
+  }
+  const payload = JSON.parse(raw) as { type?: string; data?: unknown }
+  if (!payload.type) {
+    return null
+  }
+  return {
+    event: payload.type as AiStreamEvent['event'],
+    data: payload.data as AiStreamEvent['data'],
+  } as AiStreamEvent
+}
+
 export async function streamAiChat(
   payload: AiChatStreamPayload,
   handlers: {

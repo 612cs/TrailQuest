@@ -8,6 +8,9 @@ import lombok.Builder;
 public record AiParsedQuery(
         AiIntent intent,
         String location,
+        String geoProvince,
+        String geoCity,
+        String geoDistrict,
         String difficulty,
         String packType,
         String durationType,

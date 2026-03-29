@@ -525,6 +525,13 @@ async function autofillTrackLocation(coordinates: TrackCoordinate[]) {
       draft.fields.location = result.formattedLocation.trim()
       trackLocationHint.value = '已根据轨迹起点自动识别所在市县'
     }
+    draft.geo = {
+      country: result.country?.trim() ?? '',
+      province: result.province?.trim() ?? '',
+      city: result.city?.trim() ?? '',
+      district: result.district?.trim() ?? '',
+      source: 'track_reverse',
+    }
   } catch (error) {
     if (reverseGeoRequestId.value !== requestId) {
       return

@@ -23,7 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@EnableConfigurationProperties({ JwtProperties.class, OssProperties.class, GeoProperties.class, AiProperties.class })
+@EnableConfigurationProperties({ JwtProperties.class, OssProperties.class, GeoProperties.class, AiProperties.class, TrailGeoBackfillProperties.class })
 public class SecurityConfig {
 
     @Bean
@@ -78,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers("/hello", "/test/**").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/ws/ai").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/geo/reverse").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/*/card").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/trails", "/api/trails/**").permitAll()

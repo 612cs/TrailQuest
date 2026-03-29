@@ -37,6 +37,7 @@ import com.sheng.hikingbackend.mapper.TrailLikeMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.TrailTagMapper;
 import com.sheng.hikingbackend.mapper.TrailTrackMapper;
+import com.sheng.hikingbackend.service.GeoService;
 import com.sheng.hikingbackend.service.TrackParseService;
 import com.sheng.hikingbackend.service.TrailService;
 import com.sheng.hikingbackend.service.impl.support.TrackParseResult;
@@ -63,6 +64,7 @@ public class TrailServiceImpl implements TrailService {
     private final TrailTagMapper trailTagMapper;
     private final TagMapper tagMapper;
     private final TrailTrackMapper trailTrackMapper;
+    private final GeoService geoService;
     private final TrackParseService trackParseService;
     private final ObjectMapper objectMapper;
 
@@ -196,6 +198,11 @@ public class TrailServiceImpl implements TrailService {
                 .name(row.getName())
                 .location(row.getLocation())
                 .ip(row.getIp())
+                .geoCountry(row.getGeoCountry())
+                .geoProvince(row.getGeoProvince())
+                .geoCity(row.getGeoCity())
+                .geoDistrict(row.getGeoDistrict())
+                .geoSource(row.getGeoSource())
                 .difficulty(row.getDifficulty())
                 .difficultyLabel(row.getDifficultyLabel())
                 .packType(row.getPackType())
@@ -241,6 +248,7 @@ public class TrailServiceImpl implements TrailService {
         trail.setLocation(request.getLocation().trim());
         trail.setStartLng(parsedTrack == null ? null : parsedTrack.getStartLng());
         trail.setStartLat(parsedTrack == null ? null : parsedTrack.getStartLat());
+        applyStructuredGeo(trail, request, parsedTrack);
         if (StringUtils.hasText(requestIp)) {
             trail.setIp(requestIp.trim());
         } else if (!StringUtils.hasText(trail.getIp())) {
@@ -254,6 +262,62 @@ public class TrailServiceImpl implements TrailService {
         trail.setElevation(resolveElevation(request.getElevation(), parsedTrack));
         trail.setDuration(resolveDuration(request.getDuration(), parsedTrack));
         trail.setDescription(normalizeOptional(request.getDescription()));
+    }
+
+    private void applyStructuredGeo(Trail trail, CreateTrailRequest request, TrackParseResult parsedTrack) {
+        if (parsedTrack != null && parsedTrack.getStartLng() != null && parsedTrack.getStartLat() != null) {
+            try {
+                var reverseGeo = geoService.reverse(parsedTrack.getStartLng(), parsedTrack.getStartLat());
+                trail.setGeoCountry(normalizeOptional(reverseGeo.getCountry()));
+                trail.setGeoProvince(normalizeOptional(reverseGeo.getProvince()));
+                trail.setGeoCity(normalizeOptional(reverseGeo.getCity()));
+                trail.setGeoDistrict(normalizeOptional(reverseGeo.getDistrict()));
+                trail.setGeoSource("track_reverse");
+                return;
+            } catch (BusinessException ex) {
+                // Fallback to client-supplied or text lookup values below.
+            }
+        }
+
+        if (hasStructuredGeo(request)) {
+            trail.setGeoCountry(normalizeOptional(request.getGeoCountry()));
+            trail.setGeoProvince(normalizeOptional(request.getGeoProvince()));
+            trail.setGeoCity(normalizeOptional(request.getGeoCity()));
+            trail.setGeoDistrict(normalizeOptional(request.getGeoDistrict()));
+            trail.setGeoSource(normalizeGeoSource(request.getGeoSource(), "track_reverse"));
+            return;
+        }
+
+        if (StringUtils.hasText(request.getLocation())) {
+            try {
+                var lookup = geoService.lookupLocation(request.getLocation().trim());
+                trail.setGeoCountry(normalizeOptional(lookup.getCountry()));
+                trail.setGeoProvince(normalizeOptional(lookup.getProvince()));
+                trail.setGeoCity(normalizeOptional(lookup.getCity()));
+                trail.setGeoDistrict(normalizeOptional(lookup.getDistrict()));
+                trail.setGeoSource("location_lookup");
+                return;
+            } catch (BusinessException ex) {
+                // Final fallback keeps visible location only.
+            }
+        }
+
+        trail.setGeoCountry(null);
+        trail.setGeoProvince(null);
+        trail.setGeoCity(null);
+        trail.setGeoDistrict(null);
+        trail.setGeoSource(StringUtils.hasText(request.getLocation()) ? "manual_only" : null);
+    }
+
+    private boolean hasStructuredGeo(CreateTrailRequest request) {
+        return StringUtils.hasText(request.getGeoCountry())
+                || StringUtils.hasText(request.getGeoProvince())
+                || StringUtils.hasText(request.getGeoCity())
+                || StringUtils.hasText(request.getGeoDistrict());
+    }
+
+    private String normalizeGeoSource(String geoSource, String fallback) {
+        return StringUtils.hasText(geoSource) ? geoSource.trim() : fallback;
     }
 
     private void replaceGalleryImages(Long trailId, List<MediaFile> galleryMedia) {

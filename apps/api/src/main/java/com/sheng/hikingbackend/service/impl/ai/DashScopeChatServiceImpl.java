@@ -37,11 +37,16 @@ public class DashScopeChatServiceImpl implements DashScopeChatService {
 
     @Override
     public String completeJson(List<DashScopeMessage> messages) {
+        return completeJson(messages, aiProperties.getReasoningModel());
+    }
+
+    @Override
+    public String completeJson(List<DashScopeMessage> messages, String model) {
         ensureConfigured();
         try {
             HttpClient client = buildClient();
             JsonNode requestBody = objectMapper.createObjectNode()
-                    .put("model", aiProperties.getModel())
+                    .put("model", resolveModel(model))
                     .set("messages", objectMapper.valueToTree(messages));
             ((com.fasterxml.jackson.databind.node.ObjectNode) requestBody)
                     .set("response_format", objectMapper.createObjectNode().put("type", "json_object"));
@@ -68,12 +73,17 @@ public class DashScopeChatServiceImpl implements DashScopeChatService {
 
     @Override
     public String streamCompletion(List<DashScopeMessage> messages, Consumer<String> onDelta) {
+        return streamCompletion(messages, aiProperties.getReasoningModel(), onDelta);
+    }
+
+    @Override
+    public String streamCompletion(List<DashScopeMessage> messages, String model, Consumer<String> onDelta) {
         ensureConfigured();
         StringBuilder answer = new StringBuilder();
         try {
             HttpClient client = buildClient();
             JsonNode requestBody = objectMapper.createObjectNode()
-                    .put("model", aiProperties.getModel())
+                    .put("model", resolveModel(model))
                     .put("stream", true)
                     .set("messages", objectMapper.valueToTree(messages));
 
@@ -142,6 +152,10 @@ public class DashScopeChatServiceImpl implements DashScopeChatService {
         if (!StringUtils.hasText(aiProperties.getApiKey())) {
             throw BusinessException.badRequest("AI_CONFIG_MISSING", "AI 配置缺失，请检查后端配置");
         }
+    }
+
+    private String resolveModel(String model) {
+        return StringUtils.hasText(model) ? model.trim() : aiProperties.getModel();
     }
 
     private String readResponseBody(HttpResponse<InputStream> response) throws Exception {

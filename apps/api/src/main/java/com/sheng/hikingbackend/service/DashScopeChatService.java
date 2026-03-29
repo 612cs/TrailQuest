@@ -10,4 +10,8 @@ public interface DashScopeChatService {
     String completeJson(List<DashScopeMessage> messages);
 
     String streamCompletion(List<DashScopeMessage> messages, Consumer<String> onDelta);
+
+    String completeJson(List<DashScopeMessage> messages, String model);
+
+    String streamCompletion(List<DashScopeMessage> messages, String model, Consumer<String> onDelta);
 }

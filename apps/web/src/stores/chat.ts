@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { createAiConversation, fetchAiConversations, fetchAiMessages, streamAiChat } from '../api/ai'
+import { buildAiWebSocketUrl, createAiConversation, fetchAiConversations, fetchAiMessages, getAiAccessToken, parseAiSocketMessage } from '../api/ai'
 import type { AiConversationSummary, AiMessage, AiTrailCard, AiFollowUp, AiStreamEvent } from '../types/ai'
 import { ApiError } from '../types/api'
 
@@ -21,7 +21,9 @@ export const useChatStore = defineStore('chat', () => {
   const isStreaming = ref(false)
   const streamError = ref('')
   const pendingUserMessage = ref('')
-  const activeAbortController = ref<AbortController | null>(null)
+  const socket = ref<WebSocket | null>(null)
+  const socketReadyPromise = ref<Promise<void> | null>(null)
+  const activeAssistantMessageId = ref('')
 
   const hasMessages = computed(() => messages.value.length > 0)
   const activeConversation = computed(() => (
@@ -63,8 +65,10 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   function reset() {
-    activeAbortController.value?.abort()
-    activeAbortController.value = null
+    socket.value?.close()
+    socket.value = null
+    socketReadyPromise.value = null
+    activeAssistantMessageId.value = ''
     conversations.value = []
     activeConversationId.value = ''
     messages.value = []
@@ -110,26 +114,21 @@ export const useChatStore = defineStore('chat', () => {
     }
 
     messages.value = [...messages.value, userMessage, assistantMessage]
-
-    const abortController = new AbortController()
-    activeAbortController.value = abortController
+    activeAssistantMessageId.value = assistantMessage.id
 
     try {
-      await streamAiChat(
-        {
-          conversationId,
-          message: trimmed,
-          context: {
-            currentCity: context?.currentCity ?? null,
-            currentTrailId: context?.currentTrailId ?? null,
-            useUserPreference: true,
-          },
+      await ensureSocketReady()
+      socket.value?.send(JSON.stringify({
+        type: 'chat.send',
+        conversationId,
+        message: trimmed,
+        context: {
+          currentCity: context?.currentCity ?? null,
+          currentTrailId: context?.currentTrailId ?? null,
+          useUserPreference: true,
         },
-        {
-          signal: abortController.signal,
-          onEvent: (event) => handleStreamEvent(event, assistantMessage.id),
-        },
-      )
+      }))
+      await waitForStreamComplete(assistantMessage.id)
       await refreshActiveConversation()
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'AI 对话暂时不可用，请稍后重试'
@@ -143,12 +142,14 @@ export const useChatStore = defineStore('chat', () => {
     } finally {
       pendingUserMessage.value = ''
       isStreaming.value = false
-      activeAbortController.value = null
+      activeAssistantMessageId.value = ''
     }
   }
 
   function handleStreamEvent(event: AiStreamEvent, assistantMessageId: string) {
     switch (event.event) {
+      case 'auth.ok':
+        break
       case 'session':
         activeConversationId.value = String(event.data.conversationId)
         break
@@ -191,6 +192,95 @@ export const useChatStore = defineStore('chat', () => {
     messages.value = messages.value.map((message) => (
       message.id === messageId ? updater(message) : message
     ))
+  }
+
+  async function ensureSocketReady() {
+    if (socket.value && socket.value.readyState === WebSocket.OPEN) {
+      return
+    }
+    if (socketReadyPromise.value) {
+      return socketReadyPromise.value
+    }
+
+    const token = getAiAccessToken()
+    if (!token) {
+      throw new ApiError('请先登录后再使用 AI 对话', 'UNAUTHORIZED', 401)
+    }
+
+    socketReadyPromise.value = new Promise<void>((resolve, reject) => {
+      const ws = new WebSocket(buildAiWebSocketUrl())
+      socket.value = ws
+      let authed = false
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'auth', token }))
+      }
+
+      ws.onmessage = (event) => {
+        try {
+          const parsed = parseAiSocketMessage(String(event.data))
+          if (!parsed) {
+            return
+          }
+          if (parsed.event === 'auth.ok') {
+            authed = true
+            resolve()
+            return
+          }
+          if (parsed.event === 'error' && !authed) {
+            reject(new ApiError(parsed.data.message, parsed.data.code, 401))
+            return
+          }
+          if (activeAssistantMessageId.value) {
+            handleStreamEvent(parsed, activeAssistantMessageId.value)
+          }
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error('AI WebSocket 消息解析失败'))
+        }
+      }
+
+      ws.onerror = () => {
+        if (!authed) {
+          reject(new ApiError('AI 连接建立失败，请稍后重试', 'AI_SOCKET_CONNECT_FAILED', 500))
+        }
+      }
+
+      ws.onclose = () => {
+        socket.value = null
+        socketReadyPromise.value = null
+        if (!authed) {
+          reject(new ApiError('AI 连接已关闭，请重新尝试', 'AI_SOCKET_CLOSED', 500))
+        }
+      }
+    })
+
+    try {
+      await socketReadyPromise.value
+    } finally {
+      socketReadyPromise.value = null
+    }
+  }
+
+  function waitForStreamComplete(assistantMessageId: string) {
+    return new Promise<void>((resolve, reject) => {
+      const stop = window.setInterval(() => {
+        const assistant = messages.value.find((item) => item.id === assistantMessageId)
+        if (!assistant) {
+          window.clearInterval(stop)
+          resolve()
+          return
+        }
+        if (streamError.value && !assistant.isStreaming) {
+          window.clearInterval(stop)
+          reject(new ApiError(streamError.value, 'AI_STREAM_FAILED', 500))
+          return
+        }
+        if (!assistant.isStreaming) {
+          window.clearInterval(stop)
+          resolve()
+        }
+      }, 60)
+    })
   }
 
   async function refreshActiveConversation() {

@@ -5,6 +5,11 @@ import type { PageResponse, TrailInteractionResult, TrailListItem, TrailListPara
 export interface CreateTrailPayload {
   name: string
   location: string
+  geoCountry?: string
+  geoProvince?: string
+  geoCity?: string
+  geoDistrict?: string
+  geoSource?: string
   difficulty: 'easy' | 'moderate' | 'hard'
   difficultyLabel: string
   packType: 'light' | 'heavy' | 'both'
@@ -12,7 +17,7 @@ export interface CreateTrailPayload {
   distance?: string
   elevation?: string
   duration?: string
-  description: string
+  description?: string
   coverMediaId: string
   galleryMediaIds?: string[]
   trackMediaId?: string | null

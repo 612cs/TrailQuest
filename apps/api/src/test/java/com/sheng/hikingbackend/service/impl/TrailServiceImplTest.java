@@ -33,8 +33,10 @@ import com.sheng.hikingbackend.mapper.TrailLikeMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.TrailTagMapper;
 import com.sheng.hikingbackend.mapper.TrailTrackMapper;
+import com.sheng.hikingbackend.service.GeoService;
 import com.sheng.hikingbackend.service.TrackParseService;
 import com.sheng.hikingbackend.service.impl.support.TrackParseResult;
+import com.sheng.hikingbackend.vo.geo.ReverseGeoResponse;
 import com.sheng.hikingbackend.vo.trail.TrailQueryRow;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +63,8 @@ class TrailServiceImplTest {
     @Mock
     private TrailTrackMapper trailTrackMapper;
     @Mock
+    private GeoService geoService;
+    @Mock
     private TrackParseService trackParseService;
 
     private TrailServiceImpl trailService;
@@ -76,6 +80,7 @@ class TrailServiceImplTest {
                 trailTagMapper,
                 tagMapper,
                 trailTrackMapper,
+                geoService,
                 trackParseService,
                 new ObjectMapper());
     }
@@ -95,6 +100,13 @@ class TrailServiceImplTest {
         when(trailMapper.selectTrailDetailById(TRAIL_ID, USER_ID)).thenReturn(row);
         when(trailImageMapper.selectByTrailId(TRAIL_ID)).thenReturn(List.of());
         when(trackParseService.parse(any())).thenReturn(parseResult);
+        when(geoService.reverse(any(), any())).thenReturn(ReverseGeoResponse.builder()
+                .province("江西")
+                .city("萍乡")
+                .district("芦溪")
+                .country("中国")
+                .formattedLocation("萍乡 芦溪")
+                .build());
 
         UpdateTrailRequest request = buildUpdateRequest();
         request.setTrackMediaId(5001L);

@@ -8,6 +8,7 @@ import type { EntityId } from '../types/id'
 import type { TrailListItem } from '../types/trail'
 import type {
   PublishDraftFields,
+  PublishDraftGeo,
   PublishDraftMode,
   PublishDraftState,
   PublishImageAsset,
@@ -47,6 +48,16 @@ function createEmptyFields(): PublishDraftFields {
   }
 }
 
+function createEmptyGeo(): PublishDraftGeo {
+  return {
+    country: '',
+    province: '',
+    city: '',
+    district: '',
+    source: '',
+  }
+}
+
 function createEmptyTask() {
   return {
     id: null,
@@ -64,6 +75,7 @@ function resetDraftAfterCreateSuccess(draft: PublishDraftState) {
   draft.trackItem = null
   draft.geoJsonData = null
   draft.trackPreviewError = ''
+  draft.geo = createEmptyGeo()
   draft.task = createEmptyTask()
   draft.hydratedFromServer = false
 }
@@ -117,6 +129,7 @@ function serializeDraft(draft: PublishDraftState) {
     trackItem: serializeTrackAsset(draft.trackItem),
     geoJsonData: draft.geoJsonData,
     trackPreviewError: draft.trackPreviewError,
+    geo: draft.geo,
     task: draft.task,
   }
 }
@@ -133,6 +146,7 @@ function createDraft(scopeKey: string, mode: PublishDraftMode, trailId: EntityId
     trackItem: null,
     geoJsonData: null,
     trackPreviewError: '',
+    geo: createEmptyGeo(),
     task: createEmptyTask(),
   }
 }
@@ -158,6 +172,7 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
           scopeKey,
           {
             ...draft,
+            geo: draft.geo ?? createEmptyGeo(),
             task: draft.task.stage === 'success'
               ? draft.task
               : {
@@ -263,6 +278,13 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
       : null
     draft.geoJsonData = trail.track?.geoJson ?? null
     draft.trackPreviewError = ''
+    draft.geo = {
+      country: trail.geoCountry ?? '',
+      province: trail.geoProvince ?? '',
+      city: trail.geoCity ?? '',
+      district: trail.geoDistrict ?? '',
+      source: trail.geoSource ?? '',
+    }
     draft.hydratedFromServer = true
     return draft
   }
@@ -387,6 +409,11 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
       const payload = {
         name: draft.fields.name.trim(),
         location: draft.fields.location.trim(),
+        geoCountry: draft.geo.country || undefined,
+        geoProvince: draft.geo.province || undefined,
+        geoCity: draft.geo.city || undefined,
+        geoDistrict: draft.geo.district || undefined,
+        geoSource: draft.geo.source || undefined,
         difficulty: draft.fields.difficulty,
         difficultyLabel: resolveDifficultyLabel(draft.fields.difficulty),
         packType: draft.fields.packType,

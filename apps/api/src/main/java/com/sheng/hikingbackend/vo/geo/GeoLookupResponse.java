@@ -11,6 +11,7 @@ public class GeoLookupResponse {
 
     private BigDecimal lng;
     private BigDecimal lat;
+    private String country;
     private String province;
     private String city;
     private String district;

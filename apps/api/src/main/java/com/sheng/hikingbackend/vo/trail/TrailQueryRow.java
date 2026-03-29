@@ -15,6 +15,11 @@ public class TrailQueryRow {
     private String name;
     private String location;
     private String ip;
+    private String geoCountry;
+    private String geoProvince;
+    private String geoCity;
+    private String geoDistrict;
+    private String geoSource;
     private String difficulty;
     private String difficultyLabel;
     private String packType;

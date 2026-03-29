@@ -280,6 +280,11 @@ CREATE TABLE `trails` (
   `ip` varchar(45) NOT NULL COMMENT '用于定位的IP',
   `start_lng` decimal(10,6) DEFAULT NULL COMMENT '路线起点经度',
   `start_lat` decimal(10,6) DEFAULT NULL COMMENT '路线起点纬度',
+  `geo_country` varchar(64) DEFAULT NULL COMMENT '结构化地点-国家',
+  `geo_province` varchar(64) DEFAULT NULL COMMENT '结构化地点-省',
+  `geo_city` varchar(64) DEFAULT NULL COMMENT '结构化地点-市',
+  `geo_district` varchar(64) DEFAULT NULL COMMENT '结构化地点-区县',
+  `geo_source` varchar(32) DEFAULT NULL COMMENT '结构化地点来源',
   `difficulty` enum('easy','moderate','hard') NOT NULL COMMENT '难度枚举',
   `difficulty_label` varchar(10) NOT NULL COMMENT '难度中文',
   `pack_type` enum('light','heavy','both') NOT NULL COMMENT '轻装/重装/皆可',
@@ -299,6 +304,9 @@ CREATE TABLE `trails` (
   PRIMARY KEY (`id`),
   KEY `idx_trails_author_created` (`author_id`,`created_at`),
   KEY `idx_trails_status_created` (`status`,`created_at`),
+  KEY `idx_trails_geo_province` (`geo_province`),
+  KEY `idx_trails_geo_city` (`geo_city`),
+  KEY `idx_trails_geo_district` (`geo_district`),
   CONSTRAINT `trails_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='路线表';
 

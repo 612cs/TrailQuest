@@ -10,6 +10,9 @@ import lombok.Setter;
 public class TrailPageRequest extends PageRequest {
 
     private String keyword;
+    private String geoProvince;
+    private String geoCity;
+    private String geoDistrict;
     private String difficulty;
     private String packType;
     private String durationType;
