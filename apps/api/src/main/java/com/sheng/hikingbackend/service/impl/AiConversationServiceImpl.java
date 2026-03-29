@@ -3,6 +3,7 @@ package com.sheng.hikingbackend.service.impl;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -114,7 +115,20 @@ public class AiConversationServiceImpl implements AiConversationService {
                 null,
                 new LambdaUpdateWrapper<AiConversation>()
                         .eq(AiConversation::getId, conversationId)
-                        .set(AiConversation::getUpdatedAt, java.time.LocalDateTime.now()));
+                        .set(AiConversation::getUpdatedAt, LocalDateTime.now()));
+    }
+
+    @Override
+    @Transactional
+    public void deleteConversation(Long userId, Long conversationId) {
+        requireOwnedConversation(userId, conversationId);
+        aiConversationMapper.update(
+                null,
+                new LambdaUpdateWrapper<AiConversation>()
+                        .eq(AiConversation::getId, conversationId)
+                        .eq(AiConversation::getUserId, userId)
+                        .set(AiConversation::getStatus, "deleted")
+                        .set(AiConversation::getUpdatedAt, LocalDateTime.now()));
     }
 
     @Override

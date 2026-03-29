@@ -25,5 +25,7 @@ public interface AiConversationService {
 
     void touchConversation(Long conversationId);
 
+    void deleteConversation(Long userId, Long conversationId);
+
     String buildConversationTitle(String firstMessage);
 }

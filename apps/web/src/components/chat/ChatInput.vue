@@ -28,16 +28,16 @@ function handleKeydown(e: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="border-t px-4 py-4" style="border-color: var(--border-default); background-color: var(--bg-card);">
+  <div class="border-t px-4 py-3" style="border-color: var(--border-default); background-color: var(--bg-card);">
     <div class="mx-auto max-w-4xl">
-      <div class="flex items-end gap-3 rounded-[28px] border px-3 py-3 sm:px-4" style="border-color: var(--border-card); background-color: var(--bg-page);">
+      <div class="flex items-end gap-3 rounded-[26px] border px-3 py-2.5 sm:px-4" style="border-color: var(--border-card); background-color: var(--bg-page);">
         <textarea
           v-model="text"
           @keydown="handleKeydown"
           :disabled="disabled"
           rows="1"
           :placeholder="placeholder || '描述你想去哪里、想走多久，或者直接问我装备和天气建议...'"
-          class="min-h-[96px] w-full resize-none bg-transparent px-2 py-2 text-sm leading-7 transition-colors focus:outline-none sm:text-[15px]"
+          class="min-h-[68px] w-full resize-none bg-transparent px-2 py-1.5 text-sm leading-6 transition-colors focus:outline-none sm:text-[15px]"
           style="
             color: var(--text-primary);
           "
@@ -45,7 +45,7 @@ function handleKeydown(e: KeyboardEvent) {
         <button
           @click="handleSend"
           :disabled="!text.trim() || disabled"
-          class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
           :style="text.trim() && !disabled
             ? 'border-color: var(--color-primary-500); background-color: var(--color-primary-500); color: white;'
             : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-tertiary);'"

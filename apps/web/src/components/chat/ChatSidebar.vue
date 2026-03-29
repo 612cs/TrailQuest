@@ -11,6 +11,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'select', id: string | number): void
   (event: 'create'): void
+  (event: 'delete', id: string | number): void
 }>()
 
 function formatTime(value: string) {
@@ -48,23 +49,37 @@ function formatTime(value: string) {
         <p class="mt-1 text-xs leading-5" style="color: var(--text-secondary);">新建一个会话，我们就可以开始帮你找路线了。</p>
       </div>
       <div v-else class="space-y-2">
-        <button
+        <div
           v-for="conversation in props.conversations"
           :key="conversation.id"
-          @click="emit('select', conversation.id)"
-          class="w-full rounded-2xl border px-3 py-3 text-left transition-all duration-200"
+          class="group relative w-full rounded-2xl border px-3 py-3 text-left transition-all duration-200"
           :style="String(conversation.id) === props.activeConversationId
             ? 'border-color: var(--color-primary-400); background: color-mix(in srgb, var(--color-primary-500) 8%, var(--bg-card));'
             : 'border-color: var(--border-default); background-color: var(--bg-page);'"
         >
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0 flex-1">
-              <p class="line-clamp-1 text-sm font-semibold" style="color: var(--text-primary);">{{ conversation.title }}</p>
-              <p class="mt-1 line-clamp-2 text-xs leading-5" style="color: var(--text-secondary);">{{ conversation.preview }}</p>
+          <button
+            type="button"
+            @click="emit('select', conversation.id)"
+            class="w-full text-left"
+          >
+            <div class="flex items-start justify-between gap-3 pr-8">
+              <div class="min-w-0 flex-1">
+                <p class="line-clamp-1 text-sm font-semibold" style="color: var(--text-primary);">{{ conversation.title }}</p>
+                <p class="mt-1 line-clamp-2 text-xs leading-5" style="color: var(--text-secondary);">{{ conversation.preview }}</p>
+              </div>
+              <span class="shrink-0 text-[10px]" style="color: var(--text-tertiary);">{{ formatTime(conversation.updatedAt) }}</span>
             </div>
-            <span class="shrink-0 text-[10px]" style="color: var(--text-tertiary);">{{ formatTime(conversation.updatedAt) }}</span>
-          </div>
-        </button>
+          </button>
+          <button
+            type="button"
+            class="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-xl border opacity-0 transition-all duration-150 group-hover:opacity-100 hover:bg-red-500/10"
+            style="border-color: var(--border-default); color: var(--text-tertiary);"
+            title="删除会话"
+            @click.stop="emit('delete', conversation.id)"
+          >
+            <BaseIcon name="Trash2" :size="14" />
+          </button>
+        </div>
       </div>
     </div>
   </aside>

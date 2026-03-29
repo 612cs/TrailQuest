@@ -5,6 +5,9 @@ import type { AiMessage } from '../../types/ai'
 
 const props = defineProps<{
   message: AiMessage
+  userAvatarText?: string
+  userAvatarMediaUrl?: string
+  userAvatarBg?: string
 }>()
 
 const emit = defineEmits<{
@@ -22,10 +25,19 @@ function formatTime(timestamp: string): string {
     <div
       class="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border"
       :style="message.role === 'user'
-        ? 'border-color: color-mix(in srgb, var(--color-primary-500) 24%, transparent); background-color: var(--color-primary-500); color: white;'
+        ? `border-color: color-mix(in srgb, ${props.userAvatarBg || 'var(--color-primary-500)'} 24%, transparent); background-color: ${props.userAvatarBg || 'var(--color-primary-500)'}; color: white;`
         : 'border-color: var(--border-default); background-color: color-mix(in srgb, var(--color-primary-500) 8%, var(--bg-card)); color: var(--color-primary-500);'"
     >
-      <BaseIcon :name="message.role === 'user' ? 'User' : 'Leaf'" :size="17" />
+      <template v-if="message.role === 'user'">
+        <img
+          v-if="props.userAvatarMediaUrl"
+          :src="props.userAvatarMediaUrl"
+          alt="用户头像"
+          class="h-full w-full rounded-2xl object-cover"
+        />
+        <span v-else class="text-sm font-semibold leading-none">{{ props.userAvatarText || 'U' }}</span>
+      </template>
+      <BaseIcon v-else name="Leaf" :size="17" />
     </div>
 
     <div class="min-w-0 space-y-2">

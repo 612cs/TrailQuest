@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.sheng.hikingbackend.common.ApiResponse;
@@ -61,6 +62,14 @@ public class AiController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long id) {
         return ApiResponse.success("AI 会话消息加载成功", aiConversationService.listMessages(userDetails.getId(), id));
+    }
+
+    @DeleteMapping("/conversations/{id}")
+    public ApiResponse<Void> deleteConversation(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long id) {
+        aiConversationService.deleteConversation(userDetails.getId(), id);
+        return ApiResponse.success("AI 会话删除成功", null);
     }
 
     @PostMapping(path = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

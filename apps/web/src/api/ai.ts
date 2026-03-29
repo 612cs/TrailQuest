@@ -15,6 +15,10 @@ export function fetchAiMessages(conversationId: string | number) {
   return http.get<AiMessage[]>(`/api/ai/conversations/${conversationId}/messages`)
 }
 
+export function deleteAiConversation(conversationId: string | number) {
+  return http.delete<void>(`/api/ai/conversations/${conversationId}`)
+}
+
 export function buildAiWebSocketUrl() {
   return API_BASE_URL.replace(/^http/i, 'ws') + '/ws/ai'
 }

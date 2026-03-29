@@ -6,7 +6,7 @@ import AuthModal from './components/auth/AuthModal.vue'
 import FlashToast from './components/common/FlashToast.vue'
 
 const route = useRoute()
-const hideHeaderRoutes = ['TrailDetail', 'TrailGallery']
+const hideHeaderRoutes = ['TrailDetail', 'TrailGallery', 'Chat']
 const showHeader = computed(() => !hideHeaderRoutes.includes(route.name as string))
 const headerVariant = computed<'default' | 'overlay'>(() => (
   route.meta.headerVariant === 'overlay' ? 'overlay' : 'default'

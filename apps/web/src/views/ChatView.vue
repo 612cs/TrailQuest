@@ -103,6 +103,16 @@ async function handleSelectConversation(conversationId: string | number) {
   }
 }
 
+async function handleDeleteConversation(conversationId: string | number) {
+  try {
+    await chatStore.removeConversation(conversationId)
+    mobileSidebarOpen.value = false
+    flashStore.showSuccess('会话已删除', 1800)
+  } catch (error) {
+    flashStore.showError(error instanceof Error ? error.message : '删除会话失败')
+  }
+}
+
 watch(
   () => userStore.isLoggedIn,
   () => {
@@ -136,6 +146,7 @@ onMounted(() => {
           :loading="chatStore.isBootstrapping"
           @create="handleCreateConversation"
           @select="handleSelectConversation"
+          @delete="handleDeleteConversation"
         />
       </div>
 
@@ -221,6 +232,9 @@ onMounted(() => {
               v-for="msg in chatStore.messages"
               :key="msg.id"
               :message="msg"
+              :user-avatar-text="userStore.profile?.avatar || 'U'"
+              :user-avatar-media-url="userStore.profile?.avatarMediaUrl || ''"
+              :user-avatar-bg="userStore.profile?.avatarBg || 'var(--color-primary-500)'"
               @follow-up="handleFollowUp"
             />
           </div>
@@ -239,6 +253,7 @@ onMounted(() => {
             :loading="chatStore.isBootstrapping"
             @create="handleCreateConversation"
             @select="handleSelectConversation"
+            @delete="handleDeleteConversation"
           />
         </aside>
       </div>

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { buildAiWebSocketUrl, createAiConversation, fetchAiConversations, fetchAiMessages, getAiAccessToken, parseAiSocketMessage } from '../api/ai'
+import { buildAiWebSocketUrl, createAiConversation, deleteAiConversation, fetchAiConversations, fetchAiMessages, getAiAccessToken, parseAiSocketMessage } from '../api/ai'
 import type { AiConversationSummary, AiMessage, AiTrailCard, AiFollowUp, AiStreamEvent } from '../types/ai'
 import { ApiError } from '../types/api'
 
@@ -62,6 +62,21 @@ export const useChatStore = defineStore('chat', () => {
     activeConversationId.value = String(conversationId)
     messages.value = await fetchAiMessages(conversationId)
     streamError.value = ''
+  }
+
+  async function removeConversation(conversationId: string | number) {
+    await deleteAiConversation(conversationId)
+    conversations.value = conversations.value.filter((item) => String(item.id) !== String(conversationId))
+
+    if (activeConversationId.value === String(conversationId)) {
+      const nextConversation = conversations.value[0]
+      if (nextConversation) {
+        await selectConversation(nextConversation.id)
+      } else {
+        activeConversationId.value = ''
+        messages.value = []
+      }
+    }
   }
 
   function reset() {
@@ -304,6 +319,7 @@ export const useChatStore = defineStore('chat', () => {
     bootstrap,
     createConversation,
     selectConversation,
+    removeConversation,
     sendMessage,
     refreshActiveConversation,
     reset,

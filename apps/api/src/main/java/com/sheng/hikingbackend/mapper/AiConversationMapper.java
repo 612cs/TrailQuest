@@ -26,6 +26,7 @@ public interface AiConversationMapper extends BaseMapper<AiConversation> {
             FROM ai_conversations
             WHERE id = #{conversationId}
               AND user_id = #{userId}
+              AND status = 'active'
             LIMIT 1
             """)
     AiConversation selectOwnedConversation(@Param("conversationId") Long conversationId, @Param("userId") Long userId);
