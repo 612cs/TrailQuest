@@ -35,6 +35,7 @@ public class AdminTrailDetailVo {
     private Integer favorites;
     private Integer likes;
     private Integer reviewCount;
+    private String status;
     private String reviewStatus;
     private String reviewRemark;
     private Long reviewedBy;

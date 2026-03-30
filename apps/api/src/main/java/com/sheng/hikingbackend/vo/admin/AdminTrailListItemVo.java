@@ -13,6 +13,7 @@ public class AdminTrailListItemVo {
     private String image;
     private String name;
     private String location;
+    private String status;
     private String reviewStatus;
     private String authorUsername;
     private LocalDateTime createdAt;

@@ -77,10 +77,12 @@ public interface UserMapper extends BaseMapper<User> {
               u.username,
               u.email,
               u.role,
+              u.status,
               u.location,
               u.avatar,
               u.avatar_bg,
               mf.url AS avatar_media_url,
+              u.banned_at,
               (
                 SELECT COUNT(*)
                 FROM trails t

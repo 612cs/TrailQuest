@@ -38,6 +38,22 @@ public class User {
     private String passwordHash;
 
     private UserRole role;
+    private String status;
+
+    @TableField("ban_reason")
+    private String banReason;
+
+    @TableField("banned_by")
+    private Long bannedBy;
+
+    @TableField("banned_at")
+    private LocalDateTime bannedAt;
+
+    @TableField("deleted_by")
+    private Long deletedBy;
+
+    @TableField("deleted_at")
+    private LocalDateTime deletedAt;
 
     @TableField("created_at")
     private LocalDateTime createdAt;

@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sheng.hikingbackend.common.ApiResponse;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.config.CustomUserDetails;
-import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
+import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
 import com.sheng.hikingbackend.dto.admin.AdminHomeHeroUpdateRequest;
+import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
+import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.service.AdminService;
@@ -66,9 +68,36 @@ public class AdminController {
         return ApiResponse.success(adminService.pageUsers(request));
     }
 
+    @PostMapping("/users/{id}/ban")
+    public ApiResponse<Void> banUser(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody AdminBanUserRequest request) {
+        adminService.banUser(id, userDetails.getId(), request);
+        return ApiResponse.success("用户已封禁", null);
+    }
+
+    @PostMapping("/users/{id}/unban")
+    public ApiResponse<Void> unbanUser(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        adminService.unbanUser(id, userDetails.getId());
+        return ApiResponse.success("用户已解封", null);
+    }
+
     @GetMapping("/trails/{id}")
     public ApiResponse<AdminTrailDetailVo> trailDetail(@PathVariable Long id) {
         return ApiResponse.success(adminService.getTrailDetail(id));
+    }
+
+    @GetMapping("/trail-management")
+    public ApiResponse<PageResponse<AdminTrailListItemVo>> pageTrailManagement(@Valid AdminTrailManagementPageRequest request) {
+        return ApiResponse.success(adminService.pageTrailManagement(request));
+    }
+
+    @GetMapping("/trail-management/{id}")
+    public ApiResponse<AdminTrailDetailVo> trailManagementDetail(@PathVariable Long id) {
+        return ApiResponse.success(adminService.getTrailManagementDetail(id));
     }
 
     @PostMapping("/trails/{id}/approve")
@@ -86,6 +115,22 @@ public class AdminController {
             @Valid @RequestBody AdminRejectTrailRequest request) {
         adminService.rejectTrail(id, userDetails.getId(), request);
         return ApiResponse.success("已驳回路线", null);
+    }
+
+    @PostMapping("/trail-management/{id}/offline")
+    public ApiResponse<Void> offlineTrail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        adminService.offlineTrail(id, userDetails.getId());
+        return ApiResponse.success("路线已下架", null);
+    }
+
+    @PostMapping("/trail-management/{id}/restore")
+    public ApiResponse<Void> restoreTrail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        adminService.restoreTrail(id, userDetails.getId());
+        return ApiResponse.success("路线已恢复", null);
     }
 
     @GetMapping("/reviews")

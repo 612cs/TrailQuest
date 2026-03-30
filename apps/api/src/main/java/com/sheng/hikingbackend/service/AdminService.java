@@ -1,8 +1,10 @@
 package com.sheng.hikingbackend.service;
 
 import com.sheng.hikingbackend.common.PageResponse;
+import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
 import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
+import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
@@ -20,11 +22,23 @@ public interface AdminService {
 
     PageResponse<AdminUserListItemVo> pageUsers(AdminUserPageRequest request);
 
+    void banUser(Long userId, Long adminUserId, AdminBanUserRequest request);
+
+    void unbanUser(Long userId, Long adminUserId);
+
     AdminTrailDetailVo getTrailDetail(Long trailId);
+
+    PageResponse<AdminTrailListItemVo> pageTrailManagement(AdminTrailManagementPageRequest request);
+
+    AdminTrailDetailVo getTrailManagementDetail(Long trailId);
 
     void approveTrail(Long trailId, Long adminUserId);
 
     void rejectTrail(Long trailId, Long adminUserId, AdminRejectTrailRequest request);
+
+    void offlineTrail(Long trailId, Long adminUserId);
+
+    void restoreTrail(Long trailId, Long adminUserId);
 
     PageResponse<AdminReviewListItemVo> pageReviews(AdminReviewPageRequest request);
 

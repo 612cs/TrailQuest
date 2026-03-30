@@ -17,6 +17,8 @@ public class AdminUserQueryRow {
     private String avatar;
     private String avatarBg;
     private String avatarMediaUrl;
+    private String status;
+    private LocalDateTime bannedAt;
     private Integer publishedTrailCount;
     private LocalDateTime createdAt;
 }

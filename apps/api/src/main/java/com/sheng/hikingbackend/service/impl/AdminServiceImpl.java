@@ -2,20 +2,29 @@ package com.sheng.hikingbackend.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.common.enums.TrailReviewStatus;
+import com.sheng.hikingbackend.common.enums.UserStatus;
 import com.sheng.hikingbackend.common.exception.BusinessException;
+import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
 import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
+import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
+import com.sheng.hikingbackend.entity.AdminOperationLog;
 import com.sheng.hikingbackend.entity.Trail;
+import com.sheng.hikingbackend.entity.User;
+import com.sheng.hikingbackend.mapper.AdminOperationLogMapper;
 import com.sheng.hikingbackend.mapper.ReviewMapper;
 import com.sheng.hikingbackend.mapper.TrailImageMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
@@ -48,6 +57,8 @@ public class AdminServiceImpl implements AdminService {
     private final TrailImageMapper trailImageMapper;
     private final TrailTrackMapper trailTrackMapper;
     private final UserMapper userMapper;
+    private final AdminOperationLogMapper adminOperationLogMapper;
+    private final ObjectMapper objectMapper;
 
     @Override
     public AdminDashboardSummaryVo getDashboardSummary() {
@@ -63,18 +74,8 @@ public class AdminServiceImpl implements AdminService {
     public PageResponse<AdminTrailListItemVo> pageTrails(AdminTrailPageRequest request) {
         Page<TrailQueryRow> page = Page.of(request.getPageNum(), request.getPageSize());
         IPage<TrailQueryRow> result = trailMapper.selectAdminTrailPage(page, request);
-        List<AdminTrailListItemVo> list = result.getRecords().stream()
-                .map(row -> AdminTrailListItemVo.builder()
-                        .id(row.getId())
-                        .image(row.getImage())
-                        .name(row.getName())
-                        .location(row.getLocation())
-                        .reviewStatus(row.getReviewStatus())
-                        .authorUsername(row.getAuthorUsername())
-                        .createdAt(row.getCreatedAt())
-                        .build())
-                .toList();
-        return PageResponse.of(list, result.getCurrent(), result.getSize(), result.getTotal());
+        return PageResponse.of(result.getRecords().stream().map(this::toAdminTrailListItem).toList(),
+                result.getCurrent(), result.getSize(), result.getTotal());
     }
 
     @Override
@@ -91,6 +92,8 @@ public class AdminServiceImpl implements AdminService {
                         .avatar(row.getAvatar())
                         .avatarBg(row.getAvatarBg())
                         .avatarMediaUrl(row.getAvatarMediaUrl())
+                        .status(row.getStatus())
+                        .bannedAt(row.getBannedAt())
                         .publishedTrailCount(row.getPublishedTrailCount())
                         .createdAt(row.getCreatedAt())
                         .build())
@@ -99,48 +102,67 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public AdminTrailDetailVo getTrailDetail(Long trailId) {
-        TrailQueryRow row = trailMapper.selectAdminTrailDetailById(trailId);
-        if (row == null) {
-            throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
+    @Transactional
+    public void banUser(Long userId, Long adminUserId, AdminBanUserRequest request) {
+        User user = requireUser(userId);
+        if (userId.equals(adminUserId)) {
+            throw BusinessException.badRequest("ADMIN_SELF_BAN_FORBIDDEN", "不能封禁当前登录管理员");
+        }
+        if (UserStatus.BANNED.getCode().equals(user.getStatus())) {
+            throw BusinessException.badRequest("USER_ALREADY_BANNED", "该用户已被封禁");
+        }
+        if (UserStatus.DELETED.getCode().equals(user.getStatus())) {
+            throw BusinessException.badRequest("USER_ALREADY_DELETED", "该用户当前不可恢复");
         }
 
-        return AdminTrailDetailVo.builder()
-                .id(row.getId())
-                .image(row.getImage())
-                .name(row.getName())
-                .location(row.getLocation())
-                .geoCountry(row.getGeoCountry())
-                .geoProvince(row.getGeoProvince())
-                .geoCity(row.getGeoCity())
-                .geoDistrict(row.getGeoDistrict())
-                .geoSource(row.getGeoSource())
-                .difficulty(row.getDifficulty())
-                .difficultyLabel(row.getDifficultyLabel())
-                .packType(row.getPackType())
-                .durationType(row.getDurationType())
-                .distance(row.getDistance())
-                .elevation(row.getElevation())
-                .duration(row.getDuration())
-                .description(row.getDescription())
-                .tags(splitTags(row.getTagsCsv()))
-                .favorites(row.getFavorites())
-                .likes(row.getLikes())
-                .reviewCount(row.getReviewCount())
-                .reviewStatus(row.getReviewStatus())
-                .reviewRemark(row.getReviewRemark())
-                .reviewedBy(row.getReviewedBy())
-                .reviewedAt(row.getReviewedAt())
-                .createdAt(row.getCreatedAt())
-                .author(UserSummaryVo.builder()
-                        .id(row.getAuthorId())
-                        .username(row.getAuthorUsername())
-                        .avatar(row.getAuthorAvatar())
-                        .avatarBg(row.getAuthorAvatarBg())
-                        .build())
-                .gallery(loadGallery(row.getId()))
-                .track(buildTrackVo(row.getId()))
-                .build();
+        user.setStatus(UserStatus.BANNED.getCode());
+        user.setBanReason(request.getReason());
+        user.setBannedBy(adminUserId);
+        user.setBannedAt(LocalDateTime.now());
+        userMapper.updateById(user);
+
+        logAction("user.ban", "user", userId, adminUserId, request.getReason(), Map.of(
+                "status", user.getStatus()));
+    }
+
+    @Override
+    @Transactional
+    public void unbanUser(Long userId, Long adminUserId) {
+        User user = requireUser(userId);
+        if (!UserStatus.BANNED.getCode().equals(user.getStatus())) {
+            throw BusinessException.badRequest("USER_NOT_BANNED", "该用户当前不是封禁状态");
+        }
+
+        user.setStatus(UserStatus.ACTIVE.getCode());
+        user.setBanReason(null);
+        user.setBannedBy(null);
+        user.setBannedAt(null);
+        userMapper.updateById(user);
+
+        logAction("user.unban", "user", userId, adminUserId, "恢复账号", Map.of(
+                "status", user.getStatus()));
+    }
+
+    @Override
+    public AdminTrailDetailVo getTrailDetail(Long trailId) {
+        TrailQueryRow row = requireTrailRow(trailId);
+        if (!"active".equals(row.getStatus())) {
+            throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
+        }
+        return toAdminTrailDetail(row);
+    }
+
+    @Override
+    public PageResponse<AdminTrailListItemVo> pageTrailManagement(AdminTrailManagementPageRequest request) {
+        Page<TrailQueryRow> page = Page.of(request.getPageNum(), request.getPageSize());
+        IPage<TrailQueryRow> result = trailMapper.selectAdminTrailManagementPage(page, request);
+        return PageResponse.of(result.getRecords().stream().map(this::toAdminTrailListItem).toList(),
+                result.getCurrent(), result.getSize(), result.getTotal());
+    }
+
+    @Override
+    public AdminTrailDetailVo getTrailManagementDetail(Long trailId) {
+        return toAdminTrailDetail(requireTrailRow(trailId));
     }
 
     @Override
@@ -152,17 +174,61 @@ public class AdminServiceImpl implements AdminService {
         trail.setReviewedBy(adminUserId);
         trail.setReviewedAt(LocalDateTime.now());
         trailMapper.updateById(trail);
+
+        logAction("trail.approve", "trail", trailId, adminUserId, "审核通过", Map.of(
+                "status", trail.getStatus(),
+                "reviewStatus", trail.getReviewStatus()));
     }
 
     @Override
     @Transactional
     public void rejectTrail(Long trailId, Long adminUserId, AdminRejectTrailRequest request) {
         Trail trail = requireTrail(trailId);
+        String remark = request.getRemark().trim();
         trail.setReviewStatus(TrailReviewStatus.REJECTED.getCode());
-        trail.setReviewRemark(request.getRemark().trim());
+        trail.setReviewRemark(remark);
         trail.setReviewedBy(adminUserId);
         trail.setReviewedAt(LocalDateTime.now());
         trailMapper.updateById(trail);
+
+        logAction("trail.reject", "trail", trailId, adminUserId, remark, Map.of(
+                "status", trail.getStatus(),
+                "reviewStatus", trail.getReviewStatus()));
+    }
+
+    @Override
+    @Transactional
+    public void offlineTrail(Long trailId, Long adminUserId) {
+        Trail trail = requireExistingTrail(trailId);
+        if (!TrailReviewStatus.APPROVED.getCode().equals(trail.getReviewStatus())) {
+            throw BusinessException.badRequest("TRAIL_NOT_APPROVED", "仅已通过审核的路线可以下架");
+        }
+        if ("deleted".equals(trail.getStatus())) {
+            throw BusinessException.badRequest("TRAIL_ALREADY_OFFLINE", "该路线已下架");
+        }
+
+        trail.setStatus("deleted");
+        trailMapper.updateById(trail);
+
+        logAction("trail.offline", "trail", trailId, adminUserId, "路线下架", Map.of(
+                "status", trail.getStatus(),
+                "reviewStatus", trail.getReviewStatus()));
+    }
+
+    @Override
+    @Transactional
+    public void restoreTrail(Long trailId, Long adminUserId) {
+        Trail trail = requireExistingTrail(trailId);
+        if (!"deleted".equals(trail.getStatus())) {
+            throw BusinessException.badRequest("TRAIL_NOT_OFFLINE", "该路线当前不是下架状态");
+        }
+
+        trail.setStatus("active");
+        trailMapper.updateById(trail);
+
+        logAction("trail.restore", "trail", trailId, adminUserId, "路线恢复", Map.of(
+                "status", trail.getStatus(),
+                "reviewStatus", trail.getReviewStatus()));
     }
 
     @Override
@@ -194,10 +260,62 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void resolveReport(Long reportId) {
-        // 第一版后台先保留治理入口，等前台举报链路接入后再补真实处理逻辑。
         if (reportId == null) {
             throw BusinessException.badRequest("REPORT_ID_REQUIRED", "举报 ID 不能为空");
         }
+    }
+
+    private AdminTrailListItemVo toAdminTrailListItem(TrailQueryRow row) {
+        return AdminTrailListItemVo.builder()
+                .id(row.getId())
+                .image(row.getImage())
+                .name(row.getName())
+                .location(row.getLocation())
+                .status(row.getStatus())
+                .reviewStatus(row.getReviewStatus())
+                .authorUsername(row.getAuthorUsername())
+                .createdAt(row.getCreatedAt())
+                .build();
+    }
+
+    private AdminTrailDetailVo toAdminTrailDetail(TrailQueryRow row) {
+        return AdminTrailDetailVo.builder()
+                .id(row.getId())
+                .image(row.getImage())
+                .name(row.getName())
+                .location(row.getLocation())
+                .geoCountry(row.getGeoCountry())
+                .geoProvince(row.getGeoProvince())
+                .geoCity(row.getGeoCity())
+                .geoDistrict(row.getGeoDistrict())
+                .geoSource(row.getGeoSource())
+                .difficulty(row.getDifficulty())
+                .difficultyLabel(row.getDifficultyLabel())
+                .packType(row.getPackType())
+                .durationType(row.getDurationType())
+                .distance(row.getDistance())
+                .elevation(row.getElevation())
+                .duration(row.getDuration())
+                .description(row.getDescription())
+                .tags(splitTags(row.getTagsCsv()))
+                .favorites(row.getFavorites())
+                .likes(row.getLikes())
+                .reviewCount(row.getReviewCount())
+                .status(row.getStatus())
+                .reviewStatus(row.getReviewStatus())
+                .reviewRemark(row.getReviewRemark())
+                .reviewedBy(row.getReviewedBy())
+                .reviewedAt(row.getReviewedAt())
+                .createdAt(row.getCreatedAt())
+                .author(UserSummaryVo.builder()
+                        .id(row.getAuthorId())
+                        .username(row.getAuthorUsername())
+                        .avatar(row.getAuthorAvatar())
+                        .avatarBg(row.getAuthorAvatarBg())
+                        .build())
+                .gallery(loadGallery(row.getId()))
+                .track(buildTrackVo(row.getId()))
+                .build();
     }
 
     private Trail requireTrail(Long trailId) {
@@ -206,6 +324,30 @@ public class AdminServiceImpl implements AdminService {
             throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
         }
         return trail;
+    }
+
+    private Trail requireExistingTrail(Long trailId) {
+        Trail trail = trailMapper.selectById(trailId);
+        if (trail == null) {
+            throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
+        }
+        return trail;
+    }
+
+    private TrailQueryRow requireTrailRow(Long trailId) {
+        TrailQueryRow row = trailMapper.selectAdminTrailDetailById(trailId);
+        if (row == null) {
+            throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
+        }
+        return row;
+    }
+
+    private User requireUser(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw BusinessException.notFound("USER_NOT_FOUND", "用户不存在");
+        }
+        return user;
     }
 
     private List<String> splitTags(String tagsCsv) {
@@ -245,5 +387,34 @@ public class AdminServiceImpl implements AdminService {
                 .elevationLossMeters(track.getElevationLossMeters())
                 .durationSeconds(track.getDurationSeconds())
                 .build();
+    }
+
+    private void logAction(
+            String actionType,
+            String targetType,
+            Long targetId,
+            Long operatorId,
+            String remark,
+            Map<String, Object> metadata) {
+        AdminOperationLog log = new AdminOperationLog();
+        log.setActionType(actionType);
+        log.setTargetType(targetType);
+        log.setTargetId(targetId);
+        log.setOperatorId(operatorId);
+        log.setRemark(remark);
+        log.setMetadataJson(writeMetadata(metadata));
+        log.setCreatedAt(LocalDateTime.now());
+        adminOperationLogMapper.insert(log);
+    }
+
+    private String writeMetadata(Map<String, Object> metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(metadata);
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException("failed to serialize admin operation metadata", ex);
+        }
     }
 }

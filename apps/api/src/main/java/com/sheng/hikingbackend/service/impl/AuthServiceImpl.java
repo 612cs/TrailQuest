@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,7 @@ import com.sheng.hikingbackend.common.enums.HikingPackPreference;
 import com.sheng.hikingbackend.common.enums.HikingTrailStyle;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.common.enums.UserRole;
+import com.sheng.hikingbackend.common.enums.UserStatus;
 import com.sheng.hikingbackend.config.CustomUserDetails;
 import com.sheng.hikingbackend.config.JwtTokenProvider;
 import com.sheng.hikingbackend.dto.auth.LoginRequest;
@@ -60,6 +62,7 @@ public class AuthServiceImpl implements AuthService {
         if (existingUser == null) {
             throw BusinessException.unauthorized("USER_NOT_FOUND", "这个邮箱还没有注册");
         }
+        ensureUserAvailable(existingUser);
 
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -72,6 +75,8 @@ public class AuthServiceImpl implements AuthService {
                     .expiresInSeconds(jwtTokenProvider.getExpiresInSeconds())
                     .user(buildCurrentUser(user))
                     .build();
+        } catch (DisabledException ex) {
+            throw BusinessException.forbidden("ACCOUNT_DISABLED", "账号已被禁用，无法登录");
         } catch (BadCredentialsException ex) {
             throw BusinessException.unauthorized("INVALID_CREDENTIALS", "邮箱或密码不正确");
         }
@@ -93,6 +98,7 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(request.getEmail().trim());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(UserRole.USER);
+        user.setStatus(UserStatus.ACTIVE.getCode());
         userMapper.insert(user);
         saveHikingProfile(user.getId(), request.getHikingProfile());
 
@@ -111,6 +117,7 @@ public class AuthServiceImpl implements AuthService {
         if (user == null) {
             throw BusinessException.notFound("USER_NOT_FOUND", "用户不存在");
         }
+        ensureUserAvailable(user);
         return buildCurrentUser(user);
     }
 
@@ -177,5 +184,15 @@ public class AuthServiceImpl implements AuthService {
 
     private String normalizeNullable(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private void ensureUserAvailable(User user) {
+        if (user == null || user.getStatus() == null || UserStatus.ACTIVE.getCode().equals(user.getStatus())) {
+            return;
+        }
+        if (UserStatus.BANNED.getCode().equals(user.getStatus())) {
+            throw BusinessException.forbidden("ACCOUNT_BANNED", "账号已被封禁");
+        }
+        throw BusinessException.forbidden("ACCOUNT_UNAVAILABLE", "账号当前不可用");
     }
 }

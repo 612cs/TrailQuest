@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Update;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
 import com.sheng.hikingbackend.entity.Trail;
@@ -482,8 +483,82 @@ public interface TrailMapper extends BaseMapper<Trail> {
               JOIN tags tag ON tag.id = tt.tag_id
               GROUP BY tt.trail_id
             ) tag_summary ON tag_summary.trail_id = t.id
+            <where>
+              AND t.review_status = 'approved'
+              <if test="query.status != null and query.status != ''">
+                AND t.status = #{query.status}
+              </if>
+              <if test="query.keyword != null and query.keyword != ''">
+                AND (
+                  t.name LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.location LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.geo_province LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.geo_city LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.geo_district LIKE CONCAT('%', #{query.keyword}, '%')
+                )
+              </if>
+              <if test="query.authorKeyword != null and query.authorKeyword != ''">
+                AND u.username LIKE CONCAT('%', #{query.authorKeyword}, '%')
+              </if>
+            </where>
+            ORDER BY
+              CASE t.status
+                WHEN 'active' THEN 0
+                ELSE 1
+              END ASC,
+              t.created_at DESC
+            </script>
+            """)
+    IPage<TrailQueryRow> selectAdminTrailManagementPage(
+            Page<TrailQueryRow> page,
+            @Param("query") AdminTrailManagementPageRequest query);
+
+    @Select("""
+            <script>
+            SELECT
+              t.id,
+              t.image,
+              t.name,
+              t.location,
+              t.geo_country,
+              t.geo_province,
+              t.geo_city,
+              t.geo_district,
+              t.geo_source,
+              t.difficulty,
+              t.difficulty_label,
+              t.pack_type,
+              t.duration_type,
+              t.rating,
+              t.review_count,
+              t.distance,
+              t.elevation,
+              t.duration,
+              t.description,
+              t.favorites,
+              t.likes,
+              t.author_id,
+              t.created_at,
+              t.status,
+              t.review_status,
+              t.review_remark,
+              t.reviewed_by,
+              t.reviewed_at,
+              tag_summary.tags_csv,
+              u.username AS author_username,
+              u.avatar AS author_avatar,
+              u.avatar_bg AS author_avatar_bg
+            FROM trails t
+            JOIN users u ON u.id = t.author_id
+            LEFT JOIN (
+              SELECT
+                tt.trail_id,
+                GROUP_CONCAT(tag.name ORDER BY tag.id SEPARATOR ',') AS tags_csv
+              FROM trail_tags tt
+              JOIN tags tag ON tag.id = tt.tag_id
+              GROUP BY tt.trail_id
+            ) tag_summary ON tag_summary.trail_id = t.id
             WHERE t.id = #{trailId}
-              AND t.status = 'active'
             LIMIT 1
             </script>
             """)
