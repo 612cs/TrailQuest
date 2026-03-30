@@ -18,6 +18,8 @@ public interface TrailService {
 
     TrailDetailVo updateTrail(Long trailId, Long currentUserId, String requestIp, UpdateTrailRequest request);
 
+    TrailDetailVo getTrailDetailForAdmin(Long id);
+
     void deleteTrail(Long trailId, Long currentUserId);
 
     TrailInteractionVo likeTrail(Long trailId, Long currentUserId);

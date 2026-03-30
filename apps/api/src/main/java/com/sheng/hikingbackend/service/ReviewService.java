@@ -12,4 +12,6 @@ public interface ReviewService {
     CreateReviewResponse createReview(Long userId, CreateReviewRequest request);
 
     DeleteReviewResponse deleteReview(Long userId, Long reviewId);
+
+    DeleteReviewResponse deleteReviewAsAdmin(Long reviewId);
 }

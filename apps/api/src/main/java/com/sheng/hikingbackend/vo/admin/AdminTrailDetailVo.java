@@ -1,20 +1,23 @@
-package com.sheng.hikingbackend.vo.trail;
+package com.sheng.hikingbackend.vo.admin;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
+import com.sheng.hikingbackend.vo.common.UserSummaryVo;
+import com.sheng.hikingbackend.vo.trail.TrailGalleryItemVo;
+import com.sheng.hikingbackend.vo.trail.TrailTrackVo;
+
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
-public class TrailQueryRow {
+@Builder
+public class AdminTrailDetailVo {
 
     private Long id;
     private String image;
     private String name;
     private String location;
-    private String ip;
     private String geoCountry;
     private String geoProvince;
     private String geoCity;
@@ -24,25 +27,20 @@ public class TrailQueryRow {
     private String difficultyLabel;
     private String packType;
     private String durationType;
-    private BigDecimal rating;
-    private Integer reviewCount;
     private String distance;
     private String elevation;
     private String duration;
     private String description;
+    private List<String> tags;
     private Integer favorites;
     private Integer likes;
-    private Boolean likedByCurrentUser;
-    private Boolean favoritedByCurrentUser;
-    private Long authorId;
-    private LocalDateTime createdAt;
-    private String status;
+    private Integer reviewCount;
     private String reviewStatus;
     private String reviewRemark;
     private Long reviewedBy;
     private LocalDateTime reviewedAt;
-    private String tagsCsv;
-    private String authorUsername;
-    private String authorAvatar;
-    private String authorAvatarBg;
+    private LocalDateTime createdAt;
+    private UserSummaryVo author;
+    private List<TrailGalleryItemVo> gallery;
+    private TrailTrackVo track;
 }

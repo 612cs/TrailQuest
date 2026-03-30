@@ -157,6 +157,25 @@ public class ReviewServiceImpl implements ReviewService {
                 .build();
     }
 
+    @Override
+    @Transactional
+    public DeleteReviewResponse deleteReviewAsAdmin(Long reviewId) {
+        Review review = reviewMapper.selectById(reviewId);
+        if (review == null) {
+            throw BusinessException.notFound("REVIEW_NOT_FOUND", "评论不存在");
+        }
+
+        Trail trail = ensureTrailExists(review.getTrailId());
+        reviewMapper.deleteById(reviewId);
+        TrailReviewStatsVo stats = refreshTrailReviewStats(trail);
+
+        return DeleteReviewResponse.builder()
+                .deletedReviewId(reviewId)
+                .trailRating(scaleRating(stats.getAverageRating()))
+                .trailReviewCount(stats.getReviewCount() == null ? 0 : stats.getReviewCount().intValue())
+                .build();
+    }
+
     private Trail ensureTrailExists(Long trailId) {
         Trail trail = trailMapper.selectById(trailId);
         if (trail == null) {

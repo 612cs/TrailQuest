@@ -64,6 +64,14 @@ public class Trail {
     private Long authorId;
 
     private String status;
+    @TableField("review_status")
+    private String reviewStatus;
+    @TableField("review_remark")
+    private String reviewRemark;
+    @TableField("reviewed_by")
+    private Long reviewedBy;
+    @TableField("reviewed_at")
+    private LocalDateTime reviewedAt;
 
     @TableField("created_at")
     private LocalDateTime createdAt;

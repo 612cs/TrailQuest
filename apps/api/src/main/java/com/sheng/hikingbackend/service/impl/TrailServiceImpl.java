@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.common.enums.MediaBizType;
 import com.sheng.hikingbackend.common.enums.MediaFileStatus;
+import com.sheng.hikingbackend.common.enums.TrailReviewStatus;
 import com.sheng.hikingbackend.common.enums.TrailStatus;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.dto.trail.CreateTrailRequest;
@@ -89,6 +90,15 @@ public class TrailServiceImpl implements TrailService {
     }
 
     @Override
+    public TrailDetailVo getTrailDetailForAdmin(Long id) {
+        TrailQueryRow row = trailMapper.selectAdminTrailDetailById(id);
+        if (row == null) {
+            throw BusinessException.notFound("TRAIL_NOT_FOUND", "路线不存在");
+        }
+        return toTrailDetailVo(row, buildTrackVo(id), null, true);
+    }
+
+    @Override
     @Transactional
     public TrailDetailVo createTrail(Long currentUserId, String requestIp, CreateTrailRequest request) {
         TrackMutation mutation = resolveTrackMutation(currentUserId, request.getTrackMediaId());
@@ -102,6 +112,10 @@ public class TrailServiceImpl implements TrailService {
         trail.setRating(java.math.BigDecimal.ZERO.setScale(1));
         trail.setReviewCount(0);
         trail.setStatus(TrailStatus.ACTIVE.getCode());
+        trail.setReviewStatus(TrailReviewStatus.PENDING.getCode());
+        trail.setReviewRemark(null);
+        trail.setReviewedBy(null);
+        trail.setReviewedAt(null);
         applyTrailFields(trail, request, requestIp, coverMedia, mutation.parsedTrack());
         trailMapper.insert(trail);
 
@@ -123,6 +137,10 @@ public class TrailServiceImpl implements TrailService {
         MediaFile coverMedia = requireOwnedMedia(currentUserId, request.getCoverMediaId(), MediaBizType.TRAIL_COVER);
 
         applyTrailFields(trail, request, requestIp, coverMedia, mutation.parsedTrack());
+        trail.setReviewStatus(TrailReviewStatus.PENDING.getCode());
+        trail.setReviewRemark(null);
+        trail.setReviewedBy(null);
+        trail.setReviewedAt(null);
         trailMapper.updateById(trail);
 
         replaceGalleryImages(trailId, galleryMedia);
@@ -221,6 +239,10 @@ public class TrailServiceImpl implements TrailService {
                 .authorId(row.getAuthorId())
                 .publishTime(formatPublishTime(row.getCreatedAt()))
                 .createdAt(row.getCreatedAt())
+                .reviewStatus(row.getReviewStatus())
+                .reviewRemark(row.getReviewRemark())
+                .reviewedBy(row.getReviewedBy())
+                .reviewedAt(row.getReviewedAt())
                 .ownedByCurrentUser(isOwnedByCurrentUser(row, currentUserId))
                 .editableByCurrentUser(isEditableByCurrentUser(row, currentUserId))
                 .coverMediaId(includeEditMedia

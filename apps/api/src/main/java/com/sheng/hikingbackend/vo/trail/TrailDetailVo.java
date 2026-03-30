@@ -41,6 +41,10 @@ public class TrailDetailVo {
     private Long authorId;
     private String publishTime;
     private LocalDateTime createdAt;
+    private String reviewStatus;
+    private String reviewRemark;
+    private Long reviewedBy;
+    private LocalDateTime reviewedAt;
     private Boolean ownedByCurrentUser;
     private Boolean editableByCurrentUser;
     private Long coverMediaId;

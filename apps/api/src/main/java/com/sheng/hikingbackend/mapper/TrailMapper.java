@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Update;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
 import com.sheng.hikingbackend.entity.Trail;
 import com.sheng.hikingbackend.vo.trail.TrailInteractionVo;
@@ -62,6 +63,10 @@ public interface TrailMapper extends BaseMapper<Trail> {
               t.author_id,
               t.created_at,
               t.status,
+              t.review_status,
+              t.review_remark,
+              t.reviewed_by,
+              t.reviewed_at,
               tag_summary.tags_csv,
               u.username AS author_username,
               u.avatar AS author_avatar,
@@ -78,6 +83,7 @@ public interface TrailMapper extends BaseMapper<Trail> {
             ) tag_summary ON tag_summary.trail_id = t.id
             <where>
               AND t.status = 'active'
+              AND t.review_status = 'approved'
               <if test="query.geoDistrict != null and query.geoDistrict != ''">
                 AND t.geo_district = #{query.geoDistrict}
               </if>
@@ -188,6 +194,10 @@ public interface TrailMapper extends BaseMapper<Trail> {
               t.author_id,
               t.created_at,
               t.status,
+              t.review_status,
+              t.review_remark,
+              t.reviewed_by,
+              t.reviewed_at,
               tag_summary.tags_csv,
               u.username AS author_username,
               u.avatar AS author_avatar,
@@ -204,6 +214,12 @@ public interface TrailMapper extends BaseMapper<Trail> {
             ) tag_summary ON tag_summary.trail_id = t.id
             WHERE t.id = #{id}
               AND t.status = 'active'
+              AND (
+                t.review_status = 'approved'
+                <if test="userId != null">
+                  OR t.author_id = #{userId}
+                </if>
+              )
             LIMIT 1
             </script>
             """)
@@ -271,6 +287,10 @@ public interface TrailMapper extends BaseMapper<Trail> {
               t.author_id,
               t.created_at,
               t.status,
+              t.review_status,
+              t.review_remark,
+              t.reviewed_by,
+              t.reviewed_at,
               u.username AS author_username
             FROM trails t
             JOIN users u ON u.id = t.author_id
@@ -314,12 +334,17 @@ public interface TrailMapper extends BaseMapper<Trail> {
               t.author_id,
               t.created_at,
               t.status,
+              t.review_status,
+              t.review_remark,
+              t.reviewed_by,
+              t.reviewed_at,
               u.username AS author_username
             FROM trail_favorites favorite
             JOIN trails t ON t.id = favorite.trail_id
             JOIN users u ON u.id = t.author_id
             WHERE favorite.user_id = #{currentUserId}
               AND t.status = 'active'
+              AND t.review_status = 'approved'
             ORDER BY favorite.created_at DESC, favorite.id DESC
             </script>
             """)
@@ -333,9 +358,144 @@ public interface TrailMapper extends BaseMapper<Trail> {
             FROM trails
             WHERE id = #{trailId}
               AND status = 'active'
+              AND review_status = 'approved'
             LIMIT 1
             """)
     Trail selectActiveById(@Param("trailId") Long trailId);
+
+    @Select("""
+            <script>
+            SELECT
+              t.id,
+              t.image,
+              t.name,
+              t.location,
+              t.geo_country,
+              t.geo_province,
+              t.geo_city,
+              t.geo_district,
+              t.geo_source,
+              t.difficulty,
+              t.difficulty_label,
+              t.pack_type,
+              t.duration_type,
+              t.rating,
+              t.review_count,
+              t.distance,
+              t.elevation,
+              t.duration,
+              t.description,
+              t.favorites,
+              t.likes,
+              t.author_id,
+              t.created_at,
+              t.status,
+              t.review_status,
+              t.review_remark,
+              t.reviewed_by,
+              t.reviewed_at,
+              tag_summary.tags_csv,
+              u.username AS author_username,
+              u.avatar AS author_avatar,
+              u.avatar_bg AS author_avatar_bg
+            FROM trails t
+            JOIN users u ON u.id = t.author_id
+            LEFT JOIN (
+              SELECT
+                tt.trail_id,
+                GROUP_CONCAT(tag.name ORDER BY tag.id SEPARATOR ',') AS tags_csv
+              FROM trail_tags tt
+              JOIN tags tag ON tag.id = tt.tag_id
+              GROUP BY tt.trail_id
+            ) tag_summary ON tag_summary.trail_id = t.id
+            <where>
+              AND t.status = 'active'
+              <if test="query.reviewStatus != null and query.reviewStatus != ''">
+                AND t.review_status = #{query.reviewStatus}
+              </if>
+              <if test="query.keyword != null and query.keyword != ''">
+                AND (
+                  t.name LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.location LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.geo_province LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.geo_city LIKE CONCAT('%', #{query.keyword}, '%')
+                  OR t.geo_district LIKE CONCAT('%', #{query.keyword}, '%')
+                )
+              </if>
+              <if test="query.authorKeyword != null and query.authorKeyword != ''">
+                AND u.username LIKE CONCAT('%', #{query.authorKeyword}, '%')
+              </if>
+            </where>
+            ORDER BY
+              CASE t.review_status
+                WHEN 'pending' THEN 0
+                WHEN 'rejected' THEN 1
+                ELSE 2
+              END ASC,
+              t.created_at DESC
+            </script>
+            """)
+    IPage<TrailQueryRow> selectAdminTrailPage(Page<TrailQueryRow> page, @Param("query") AdminTrailPageRequest query);
+
+    @Select("""
+            <script>
+            SELECT
+              t.id,
+              t.image,
+              t.name,
+              t.location,
+              t.geo_country,
+              t.geo_province,
+              t.geo_city,
+              t.geo_district,
+              t.geo_source,
+              t.difficulty,
+              t.difficulty_label,
+              t.pack_type,
+              t.duration_type,
+              t.rating,
+              t.review_count,
+              t.distance,
+              t.elevation,
+              t.duration,
+              t.description,
+              t.favorites,
+              t.likes,
+              t.author_id,
+              t.created_at,
+              t.status,
+              t.review_status,
+              t.review_remark,
+              t.reviewed_by,
+              t.reviewed_at,
+              tag_summary.tags_csv,
+              u.username AS author_username,
+              u.avatar AS author_avatar,
+              u.avatar_bg AS author_avatar_bg
+            FROM trails t
+            JOIN users u ON u.id = t.author_id
+            LEFT JOIN (
+              SELECT
+                tt.trail_id,
+                GROUP_CONCAT(tag.name ORDER BY tag.id SEPARATOR ',') AS tags_csv
+              FROM trail_tags tt
+              JOIN tags tag ON tag.id = tt.tag_id
+              GROUP BY tt.trail_id
+            ) tag_summary ON tag_summary.trail_id = t.id
+            WHERE t.id = #{trailId}
+              AND t.status = 'active'
+            LIMIT 1
+            </script>
+            """)
+    TrailQueryRow selectAdminTrailDetailById(@Param("trailId") Long trailId);
+
+    @Select("""
+            SELECT COUNT(*)
+            FROM trails
+            WHERE status = 'active'
+              AND review_status = 'pending'
+            """)
+    long countPendingReviewTrails();
 
     @Update("""
             UPDATE trails

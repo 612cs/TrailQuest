@@ -7,7 +7,11 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
 import com.sheng.hikingbackend.entity.Review;
+import com.sheng.hikingbackend.vo.admin.AdminReviewQueryRow;
 import com.sheng.hikingbackend.vo.review.ReviewQueryRow;
 import com.sheng.hikingbackend.vo.review.TrailReviewStatsVo;
 
@@ -103,4 +107,36 @@ public interface ReviewMapper extends BaseMapper<Review> {
               AND parent_id IS NULL
             """)
     TrailReviewStatsVo selectTrailReviewStats(@Param("trailId") Long trailId);
+
+    @Select("""
+            <script>
+            SELECT
+              r.id,
+              r.text,
+              u.username AS author_username,
+              t.name AS trail_name,
+              r.created_at
+            FROM reviews r
+            JOIN users u ON u.id = r.user_id
+            LEFT JOIN trails t ON t.id = r.trail_id
+            <where>
+              <if test="query.keyword != null and query.keyword != ''">
+                AND r.text LIKE CONCAT('%', #{query.keyword}, '%')
+              </if>
+              <if test="query.trailKeyword != null and query.trailKeyword != ''">
+                AND t.name LIKE CONCAT('%', #{query.trailKeyword}, '%')
+              </if>
+              <if test="query.authorKeyword != null and query.authorKeyword != ''">
+                AND u.username LIKE CONCAT('%', #{query.authorKeyword}, '%')
+              </if>
+            </where>
+            ORDER BY r.created_at DESC, r.id DESC
+            </script>
+            """)
+    IPage<AdminReviewQueryRow> selectAdminReviewPage(
+            Page<AdminReviewQueryRow> page,
+            @Param("query") AdminReviewPageRequest query);
+
+    @Select("SELECT COUNT(*) FROM reviews")
+    long countAllReviews();
 }

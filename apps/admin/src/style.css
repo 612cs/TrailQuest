@@ -1,0 +1,304 @@
+:root {
+  color-scheme: light;
+  --color-primary-500: #2f5e25;
+  --bg: #eef3ea;
+  --bg-elevated: rgba(255, 255, 255, 0.82);
+  --bg-surface: rgba(255, 255, 255, 0.95);
+  --bg-soft: rgba(47, 94, 37, 0.08);
+  --bg-soft-strong: rgba(47, 94, 37, 0.12);
+  --border: rgba(48, 79, 38, 0.12);
+  --border-strong: rgba(47, 94, 37, 0.24);
+  --text: #182217;
+  --text-strong: #0e160d;
+  --text-muted: #6b7668;
+  --primary: #2f5e25;
+  --primary-strong: #21401a;
+  --primary-soft: rgba(47, 94, 37, 0.1);
+  --danger: #b54444;
+  --warning: #b57a21;
+  --success: #2f6a3a;
+  --shadow: 0 24px 80px rgba(27, 48, 22, 0.12);
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --admin-bg: var(--bg);
+  --admin-card: var(--bg-surface);
+  --admin-card-muted: rgba(255, 255, 255, 0.68);
+  --admin-sidebar: rgba(255, 255, 255, 0.88);
+  --admin-accent-soft: var(--bg-soft);
+  --admin-border: var(--border);
+  --admin-text: var(--text);
+  --admin-text-secondary: var(--text-muted);
+  --admin-text-muted: var(--text-muted);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-primary-500: #6aa55a;
+  --bg: #0d110e;
+  --bg-elevated: rgba(18, 23, 19, 0.84);
+  --bg-surface: rgba(18, 23, 19, 0.96);
+  --bg-soft: rgba(79, 137, 69, 0.1);
+  --bg-soft-strong: rgba(79, 137, 69, 0.18);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(79, 137, 69, 0.4);
+  --text: #e5efe2;
+  --text-strong: #f6faf3;
+  --text-muted: #93a28f;
+  --primary: #6aa55a;
+  --primary-strong: #87c171;
+  --primary-soft: rgba(106, 165, 90, 0.14);
+  --danger: #e27c7c;
+  --warning: #e0b15d;
+  --success: #88c69a;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+  --admin-card-muted: rgba(22, 28, 23, 0.78);
+  --admin-sidebar: rgba(15, 19, 16, 0.88);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+html {
+  background:
+    radial-gradient(circle at top left, rgba(111, 165, 94, 0.18), transparent 36%),
+    radial-gradient(circle at right top, rgba(47, 94, 37, 0.12), transparent 24%),
+    var(--bg);
+}
+
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: rgba(47, 94, 37, 0.18);
+}
+
+.admin-page {
+  min-height: 100vh;
+}
+
+.admin-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+}
+
+.admin-panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px);
+}
+
+.admin-panel-muted {
+  background: var(--admin-card-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(12px);
+}
+
+.admin-input,
+.admin-select,
+.admin-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-strong);
+  border-radius: 16px;
+  padding: 0.95rem 1.05rem;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-input::placeholder,
+.admin-textarea::placeholder {
+  color: color-mix(in srgb, var(--text-muted) 72%, transparent);
+}
+
+.admin-input:focus,
+.admin-select:focus,
+.admin-textarea:focus {
+  border-color: var(--primary-strong);
+  box-shadow: 0 0 0 4px rgba(47, 94, 37, 0.14);
+}
+
+.admin-button,
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.8rem 1.15rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.admin-button:hover,
+.admin-btn:hover {
+  transform: translateY(-1px);
+}
+
+.admin-button:disabled,
+.admin-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.admin-button-primary,
+.admin-btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.admin-button-secondary,
+.admin-btn-secondary {
+  background: transparent;
+  color: var(--text-strong);
+  border-color: var(--border);
+}
+
+.admin-button-danger,
+.admin-btn-danger {
+  background: rgba(181, 68, 68, 0.08);
+  color: var(--danger);
+  border-color: rgba(181, 68, 68, 0.2);
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.34rem 0.72rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.admin-badge-pending {
+  color: var(--warning);
+  background: rgba(181, 122, 33, 0.12);
+}
+
+.admin-badge-approved {
+  color: var(--success);
+  background: rgba(47, 106, 58, 0.12);
+}
+
+.admin-badge-rejected {
+  color: var(--danger);
+  background: rgba(181, 68, 68, 0.12);
+}
+
+.admin-badge-neutral {
+  color: var(--text-muted);
+  background: var(--bg-soft);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.95rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.admin-table th {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.admin-muted {
+  color: var(--text-muted);
+}
+
+.admin-title {
+  margin: 0;
+  color: var(--text-strong);
+}
+
+.admin-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.admin-section {
+  padding: 1.25rem;
+}
+
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.admin-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.admin-empty {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  text-align: center;
+  padding: 2rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--bg-surface) 82%, transparent);
+}
+
+@media (max-width: 1024px) {
+  .admin-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}

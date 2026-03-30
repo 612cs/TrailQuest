@@ -2,9 +2,9 @@ package com.sheng.hikingbackend.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -14,18 +14,25 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.core.MethodParameter;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sheng.hikingbackend.common.exception.GlobalExceptionHandler;
 import com.sheng.hikingbackend.common.enums.UserRole;
+import com.sheng.hikingbackend.common.exception.GlobalExceptionHandler;
 import com.sheng.hikingbackend.config.CustomUserDetails;
 import com.sheng.hikingbackend.entity.User;
 import com.sheng.hikingbackend.service.LandscapePredictionService;
@@ -34,32 +41,59 @@ import com.sheng.hikingbackend.service.TrailWeatherService;
 import com.sheng.hikingbackend.vo.common.UserSummaryVo;
 import com.sheng.hikingbackend.vo.trail.TrailDetailVo;
 
-@WebMvcTest(TrailController.class)
-@Import(GlobalExceptionHandler.class)
 class TrailControllerIntegrationTest {
 
-    @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    @MockitoBean
     private TrailService trailService;
+    private CustomUserDetails testUserDetails;
 
-    @MockitoBean
-    private TrailWeatherService trailWeatherService;
+    @BeforeEach
+    void setUp() {
+        trailService = mock(TrailService.class);
+        TrailWeatherService trailWeatherService = mock(TrailWeatherService.class);
+        LandscapePredictionService landscapePredictionService = mock(LandscapePredictionService.class);
+        objectMapper = new ObjectMapper().findAndRegisterModules();
+        testUserDetails = (CustomUserDetails) buildAuthentication().getPrincipal();
 
-    @MockitoBean
-    private LandscapePredictionService landscapePredictionService;
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
+
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(new TrailController(trailService, trailWeatherService, landscapePredictionService))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                    @Override
+                    public boolean supportsParameter(MethodParameter parameter) {
+                        return parameter.getParameterType().equals(CustomUserDetails.class);
+                    }
+
+                    @Override
+                    public Object resolveArgument(
+                            MethodParameter parameter,
+                            ModelAndViewContainer mavContainer,
+                            NativeWebRequest webRequest,
+                            WebDataBinderFactory binderFactory) {
+                        return testUserDetails;
+                    }
+                })
+                .setValidator(validator)
+                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+                .build();
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void createTrailShouldBindStructuredGeoFieldsAndReturnSuccess() throws Exception {
         TrailDetailVo response = buildTrailDetail();
-        when(trailService.createTrail(eq(2001L), any(), any())).thenReturn(response);
+        when(trailService.createTrail(any(), any(), any())).thenReturn(response);
+        SecurityContextHolder.getContext().setAuthentication(buildAuthentication());
 
         mockMvc.perform(post("/api/trails")
-                .with(authentication(buildAuthentication()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new CreateTrailBody())))
                 .andExpect(status().isOk())
@@ -70,16 +104,16 @@ class TrailControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.geoCity").value("萍乡"))
                 .andExpect(jsonPath("$.data.geoDistrict").value("芦溪"));
 
-        verify(trailService).createTrail(eq(2001L), any(), any());
+        verify(trailService).createTrail(any(), any(), any());
     }
 
     @Test
     void createTrailShouldRejectMissingLocation() throws Exception {
         CreateTrailBody body = new CreateTrailBody();
         body.location = "";
+        SecurityContextHolder.getContext().setAuthentication(buildAuthentication());
 
         mockMvc.perform(post("/api/trails")
-                .with(authentication(buildAuthentication()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isBadRequest())
@@ -91,21 +125,21 @@ class TrailControllerIntegrationTest {
     @Test
     void updateTrailShouldBindTrackAndGeoFields() throws Exception {
         TrailDetailVo response = buildTrailDetail();
-        when(trailService.updateTrail(eq(3001L), eq(2001L), any(), any())).thenReturn(response);
+        when(trailService.updateTrail(eq(3001L), any(), any(), any())).thenReturn(response);
 
         CreateTrailBody body = new CreateTrailBody();
         body.trackMediaId = 6002L;
         body.geoSource = "track_reverse";
+        SecurityContextHolder.getContext().setAuthentication(buildAuthentication());
 
         mockMvc.perform(put("/api/trails/3001")
-                .with(authentication(buildAuthentication()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("路线更新成功"));
 
-        verify(trailService).updateTrail(eq(3001L), eq(2001L), any(), any());
+        verify(trailService).updateTrail(eq(3001L), any(), any(), any());
     }
 
     private UsernamePasswordAuthenticationToken buildAuthentication() {

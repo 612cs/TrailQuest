@@ -299,15 +299,22 @@ CREATE TABLE `trails` (
   `likes` int NOT NULL DEFAULT '0' COMMENT '点赞数',
   `author_id` bigint NOT NULL COMMENT '发布者ID',
   `status` enum('active','deleted') NOT NULL DEFAULT 'active' COMMENT '路线状态',
+  `review_status` enum('pending','approved','rejected') NOT NULL DEFAULT 'approved' COMMENT '审核状态',
+  `review_remark` varchar(255) DEFAULT NULL COMMENT '审核备注',
+  `reviewed_by` bigint DEFAULT NULL COMMENT '审核管理员ID',
+  `reviewed_at` datetime DEFAULT NULL COMMENT '审核时间',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`),
   KEY `idx_trails_author_created` (`author_id`,`created_at`),
   KEY `idx_trails_status_created` (`status`,`created_at`),
+  KEY `idx_trails_review_status_created` (`review_status`,`created_at`),
   KEY `idx_trails_geo_province` (`geo_province`),
   KEY `idx_trails_geo_city` (`geo_city`),
   KEY `idx_trails_geo_district` (`geo_district`),
-  CONSTRAINT `trails_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`)
+  KEY `idx_trails_reviewed_by` (`reviewed_by`),
+  CONSTRAINT `trails_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `trails_ibfk_reviewed_by` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='路线表';
 
 -- ----------------------------
