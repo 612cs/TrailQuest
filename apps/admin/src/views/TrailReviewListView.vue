@@ -34,38 +34,25 @@ onMounted(() => {
 
 <template>
   <section class="admin-card admin-section">
-    <div class="admin-list-header">
-      <h2 class="admin-title">路线审核</h2>
-      <button class="admin-button admin-button-secondary" type="button" @click="load()">
-        <RefreshCcw :size="16" :stroke-width="2" />
-        刷新
-      </button>
-    </div>
-
     <div class="admin-list-toolbar">
-      <label>
-        <span>关键词</span>
-        <input v-model="keyword" class="admin-input" placeholder="路线名称 / 地点" @keyup.enter="load(1)" />
-      </label>
-      <label>
-        <span>审核状态</span>
-        <select v-model="reviewStatus" class="admin-select" @change="load(1)">
+      <input v-model="keyword" class="admin-input" placeholder="路线名称 / 地点" aria-label="关键词" @keyup.enter="load(1)" />
+      <select v-model="reviewStatus" class="admin-select" aria-label="审核状态" @change="load(1)">
           <option value="">全部</option>
           <option value="pending">待审核</option>
           <option value="approved">已通过</option>
           <option value="rejected">已驳回</option>
-        </select>
-      </label>
-      <label>
-        <span>作者</span>
-        <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" @keyup.enter="load(1)" />
-      </label>
+      </select>
+      <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" aria-label="作者" @keyup.enter="load(1)" />
       <div class="admin-list-toolbar__actions">
         <button class="admin-button admin-button-primary" type="button" @click="load(1)">
           <Search :size="16" :stroke-width="2" />
           搜索
         </button>
         <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+        <button class="admin-button admin-button-secondary" type="button" @click="load()">
+          <RefreshCcw :size="16" :stroke-width="2" />
+          刷新
+        </button>
       </div>
     </div>
 
@@ -100,7 +87,6 @@ onMounted(() => {
   min-height: 0;
 }
 
-.admin-list-header,
 .admin-list-toolbar,
 .admin-list-toolbar__actions {
   display: flex;
@@ -110,21 +96,13 @@ onMounted(() => {
 }
 
 .admin-list-toolbar {
-  margin-top: 1rem;
   align-items: end;
   flex-wrap: wrap;
 }
 
-.admin-list-toolbar label {
-  flex: 1 1 18rem;
-  display: grid;
-  gap: 0.55rem;
-}
-
-.admin-list-toolbar span {
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  font-weight: 600;
+.admin-list-toolbar > .admin-input,
+.admin-list-toolbar > .admin-select {
+  flex: 1 1 14rem;
 }
 
 .admin-list-toolbar__actions {

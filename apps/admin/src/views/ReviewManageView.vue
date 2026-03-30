@@ -67,33 +67,20 @@ onMounted(load)
 
 <template>
   <section class="admin-card admin-section">
-    <div class="admin-list-header">
-      <h2 class="admin-title">评论管理</h2>
-      <button class="admin-button admin-button-secondary" type="button" @click="load()">
-        <RefreshCcw :size="16" :stroke-width="2" />
-        刷新
-      </button>
-    </div>
-
     <div class="admin-list-toolbar">
-      <label>
-        <span>关键字</span>
-        <input v-model="keyword" class="admin-input" placeholder="评论内容" @keyup.enter="load(1)" />
-      </label>
-      <label>
-        <span>路线关键字</span>
-        <input v-model="trailKeyword" class="admin-input" placeholder="路线名称" @keyup.enter="load(1)" />
-      </label>
-      <label>
-        <span>作者</span>
-        <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" @keyup.enter="load(1)" />
-      </label>
+      <input v-model="keyword" class="admin-input" placeholder="评论内容" aria-label="评论关键字" @keyup.enter="load(1)" />
+      <input v-model="trailKeyword" class="admin-input" placeholder="路线名称" aria-label="路线关键字" @keyup.enter="load(1)" />
+      <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" aria-label="作者" @keyup.enter="load(1)" />
       <div class="admin-list-toolbar__actions">
         <button class="admin-button admin-button-primary" type="button" @click="load(1)">
           <Search :size="16" :stroke-width="2" />
           搜索
         </button>
         <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+        <button class="admin-button admin-button-secondary" type="button" @click="load()">
+          <RefreshCcw :size="16" :stroke-width="2" />
+          刷新
+        </button>
       </div>
     </div>
 
@@ -151,7 +138,6 @@ onMounted(load)
   min-height: 0;
 }
 
-.admin-list-header,
 .admin-list-toolbar,
 .admin-list-toolbar__actions {
   display: flex;
@@ -161,21 +147,13 @@ onMounted(load)
 }
 
 .admin-list-toolbar {
-  margin-top: 1rem;
   align-items: end;
   flex-wrap: wrap;
 }
 
-.admin-list-toolbar label {
-  flex: 1 1 16rem;
-  display: grid;
-  gap: 0.55rem;
-}
-
-.admin-list-toolbar span {
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  font-weight: 600;
+.admin-list-toolbar > .admin-input,
+.admin-list-toolbar > .admin-select {
+  flex: 1 1 14rem;
 }
 
 .admin-list-toolbar__actions {

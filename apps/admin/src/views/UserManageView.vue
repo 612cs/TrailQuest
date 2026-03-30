@@ -86,33 +86,23 @@ onMounted(() => {
 
 <template>
   <section class="admin-card admin-section">
-    <div class="admin-list-header">
-      <h2 class="admin-title">用户管理</h2>
-      <button class="admin-button admin-button-secondary" type="button" @click="load()">
-        <RefreshCcw :size="16" :stroke-width="2" />
-        刷新
-      </button>
-    </div>
-
     <div class="admin-list-toolbar">
-      <label>
-        <span>关键词</span>
-        <input v-model="keyword" class="admin-input" placeholder="用户名、邮箱或所在地" @keyup.enter="load(1)" />
-      </label>
-      <label>
-        <span>角色</span>
-        <select v-model="role" class="admin-select" @change="load(1)">
+      <input v-model="keyword" class="admin-input" placeholder="用户名、邮箱或所在地" aria-label="关键词" @keyup.enter="load(1)" />
+      <select v-model="role" class="admin-select" aria-label="角色" @change="load(1)">
           <option value="">全部角色</option>
           <option value="USER">普通用户</option>
           <option value="ADMIN">管理员</option>
-        </select>
-      </label>
+      </select>
       <div class="admin-list-toolbar__actions">
         <button class="admin-button admin-button-primary" type="button" @click="load(1)">
           <Search :size="16" :stroke-width="2" />
           搜索
         </button>
         <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+        <button class="admin-button admin-button-secondary" type="button" @click="load()">
+          <RefreshCcw :size="16" :stroke-width="2" />
+          刷新
+        </button>
       </div>
     </div>
 
@@ -179,7 +169,6 @@ onMounted(() => {
   min-height: 0;
 }
 
-.admin-list-header,
 .admin-list-toolbar,
 .admin-list-toolbar__actions {
   display: flex;
@@ -189,21 +178,13 @@ onMounted(() => {
 }
 
 .admin-list-toolbar {
-  margin-top: 1rem;
   align-items: end;
   flex-wrap: wrap;
 }
 
-.admin-list-toolbar label {
-  flex: 1 1 18rem;
-  display: grid;
-  gap: 0.55rem;
-}
-
-.admin-list-toolbar span {
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  font-weight: 600;
+.admin-list-toolbar > .admin-input,
+.admin-list-toolbar > .admin-select {
+  flex: 1 1 14rem;
 }
 
 .admin-list-toolbar__actions {

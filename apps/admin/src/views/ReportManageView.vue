@@ -51,8 +51,8 @@ onMounted(load)
 
 <template>
   <section class="admin-card admin-section">
-    <div class="admin-list-header">
-      <h2 class="admin-title">举报处理</h2>
+    <div class="admin-list-toolbar admin-list-toolbar--single">
+      <div class="admin-muted">当前举报入口仍在前台接入中，先保留治理入口。</div>
       <button class="admin-button admin-button-secondary" type="button" @click="load()">
         <RefreshCcw :size="16" :stroke-width="2" />
         刷新
@@ -116,11 +116,15 @@ onMounted(load)
   min-height: 0;
 }
 
-.admin-list-header {
+.admin-list-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.admin-list-toolbar--single {
+  flex-wrap: wrap;
 }
 
 .admin-list-body {
