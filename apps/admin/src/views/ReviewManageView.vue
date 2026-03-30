@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { RefreshCcw, Search, Trash2 } from 'lucide-vue-next'
 
 import { deleteAdminReview, fetchAdminReviews } from '../api/admin'
+import AdminPagination from '../components/common/AdminPagination.vue'
 import EmptyState from '../components/common/EmptyState.vue'
 import { formatDateTime } from '../utils/format'
 import type { AdminReviewListItem } from '../types/admin'
@@ -59,15 +60,6 @@ function resetFilters() {
   trailKeyword.value = ''
   authorKeyword.value = ''
   load(1)
-}
-
-function changePage(delta: number) {
-  const next = pageNum.value + delta
-  const totalPages = Math.max(1, Math.ceil(total.value / pageSize.value))
-  if (next < 1 || next > totalPages) {
-    return
-  }
-  load(next)
 }
 
 onMounted(load)
@@ -145,20 +137,18 @@ onMounted(load)
       description="当前筛选条件下没有评论数据。"
     />
 
-    <div class="admin-pagination">
-      <span class="admin-muted">第 {{ pageNum }} 页 / 共 {{ Math.max(1, Math.ceil(total / pageSize)) }} 页，共 {{ total }} 条</span>
-      <div class="admin-pagination__actions">
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum <= 1 || loading" @click="changePage(-1)">上一页</button>
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum >= Math.ceil(total / pageSize) || loading" @click="changePage(1)">下一页</button>
-      </div>
-    </div>
+    <AdminPagination
+      :current="pageNum"
+      :total-pages="Math.max(1, Math.ceil(total / pageSize))"
+      :total-items="total"
+      @update:current="load"
+    />
   </section>
 </template>
 
 <style scoped>
 .admin-list-header,
-.admin-list-actions,
-.admin-pagination {
+.admin-list-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -204,12 +194,4 @@ onMounted(load)
   line-height: 1.65;
 }
 
-.admin-pagination {
-  margin-top: 1rem;
-}
-
-.admin-pagination__actions {
-  display: flex;
-  gap: 0.6rem;
-}
 </style>

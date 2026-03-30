@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { RefreshCcw, Search, UsersRound } from 'lucide-vue-next'
 
+import AdminPagination from '../components/common/AdminPagination.vue'
 import AdminConfirmDialog from '../components/common/AdminConfirmDialog.vue'
 import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
 import EmptyState from '../components/common/EmptyState.vue'
@@ -21,7 +22,6 @@ const {
   totalPages,
   load,
   resetFilters,
-  changePage,
   banUser,
   unbanUser,
 } = useUserManagement()
@@ -137,13 +137,13 @@ onMounted(() => {
       :icon="UsersRound"
     />
 
-    <div class="admin-pagination">
-      <span class="admin-muted">第 {{ pageNum }} 页 / 共 {{ totalPages }} 页，共 {{ total }} 位用户</span>
-      <div class="admin-pagination__actions">
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum <= 1 || loading" @click="changePage(-1)">上一页</button>
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum >= totalPages || loading" @click="changePage(1)">下一页</button>
-      </div>
-    </div>
+    <AdminPagination
+      :current="pageNum"
+      :total-pages="totalPages"
+      :total-items="total"
+      item-label="位用户"
+      @update:current="load"
+    />
 
     <AdminConfirmDialog
       v-model:show="banDialogVisible"
@@ -176,8 +176,7 @@ onMounted(() => {
 
 <style scoped>
 .admin-list-header,
-.admin-list-actions,
-.admin-pagination {
+.admin-list-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -212,12 +211,4 @@ onMounted(() => {
   border: 1px solid rgba(181, 68, 68, 0.16);
 }
 
-.admin-pagination {
-  margin-top: 1rem;
-}
-
-.admin-pagination__actions {
-  display: flex;
-  gap: 0.6rem;
-}
 </style>

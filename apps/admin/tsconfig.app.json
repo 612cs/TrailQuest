@@ -2,6 +2,12 @@
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "baseUrl": ".",
+    "paths": {
+      "@trailquest/ui/*": ["../../packages/ui/src/*"],
+      "vue": ["./node_modules/vue"],
+      "lucide-vue-next": ["./node_modules/lucide-vue-next"]
+    },
     "types": ["vite/client"],
     "strict": true,
     "noUnusedLocals": true,
@@ -10,5 +16,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"]
+  "include": ["src/**/*.ts", "src/**/*.vue", "../../packages/ui/src/**/*.ts", "../../packages/ui/src/**/*.vue"]
 }

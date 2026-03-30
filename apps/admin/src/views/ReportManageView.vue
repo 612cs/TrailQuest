@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { FlagTriangleRight, RefreshCcw, CheckCheck } from 'lucide-vue-next'
 
 import { fetchAdminReports, resolveReport } from '../api/admin'
+import AdminPagination from '../components/common/AdminPagination.vue'
 import EmptyState from '../components/common/EmptyState.vue'
 import StatusBadge from '../components/common/StatusBadge.vue'
 import type { AdminReportListItem } from '../types/admin'
@@ -30,15 +31,6 @@ async function load(page = pageNum.value) {
   } finally {
     loading.value = false
   }
-}
-
-function changePage(delta: number) {
-  const next = pageNum.value + delta
-  const totalPages = Math.max(1, Math.ceil(total.value / pageSize.value))
-  if (next < 1 || next > totalPages) {
-    return
-  }
-  load(next)
 }
 
 async function handleResolve(id: string | number) {
@@ -109,19 +101,17 @@ onMounted(load)
       :icon="FlagTriangleRight"
     />
 
-    <div class="admin-pagination">
-      <span class="admin-muted">第 {{ pageNum }} 页 / 共 {{ Math.max(1, Math.ceil(total / pageSize)) }} 页，共 {{ total }} 条</span>
-      <div class="admin-pagination__actions">
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum <= 1 || loading" @click="changePage(-1)">上一页</button>
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum >= Math.ceil(total / pageSize) || loading" @click="changePage(1)">下一页</button>
-      </div>
-    </div>
+    <AdminPagination
+      :current="pageNum"
+      :total-pages="Math.max(1, Math.ceil(total / pageSize))"
+      :total-items="total"
+      @update:current="load"
+    />
   </section>
 </template>
 
 <style scoped>
-.admin-list-header,
-.admin-pagination {
+.admin-list-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -142,12 +132,4 @@ onMounted(load)
   overflow-x: auto;
 }
 
-.admin-pagination {
-  margin-top: 1rem;
-}
-
-.admin-pagination__actions {
-  display: flex;
-  gap: 0.6rem;
-}
 </style>

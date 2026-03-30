@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { RefreshCcw, Search } from 'lucide-vue-next'
 
+import AdminPagination from '../components/common/AdminPagination.vue'
 import EmptyState from '../components/common/EmptyState.vue'
 import TrailReviewTable from '../components/trails/TrailReviewTable.vue'
 import { useTrailReviewList } from '../composables/useTrailReviewList'
@@ -20,7 +21,6 @@ const {
   totalPages,
   load,
   resetFilters,
-  changePage,
 } = useTrailReviewList()
 
 function openDetail(id: string) {
@@ -86,20 +86,18 @@ onMounted(() => {
       />
     </div>
 
-    <div class="admin-pagination">
-      <span class="admin-muted">第 {{ pageNum }} 页 / 共 {{ totalPages }} 页，共 {{ total }} 条</span>
-      <div class="admin-pagination__actions">
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum <= 1 || loading" @click="changePage(-1)">上一页</button>
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum >= totalPages || loading" @click="changePage(1)">下一页</button>
-      </div>
-    </div>
+    <AdminPagination
+      :current="pageNum"
+      :total-pages="totalPages"
+      :total-items="total"
+      @update:current="load"
+    />
   </section>
 </template>
 
 <style scoped>
 .admin-list-header,
-.admin-list-actions,
-.admin-pagination {
+.admin-list-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -136,14 +134,5 @@ onMounted(() => {
 
 .admin-empty-wrap {
   margin-top: 1rem;
-}
-
-.admin-pagination {
-  margin-top: 1rem;
-}
-
-.admin-pagination__actions {
-  display: flex;
-  gap: 0.6rem;
 }
 </style>
