@@ -13,6 +13,7 @@ const router = useRouter()
 const menuItems = [
   { path: '/dashboard', title: '后台首页', icon: LayoutDashboard },
   { path: '/trails/review', title: '路线审核', icon: Mountain },
+  { path: '/trails/manage', title: '路线管理', icon: Mountain },
   { path: '/users', title: '用户管理', icon: UsersRound },
   { path: '/reviews', title: '评论管理', icon: MessageSquareMore },
   { path: '/reports', title: '举报处理', icon: FlagTriangleRight },

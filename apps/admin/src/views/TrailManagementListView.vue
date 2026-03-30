@@ -4,8 +4,8 @@ import { useRouter } from 'vue-router'
 import { RefreshCcw, Search } from 'lucide-vue-next'
 
 import EmptyState from '../components/common/EmptyState.vue'
-import TrailReviewTable from '../components/trails/TrailReviewTable.vue'
-import { useTrailReviewList } from '../composables/useTrailReviewList'
+import TrailManagementTable from '../components/trails/TrailManagementTable.vue'
+import { useTrailManagementList } from '../composables/useTrailManagementList'
 
 const router = useRouter()
 const {
@@ -13,18 +13,18 @@ const {
   list,
   total,
   pageNum,
+  status,
   keyword,
-  reviewStatus,
   authorKeyword,
   errorMessage,
   totalPages,
   load,
   resetFilters,
   changePage,
-} = useTrailReviewList()
+} = useTrailManagementList()
 
 function openDetail(id: string) {
-  router.push({ name: 'trail-review-detail', params: { id } })
+  router.push({ name: 'trail-manage-detail', params: { id } })
 }
 
 onMounted(() => {
@@ -36,8 +36,8 @@ onMounted(() => {
   <section class="admin-card admin-section">
     <div class="admin-list-header">
       <div>
-        <h2 class="admin-title">路线审核</h2>
-        <p class="admin-subtitle">聚焦待审核路线，点击整行直接进入审核详情。</p>
+        <h2 class="admin-title">路线管理</h2>
+        <p class="admin-subtitle">管理已进入系统的路线，支持下架与恢复公开展示。</p>
       </div>
       <button class="admin-button admin-button-secondary" type="button" @click="load()">
         <RefreshCcw :size="16" :stroke-width="2" />
@@ -47,17 +47,16 @@ onMounted(() => {
 
     <div class="admin-list-filters admin-grid-3">
       <label>
-        <span>关键词</span>
-        <input v-model="keyword" class="admin-input" placeholder="路线名称 / 地点" @keyup.enter="load(1)" />
+        <span>展示状态</span>
+        <select v-model="status" class="admin-select" @change="load(1)">
+          <option value="">全部</option>
+          <option value="active">正常</option>
+          <option value="deleted">已下架</option>
+        </select>
       </label>
       <label>
-        <span>审核状态</span>
-        <select v-model="reviewStatus" class="admin-select" @change="load(1)">
-          <option value="">全部</option>
-          <option value="pending">待审核</option>
-          <option value="approved">已通过</option>
-          <option value="rejected">已驳回</option>
-        </select>
+        <span>关键词</span>
+        <input v-model="keyword" class="admin-input" placeholder="路线名称 / 地点" @keyup.enter="load(1)" />
       </label>
       <label>
         <span>作者</span>
@@ -75,14 +74,14 @@ onMounted(() => {
 
     <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
 
-    <TrailReviewTable v-if="list.length" :items="list" @open="openDetail" />
+    <TrailManagementTable v-if="list.length" :items="list" @open="openDetail" />
 
     <div v-else class="admin-empty-wrap">
-      <div v-if="loading" class="admin-muted">正在加载路线列表...</div>
+      <div v-if="loading" class="admin-muted">正在加载路线管理列表...</div>
       <EmptyState
         v-else
         title="暂无路线数据"
-        description="当前筛选条件下没有匹配的审核记录。"
+        description="当前筛选条件下没有匹配的路线。"
       />
     </div>
 

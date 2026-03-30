@@ -10,6 +10,7 @@ export interface AdminTrailListItem {
   image?: string | null
   name: string
   location?: string | null
+  status: 'active' | 'deleted' | string
   reviewStatus: 'pending' | 'approved' | 'rejected'
   authorUsername: string
   createdAt: string
@@ -37,6 +38,7 @@ export interface AdminTrailDetail {
   favorites: number
   likes: number
   reviewCount: number
+  status: 'active' | 'deleted' | string
   reviewStatus: 'pending' | 'approved' | 'rejected'
   reviewRemark?: string | null
   reviewedBy?: string | number | null
@@ -81,11 +83,23 @@ export interface AdminRejectTrailRequest {
   remark: string
 }
 
+export interface AdminBanUserRequest {
+  reason: string
+}
+
 export interface AdminTrailPageQuery {
   pageNum?: number
   pageSize?: number
   keyword?: string
   reviewStatus?: string
+  authorKeyword?: string
+}
+
+export interface AdminTrailManagementPageQuery {
+  pageNum?: number
+  pageSize?: number
+  status?: string
+  keyword?: string
   authorKeyword?: string
 }
 
@@ -107,10 +121,12 @@ export interface AdminUserListItem {
   username: string
   email: string
   role: 'USER' | 'ADMIN' | string
+  status: 'active' | 'banned' | 'deleted' | string
   location?: string | null
   avatar: string
   avatarBg: string
   avatarMediaUrl?: string | null
+  bannedAt?: string | null
   publishedTrailCount: number
   createdAt: string
 }

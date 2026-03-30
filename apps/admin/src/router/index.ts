@@ -35,6 +35,18 @@ const routes = [
         meta: { title: '路线审核详情', requiresAuth: true },
       },
       {
+        path: 'trails/manage',
+        name: 'trail-manage-list',
+        component: () => import('../views/TrailManagementListView.vue'),
+        meta: { title: '路线管理', requiresAuth: true },
+      },
+      {
+        path: 'trails/manage/:id',
+        name: 'trail-manage-detail',
+        component: () => import('../views/TrailManagementDetailView.vue'),
+        meta: { title: '路线管理详情', requiresAuth: true },
+      },
+      {
         path: 'users',
         name: 'user-manage',
         component: () => import('../views/UserManageView.vue'),

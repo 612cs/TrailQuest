@@ -78,6 +78,7 @@ onMounted(loadSummary)
         </div>
         <div class="admin-dashboard__links">
           <RouterLink class="admin-dashboard__link" to="/trails/review">路线审核</RouterLink>
+          <RouterLink class="admin-dashboard__link" to="/trails/manage">路线管理</RouterLink>
           <RouterLink class="admin-dashboard__link" to="/users">用户管理</RouterLink>
           <RouterLink class="admin-dashboard__link" to="/reviews">评论管理</RouterLink>
           <RouterLink class="admin-dashboard__link" to="/reports">举报处理</RouterLink>
@@ -105,6 +106,13 @@ onMounted(loadSummary)
           <div>
             <strong>路线审核</strong>
             <p>支持通过、驳回与备注记录。</p>
+          </div>
+        </div>
+        <div class="admin-dashboard__note">
+          <Mountain :size="18" :stroke-width="2" />
+          <div>
+            <strong>路线管理</strong>
+            <p>支持对已上线路线进行下架与恢复。</p>
           </div>
         </div>
         <div class="admin-dashboard__note">

@@ -19,6 +19,10 @@ const meta = computed(() => {
       return { label: '已禁用', className: 'admin-badge admin-badge-rejected' }
     case 'active':
       return { label: '正常', className: 'admin-badge admin-badge-approved' }
+    case 'banned':
+      return { label: '已封禁', className: 'admin-badge admin-badge-rejected' }
+    case 'deleted':
+      return { label: '已下架', className: 'admin-badge admin-badge-neutral' }
     default:
       return { label: props.status || '未知', className: 'admin-badge admin-badge-neutral' }
   }

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, CheckCircle2, ImageIcon, RefreshCcw, XCircle } from 'lucide-vue-next'
+import { ArrowLeft, EyeOff, ImageIcon, RefreshCcw, RotateCcw } from 'lucide-vue-next'
 
-import { approveTrail, fetchAdminTrailDetail, rejectTrail } from '../api/admin'
+import { fetchAdminTrailManagementDetail, offlineTrail, restoreTrail } from '../api/admin'
 import AdminConfirmDialog from '../components/common/AdminConfirmDialog.vue'
 import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
 import EmptyState from '../components/common/EmptyState.vue'
@@ -16,7 +16,7 @@ const detail = ref<AdminTrailDetail | null>(null)
 const loading = ref(false)
 const actionLoading = ref(false)
 const errorMessage = ref('')
-const rejectDialogVisible = ref(false)
+const confirmDialogVisible = ref(false)
 const successDialog = ref({
   show: false,
   title: '',
@@ -24,6 +24,7 @@ const successDialog = ref({
 })
 
 const trailId = computed(() => String(route.params.id || ''))
+const isOffline = computed(() => detail.value?.status === 'deleted')
 
 async function loadDetail() {
   if (!trailId.value) {
@@ -32,7 +33,7 @@ async function loadDetail() {
   loading.value = true
   errorMessage.value = ''
   try {
-    detail.value = await fetchAdminTrailDetail(trailId.value)
+    detail.value = await fetchAdminTrailManagementDetail(trailId.value)
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : '路线详情加载失败'
   } finally {
@@ -40,44 +41,34 @@ async function loadDetail() {
   }
 }
 
-async function handleApprove() {
-  if (!trailId.value) {
+async function handleConfirm() {
+  if (!trailId.value || !detail.value) {
     return
   }
   actionLoading.value = true
   errorMessage.value = ''
   try {
-    await approveTrail(trailId.value)
-    await loadDetail()
-    successDialog.value = {
-      show: true,
-      title: '审核已通过',
-      message: '该路线已经审核通过，前台公开列表现在可以展示它了。',
+    if (isOffline.value) {
+      await restoreTrail(trailId.value)
+      successDialog.value = {
+        show: true,
+        title: '路线已恢复',
+        message: detail.value.reviewStatus === 'approved'
+          ? '路线已恢复为公开可见状态。'
+          : '路线已恢复记录存在状态，但当前审核状态仍不允许公开展示。',
+      }
+    } else {
+      await offlineTrail(trailId.value)
+      successDialog.value = {
+        show: true,
+        title: '路线已下架',
+        message: '该路线已从前台公开列表和搜索结果中移除。',
+      }
     }
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '审核通过失败'
-  } finally {
-    actionLoading.value = false
-  }
-}
-
-async function handleReject(reason: string) {
-  if (!trailId.value) {
-    return
-  }
-  actionLoading.value = true
-  errorMessage.value = ''
-  try {
-    await rejectTrail(trailId.value, { remark: reason })
-    rejectDialogVisible.value = false
+    confirmDialogVisible.value = false
     await loadDetail()
-    successDialog.value = {
-      show: true,
-      title: '路线已驳回',
-      message: '驳回结果和备注已经保存，作者修改后可重新提交审核。',
-    }
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '驳回失败'
+    errorMessage.value = error instanceof Error ? error.message : '路线治理操作失败'
   } finally {
     actionLoading.value = false
   }
@@ -95,7 +86,7 @@ watch(() => route.params.id, () => {
 <template>
   <section class="admin-card admin-section">
     <div class="admin-detail-header">
-      <button class="admin-button admin-button-secondary" type="button" @click="router.push({ name: 'trail-review-list' })">
+      <button class="admin-button admin-button-secondary" type="button" @click="router.push({ name: 'trail-manage-list' })">
         <ArrowLeft :size="16" :stroke-width="2" />
         返回列表
       </button>
@@ -111,16 +102,19 @@ watch(() => route.params.id, () => {
       <TrailDetailContent :detail="detail" />
 
       <section class="admin-card admin-detail-card">
-        <h3>审核操作</h3>
-        <p class="admin-subtitle">通过或驳回该路线。驳回时必须填写审核原因。</p>
+        <h3>路线治理</h3>
+        <p class="admin-subtitle">针对已进入系统的路线执行下架或恢复，默认不改变审核状态。</p>
         <div class="admin-detail-actions">
-          <button class="admin-button admin-button-primary" type="button" :disabled="actionLoading" @click="handleApprove">
-            <CheckCircle2 :size="16" :stroke-width="2" />
-            通过审核
-          </button>
-          <button class="admin-button admin-button-danger" type="button" :disabled="actionLoading" @click="rejectDialogVisible = true">
-            <XCircle :size="16" :stroke-width="2" />
-            驳回
+          <button
+            class="admin-button"
+            :class="isOffline ? 'admin-button-primary' : 'admin-button-danger'"
+            type="button"
+            :disabled="actionLoading"
+            @click="confirmDialogVisible = true"
+          >
+            <RotateCcw v-if="isOffline" :size="16" :stroke-width="2" />
+            <EyeOff v-else :size="16" :stroke-width="2" />
+            {{ isOffline ? '恢复路线' : '下架路线' }}
           </button>
         </div>
       </section>
@@ -129,23 +123,21 @@ watch(() => route.params.id, () => {
     <EmptyState
       v-else-if="!loading"
       title="路线不存在"
-      description="当前路线审核记录不存在或已被删除。"
+      description="当前路线管理记录不存在。"
       :icon="ImageIcon"
     />
 
     <div v-else class="admin-detail-loading">正在加载路线详情...</div>
 
     <AdminConfirmDialog
-      v-model:show="rejectDialogVisible"
-      title="确认驳回路线"
-      message="驳回后该路线不会在前台公开展示，作者修改后可重新提交审核。"
-      confirm-text="确认驳回"
+      v-model:show="confirmDialogVisible"
+      :title="isOffline ? '确认恢复路线' : '确认下架路线'"
+      :message="isOffline
+        ? '恢复后若该路线审核状态仍为已通过，将重新在前台公开展示。'
+        : '下架后该路线不会出现在前台公开列表与搜索结果中，但后台仍可恢复。'"
+      :confirm-text="isOffline ? '确认恢复' : '确认下架'"
       :loading="actionLoading"
-      require-reason
-      reason-label="驳回原因"
-      reason-placeholder="请输入驳回原因"
-      :initial-reason="detail?.reviewRemark || ''"
-      @confirm="handleReject"
+      @confirm="handleConfirm"
     />
 
     <AdminNoticeDialog
