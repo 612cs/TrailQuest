@@ -127,7 +127,7 @@ public class AiConversationServiceImpl implements AiConversationService {
                 new LambdaUpdateWrapper<AiConversation>()
                         .eq(AiConversation::getId, conversationId)
                         .eq(AiConversation::getUserId, userId)
-                        .set(AiConversation::getStatus, "deleted")
+                        .set(AiConversation::getStatus, "archived")
                         .set(AiConversation::getUpdatedAt, LocalDateTime.now()));
     }
 
