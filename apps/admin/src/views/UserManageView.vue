@@ -1,56 +1,82 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { RefreshCcw, Search, ShieldCheck, UsersRound } from 'lucide-vue-next'
+import { onMounted, ref } from 'vue'
+import { RefreshCcw, Search, UsersRound } from 'lucide-vue-next'
 
-import { fetchAdminUsers } from '../api/admin'
+import AdminConfirmDialog from '../components/common/AdminConfirmDialog.vue'
+import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
 import EmptyState from '../components/common/EmptyState.vue'
-import { formatDateTime } from '../utils/format'
+import UserManagementTable from '../components/users/UserManagementTable.vue'
+import { useUserManagement } from '../composables/useUserManagement'
 import type { AdminUserListItem } from '../types/admin'
 
-const loading = ref(false)
-const list = ref<AdminUserListItem[]>([])
-const total = ref(0)
-const pageNum = ref(1)
-const pageSize = ref(10)
-const keyword = ref('')
-const role = ref('')
-const errorMessage = ref('')
+const {
+  loading,
+  actionLoading,
+  list,
+  total,
+  pageNum,
+  keyword,
+  role,
+  errorMessage,
+  totalPages,
+  load,
+  resetFilters,
+  changePage,
+  banUser,
+  unbanUser,
+} = useUserManagement()
 
-const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
+const targetUser = ref<AdminUserListItem | null>(null)
+const banDialogVisible = ref(false)
+const unbanDialogVisible = ref(false)
+const successDialog = ref({
+  show: false,
+  title: '',
+  message: '',
+})
 
-async function load(page = pageNum.value) {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    const result = await fetchAdminUsers({
-      pageNum: page,
-      pageSize: pageSize.value,
-      keyword: keyword.value.trim() || undefined,
-      role: role.value || undefined,
-    })
-    list.value = result.list
-    total.value = result.total
-    pageNum.value = result.pageNum
-    pageSize.value = result.pageSize
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '用户列表加载失败'
-  } finally {
-    loading.value = false
-  }
+function openBanDialog(user: AdminUserListItem) {
+  targetUser.value = user
+  banDialogVisible.value = true
 }
 
-function resetFilters() {
-  keyword.value = ''
-  role.value = ''
-  void load(1)
+function openUnbanDialog(user: AdminUserListItem) {
+  targetUser.value = user
+  unbanDialogVisible.value = true
 }
 
-function changePage(delta: number) {
-  const next = pageNum.value + delta
-  if (next < 1 || next > totalPages.value) {
+async function handleBan(reason: string) {
+  if (!targetUser.value) {
     return
   }
-  void load(next)
+  try {
+    await banUser(targetUser.value.id, reason)
+    banDialogVisible.value = false
+    successDialog.value = {
+      show: true,
+      title: '用户已封禁',
+      message: `${targetUser.value.username} 已被封禁，后续将无法登录和进行互动。`,
+    }
+  } catch {
+    return
+  }
+}
+
+async function handleUnban() {
+  if (!targetUser.value) {
+    return
+  }
+  try {
+    await unbanUser(targetUser.value.id)
+    unbanDialogVisible.value = false
+    successDialog.value = {
+      show: true,
+      title: '用户已解封',
+      message: `${targetUser.value.username} 已恢复正常状态。`,
+    }
+  } catch {
+    return
+  }
 }
 
 onMounted(() => {
@@ -63,7 +89,7 @@ onMounted(() => {
     <div class="admin-list-header">
       <div>
         <h2 class="admin-title">用户管理</h2>
-        <p class="admin-subtitle">查看当前系统用户规模、角色分布与发布活跃度。</p>
+        <p class="admin-subtitle">查看账号状态、封禁时间与基础活跃度，并支持封禁与解封。</p>
       </div>
       <button class="admin-button admin-button-secondary" type="button" @click="load()">
         <RefreshCcw :size="16" :stroke-width="2" />
@@ -78,7 +104,7 @@ onMounted(() => {
       </label>
       <label>
         <span>角色</span>
-        <select v-model="role" class="admin-select">
+        <select v-model="role" class="admin-select" @change="load(1)">
           <option value="">全部角色</option>
           <option value="USER">普通用户</option>
           <option value="ADMIN">管理员</option>
@@ -96,46 +122,13 @@ onMounted(() => {
 
     <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
 
-    <div v-if="list.length" class="admin-table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>用户</th>
-            <th>邮箱</th>
-            <th>角色</th>
-            <th>所在地</th>
-            <th>已发布路线</th>
-            <th>注册时间</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in list" :key="item.id">
-            <td>
-              <div class="admin-user-cell">
-                <div class="admin-user-cell__avatar" :style="item.avatarMediaUrl ? '' : `background:${item.avatarBg || 'var(--bg-soft)'}`">
-                  <img v-if="item.avatarMediaUrl" :src="item.avatarMediaUrl" :alt="item.username" />
-                  <span v-else>{{ item.avatar || item.username.slice(0, 2).toUpperCase() }}</span>
-                </div>
-                <div>
-                  <strong>{{ item.username }}</strong>
-                  <small>ID {{ item.id }}</small>
-                </div>
-              </div>
-            </td>
-            <td>{{ item.email }}</td>
-            <td>
-              <span class="admin-badge" :class="item.role === 'ADMIN' ? 'admin-badge-approved' : 'admin-badge-neutral'">
-                <ShieldCheck v-if="item.role === 'ADMIN'" :size="14" :stroke-width="2" />
-                {{ item.role === 'ADMIN' ? '管理员' : '普通用户' }}
-              </span>
-            </td>
-            <td>{{ item.location || '--' }}</td>
-            <td>{{ item.publishedTrailCount }}</td>
-            <td>{{ formatDateTime(item.createdAt) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <UserManagementTable
+      v-if="list.length"
+      :items="list"
+      :action-loading="actionLoading"
+      @ban="openBanDialog"
+      @unban="openUnbanDialog"
+    />
 
     <EmptyState
       v-else-if="!loading"
@@ -151,6 +144,33 @@ onMounted(() => {
         <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum >= totalPages || loading" @click="changePage(1)">下一页</button>
       </div>
     </div>
+
+    <AdminConfirmDialog
+      v-model:show="banDialogVisible"
+      title="确认封禁用户"
+      :message="targetUser ? `封禁 ${targetUser.username} 后，该账号将无法登录、发布和互动。` : '封禁后该账号将无法登录。'"
+      confirm-text="确认封禁"
+      :loading="actionLoading"
+      require-reason
+      reason-label="封禁原因"
+      reason-placeholder="请输入封禁原因"
+      @confirm="handleBan"
+    />
+
+    <AdminConfirmDialog
+      v-model:show="unbanDialogVisible"
+      title="确认解封用户"
+      :message="targetUser ? `解封 ${targetUser.username} 后，该账号将恢复正常使用。` : '确认恢复该账号？'"
+      confirm-text="确认解封"
+      :loading="actionLoading"
+      @confirm="handleUnban"
+    />
+
+    <AdminNoticeDialog
+      v-model:show="successDialog.show"
+      :title="successDialog.title"
+      :message="successDialog.message"
+    />
   </section>
 </template>
 
@@ -190,45 +210,6 @@ onMounted(() => {
   color: var(--danger);
   background: rgba(181, 68, 68, 0.08);
   border: 1px solid rgba(181, 68, 68, 0.16);
-}
-
-.admin-table-wrap {
-  margin-top: 1rem;
-  overflow-x: auto;
-}
-
-.admin-user-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-}
-
-.admin-user-cell__avatar {
-  width: 2.75rem;
-  height: 2.75rem;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  color: #fff;
-  font-weight: 700;
-}
-
-.admin-user-cell__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.admin-user-cell strong,
-.admin-user-cell small {
-  display: block;
-}
-
-.admin-user-cell small {
-  margin-top: 0.25rem;
-  color: var(--text-muted);
 }
 
 .admin-pagination {
