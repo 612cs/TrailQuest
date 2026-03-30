@@ -133,27 +133,27 @@ onUnmounted(() => {
     <transition name="modal-fade" appear>
       <div
         v-if="isVisible"
-        class="fixed inset-0 z-[100] flex items-center justify-center"
+        class="image-preview"
         @click.self="closePreview"
       >
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="closePreview" />
+        <div class="image-preview__backdrop" @click="closePreview" />
 
         <button
           type="button"
-          class="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20"
+          class="image-preview__close"
           @click="closePreview"
         >
           <X :size="22" :stroke-width="2" />
         </button>
 
-        <div class="absolute top-4 left-4 z-10 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white backdrop-blur">
+        <div class="image-preview__counter">
           {{ currentIndex + 1 }} / {{ images.length }}
         </div>
 
         <button
           v-if="currentIndex > 0"
           type="button"
-          class="absolute left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20"
+          class="image-preview__nav image-preview__nav--prev"
           @click="prev"
         >
           <ChevronLeft :size="24" :stroke-width="2" />
@@ -162,36 +162,36 @@ onUnmounted(() => {
         <button
           v-if="currentIndex < images.length - 1"
           type="button"
-          class="absolute right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20"
+          class="image-preview__nav image-preview__nav--next"
           @click="next"
         >
           <ChevronRight :size="24" :stroke-width="2" />
         </button>
 
-        <div class="relative z-[1] flex max-h-[80vh] max-w-[90vw] items-center justify-center">
+        <div class="image-preview__stage">
           <transition name="image-fade" mode="out-in">
             <img
               :key="currentIndex"
               :src="images[currentIndex]"
               alt=""
-              class="max-h-[80vh] max-w-full rounded-lg object-contain shadow-2xl"
+              class="image-preview__image"
             />
           </transition>
         </div>
 
         <div
           v-if="hasMultiple"
-          class="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2 rounded-full bg-black/40 px-4 py-2 backdrop-blur-sm"
+          class="image-preview__thumbs"
         >
           <button
             v-for="(src, index) in images"
             :key="`${src}-${index}`"
             type="button"
-            class="h-10 w-10 shrink-0 overflow-hidden rounded-md border-2 transition-all duration-200"
-            :class="index === currentIndex ? 'scale-110 border-white' : 'border-transparent opacity-60 hover:opacity-90'"
+            class="image-preview__thumb"
+            :class="{ 'image-preview__thumb--active': index === currentIndex }"
             @click="currentIndex = index"
           >
-            <img :src="src" alt="" class="h-full w-full object-cover" />
+            <img :src="src" alt="" class="image-preview__thumb-image" />
           </button>
         </div>
       </div>
@@ -200,6 +200,134 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.image-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-preview__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
+}
+
+.image-preview__close,
+.image-preview__nav {
+  position: absolute;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.image-preview__close:hover,
+.image-preview__nav:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.image-preview__close {
+  top: 1rem;
+  right: 1rem;
+}
+
+.image-preview__counter {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  padding: 0.375rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+.image-preview__nav--prev {
+  left: 0.75rem;
+}
+
+.image-preview__nav--next {
+  right: 0.75rem;
+}
+
+.image-preview__stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 90vw;
+  max-height: 80vh;
+}
+
+.image-preview__image {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 0.5rem;
+  object-fit: contain;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.image-preview__thumbs {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  transform: translateX(-50%);
+}
+
+.image-preview__thumb {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  background: transparent;
+  opacity: 0.6;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.image-preview__thumb:hover {
+  opacity: 0.9;
+}
+
+.image-preview__thumb--active {
+  opacity: 1;
+  border-color: #fff;
+  transform: scale(1.1);
+}
+
+.image-preview__thumb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .image-fade-enter-active,
 .image-fade-leave-active {
   transition: opacity 0.2s ease;
@@ -220,5 +348,12 @@ onUnmounted(() => {
 .modal-fade-leave-to {
   opacity: 0;
   transform: scale(0.96);
+}
+
+@media (max-width: 640px) {
+  .image-preview__thumbs {
+    max-width: calc(100vw - 2rem);
+    overflow-x: auto;
+  }
 }
 </style>

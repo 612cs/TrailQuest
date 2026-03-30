@@ -48,15 +48,25 @@ function handleLogout() {
 .admin-shell {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
 }
 
 .admin-shell__main {
   min-width: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   padding: 1.15rem 1.15rem 1.35rem 0;
+  overflow: hidden;
 }
 
 .admin-shell__content {
+  flex: 1;
+  min-height: 0;
   padding: 0 0.25rem 0.25rem 0;
+  overflow: auto;
 }
 
 @media (max-width: 1200px) {

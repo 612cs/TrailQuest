@@ -86,6 +86,8 @@ const emit = defineEmits<{
 .admin-table-wrap {
   margin-top: 1rem;
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: min(52vh, 40rem);
 }
 
 .admin-user-cell {
