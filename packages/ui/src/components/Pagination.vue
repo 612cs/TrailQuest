@@ -42,7 +42,7 @@ const showLastPage = computed(() => lastVisiblePage.value < totalPages.value)
 const showTrailingEllipsis = computed(() => lastVisiblePage.value < totalPages.value - 1)
 
 function setPage(page: number) {
-  if (page < 1 || page > totalPages.value || page === props.current) {
+  if (page < 1 || page > props.total || page === props.current) {
     return
   }
   emit('update:current', page)
@@ -51,11 +51,23 @@ function setPage(page: number) {
 
 <template>
   <nav class="shared-pagination" aria-label="分页导航">
-    <button class="shared-pagination__nav" type="button" :disabled="props.current <= 1" @click="setPage(props.current - 1)">
+    <button
+      class="shared-pagination__nav"
+      type="button"
+      :disabled="props.current === 1"
+      @click="setPage(props.current - 1)"
+    >
       <ChevronLeft :size="16" :stroke-width="2" />
     </button>
 
-    <button v-if="showFirstPage" class="shared-pagination__page" type="button" @click="setPage(1)">1</button>
+    <button
+      v-if="showFirstPage"
+      class="shared-pagination__page"
+      type="button"
+      @click="setPage(1)"
+    >
+      1
+    </button>
     <span v-if="showLeadingEllipsis" class="shared-pagination__ellipsis">...</span>
 
     <button
@@ -70,11 +82,21 @@ function setPage(page: number) {
     </button>
 
     <span v-if="showTrailingEllipsis" class="shared-pagination__ellipsis">...</span>
-    <button v-if="showLastPage" class="shared-pagination__page" type="button" @click="setPage(totalPages)">
+    <button
+      v-if="showLastPage"
+      class="shared-pagination__page"
+      type="button"
+      @click="setPage(totalPages)"
+    >
       {{ totalPages }}
     </button>
 
-    <button class="shared-pagination__nav" type="button" :disabled="props.current >= totalPages" @click="setPage(props.current + 1)">
+    <button
+      class="shared-pagination__nav"
+      type="button"
+      :disabled="props.current === totalPages"
+      @click="setPage(props.current + 1)"
+    >
       <ChevronRight :size="16" :stroke-width="2" />
     </button>
   </nav>
@@ -85,26 +107,25 @@ function setPage(page: number) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   flex-wrap: wrap;
 }
 
 .shared-pagination__nav,
 .shared-pagination__page {
-  min-width: 2.25rem;
-  height: 2.25rem;
-  padding: 0 0.7rem;
+  width: 2rem;
+  height: 2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: 0.5rem;
   border: 1px solid var(--pagination-border, var(--border-default, var(--border, rgba(0, 0, 0, 0.08))));
   background: var(--pagination-bg, var(--bg-card, var(--bg-surface, #fff)));
   color: var(--pagination-text, var(--text-secondary, var(--text-muted, #667085)));
-  font-size: 0.92rem;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  transition: all 0.2s ease;
 }
 
 .shared-pagination__nav:hover,
@@ -113,9 +134,10 @@ function setPage(page: number) {
 }
 
 .shared-pagination__page--active {
-  border-color: var(--pagination-active-bg, var(--color-primary-500, var(--primary, #2d5927)));
   background: var(--pagination-active-bg, var(--color-primary-500, var(--primary, #2d5927)));
   color: var(--pagination-active-text, #fff);
+  border-color: transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .shared-pagination__nav:disabled,
@@ -127,6 +149,7 @@ function setPage(page: number) {
 
 .shared-pagination__ellipsis {
   color: var(--pagination-muted, var(--text-tertiary, var(--text-muted, #98a2b3)));
-  font-size: 0.9rem;
+  padding: 0 0.25rem;
+  font-size: 0.875rem;
 }
 </style>

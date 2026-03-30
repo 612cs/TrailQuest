@@ -38,6 +38,8 @@ const summary = computed(() => `第 ${props.current} 页 / 共 ${props.totalPage
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  --pagination-active-bg: var(--primary);
+  --pagination-active-text: #fff;
 }
 
 @media (max-width: 720px) {

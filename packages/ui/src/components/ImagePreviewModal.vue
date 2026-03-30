@@ -2,8 +2,6 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ChevronLeft, ChevronRight, X } from 'lucide-vue-next'
 
-import ModalShell from './ModalShell.vue'
-
 const props = defineProps<{
   images: string[]
   initialIndex?: number
@@ -16,245 +14,211 @@ const emit = defineEmits<{
 }>()
 
 const currentIndex = ref(props.initialIndex ?? 0)
-const isVisible = computed(() => props.show ?? true)
-const hasImages = computed(() => props.images.length > 0)
-const activeImage = computed(() => props.images[currentIndex.value] ?? '')
-const counterLabel = computed(() => `${currentIndex.value + 1} / ${props.images.length}`)
+const isVisible = ref(Boolean(props.show))
+const closeTimer = ref<number | null>(null)
+const isControlled = computed(() => typeof props.show === 'boolean')
+const hasMultiple = computed(() => props.images.length > 1)
 const previousBodyOverflow = ref('')
 
+function syncBodyOverflow(visible: boolean) {
+  if (typeof document === 'undefined') {
+    return
+  }
+
+  if (visible) {
+    previousBodyOverflow.value = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = previousBodyOverflow.value
+  }
+}
+
+function openPreview() {
+  if (closeTimer.value != null) {
+    window.clearTimeout(closeTimer.value)
+    closeTimer.value = null
+  }
+  isVisible.value = true
+  syncBodyOverflow(true)
+}
+
+function closePreview() {
+  isVisible.value = false
+  syncBodyOverflow(false)
+  emit('update:show', false)
+
+  if (closeTimer.value != null) {
+    window.clearTimeout(closeTimer.value)
+  }
+
+  closeTimer.value = window.setTimeout(() => {
+    emit('close')
+  }, 300)
+}
+
+function next() {
+  if (currentIndex.value < props.images.length - 1) {
+    currentIndex.value += 1
+  }
+}
+
+function prev() {
+  if (currentIndex.value > 0) {
+    currentIndex.value -= 1
+  }
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (!isVisible.value) {
+    return
+  }
+
+  if (event.key === 'Escape') {
+    closePreview()
+  } else if (event.key === 'ArrowRight') {
+    next()
+  } else if (event.key === 'ArrowLeft') {
+    prev()
+  }
+}
+
 watch(
-  () => [props.initialIndex, props.images],
-  () => {
-    currentIndex.value = clampIndex(props.initialIndex ?? 0)
+  () => props.initialIndex,
+  (value) => {
+    if (typeof value === 'number') {
+      currentIndex.value = value
+    }
   },
-  { deep: true },
 )
 
 watch(
   () => props.show,
   (show) => {
-    if (show !== false) {
-      currentIndex.value = clampIndex(props.initialIndex ?? 0)
-    }
-  },
-)
-
-watch(
-  isVisible,
-  (visible) => {
-    if (typeof document === 'undefined') {
+    if (!isControlled.value) {
       return
     }
 
-    if (visible) {
-      previousBodyOverflow.value = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
+    if (show) {
+      currentIndex.value = props.initialIndex ?? 0
+      openPreview()
       return
     }
 
-    document.body.style.overflow = previousBodyOverflow.value
+    isVisible.value = false
+    syncBodyOverflow(false)
   },
   { immediate: true },
 )
 
-function clampIndex(index: number) {
-  if (!props.images.length) {
-    return 0
-  }
-  return Math.min(Math.max(index, 0), props.images.length - 1)
-}
-
-function close() {
-  emit('update:show', false)
-  emit('close')
-}
-
-function goPrevious() {
-  currentIndex.value = (currentIndex.value - 1 + props.images.length) % props.images.length
-}
-
-function goNext() {
-  currentIndex.value = (currentIndex.value + 1) % props.images.length
-}
-
-function handleKeydown(event: KeyboardEvent) {
-  if (!isVisible.value || !hasImages.value) {
-    return
-  }
-  if (event.key === 'ArrowLeft') {
-    goPrevious()
-  } else if (event.key === 'ArrowRight') {
-    goNext()
-  }
-}
-
 onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
+  if (!isControlled.value) {
+    openPreview()
+  }
+
+  document.addEventListener('keydown', onKeydown)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
-  if (typeof document !== 'undefined') {
-    document.body.style.overflow = previousBodyOverflow.value
+  document.removeEventListener('keydown', onKeydown)
+  syncBodyOverflow(false)
+
+  if (closeTimer.value != null) {
+    window.clearTimeout(closeTimer.value)
   }
 })
 </script>
 
 <template>
-  <ModalShell
-    v-if="hasImages"
-    :show="isVisible"
-    aria-label="图片预览"
-    :panel-style="{ width: 'min(1120px, 100%)', maxHeight: 'min(92vh, 100%)', borderRadius: '28px' }"
-    :body-style="{ padding: '0' }"
-    :overlay-style="{ background: 'rgba(6, 8, 7, 0.78)', backdropFilter: 'blur(14px)' }"
-    @update:show="emit('update:show', $event)"
-    @close="emit('close')"
-  >
-    <div class="shared-image-preview">
-      <div class="shared-image-preview__toolbar">
-        <span class="shared-image-preview__counter">{{ counterLabel }}</span>
-        <button class="shared-image-preview__icon" type="button" @click="close">
-          <X :size="18" :stroke-width="2" />
-        </button>
-      </div>
+  <Teleport to="body">
+    <transition name="modal-fade" appear>
+      <div
+        v-if="isVisible"
+        class="fixed inset-0 z-[100] flex items-center justify-center"
+        @click.self="closePreview"
+      >
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="closePreview" />
 
-      <div class="shared-image-preview__viewport">
-        <button v-if="props.images.length > 1" class="shared-image-preview__nav" type="button" @click="goPrevious">
+        <button
+          type="button"
+          class="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20"
+          @click="closePreview"
+        >
+          <X :size="22" :stroke-width="2" />
+        </button>
+
+        <div class="absolute top-4 left-4 z-10 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white backdrop-blur">
+          {{ currentIndex + 1 }} / {{ images.length }}
+        </div>
+
+        <button
+          v-if="currentIndex > 0"
+          type="button"
+          class="absolute left-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20"
+          @click="prev"
+        >
           <ChevronLeft :size="24" :stroke-width="2" />
         </button>
 
-        <img class="shared-image-preview__image" :src="activeImage" :alt="`预览图片 ${currentIndex + 1}`" />
-
-        <button v-if="props.images.length > 1" class="shared-image-preview__nav" type="button" @click="goNext">
+        <button
+          v-if="currentIndex < images.length - 1"
+          type="button"
+          class="absolute right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition-colors hover:bg-white/20"
+          @click="next"
+        >
           <ChevronRight :size="24" :stroke-width="2" />
         </button>
-      </div>
 
-      <div v-if="props.images.length > 1" class="shared-image-preview__thumbs">
-        <button
-          v-for="(image, index) in props.images"
-          :key="`${image}-${index}`"
-          class="shared-image-preview__thumb"
-          :class="{ 'shared-image-preview__thumb--active': index === currentIndex }"
-          type="button"
-          @click="currentIndex = index"
+        <div class="relative z-[1] flex max-h-[80vh] max-w-[90vw] items-center justify-center">
+          <transition name="image-fade" mode="out-in">
+            <img
+              :key="currentIndex"
+              :src="images[currentIndex]"
+              alt=""
+              class="max-h-[80vh] max-w-full rounded-lg object-contain shadow-2xl"
+            />
+          </transition>
+        </div>
+
+        <div
+          v-if="hasMultiple"
+          class="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2 rounded-full bg-black/40 px-4 py-2 backdrop-blur-sm"
         >
-          <img :src="image" :alt="`缩略图 ${index + 1}`" />
-        </button>
+          <button
+            v-for="(src, index) in images"
+            :key="`${src}-${index}`"
+            type="button"
+            class="h-10 w-10 shrink-0 overflow-hidden rounded-md border-2 transition-all duration-200"
+            :class="index === currentIndex ? 'scale-110 border-white' : 'border-transparent opacity-60 hover:opacity-90'"
+            @click="currentIndex = index"
+          >
+            <img :src="src" alt="" class="h-full w-full object-cover" />
+          </button>
+        </div>
       </div>
-    </div>
-  </ModalShell>
+    </transition>
+  </Teleport>
 </template>
 
 <style scoped>
-.shared-image-preview {
-  display: grid;
-  gap: 1rem;
-  padding: 1rem;
-  background: color-mix(in srgb, var(--bg-card, var(--bg-surface, #101310)) 88%, #000);
+.image-fade-enter-active,
+.image-fade-leave-active {
+  transition: opacity 0.2s ease;
 }
 
-.shared-image-preview__toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+.image-fade-enter-from,
+.image-fade-leave-to {
+  opacity: 0;
 }
 
-.shared-image-preview__counter {
-  color: var(--text-primary, var(--text-strong, #f8fafc));
-  font-size: 0.95rem;
-  font-weight: 600;
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+  transform-origin: center center;
 }
 
-.shared-image-preview__icon,
-.shared-image-preview__nav,
-.shared-image-preview__thumb {
-  border: 0;
-  cursor: pointer;
-}
-
-.shared-image-preview__icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-card, var(--bg-surface, #101310)) 78%, #000);
-  color: var(--text-primary, var(--text-strong, #f8fafc));
-}
-
-.shared-image-preview__viewport {
-  min-height: min(62vh, 680px);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 1rem;
-}
-
-.shared-image-preview__nav {
-  width: 3rem;
-  height: 3rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-card, var(--bg-surface, #101310)) 72%, #000);
-  color: var(--text-primary, var(--text-strong, #f8fafc));
-}
-
-.shared-image-preview__image {
-  width: 100%;
-  max-height: min(68vh, 760px);
-  object-fit: contain;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.shared-image-preview__thumbs {
-  display: flex;
-  gap: 0.75rem;
-  overflow-x: auto;
-  padding-bottom: 0.15rem;
-}
-
-.shared-image-preview__thumb {
-  padding: 0;
-  width: 5.5rem;
-  height: 5.5rem;
-  flex: 0 0 auto;
-  border-radius: 18px;
-  overflow: hidden;
-  border: 2px solid transparent;
-  background: transparent;
-  opacity: 0.72;
-}
-
-.shared-image-preview__thumb--active {
-  border-color: var(--color-primary-500, var(--primary, #2d5927));
-  opacity: 1;
-}
-
-.shared-image-preview__thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-@media (max-width: 720px) {
-  .shared-image-preview {
-    padding: 0.85rem;
-  }
-
-  .shared-image-preview__viewport {
-    min-height: min(52vh, 540px);
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .shared-image-preview__nav {
-    display: none;
-  }
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.96);
 }
 </style>
