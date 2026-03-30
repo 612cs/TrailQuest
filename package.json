@@ -11,6 +11,8 @@
     "build:api": "./apps/api/mvnw -f apps/api/pom.xml clean package -DskipTests",
     "preview": "pnpm --dir apps/web preview",
     "preview:web": "pnpm --dir apps/web preview",
-    "test:api": "./apps/api/mvnw -f apps/api/pom.xml test"
+    "test:api": "./apps/api/mvnw -f apps/api/pom.xml test",
+    "test:web:unit": "pnpm --dir apps/web test:unit",
+    "test:web:e2e": "pnpm --dir apps/web test:e2e"
   }
 }

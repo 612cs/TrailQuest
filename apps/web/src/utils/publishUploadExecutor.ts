@@ -45,6 +45,14 @@ function inferTrackMimeType(file: File) {
 }
 
 function createOssClient(sts: Awaited<ReturnType<typeof createUploadSts>>) {
+  const testClient = (globalThis as typeof globalThis & {
+    __TRAILQUEST_TEST_OSS_CLIENT__?: OSS | { multipartUpload: OSS['multipartUpload'] }
+  }).__TRAILQUEST_TEST_OSS_CLIENT__
+
+  if (testClient) {
+    return testClient
+  }
+
   return new OSS({
     region: sts.region,
     endpoint: `https://${sts.endpoint}`,

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <Placemark>
+      <name>Sample Trail</name>
+      <LineString>
+        <coordinates>
+          114.116147,27.454187,0 114.118247,27.456187,0 114.120347,27.458187,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>

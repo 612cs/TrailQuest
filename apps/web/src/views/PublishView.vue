@@ -790,7 +790,7 @@ async function handleSubmit() {
                 <BaseIcon name="ImagePlus" :size="20" class="text-primary-500" />
               </div>
               <p class="text-sm font-medium" style="color: var(--text-secondary);">上传路线封面</p>
-              <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" :disabled="isSubmissionRunning" @change="handleCoverChange" />
+              <input data-testid="publish-cover-input" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" :disabled="isSubmissionRunning" @change="handleCoverChange" />
             </label>
             <p v-if="hasFieldError('cover')" class="text-xs text-red-500">请先上传封面图片</p>
           </div>
@@ -804,7 +804,7 @@ async function handleSubmit() {
             </h3>
             <label class="cursor-pointer rounded-lg bg-primary-500/10 px-3 py-1.5 text-xs font-medium text-primary-500 transition-colors hover:bg-primary-500/20" :class="isSubmissionRunning ? 'pointer-events-none opacity-40' : ''">
               {{ trackItem ? '重新上传' : '上传轨迹' }}
-              <input type="file" accept=".gpx,.kml,application/gpx+xml,application/vnd.google-earth.kml+xml,text/xml,application/xml" class="hidden" :disabled="isSubmissionRunning" @change="handleTrackChange" />
+              <input data-testid="publish-track-input" type="file" accept=".gpx,.kml,application/gpx+xml,application/vnd.google-earth.kml+xml,text/xml,application/xml" class="hidden" :disabled="isSubmissionRunning" @change="handleTrackChange" />
             </label>
           </div>
 
@@ -868,13 +868,13 @@ async function handleSubmit() {
 
           <div>
             <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线名称</label>
-            <input v-model="currentDraft.fields.name" type="text" placeholder="例如：龙脊梯田精华线" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :class="{ 'publish-input-error': hasFieldError('name') }" :disabled="isSubmissionRunning" />
+            <input data-testid="publish-name-input" v-model="currentDraft.fields.name" type="text" placeholder="例如：龙脊梯田精华线" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :class="{ 'publish-input-error': hasFieldError('name') }" :disabled="isSubmissionRunning" />
             <p v-if="hasFieldError('name')" class="mt-1.5 text-xs text-red-500">请填写路线名称</p>
           </div>
 
           <div>
             <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">所在位置</label>
-            <input v-model="currentDraft.fields.location" type="text" placeholder="例如：广西 桂林 龙胜" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :class="{ 'publish-input-error': hasFieldError('location') }" :disabled="isSubmissionRunning" />
+            <input data-testid="publish-location-input" v-model="currentDraft.fields.location" type="text" placeholder="例如：广西 桂林 龙胜" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :class="{ 'publish-input-error': hasFieldError('location') }" :disabled="isSubmissionRunning" />
             <p
               v-if="trackLocationHint"
               class="mt-1.5 text-xs"
@@ -957,7 +957,7 @@ async function handleSubmit() {
 
           <div>
             <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线描述</label>
-            <textarea v-model="currentDraft.fields.description" rows="5" placeholder="描述这条路线的特色、注意事项、推荐理由..." class="publish-input w-full resize-none rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
+            <textarea data-testid="publish-description-input" v-model="currentDraft.fields.description" rows="5" placeholder="描述这条路线的特色、注意事项、推荐理由..." class="publish-input w-full resize-none rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
           </div>
         </section>
 
@@ -1057,6 +1057,7 @@ async function handleSubmit() {
 
         <div class="animate-fade-in-up pb-8">
           <button
+            data-testid="publish-submit-button"
             class="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-white transition-all disabled:cursor-not-allowed disabled:opacity-40"
             :class="canSubmitDraft ? 'bg-primary-500 hover:bg-primary-600 hover:shadow-md active:scale-[0.98]' : 'bg-gray-400'"
             :disabled="!canSubmitDraft"
