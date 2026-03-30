@@ -11,7 +11,7 @@ defineProps<{
 
 <template>
   <article class="admin-card admin-stat-card">
-    <div class="admin-stat-card__icon" v-if="icon">
+    <div v-if="icon" class="admin-stat-card__icon">
       <component :is="icon" :size="18" :stroke-width="2" />
     </div>
     <div class="admin-stat-card__body">

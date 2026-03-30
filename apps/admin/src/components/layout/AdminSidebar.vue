@@ -21,7 +21,7 @@ const menuItems = [
 ]
 
 function isActive(path: string) {
-  return computed(() => route.path === path || route.path.startsWith(`${path}/`)).value
+  return route.path === path || route.path.startsWith(`${path}/`)
 }
 
 function navigate(path: string) {
