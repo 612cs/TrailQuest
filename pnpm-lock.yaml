@@ -10,6 +10,9 @@ importers:
 
   apps/admin:
     dependencies:
+      ali-oss:
+        specifier: ^6.23.0
+        version: 6.23.0
       lucide-vue-next:
         specifier: ^0.577.0
         version: 0.577.0(vue@3.5.29(typescript@5.9.3))

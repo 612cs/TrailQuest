@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { ImagePlus, MoonStar, RefreshCcw, SunMedium, UserCircle2, Settings2 } from 'lucide-vue-next'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
+import { LoaderCircle, MoonStar, RefreshCcw, SunMedium, Upload, UserCircle2, Settings2 } from 'lucide-vue-next'
 
 import { fetchAdminHomeHeroSetting, updateAdminHomeHeroSetting } from '../api/admin'
 import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
 import { useAdminAuthStore } from '../stores/auth'
 import { useThemeStore } from '../stores/theme'
 import { pinia } from '../stores/pinia'
+import { mediaUrlOf, resolveUploadErrorMessage, uploadAdminImage } from '../utils/adminUpload'
 
 const authStore = useAdminAuthStore(pinia)
 const themeStore = useThemeStore(pinia)
@@ -15,8 +16,11 @@ const user = computed(() => authStore.user)
 const heroImageUrl = ref('')
 const heroLoading = ref(false)
 const heroSaving = ref(false)
+const heroUploading = ref(false)
+const heroUploadProgress = ref(0)
 const heroError = ref('')
 const heroDialogShow = ref(false)
+const heroFileInput = useTemplateRef<HTMLInputElement>('heroFileInput')
 
 async function loadHeroSetting() {
   heroLoading.value = true
@@ -41,6 +45,39 @@ async function saveHeroSetting() {
     heroError.value = error instanceof Error ? error.message : '首页大图保存失败'
   } finally {
     heroSaving.value = false
+  }
+}
+
+function openHeroFilePicker() {
+  heroFileInput.value?.click()
+}
+
+async function handleHeroFileChange(event: Event) {
+  const target = event.target as HTMLInputElement | null
+  const file = target?.files?.[0]
+  if (!file) {
+    return
+  }
+
+  heroError.value = ''
+  heroUploading.value = true
+  heroUploadProgress.value = 0
+
+  try {
+    const remote = await uploadAdminImage(file, 'home_hero', (progress) => {
+      heroUploadProgress.value = progress
+    })
+    heroImageUrl.value = mediaUrlOf(remote)
+    await updateAdminHomeHeroSetting({ imageUrl: heroImageUrl.value })
+    heroDialogShow.value = true
+  } catch (error) {
+    heroError.value = resolveUploadErrorMessage(error)
+  } finally {
+    heroUploading.value = false
+    heroUploadProgress.value = 0
+    if (target) {
+      target.value = ''
+    }
   }
 }
 
@@ -101,32 +138,51 @@ onMounted(() => {
         <div class="admin-setting-hero__header">
           <div>
             <h2 class="admin-title">首页大屏图片</h2>
-            <p class="admin-subtitle">动态修改前台首页首屏大图，未配置时继续使用前台默认图。</p>
+            <p class="admin-subtitle">从本地选择图片后会自动上传到阿里云 OSS，并将图片地址设置为首页大图。</p>
           </div>
-          <button class="admin-button admin-button-secondary" type="button" :disabled="heroLoading || heroSaving" @click="loadHeroSetting">
+          <button class="admin-button admin-button-secondary" type="button" :disabled="heroLoading || heroSaving || heroUploading" @click="loadHeroSetting">
             <RefreshCcw :size="16" :stroke-width="2" />
             刷新
           </button>
         </div>
 
         <label class="admin-setting-field">
-          <span>图片地址</span>
+          <span>上传首页大图</span>
+          <input
+            ref="heroFileInput"
+            class="admin-file-input"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            @change="handleHeroFileChange"
+          />
+          <button
+            class="admin-button admin-button-primary admin-setting-upload"
+            type="button"
+            :disabled="heroUploading || heroSaving"
+            @click="openHeroFilePicker"
+          >
+            <LoaderCircle v-if="heroUploading" class="admin-spin" :size="16" :stroke-width="2" />
+            <Upload v-else :size="16" :stroke-width="2" />
+            {{ heroUploading ? `上传中 ${heroUploadProgress}%` : '选择图片并上传' }}
+          </button>
+          <small class="admin-setting-hint">支持 JPG、PNG、WEBP。上传成功后会自动写入首页配置，不需要手动复制链接。</small>
+        </label>
+
+        <label class="admin-setting-field">
+          <span>当前 OSS 地址</span>
           <input
             v-model="heroImageUrl"
             class="admin-input"
-            type="url"
-            placeholder="https://example.com/home-hero.jpg"
+            type="text"
+            readonly
+            placeholder="上传成功后会自动显示 OSS 图片地址"
           />
         </label>
 
         <div v-if="heroError" class="admin-setting-error">{{ heroError }}</div>
 
         <div class="admin-setting-actions">
-          <button class="admin-button admin-button-primary" type="button" :disabled="heroSaving" @click="saveHeroSetting">
-            <ImagePlus :size="16" :stroke-width="2" />
-            {{ heroSaving ? '保存中...' : '保存设置' }}
-          </button>
-          <button class="admin-button admin-button-secondary" type="button" :disabled="heroSaving" @click="resetHeroSetting">
+          <button class="admin-button admin-button-secondary" type="button" :disabled="heroSaving || heroUploading" @click="resetHeroSetting">
             恢复默认
           </button>
         </div>
@@ -147,7 +203,7 @@ onMounted(() => {
   <AdminNoticeDialog
     v-model:show="heroDialogShow"
     title="保存成功"
-    message="首页大屏图片配置已经更新，前台首页刷新后会显示最新图片。"
+    message="首页大屏图片已经上传并更新，前台首页刷新后会显示最新图片。"
   />
 </template>
 
@@ -232,6 +288,19 @@ onMounted(() => {
   font-weight: 600;
 }
 
+.admin-file-input {
+  display: none;
+}
+
+.admin-setting-upload {
+  width: fit-content;
+}
+
+.admin-setting-hint {
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
 .admin-setting-actions {
   justify-content: flex-start;
   margin-top: 1rem;
@@ -276,5 +345,29 @@ onMounted(() => {
   color: var(--text-muted);
   text-align: center;
   line-height: 1.8;
+}
+
+.admin-spin {
+  animation: admin-rotate 1s linear infinite;
+}
+
+@media (max-width: 900px) {
+  .admin-setting-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-setting-hero__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@keyframes admin-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

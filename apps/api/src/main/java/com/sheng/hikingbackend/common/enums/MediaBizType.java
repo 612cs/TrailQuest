@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 public enum MediaBizType {
     AVATAR("avatar"),
+    HOME_HERO("home_hero"),
     TRAIL_COVER("trail_cover"),
     TRAIL_GALLERY("trail_gallery"),
     TRAIL_TRACK("trail_track"),

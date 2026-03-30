@@ -1,14 +1,16 @@
 import { http } from './http'
 import type { MediaFilePayload, UploadStsPayload } from '../types/upload'
 
+type UploadImageBizType = 'avatar' | 'home_hero' | 'trail_cover' | 'trail_gallery' | 'review'
+
 interface CreateUploadStsRequest {
-  bizType: 'avatar' | 'home_hero' | 'trail_cover' | 'trail_gallery' | 'trail_track' | 'review'
+  bizType: UploadImageBizType
   fileName: string
   mimeType: string
 }
 
 interface CompleteUploadRequest {
-  bizType: 'avatar' | 'home_hero' | 'trail_cover' | 'trail_gallery' | 'trail_track' | 'review'
+  bizType: UploadImageBizType
   objectKey: string
   url: string
   originalName?: string
