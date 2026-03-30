@@ -62,7 +62,7 @@ CREATE TABLE `media_files` (
   `bucket_name` varchar(100) NOT NULL COMMENT 'OSS Bucket 名称',
   `object_key` varchar(255) NOT NULL COMMENT 'OSS 对象Key',
   `url` varchar(500) NOT NULL COMMENT '文件访问地址',
-  `biz_type` enum('avatar','trail_cover','trail_gallery','trail_track','review') NOT NULL COMMENT '业务类型',
+  `biz_type` enum('avatar','home_hero','trail_cover','trail_gallery','trail_track','review') NOT NULL COMMENT '业务类型',
   `original_name` varchar(255) DEFAULT NULL COMMENT '原始文件名',
   `extension` varchar(20) DEFAULT NULL COMMENT '文件扩展名',
   `mime_type` varchar(100) NOT NULL COMMENT '文件MIME类型',
@@ -341,7 +341,7 @@ DROP TABLE IF EXISTS `upload_checkpoints`;
 CREATE TABLE `upload_checkpoints` (
   `id` bigint NOT NULL COMMENT '断点记录ID',
   `user_id` bigint NOT NULL COMMENT '用户ID',
-  `biz_type` enum('avatar','trail_cover','trail_gallery','trail_track','review') NOT NULL COMMENT '业务类型',
+  `biz_type` enum('avatar','home_hero','trail_cover','trail_gallery','trail_track','review') NOT NULL COMMENT '业务类型',
   `file_name` varchar(255) NOT NULL COMMENT '文件名',
   `file_size` bigint NOT NULL DEFAULT '0' COMMENT '文件大小（字节）',
   `object_key` varchar(255) NOT NULL COMMENT 'OSS 对象Key',
