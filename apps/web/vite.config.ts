@@ -9,6 +9,14 @@ export default defineConfig({
     tailwindcss(),
     vue(),
   ],
+  server: {
+    fs: {
+      allow: [
+        fileURLToPath(new URL('.', import.meta.url)),
+        fileURLToPath(new URL('../../packages/ui', import.meta.url)),
+      ],
+    },
+  },
   resolve: {
     alias: {
       '@trailquest/ui': fileURLToPath(new URL('../../packages/ui/src', import.meta.url)),

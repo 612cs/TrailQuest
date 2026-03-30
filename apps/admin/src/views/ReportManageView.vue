@@ -113,7 +113,9 @@ onMounted(load)
 .admin-section {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
+  overflow: hidden;
 }
 
 .admin-list-toolbar {
@@ -133,6 +135,7 @@ onMounted(load)
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .admin-list-error {

@@ -84,7 +84,9 @@ onMounted(() => {
 .admin-section {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
+  overflow: hidden;
 }
 
 .admin-list-toolbar,
@@ -96,18 +98,20 @@ onMounted(() => {
 }
 
 .admin-list-toolbar {
-  align-items: end;
-  flex-wrap: wrap;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .admin-list-toolbar > .admin-input,
 .admin-list-toolbar > .admin-select {
   flex: 1 1 14rem;
+  min-width: 0;
 }
 
 .admin-list-toolbar__actions {
   flex: 0 0 auto;
   align-items: center;
+  flex-wrap: nowrap;
 }
 
 .admin-list-body {
@@ -116,6 +120,7 @@ onMounted(() => {
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .admin-list-error {
@@ -131,5 +136,16 @@ onMounted(() => {
   min-height: 0;
   display: grid;
   place-items: center;
+}
+
+@media (max-width: 1200px) {
+  .admin-list-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .admin-list-toolbar__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 </style>
