@@ -111,7 +111,7 @@ describe('usePublishUploadStore', () => {
     expect(draft.trackItem).toBeNull()
     expect(draft.geo.city).toBe('')
     expect(feedRefreshStore.version).toBe(1)
-    expect(flashStore.message?.message).toBe('路线发布成功')
+    expect(flashStore.message?.message).toBe('路线已提交审核，请耐心等待')
   })
 
   it('should preserve existing geo fields when submit falls back to manual location', async () => {

@@ -14,6 +14,7 @@ import {
 } from 'lucide-vue-next'
 
 import { approveTrail, fetchAdminTrailDetail, rejectTrail } from '../api/admin'
+import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
 import EmptyState from '../components/common/EmptyState.vue'
 import StatusBadge from '../components/common/StatusBadge.vue'
 import { formatDateTime } from '../utils/format'
@@ -26,7 +27,11 @@ const loading = ref(false)
 const actionLoading = ref(false)
 const errorMessage = ref('')
 const rejectRemark = ref('')
-const actionMessage = ref('')
+const successDialog = ref({
+  show: false,
+  title: '',
+  message: '',
+})
 
 const trailId = computed(() => String(route.params.id || ''))
 
@@ -36,7 +41,6 @@ async function loadDetail() {
   }
   loading.value = true
   errorMessage.value = ''
-  actionMessage.value = ''
   try {
     detail.value = await fetchAdminTrailDetail(trailId.value)
     rejectRemark.value = detail.value.reviewRemark || ''
@@ -52,13 +56,17 @@ async function handleApprove() {
     return
   }
   actionLoading.value = true
-  actionMessage.value = ''
+  errorMessage.value = ''
   try {
     await approveTrail(trailId.value)
-    actionMessage.value = '已通过该路线审核'
     await loadDetail()
+    successDialog.value = {
+      show: true,
+      title: '审核已通过',
+      message: '该路线已经审核通过，前台公开列表现在可以展示它了。',
+    }
   } catch (error) {
-    actionMessage.value = error instanceof Error ? error.message : '审核通过失败'
+    errorMessage.value = error instanceof Error ? error.message : '审核通过失败'
   } finally {
     actionLoading.value = false
   }
@@ -69,17 +77,21 @@ async function handleReject() {
     return
   }
   if (!rejectRemark.value.trim()) {
-    actionMessage.value = '请填写驳回原因'
+    errorMessage.value = '请填写驳回原因'
     return
   }
   actionLoading.value = true
-  actionMessage.value = ''
+  errorMessage.value = ''
   try {
     await rejectTrail(trailId.value, { remark: rejectRemark.value.trim() })
-    actionMessage.value = '已驳回该路线'
     await loadDetail()
+    successDialog.value = {
+      show: true,
+      title: '路线已驳回',
+      message: '驳回结果和备注已经保存，作者修改后可重新提交审核。',
+    }
   } catch (error) {
-    actionMessage.value = error instanceof Error ? error.message : '驳回失败'
+    errorMessage.value = error instanceof Error ? error.message : '驳回失败'
   } finally {
     actionLoading.value = false
   }
@@ -103,7 +115,6 @@ watch(() => route.params.id, loadDetail)
     </div>
 
     <div v-if="errorMessage" class="admin-detail-error">{{ errorMessage }}</div>
-    <div v-if="actionMessage" class="admin-detail-message">{{ actionMessage }}</div>
 
     <div v-if="detail" class="admin-detail-layout">
       <article class="admin-detail-hero">
@@ -212,6 +223,12 @@ watch(() => route.params.id, loadDetail)
     />
 
     <div v-else class="admin-detail-loading">正在加载路线详情...</div>
+
+    <AdminNoticeDialog
+      v-model:show="successDialog.show"
+      :title="successDialog.title"
+      :message="successDialog.message"
+    />
   </section>
 </template>
 
@@ -225,8 +242,7 @@ watch(() => route.params.id, loadDetail)
   gap: 1rem;
 }
 
-.admin-detail-error,
-.admin-detail-message {
+.admin-detail-error {
   margin-top: 1rem;
   border-radius: 16px;
   padding: 0.85rem 1rem;
@@ -236,12 +252,6 @@ watch(() => route.params.id, loadDetail)
   color: var(--danger);
   background: rgba(181, 68, 68, 0.08);
   border: 1px solid rgba(181, 68, 68, 0.16);
-}
-
-.admin-detail-message {
-  color: var(--primary-strong);
-  background: rgba(47, 94, 37, 0.08);
-  border: 1px solid rgba(47, 94, 37, 0.16);
 }
 
 .admin-detail-layout {

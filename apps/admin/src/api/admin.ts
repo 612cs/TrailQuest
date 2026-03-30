@@ -1,6 +1,7 @@
 import { http } from './http'
 import type {
   AdminDashboardSummary,
+  AdminHomeHeroSetting,
   AdminReportListItem,
   AdminReportPageQuery,
   AdminReviewListItem,
@@ -9,6 +10,8 @@ import type {
   AdminTrailDetail,
   AdminTrailListItem,
   AdminTrailPageQuery,
+  AdminUserListItem,
+  AdminUserPageQuery,
 } from '../types/admin'
 import type { PageResponse } from '../types/api'
 
@@ -32,6 +35,12 @@ export function fetchAdminTrails(query: AdminTrailPageQuery = {}) {
 
 export function fetchAdminTrailDetail(id: string | number) {
   return http.get<AdminTrailDetail>(`/api/admin/trails/${id}`)
+}
+
+export function fetchAdminUsers(query: AdminUserPageQuery = {}) {
+  return http.get<PageResponse<AdminUserListItem>>('/api/admin/users', {
+    params: cleanQuery({ pageNum: 1, pageSize: 10, ...query }),
+  })
 }
 
 export function approveTrail(id: string | number) {
@@ -60,4 +69,12 @@ export function fetchAdminReports(query: AdminReportPageQuery = {}) {
 
 export function resolveReport(id: string | number) {
   return http.post<void>(`/api/admin/reports/${id}/resolve`)
+}
+
+export function fetchAdminHomeHeroSetting() {
+  return http.get<AdminHomeHeroSetting>('/api/admin/settings/home-hero')
+}
+
+export function updateAdminHomeHeroSetting(payload: { imageUrl?: string | null }) {
+  return http.post<void>('/api/admin/settings/home-hero', payload)
 }

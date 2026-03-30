@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { FlagTriangleRight, LayoutDashboard, MessageSquareMore, Mountain, Settings2, ShieldCheck } from 'lucide-vue-next'
+import { FlagTriangleRight, LayoutDashboard, MessageSquareMore, Mountain, Settings2, ShieldCheck, UsersRound } from 'lucide-vue-next'
 
 const props = defineProps<{
   collapsed: boolean
@@ -13,6 +13,7 @@ const router = useRouter()
 const menuItems = [
   { path: '/dashboard', title: '后台首页', icon: LayoutDashboard },
   { path: '/trails/review', title: '路线审核', icon: Mountain },
+  { path: '/users', title: '用户管理', icon: UsersRound },
   { path: '/reviews', title: '评论管理', icon: MessageSquareMore },
   { path: '/reports', title: '举报处理', icon: FlagTriangleRight },
   { path: '/settings', title: '设置', icon: Settings2 },

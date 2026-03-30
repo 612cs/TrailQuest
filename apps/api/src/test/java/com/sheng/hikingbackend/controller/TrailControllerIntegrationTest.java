@@ -98,7 +98,7 @@ class TrailControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(new CreateTrailBody())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("路线发布成功"))
+                .andExpect(jsonPath("$.message").value("路线已提交审核，请耐心等待"))
                 .andExpect(jsonPath("$.data.name").value("武功山反穿"))
                 .andExpect(jsonPath("$.data.geoProvince").value("江西"))
                 .andExpect(jsonPath("$.data.geoCity").value("萍乡"))
@@ -137,7 +137,7 @@ class TrailControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("路线更新成功"));
+                .andExpect(jsonPath("$.message").value("路线更新已提交审核，请耐心等待"));
 
         verify(trailService).updateTrail(eq(3001L), any(), any(), any());
     }

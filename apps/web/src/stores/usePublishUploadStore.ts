@@ -343,7 +343,7 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
       resultTrailId: null,
       updatedAt: Date.now(),
     }
-    flashStore.showSuccess('已进入后台上传，上传完成后会通知你，你可以先去做点别的。', 3200)
+    flashStore.showSuccess('已进入后台上传队列，上传完成后路线会进入审核，请耐心等待。', 3200)
     void runDraft(scopeKey, taskId)
   }
 
@@ -361,7 +361,7 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
       updatedAt: Date.now(),
     }
     normalizeFailedAssets(draft)
-    flashStore.showSuccess('已重新加入后台上传队列，我们会继续处理并通知你。', 2800)
+    flashStore.showSuccess('已重新加入后台上传队列，上传完成后路线会重新进入审核。', 2800)
     void runDraft(scopeKey, taskId)
   }
 
@@ -442,7 +442,12 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
         updatedAt: Date.now(),
       }
       trailFeedRefreshStore.bump()
-      flashStore.showSuccess(draft.mode === 'edit' ? '路线更新成功' : '路线发布成功', 2600)
+      flashStore.showSuccess(
+        draft.mode === 'edit'
+          ? '路线更新已提交审核，请耐心等待'
+          : '路线已提交审核，请耐心等待',
+        2600,
+      )
 
       if (draft.mode === 'create') {
         revokeDraftUrls(draft)

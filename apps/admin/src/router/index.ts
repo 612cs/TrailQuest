@@ -35,6 +35,12 @@ const routes = [
         meta: { title: '路线审核详情', requiresAuth: true },
       },
       {
+        path: 'users',
+        name: 'user-manage',
+        component: () => import('../views/UserManageView.vue'),
+        meta: { title: '用户管理', requiresAuth: true },
+      },
+      {
         path: 'reviews',
         name: 'review-manage',
         component: () => import('../views/ReviewManageView.vue'),

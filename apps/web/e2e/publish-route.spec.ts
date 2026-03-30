@@ -117,7 +117,7 @@ test.beforeEach(async ({ page }) => {
       body: JSON.stringify({
         success: true,
         code: 'OK',
-        message: '路线发布成功',
+        message: '路线已提交审核，请耐心等待',
         data: {
           id: 'trail-1001',
           image: 'https://trailquest-prod-media.oss-cn-shenzhen.aliyuncs.com/trail_cover/cover.png',

@@ -16,16 +16,21 @@ import com.sheng.hikingbackend.common.ApiResponse;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.config.CustomUserDetails;
 import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
+import com.sheng.hikingbackend.dto.admin.AdminHomeHeroUpdateRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
+import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.service.AdminService;
 import com.sheng.hikingbackend.service.AuthService;
+import com.sheng.hikingbackend.service.SiteSettingService;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
 import com.sheng.hikingbackend.vo.admin.AdminReportListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailListItemVo;
+import com.sheng.hikingbackend.vo.admin.AdminUserListItemVo;
 import com.sheng.hikingbackend.vo.auth.CurrentUserVo;
+import com.sheng.hikingbackend.vo.site.HomeHeroSettingVo;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +44,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final AuthService authService;
+    private final SiteSettingService siteSettingService;
 
     @GetMapping("/me")
     public ApiResponse<CurrentUserVo> me(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -53,6 +59,11 @@ public class AdminController {
     @GetMapping("/trails")
     public ApiResponse<PageResponse<AdminTrailListItemVo>> pageTrails(@Valid AdminTrailPageRequest request) {
         return ApiResponse.success(adminService.pageTrails(request));
+    }
+
+    @GetMapping("/users")
+    public ApiResponse<PageResponse<AdminUserListItemVo>> pageUsers(@Valid AdminUserPageRequest request) {
+        return ApiResponse.success(adminService.pageUsers(request));
     }
 
     @GetMapping("/trails/{id}")
@@ -93,6 +104,19 @@ public class AdminController {
             @RequestParam(defaultValue = "1") long pageNum,
             @RequestParam(defaultValue = "10") long pageSize) {
         return ApiResponse.success(adminService.pageReports(pageNum, pageSize));
+    }
+
+    @GetMapping("/settings/home-hero")
+    public ApiResponse<HomeHeroSettingVo> getHomeHeroSetting() {
+        return ApiResponse.success(siteSettingService.getHomeHeroSetting());
+    }
+
+    @PostMapping("/settings/home-hero")
+    public ApiResponse<Void> updateHomeHeroSetting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody AdminHomeHeroUpdateRequest request) {
+        siteSettingService.updateHomeHeroImage(userDetails.getId(), request.getImageUrl());
+        return ApiResponse.success("首页大屏图片已更新", null);
     }
 
     @PostMapping("/reports/{id}/resolve")

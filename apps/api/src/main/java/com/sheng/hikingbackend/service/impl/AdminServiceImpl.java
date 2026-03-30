@@ -14,11 +14,13 @@ import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
+import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.entity.Trail;
 import com.sheng.hikingbackend.mapper.ReviewMapper;
 import com.sheng.hikingbackend.mapper.TrailImageMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.TrailTrackMapper;
+import com.sheng.hikingbackend.mapper.UserMapper;
 import com.sheng.hikingbackend.service.AdminService;
 import com.sheng.hikingbackend.service.ReviewService;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
@@ -27,6 +29,8 @@ import com.sheng.hikingbackend.vo.admin.AdminReviewListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewQueryRow;
 import com.sheng.hikingbackend.vo.admin.AdminTrailDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailListItemVo;
+import com.sheng.hikingbackend.vo.admin.AdminUserListItemVo;
+import com.sheng.hikingbackend.vo.admin.AdminUserQueryRow;
 import com.sheng.hikingbackend.vo.common.UserSummaryVo;
 import com.sheng.hikingbackend.vo.trail.TrailGalleryItemVo;
 import com.sheng.hikingbackend.vo.trail.TrailQueryRow;
@@ -43,6 +47,7 @@ public class AdminServiceImpl implements AdminService {
     private final ReviewService reviewService;
     private final TrailImageMapper trailImageMapper;
     private final TrailTrackMapper trailTrackMapper;
+    private final UserMapper userMapper;
 
     @Override
     public AdminDashboardSummaryVo getDashboardSummary() {
@@ -50,6 +55,7 @@ public class AdminServiceImpl implements AdminService {
                 .pendingTrailCount(Math.toIntExact(trailMapper.countPendingReviewTrails()))
                 .reviewCount(Math.toIntExact(reviewMapper.countAllReviews()))
                 .pendingReportCount(0)
+                .userCount(Math.toIntExact(userMapper.countAllUsers()))
                 .build();
     }
 
@@ -65,6 +71,27 @@ public class AdminServiceImpl implements AdminService {
                         .location(row.getLocation())
                         .reviewStatus(row.getReviewStatus())
                         .authorUsername(row.getAuthorUsername())
+                        .createdAt(row.getCreatedAt())
+                        .build())
+                .toList();
+        return PageResponse.of(list, result.getCurrent(), result.getSize(), result.getTotal());
+    }
+
+    @Override
+    public PageResponse<AdminUserListItemVo> pageUsers(AdminUserPageRequest request) {
+        Page<AdminUserQueryRow> page = Page.of(request.getPageNum(), request.getPageSize());
+        IPage<AdminUserQueryRow> result = userMapper.selectAdminUserPage(page, request);
+        List<AdminUserListItemVo> list = result.getRecords().stream()
+                .map(row -> AdminUserListItemVo.builder()
+                        .id(row.getId())
+                        .username(row.getUsername())
+                        .email(row.getEmail())
+                        .role(row.getRole())
+                        .location(row.getLocation())
+                        .avatar(row.getAvatar())
+                        .avatarBg(row.getAvatarBg())
+                        .avatarMediaUrl(row.getAvatarMediaUrl())
+                        .publishedTrailCount(row.getPublishedTrailCount())
                         .createdAt(row.getCreatedAt())
                         .build())
                 .toList();

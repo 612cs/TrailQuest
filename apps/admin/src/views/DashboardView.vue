@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { Link2, Mountain, MessageSquareMore, FlagTriangleRight, RefreshCcw } from 'lucide-vue-next'
+import { ImagePlus, Link2, Mountain, MessageSquareMore, FlagTriangleRight, RefreshCcw, UsersRound } from 'lucide-vue-next'
 
 import { fetchDashboardSummary } from '../api/admin'
 import AdminStatCard from '../components/common/AdminStatCard.vue'
@@ -44,7 +44,7 @@ onMounted(loadSummary)
 
       <div v-if="errorMessage" class="admin-dashboard__error">{{ errorMessage }}</div>
 
-      <div class="admin-grid-3 admin-dashboard__stats">
+      <div class="admin-dashboard__stats">
         <AdminStatCard
           title="待审核路线"
           :value="loading ? '...' : summary?.pendingTrailCount ?? 0"
@@ -63,6 +63,12 @@ onMounted(loadSummary)
           description="第一版先预留治理入口"
           :icon="FlagTriangleRight"
         />
+        <AdminStatCard
+          title="用户总数"
+          :value="loading ? '...' : summary?.userCount ?? 0"
+          description="当前平台已注册用户规模"
+          :icon="UsersRound"
+        />
       </div>
 
       <div class="admin-dashboard__footer">
@@ -72,8 +78,10 @@ onMounted(loadSummary)
         </div>
         <div class="admin-dashboard__links">
           <RouterLink class="admin-dashboard__link" to="/trails/review">路线审核</RouterLink>
+          <RouterLink class="admin-dashboard__link" to="/users">用户管理</RouterLink>
           <RouterLink class="admin-dashboard__link" to="/reviews">评论管理</RouterLink>
           <RouterLink class="admin-dashboard__link" to="/reports">举报处理</RouterLink>
+          <RouterLink class="admin-dashboard__link" to="/settings">首页大图管理</RouterLink>
         </div>
       </div>
     </section>
@@ -106,6 +114,13 @@ onMounted(loadSummary)
             <p>支持列表、筛选与删除。</p>
           </div>
         </div>
+        <div class="admin-dashboard__note">
+          <ImagePlus :size="18" :stroke-width="2" />
+          <div>
+            <strong>首页运营位</strong>
+            <p>支持动态修改前台首页首屏大图。</p>
+          </div>
+        </div>
       </div>
     </section>
   </div>
@@ -126,7 +141,10 @@ onMounted(loadSummary)
 }
 
 .admin-dashboard__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 1rem;
+  gap: 1rem;
 }
 
 .admin-dashboard__error {
@@ -185,5 +203,17 @@ onMounted(loadSummary)
   margin: 0;
   color: var(--text-muted);
   line-height: 1.65;
+}
+
+@media (max-width: 1280px) {
+  .admin-dashboard__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard__stats {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

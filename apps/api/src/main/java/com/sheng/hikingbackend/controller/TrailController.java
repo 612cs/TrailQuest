@@ -71,7 +71,7 @@ public class TrailController {
             HttpServletRequest httpServletRequest,
             @Valid @RequestBody CreateTrailRequest request) {
         return ApiResponse.success(
-                "路线发布成功",
+                "路线已提交审核，请耐心等待",
                 trailService.createTrail(userDetails.getId(), resolveRequestIp(httpServletRequest), request));
     }
 
@@ -82,7 +82,7 @@ public class TrailController {
             HttpServletRequest httpServletRequest,
             @Valid @RequestBody UpdateTrailRequest request) {
         return ApiResponse.success(
-                "路线更新成功",
+                "路线更新已提交审核，请耐心等待",
                 trailService.updateTrail(id, userDetails.getId(), resolveRequestIp(httpServletRequest), request));
     }
 

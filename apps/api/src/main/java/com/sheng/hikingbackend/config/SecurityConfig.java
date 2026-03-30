@@ -80,6 +80,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register").permitAll()
                         .requestMatchers("/ws/ai").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/geo/reverse").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/site/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/*/card").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/trails", "/api/trails/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()

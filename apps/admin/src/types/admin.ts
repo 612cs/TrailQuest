@@ -2,6 +2,7 @@ export interface AdminDashboardSummary {
   pendingTrailCount: number
   reviewCount: number
   pendingReportCount: number
+  userCount: number
 }
 
 export interface AdminTrailListItem {
@@ -99,4 +100,30 @@ export interface AdminReviewPageQuery {
 export interface AdminReportPageQuery {
   pageNum?: number
   pageSize?: number
+}
+
+export interface AdminUserListItem {
+  id: string | number
+  username: string
+  email: string
+  role: 'USER' | 'ADMIN' | string
+  location?: string | null
+  avatar: string
+  avatarBg: string
+  avatarMediaUrl?: string | null
+  publishedTrailCount: number
+  createdAt: string
+}
+
+export interface AdminUserPageQuery {
+  pageNum?: number
+  pageSize?: number
+  keyword?: string
+  role?: string
+}
+
+export interface AdminHomeHeroSetting {
+  imageUrl?: string | null
+  usingDefault: boolean
+  updatedAt?: string | null
 }

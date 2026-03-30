@@ -10,4 +10,5 @@ public class AdminDashboardSummaryVo {
     private long pendingTrailCount;
     private long reviewCount;
     private long pendingReportCount;
+    private long userCount;
 }

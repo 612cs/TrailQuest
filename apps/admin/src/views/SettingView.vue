@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { MoonStar, SunMedium, UserCircle2, Settings2 } from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
+import { ImagePlus, MoonStar, RefreshCcw, SunMedium, UserCircle2, Settings2 } from 'lucide-vue-next'
 
+import { fetchAdminHomeHeroSetting, updateAdminHomeHeroSetting } from '../api/admin'
+import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
 import { useAdminAuthStore } from '../stores/auth'
 import { useThemeStore } from '../stores/theme'
 import { pinia } from '../stores/pinia'
@@ -10,6 +12,46 @@ const authStore = useAdminAuthStore(pinia)
 const themeStore = useThemeStore(pinia)
 
 const user = computed(() => authStore.user)
+const heroImageUrl = ref('')
+const heroLoading = ref(false)
+const heroSaving = ref(false)
+const heroError = ref('')
+const heroDialogShow = ref(false)
+
+async function loadHeroSetting() {
+  heroLoading.value = true
+  heroError.value = ''
+  try {
+    const result = await fetchAdminHomeHeroSetting()
+    heroImageUrl.value = result.imageUrl?.trim() || ''
+  } catch (error) {
+    heroError.value = error instanceof Error ? error.message : '首页大图配置加载失败'
+  } finally {
+    heroLoading.value = false
+  }
+}
+
+async function saveHeroSetting() {
+  heroSaving.value = true
+  heroError.value = ''
+  try {
+    await updateAdminHomeHeroSetting({ imageUrl: heroImageUrl.value.trim() || undefined })
+    heroDialogShow.value = true
+  } catch (error) {
+    heroError.value = error instanceof Error ? error.message : '首页大图保存失败'
+  } finally {
+    heroSaving.value = false
+  }
+}
+
+function resetHeroSetting() {
+  heroImageUrl.value = ''
+  void saveHeroSetting()
+}
+
+onMounted(() => {
+  void loadHeroSetting()
+})
 </script>
 
 <template>
@@ -53,7 +95,60 @@ const user = computed(() => authStore.user)
         <span>当前版本聚焦路线审核、评论治理与举报占位。</span>
       </div>
     </section>
+
+    <section class="admin-card admin-section admin-grid-2 admin-setting-hero">
+      <div>
+        <div class="admin-setting-hero__header">
+          <div>
+            <h2 class="admin-title">首页大屏图片</h2>
+            <p class="admin-subtitle">动态修改前台首页首屏大图，未配置时继续使用前台默认图。</p>
+          </div>
+          <button class="admin-button admin-button-secondary" type="button" :disabled="heroLoading || heroSaving" @click="loadHeroSetting">
+            <RefreshCcw :size="16" :stroke-width="2" />
+            刷新
+          </button>
+        </div>
+
+        <label class="admin-setting-field">
+          <span>图片地址</span>
+          <input
+            v-model="heroImageUrl"
+            class="admin-input"
+            type="url"
+            placeholder="https://example.com/home-hero.jpg"
+          />
+        </label>
+
+        <div v-if="heroError" class="admin-setting-error">{{ heroError }}</div>
+
+        <div class="admin-setting-actions">
+          <button class="admin-button admin-button-primary" type="button" :disabled="heroSaving" @click="saveHeroSetting">
+            <ImagePlus :size="16" :stroke-width="2" />
+            {{ heroSaving ? '保存中...' : '保存设置' }}
+          </button>
+          <button class="admin-button admin-button-secondary" type="button" :disabled="heroSaving" @click="resetHeroSetting">
+            恢复默认
+          </button>
+        </div>
+      </div>
+
+      <div class="admin-setting-hero__preview">
+        <h3>实时预览</h3>
+        <div v-if="heroImageUrl" class="admin-setting-hero__image">
+          <img :src="heroImageUrl" alt="首页大屏预览" />
+        </div>
+        <div v-else class="admin-setting-hero__empty">
+          当前未配置额外大图，前台会继续使用默认首屏图片。
+        </div>
+      </div>
+    </section>
   </div>
+
+  <AdminNoticeDialog
+    v-model:show="heroDialogShow"
+    title="保存成功"
+    message="首页大屏图片配置已经更新，前台首页刷新后会显示最新图片。"
+  />
 </template>
 
 <style scoped>
@@ -110,5 +205,76 @@ const user = computed(() => authStore.user)
   background: var(--bg-soft);
   color: var(--text-muted);
   line-height: 1.7;
+}
+
+.admin-setting-hero {
+  grid-column: 1 / -1;
+  align-items: start;
+}
+
+.admin-setting-hero__header,
+.admin-setting-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-setting-field {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.admin-setting-field span {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.admin-setting-actions {
+  justify-content: flex-start;
+  margin-top: 1rem;
+}
+
+.admin-setting-error {
+  margin-top: 1rem;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  color: var(--danger);
+  background: rgba(181, 68, 68, 0.08);
+  border: 1px solid rgba(181, 68, 68, 0.16);
+}
+
+.admin-setting-hero__preview h3 {
+  margin: 0 0 0.8rem;
+  color: var(--text-strong);
+}
+
+.admin-setting-hero__image,
+.admin-setting-hero__empty {
+  min-height: 260px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+}
+
+.admin-setting-hero__image {
+  overflow: hidden;
+}
+
+.admin-setting-hero__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-setting-hero__empty {
+  display: grid;
+  place-items: center;
+  padding: 1.4rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.8;
 }
 </style>

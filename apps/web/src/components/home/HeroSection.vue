@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
 import homeHeroImage from '../../assets/shouye.jpg'
+import { fetchHomeHeroSetting } from '../../api/site'
 
 const router = useRouter()
 const searchQuery = ref('')
+const remoteHeroImage = ref('')
+
+const activeHeroImage = computed(() => remoteHeroImage.value || homeHeroImage)
+
+onMounted(async () => {
+  try {
+    const setting = await fetchHomeHeroSetting()
+    remoteHeroImage.value = setting.imageUrl?.trim() || ''
+  } catch (error) {
+    console.warn('Failed to load home hero setting, fallback to local asset.', error)
+  }
+})
 
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
@@ -20,7 +33,7 @@ const handleSearch = () => {
   <section class="relative h-screen min-h-[100vh] flex items-end overflow-hidden">
     <!-- Background Image -->
     <div class="absolute inset-0">
-      <img :src="homeHeroImage" alt="壮丽山景" class="w-full h-full object-cover" />
+      <img :src="activeHeroImage" alt="壮丽山景" class="w-full h-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10"></div>
     </div>
 
