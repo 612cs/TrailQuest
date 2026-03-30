@@ -68,17 +68,14 @@ onMounted(load)
 <template>
   <section class="admin-card admin-section">
     <div class="admin-list-header">
-      <div>
-        <h2 class="admin-title">评论管理</h2>
-        <p class="admin-subtitle">按内容、路线和作者筛选评论，并支持删除。</p>
-      </div>
+      <h2 class="admin-title">评论管理</h2>
       <button class="admin-button admin-button-secondary" type="button" @click="load()">
         <RefreshCcw :size="16" :stroke-width="2" />
         刷新
       </button>
     </div>
 
-    <div class="admin-list-filters admin-grid-3">
+    <div class="admin-list-toolbar">
       <label>
         <span>关键字</span>
         <input v-model="keyword" class="admin-input" placeholder="评论内容" @keyup.enter="load(1)" />
@@ -91,91 +88,110 @@ onMounted(load)
         <span>作者</span>
         <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" @keyup.enter="load(1)" />
       </label>
+      <div class="admin-list-toolbar__actions">
+        <button class="admin-button admin-button-primary" type="button" @click="load(1)">
+          <Search :size="16" :stroke-width="2" />
+          搜索
+        </button>
+        <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+      </div>
     </div>
 
-    <div class="admin-list-actions">
-      <button class="admin-button admin-button-primary" type="button" @click="load(1)">
-        <Search :size="16" :stroke-width="2" />
-        搜索
-      </button>
-      <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+    <div class="admin-list-body">
+      <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
+
+      <div v-if="list.length" class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>评论</th>
+              <th>作者</th>
+              <th>路线</th>
+              <th>时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in list" :key="item.id">
+              <td class="admin-review-preview">{{ item.text }}</td>
+              <td>{{ item.authorUsername }}</td>
+              <td>{{ item.trailName }}</td>
+              <td>{{ formatDateTime(item.createdAt) }}</td>
+              <td>
+                <button class="admin-button admin-button-danger" type="button" :disabled="loading" @click="handleDelete(item.id)">
+                  <Trash2 :size="16" :stroke-width="2" />
+                  删除
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <EmptyState
+        v-else-if="!loading"
+        title="暂无评论"
+        description="当前筛选条件下没有评论数据。"
+      />
+
+      <AdminPagination
+        :current="pageNum"
+        :total-pages="Math.max(1, Math.ceil(total / pageSize))"
+        :total-items="total"
+        @update:current="load"
+      />
     </div>
-
-    <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
-
-    <div v-if="list.length" class="admin-table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>评论</th>
-            <th>作者</th>
-            <th>路线</th>
-            <th>时间</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in list" :key="item.id">
-            <td class="admin-review-preview">{{ item.text }}</td>
-            <td>{{ item.authorUsername }}</td>
-            <td>{{ item.trailName }}</td>
-            <td>{{ formatDateTime(item.createdAt) }}</td>
-            <td>
-              <button class="admin-button admin-button-danger" type="button" :disabled="loading" @click="handleDelete(item.id)">
-                <Trash2 :size="16" :stroke-width="2" />
-                删除
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <EmptyState
-      v-else-if="!loading"
-      title="暂无评论"
-      description="当前筛选条件下没有评论数据。"
-    />
-
-    <AdminPagination
-      :current="pageNum"
-      :total-pages="Math.max(1, Math.ceil(total / pageSize))"
-      :total-items="total"
-      @update:current="load"
-    />
   </section>
 </template>
 
 <style scoped>
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .admin-list-header,
-.admin-list-actions {
+.admin-list-toolbar,
+.admin-list-toolbar__actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.admin-list-filters {
+.admin-list-toolbar {
   margin-top: 1rem;
+  align-items: end;
+  flex-wrap: wrap;
 }
 
-.admin-list-filters label {
+.admin-list-toolbar label {
+  flex: 1 1 16rem;
   display: grid;
   gap: 0.55rem;
 }
 
-.admin-list-filters span {
+.admin-list-toolbar span {
   color: var(--text-muted);
   font-size: 0.92rem;
   font-weight: 600;
 }
 
-.admin-list-actions {
+.admin-list-toolbar__actions {
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.admin-list-body {
+  flex: 1;
+  min-height: 0;
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-list-error {
-  margin-top: 1rem;
   border-radius: 16px;
   padding: 0.85rem 1rem;
   color: var(--danger);
@@ -184,10 +200,10 @@ onMounted(load)
 }
 
 .admin-table-wrap {
-  margin-top: 1rem;
+  flex: 1;
+  min-height: 0;
   overflow-x: auto;
   overflow-y: auto;
-  max-height: min(52vh, 40rem);
 }
 
 .admin-review-preview {

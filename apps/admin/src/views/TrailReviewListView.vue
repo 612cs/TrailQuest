@@ -35,17 +35,14 @@ onMounted(() => {
 <template>
   <section class="admin-card admin-section">
     <div class="admin-list-header">
-      <div>
-        <h2 class="admin-title">路线审核</h2>
-        <p class="admin-subtitle">聚焦待审核路线，点击整行直接进入审核详情。</p>
-      </div>
+      <h2 class="admin-title">路线审核</h2>
       <button class="admin-button admin-button-secondary" type="button" @click="load()">
         <RefreshCcw :size="16" :stroke-width="2" />
         刷新
       </button>
     </div>
 
-    <div class="admin-list-filters admin-grid-3">
+    <div class="admin-list-toolbar">
       <label>
         <span>关键词</span>
         <input v-model="keyword" class="admin-input" placeholder="路线名称 / 地点" @keyup.enter="load(1)" />
@@ -63,68 +60,87 @@ onMounted(() => {
         <span>作者</span>
         <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" @keyup.enter="load(1)" />
       </label>
+      <div class="admin-list-toolbar__actions">
+        <button class="admin-button admin-button-primary" type="button" @click="load(1)">
+          <Search :size="16" :stroke-width="2" />
+          搜索
+        </button>
+        <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+      </div>
     </div>
 
-    <div class="admin-list-actions">
-      <button class="admin-button admin-button-primary" type="button" @click="load(1)">
-        <Search :size="16" :stroke-width="2" />
-        搜索
-      </button>
-      <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
-    </div>
+    <div class="admin-list-body">
+      <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
 
-    <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
+      <TrailReviewTable v-if="list.length" :items="list" @open="openDetail" />
 
-    <TrailReviewTable v-if="list.length" :items="list" @open="openDetail" />
+      <div v-else class="admin-empty-wrap">
+        <div v-if="loading" class="admin-muted">正在加载路线列表...</div>
+        <EmptyState
+          v-else
+          title="暂无路线数据"
+          description="当前筛选条件下没有匹配的审核记录。"
+        />
+      </div>
 
-    <div v-else class="admin-empty-wrap">
-      <div v-if="loading" class="admin-muted">正在加载路线列表...</div>
-      <EmptyState
-        v-else
-        title="暂无路线数据"
-        description="当前筛选条件下没有匹配的审核记录。"
+      <AdminPagination
+        :current="pageNum"
+        :total-pages="totalPages"
+        :total-items="total"
+        @update:current="load"
       />
     </div>
-
-    <AdminPagination
-      :current="pageNum"
-      :total-pages="totalPages"
-      :total-items="total"
-      @update:current="load"
-    />
   </section>
 </template>
 
 <style scoped>
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .admin-list-header,
-.admin-list-actions {
+.admin-list-toolbar,
+.admin-list-toolbar__actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.admin-list-filters {
+.admin-list-toolbar {
   margin-top: 1rem;
+  align-items: end;
+  flex-wrap: wrap;
 }
 
-.admin-list-filters label {
+.admin-list-toolbar label {
+  flex: 1 1 18rem;
   display: grid;
   gap: 0.55rem;
 }
 
-.admin-list-filters span {
+.admin-list-toolbar span {
   color: var(--text-muted);
   font-size: 0.92rem;
   font-weight: 600;
 }
 
-.admin-list-actions {
+.admin-list-toolbar__actions {
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.admin-list-body {
+  flex: 1;
+  min-height: 0;
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-list-error {
-  margin-top: 1rem;
   border-radius: 16px;
   padding: 0.85rem 1rem;
   color: var(--danger);
@@ -133,6 +149,9 @@ onMounted(() => {
 }
 
 .admin-empty-wrap {
-  margin-top: 1rem;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
 }
 </style>

@@ -13,6 +13,7 @@ const emit = defineEmits<{
 
 <template>
   <SharedImagePreviewModal
+    :show="true"
     :images="images"
     :initial-index="initialIndex"
     @close="emit('close')"

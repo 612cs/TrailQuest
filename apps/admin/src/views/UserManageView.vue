@@ -87,17 +87,14 @@ onMounted(() => {
 <template>
   <section class="admin-card admin-section">
     <div class="admin-list-header">
-      <div>
-        <h2 class="admin-title">用户管理</h2>
-        <p class="admin-subtitle">查看账号状态、封禁时间与基础活跃度，并支持封禁与解封。</p>
-      </div>
+      <h2 class="admin-title">用户管理</h2>
       <button class="admin-button admin-button-secondary" type="button" @click="load()">
         <RefreshCcw :size="16" :stroke-width="2" />
         刷新
       </button>
     </div>
 
-    <div class="admin-list-filters admin-grid-2">
+    <div class="admin-list-toolbar">
       <label>
         <span>关键词</span>
         <input v-model="keyword" class="admin-input" placeholder="用户名、邮箱或所在地" @keyup.enter="load(1)" />
@@ -110,40 +107,41 @@ onMounted(() => {
           <option value="ADMIN">管理员</option>
         </select>
       </label>
+      <div class="admin-list-toolbar__actions">
+        <button class="admin-button admin-button-primary" type="button" @click="load(1)">
+          <Search :size="16" :stroke-width="2" />
+          搜索
+        </button>
+        <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+      </div>
     </div>
 
-    <div class="admin-list-actions">
-      <button class="admin-button admin-button-primary" type="button" @click="load(1)">
-        <Search :size="16" :stroke-width="2" />
-        搜索
-      </button>
-      <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+    <div class="admin-list-body">
+      <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
+
+      <UserManagementTable
+        v-if="list.length"
+        :items="list"
+        :action-loading="actionLoading"
+        @ban="openBanDialog"
+        @unban="openUnbanDialog"
+      />
+
+      <EmptyState
+        v-else-if="!loading"
+        title="暂无用户数据"
+        description="当前筛选条件下没有匹配的用户。"
+        :icon="UsersRound"
+      />
+
+      <AdminPagination
+        :current="pageNum"
+        :total-pages="totalPages"
+        :total-items="total"
+        item-label="位用户"
+        @update:current="load"
+      />
     </div>
-
-    <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
-
-    <UserManagementTable
-      v-if="list.length"
-      :items="list"
-      :action-loading="actionLoading"
-      @ban="openBanDialog"
-      @unban="openUnbanDialog"
-    />
-
-    <EmptyState
-      v-else-if="!loading"
-      title="暂无用户数据"
-      description="当前筛选条件下没有匹配的用户。"
-      :icon="UsersRound"
-    />
-
-    <AdminPagination
-      :current="pageNum"
-      :total-pages="totalPages"
-      :total-items="total"
-      item-label="位用户"
-      @update:current="load"
-    />
 
     <AdminConfirmDialog
       v-model:show="banDialogVisible"
@@ -175,35 +173,53 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .admin-list-header,
-.admin-list-actions {
+.admin-list-toolbar,
+.admin-list-toolbar__actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.admin-list-filters {
+.admin-list-toolbar {
   margin-top: 1rem;
+  align-items: end;
+  flex-wrap: wrap;
 }
 
-.admin-list-filters label {
+.admin-list-toolbar label {
+  flex: 1 1 18rem;
   display: grid;
   gap: 0.55rem;
 }
 
-.admin-list-filters span {
+.admin-list-toolbar span {
   color: var(--text-muted);
   font-size: 0.92rem;
   font-weight: 600;
 }
 
-.admin-list-actions {
+.admin-list-toolbar__actions {
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.admin-list-body {
+  flex: 1;
+  min-height: 0;
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .admin-list-error {
-  margin-top: 1rem;
   border-radius: 16px;
   padding: 0.85rem 1rem;
   color: var(--danger);
