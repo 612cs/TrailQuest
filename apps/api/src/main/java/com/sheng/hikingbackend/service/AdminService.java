@@ -3,12 +3,15 @@ package com.sheng.hikingbackend.service;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
 import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
+import com.sheng.hikingbackend.dto.admin.AdminReviewActionRequest;
+import com.sheng.hikingbackend.dto.admin.AdminReviewBatchActionRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
 import com.sheng.hikingbackend.vo.admin.AdminReportListItemVo;
+import com.sheng.hikingbackend.vo.admin.AdminReviewDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailListItemVo;
@@ -42,7 +45,17 @@ public interface AdminService {
 
     PageResponse<AdminReviewListItemVo> pageReviews(AdminReviewPageRequest request);
 
-    void deleteReview(Long reviewId);
+    AdminReviewDetailVo getReviewDetail(Long reviewId);
+
+    void hideReview(Long reviewId, Long adminUserId, AdminReviewActionRequest request);
+
+    void restoreReview(Long reviewId, Long adminUserId);
+
+    void deleteReview(Long reviewId, Long adminUserId, AdminReviewActionRequest request);
+
+    void batchHideReviews(Long adminUserId, AdminReviewBatchActionRequest request);
+
+    void batchRestoreReviews(Long adminUserId, AdminReviewBatchActionRequest request);
 
     PageResponse<AdminReportListItemVo> pageReports(long pageNum, long pageSize);
 

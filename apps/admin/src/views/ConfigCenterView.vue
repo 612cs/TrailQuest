@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { Plus, RefreshCcw, Save } from 'lucide-vue-next'
+import { Plus, Save } from 'lucide-vue-next'
 
 import {
   createAdminOptionItem,

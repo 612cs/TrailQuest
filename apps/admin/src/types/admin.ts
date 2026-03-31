@@ -64,9 +64,54 @@ export interface AdminTrailDetail {
 
 export interface AdminReviewListItem {
   id: string | number
+  trailId: string | number
+  userId: string | number
   text: string
+  rating?: number | null
+  status: 'active' | 'hidden' | 'deleted' | string
   authorUsername: string
+  avatar?: string | null
+  avatarBg?: string | null
+  avatarMediaUrl?: string | null
   trailName: string
+  parentId?: string | number | null
+  parentText?: string | null
+  moderationReason?: string | null
+  moderatedAt?: string | null
+  createdAt: string
+}
+
+export interface AdminReviewThreadItem {
+  id: string | number
+  userId: string | number
+  authorUsername: string
+  avatar?: string | null
+  avatarBg?: string | null
+  avatarMediaUrl?: string | null
+  text: string
+  status: 'active' | 'hidden' | 'deleted' | string
+  moderationReason?: string | null
+  moderatedAt?: string | null
+  createdAt: string
+}
+
+export interface AdminReviewDetail {
+  id: string | number
+  trailId: string | number
+  trailName: string
+  rating?: number | null
+  text: string
+  status: 'active' | 'hidden' | 'deleted' | string
+  moderationReason?: string | null
+  moderatedAt?: string | null
+  userId: string | number
+  authorUsername: string
+  avatar?: string | null
+  avatarBg?: string | null
+  avatarMediaUrl?: string | null
+  parentId?: string | number | null
+  parentText?: string | null
+  replies: AdminReviewThreadItem[]
   createdAt: string
 }
 
@@ -109,6 +154,16 @@ export interface AdminReviewPageQuery {
   keyword?: string
   trailKeyword?: string
   authorKeyword?: string
+  status?: string
+}
+
+export interface AdminReviewActionRequest {
+  remark: string
+}
+
+export interface AdminReviewBatchActionRequest {
+  ids: Array<string | number>
+  remark?: string
 }
 
 export interface AdminReportPageQuery {

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FlagTriangleRight, LayoutDashboard, MessageSquareMore, Mountain, Settings2, ShieldCheck, SlidersHorizontal, UsersRound } from 'lucide-vue-next'
 

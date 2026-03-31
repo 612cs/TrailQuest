@@ -8,6 +8,9 @@ import type {
   AdminOptionItem,
   AdminReportListItem,
   AdminReportPageQuery,
+  AdminReviewActionRequest,
+  AdminReviewBatchActionRequest,
+  AdminReviewDetail,
   AdminReviewListItem,
   AdminReviewPageQuery,
   AdminRejectTrailRequest,
@@ -89,8 +92,28 @@ export function fetchAdminReviews(query: AdminReviewPageQuery = {}) {
   })
 }
 
-export function deleteAdminReview(id: string | number) {
-  return http.delete<void>(`/api/admin/reviews/${id}`)
+export function fetchAdminReviewDetail(id: string | number) {
+  return http.get<AdminReviewDetail>(`/api/admin/reviews/${id}`)
+}
+
+export function hideAdminReview(id: string | number, payload: AdminReviewActionRequest) {
+  return http.post<void>(`/api/admin/reviews/${id}/hide`, payload)
+}
+
+export function restoreAdminReview(id: string | number) {
+  return http.post<void>(`/api/admin/reviews/${id}/restore`)
+}
+
+export function deleteAdminReview(id: string | number, payload: AdminReviewActionRequest) {
+  return http.post<void>(`/api/admin/reviews/${id}/delete`, payload)
+}
+
+export function batchHideAdminReviews(payload: AdminReviewBatchActionRequest) {
+  return http.post<void>('/api/admin/reviews/batch-hide', payload)
+}
+
+export function batchRestoreAdminReviews(payload: AdminReviewBatchActionRequest) {
+  return http.post<void>('/api/admin/reviews/batch-restore', payload)
 }
 
 export function fetchAdminReports(query: AdminReportPageQuery = {}) {

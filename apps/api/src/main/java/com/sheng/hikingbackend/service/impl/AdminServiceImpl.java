@@ -17,11 +17,14 @@ import com.sheng.hikingbackend.common.enums.UserStatus;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
 import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
+import com.sheng.hikingbackend.dto.admin.AdminReviewActionRequest;
+import com.sheng.hikingbackend.dto.admin.AdminReviewBatchActionRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.entity.AdminOperationLog;
+import com.sheng.hikingbackend.entity.Review;
 import com.sheng.hikingbackend.entity.Trail;
 import com.sheng.hikingbackend.entity.User;
 import com.sheng.hikingbackend.mapper.AdminOperationLogMapper;
@@ -34,8 +37,10 @@ import com.sheng.hikingbackend.service.AdminService;
 import com.sheng.hikingbackend.service.ReviewService;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
 import com.sheng.hikingbackend.vo.admin.AdminReportListItemVo;
+import com.sheng.hikingbackend.vo.admin.AdminReviewDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewQueryRow;
+import com.sheng.hikingbackend.vo.admin.AdminReviewThreadItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminUserListItemVo;
@@ -50,6 +55,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
+
+    private static final String REVIEW_STATUS_ACTIVE = "active";
+    private static final String REVIEW_STATUS_HIDDEN = "hidden";
+    private static final String REVIEW_STATUS_DELETED = "deleted";
 
     private final TrailMapper trailMapper;
     private final ReviewMapper reviewMapper;
@@ -238,8 +247,19 @@ public class AdminServiceImpl implements AdminService {
         List<AdminReviewListItemVo> list = result.getRecords().stream()
                 .map(row -> AdminReviewListItemVo.builder()
                         .id(row.getId())
+                        .trailId(row.getTrailId())
+                        .userId(row.getUserId())
                         .text(row.getText())
+                        .rating(row.getRating())
+                        .status(row.getStatus())
+                        .parentId(row.getParentId())
+                        .parentText(row.getParentText())
+                        .moderationReason(row.getModerationReason())
+                        .moderatedAt(row.getModeratedAt())
                         .authorUsername(row.getAuthorUsername())
+                        .avatar(row.getAvatar())
+                        .avatarBg(row.getAvatarBg())
+                        .avatarMediaUrl(row.getAvatarMediaUrl())
                         .trailName(row.getTrailName())
                         .createdAt(row.getCreatedAt())
                         .build())
@@ -249,8 +269,67 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
-    public void deleteReview(Long reviewId) {
-        reviewService.deleteReviewAsAdmin(reviewId);
+    public AdminReviewDetailVo getReviewDetail(Long reviewId) {
+        AdminReviewQueryRow row = requireReviewRow(reviewId);
+        List<AdminReviewThreadItemVo> replies = reviewMapper.selectAdminReviewRepliesByParentId(reviewId).stream()
+                .map(this::toAdminReviewThreadItem)
+                .toList();
+        return AdminReviewDetailVo.builder()
+                .id(row.getId())
+                .trailId(row.getTrailId())
+                .trailName(row.getTrailName())
+                .rating(row.getRating())
+                .text(row.getText())
+                .status(row.getStatus())
+                .moderationReason(row.getModerationReason())
+                .moderatedAt(row.getModeratedAt())
+                .userId(row.getUserId())
+                .authorUsername(row.getAuthorUsername())
+                .avatar(row.getAvatar())
+                .avatarBg(row.getAvatarBg())
+                .avatarMediaUrl(row.getAvatarMediaUrl())
+                .parentId(row.getParentId())
+                .parentText(row.getParentText())
+                .replies(replies)
+                .createdAt(row.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void hideReview(Long reviewId, Long adminUserId, AdminReviewActionRequest request) {
+        String remark = normalizeRequiredRemark(request == null ? null : request.getRemark(), "隐藏评论时必须填写处理原因");
+        moderateReview(reviewId, adminUserId, REVIEW_STATUS_HIDDEN, remark, "review.hide");
+    }
+
+    @Override
+    @Transactional
+    public void restoreReview(Long reviewId, Long adminUserId) {
+        moderateReview(reviewId, adminUserId, REVIEW_STATUS_ACTIVE, "恢复显示", "review.restore");
+    }
+
+    @Override
+    @Transactional
+    public void deleteReview(Long reviewId, Long adminUserId, AdminReviewActionRequest request) {
+        String remark = normalizeRequiredRemark(request == null ? null : request.getRemark(), "删除评论时必须填写处理原因");
+        moderateReview(reviewId, adminUserId, REVIEW_STATUS_DELETED, remark, "review.delete");
+    }
+
+    @Override
+    @Transactional
+    public void batchHideReviews(Long adminUserId, AdminReviewBatchActionRequest request) {
+        String remark = normalizeRequiredRemark(request == null ? null : request.getRemark(), "批量隐藏时必须填写处理原因");
+        for (Long reviewId : request.getIds()) {
+            moderateReview(reviewId, adminUserId, REVIEW_STATUS_HIDDEN, remark, "review.hide");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void batchRestoreReviews(Long adminUserId, AdminReviewBatchActionRequest request) {
+        for (Long reviewId : request.getIds()) {
+            moderateReview(reviewId, adminUserId, REVIEW_STATUS_ACTIVE, "批量恢复显示", "review.restore");
+        }
     }
 
     @Override
@@ -348,6 +427,56 @@ public class AdminServiceImpl implements AdminService {
             throw BusinessException.notFound("USER_NOT_FOUND", "用户不存在");
         }
         return user;
+    }
+
+    private Review requireReview(Long reviewId) {
+        Review review = reviewMapper.selectById(reviewId);
+        if (review == null) {
+            throw BusinessException.notFound("REVIEW_NOT_FOUND", "评论不存在");
+        }
+        return review;
+    }
+
+    private AdminReviewQueryRow requireReviewRow(Long reviewId) {
+        AdminReviewQueryRow row = reviewMapper.selectAdminReviewDetailById(reviewId);
+        if (row == null) {
+            throw BusinessException.notFound("REVIEW_NOT_FOUND", "评论不存在");
+        }
+        return row;
+    }
+
+    private AdminReviewThreadItemVo toAdminReviewThreadItem(AdminReviewQueryRow row) {
+        return AdminReviewThreadItemVo.builder()
+                .id(row.getId())
+                .userId(row.getUserId())
+                .authorUsername(row.getAuthorUsername())
+                .avatar(row.getAvatar())
+                .avatarBg(row.getAvatarBg())
+                .avatarMediaUrl(row.getAvatarMediaUrl())
+                .text(row.getText())
+                .status(row.getStatus())
+                .moderationReason(row.getModerationReason())
+                .moderatedAt(row.getModeratedAt())
+                .createdAt(row.getCreatedAt())
+                .build();
+    }
+
+    private void moderateReview(Long reviewId, Long adminUserId, String targetStatus, String remark, String actionType) {
+        Review review = requireReview(reviewId);
+        if (targetStatus.equals(review.getStatus())) {
+            throw BusinessException.badRequest("REVIEW_STATUS_UNCHANGED", "评论已处于目标状态");
+        }
+
+        reviewService.moderateReview(reviewId, adminUserId, targetStatus, remark);
+        logAction(actionType, "review", reviewId, adminUserId, remark, Map.of(
+                "status", targetStatus));
+    }
+
+    private String normalizeRequiredRemark(String remark, String errorMessage) {
+        if (remark == null || remark.isBlank()) {
+            throw BusinessException.badRequest("REVIEW_REMARK_REQUIRED", errorMessage);
+        }
+        return remark.trim();
     }
 
     private List<String> splitTags(String tagsCsv) {

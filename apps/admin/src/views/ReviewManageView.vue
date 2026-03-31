@@ -1,76 +1,95 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { RefreshCcw, Search, Trash2 } from 'lucide-vue-next'
+import { onMounted } from 'vue'
+import { MessageSquareMore, RefreshCcw, Search } from 'lucide-vue-next'
 
-import { deleteAdminReview, fetchAdminReviews } from '../api/admin'
+import AdminConfirmDialog from '../components/common/AdminConfirmDialog.vue'
+import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
 import AdminPagination from '../components/common/AdminPagination.vue'
 import EmptyState from '../components/common/EmptyState.vue'
-import { formatDateTime } from '../utils/format'
-import type { AdminReviewListItem } from '../types/admin'
+import ReviewBatchActionBar from '../components/reviews/ReviewBatchActionBar.vue'
+import ReviewDetailDialog from '../components/reviews/ReviewDetailDialog.vue'
+import ReviewManagementTable from '../components/reviews/ReviewManagementTable.vue'
+import { useReviewManagement } from '../composables/useReviewManagement'
 
-const loading = ref(false)
-const list = ref<AdminReviewListItem[]>([])
-const total = ref(0)
-const pageNum = ref(1)
-const pageSize = ref(10)
-const keyword = ref('')
-const trailKeyword = ref('')
-const authorKeyword = ref('')
-const errorMessage = ref('')
+const {
+  loading,
+  actionLoading,
+  detailLoading,
+  list,
+  total,
+  pageNum,
+  keyword,
+  trailKeyword,
+  authorKeyword,
+  status,
+  errorMessage,
+  totalPages,
+  selectedIds,
+  selectedActiveIds,
+  selectedRestorableIds,
+  allCurrentSelected,
+  detailVisible,
+  detail,
+  confirmVisible,
+  confirmConfig,
+  noticeVisible,
+  noticeTitle,
+  noticeMessage,
+  load,
+  resetFilters,
+  toggleSelection,
+  toggleSelectAllCurrent,
+  openDetail,
+  closeDetail,
+  requestHide,
+  requestRestore,
+  requestDelete,
+  requestBatchHide,
+  requestBatchRestore,
+  closeConfirm,
+  submitConfirm,
+} = useReviewManagement()
 
-async function load(page = pageNum.value) {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    const result = await fetchAdminReviews({
-      pageNum: page,
-      pageSize: pageSize.value,
-      keyword: keyword.value.trim() || undefined,
-      trailKeyword: trailKeyword.value.trim() || undefined,
-      authorKeyword: authorKeyword.value.trim() || undefined,
-    })
-    list.value = result.list
-    total.value = result.total
-    pageNum.value = result.pageNum
-    pageSize.value = result.pageSize
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '评论列表加载失败'
-  } finally {
-    loading.value = false
-  }
-}
-
-async function handleDelete(id: string | number) {
-  if (!window.confirm('确认删除这条评论吗？')) {
-    return
-  }
-  loading.value = true
-  try {
-    await deleteAdminReview(id)
-    await load(pageNum.value)
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '删除评论失败'
-  } finally {
-    loading.value = false
-  }
-}
-
-function resetFilters() {
-  keyword.value = ''
-  trailKeyword.value = ''
-  authorKeyword.value = ''
-  load(1)
-}
-
-onMounted(load)
+onMounted(() => {
+  void load()
+})
 </script>
 
 <template>
   <section class="admin-card admin-section">
     <div class="admin-list-toolbar">
-      <input v-model="keyword" class="admin-input" placeholder="评论内容" aria-label="评论关键字" @keyup.enter="load(1)" />
-      <input v-model="trailKeyword" class="admin-input" placeholder="路线名称" aria-label="路线关键字" @keyup.enter="load(1)" />
-      <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" aria-label="作者" @keyup.enter="load(1)" />
+      <input
+        v-model="keyword"
+        class="admin-input"
+        placeholder="评论内容"
+        aria-label="评论关键字"
+        @keyup.enter="load(1)"
+      />
+      <input
+        v-model="trailKeyword"
+        class="admin-input"
+        placeholder="路线名称"
+        aria-label="路线关键字"
+        @keyup.enter="load(1)"
+      />
+      <input
+        v-model="authorKeyword"
+        class="admin-input"
+        placeholder="作者昵称"
+        aria-label="作者"
+        @keyup.enter="load(1)"
+      />
+      <select
+        v-model="status"
+        class="admin-select"
+        aria-label="评论状态"
+        @change="load(1)"
+      >
+        <option value="">全部状态</option>
+        <option value="active">正常</option>
+        <option value="hidden">已隐藏</option>
+        <option value="deleted">已删除</option>
+      </select>
       <div class="admin-list-toolbar__actions">
         <button class="admin-button admin-button-primary" type="button" @click="load(1)">
           <Search :size="16" :stroke-width="2" />
@@ -84,50 +103,75 @@ onMounted(load)
       </div>
     </div>
 
+    <ReviewBatchActionBar
+      v-if="selectedIds.length"
+      :selected-count="selectedIds.length"
+      :active-count="selectedActiveIds.length"
+      :restorable-count="selectedRestorableIds.length"
+      @batch-hide="requestBatchHide"
+      @batch-restore="requestBatchRestore"
+      @clear="toggleSelectAllCurrent(false)"
+    />
+
     <div class="admin-list-body">
       <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
 
-      <div v-if="list.length" class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>评论</th>
-              <th>作者</th>
-              <th>路线</th>
-              <th>时间</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in list" :key="item.id">
-              <td class="admin-review-preview">{{ item.text }}</td>
-              <td>{{ item.authorUsername }}</td>
-              <td>{{ item.trailName }}</td>
-              <td>{{ formatDateTime(item.createdAt) }}</td>
-              <td>
-                <button class="admin-button admin-button-danger" type="button" :disabled="loading" @click="handleDelete(item.id)">
-                  <Trash2 :size="16" :stroke-width="2" />
-                  删除
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <EmptyState
-        v-else-if="!loading"
-        title="暂无评论"
-        description="当前筛选条件下没有评论数据。"
+      <ReviewManagementTable
+        v-if="list.length"
+        :items="list"
+        :selected-ids="selectedIds"
+        :all-current-selected="allCurrentSelected"
+        @toggle-select-all="toggleSelectAllCurrent"
+        @toggle-select="toggleSelection($event.id, $event.checked)"
+        @detail="openDetail($event.id)"
+        @hide="requestHide"
+        @restore="requestRestore"
+        @delete="requestDelete"
       />
+
+      <div v-else class="admin-empty-wrap">
+        <div v-if="loading" class="admin-muted">正在加载评论治理列表...</div>
+        <EmptyState
+          v-else
+          title="暂无评论数据"
+          description="当前筛选条件下没有匹配的评论。"
+          :icon="MessageSquareMore"
+        />
+      </div>
 
       <AdminPagination
         :current="pageNum"
-        :total-pages="Math.max(1, Math.ceil(total / pageSize))"
+        :total-pages="totalPages"
         :total-items="total"
         @update:current="load"
       />
     </div>
+
+    <ReviewDetailDialog
+      :show="detailVisible"
+      :detail="detail"
+      :loading="detailLoading"
+      @update:show="closeDetail"
+    />
+
+    <AdminConfirmDialog
+      v-model:show="confirmVisible"
+      :title="confirmConfig.title"
+      :message="confirmConfig.message"
+      :confirm-text="confirmConfig.confirmText"
+      :loading="actionLoading"
+      :require-reason="confirmConfig.requireReason"
+      :reason-label="confirmConfig.reasonLabel"
+      :reason-placeholder="confirmConfig.reasonPlaceholder"
+      @update:show="!$event && closeConfirm()"
+      @confirm="submitConfirm"
+    />
+
+    <AdminNoticeDialog
+      v-model:show="noticeVisible"
+      :title="noticeTitle"
+      :message="noticeMessage"
+    />
   </section>
 </template>
 
@@ -150,12 +194,12 @@ onMounted(load)
 
 .admin-list-toolbar {
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
 }
 
 .admin-list-toolbar > .admin-input,
 .admin-list-toolbar > .admin-select {
-  flex: 1 1 14rem;
+  flex: 1 1 12rem;
   min-width: 0;
 }
 
@@ -182,28 +226,17 @@ onMounted(load)
   border: 1px solid rgba(181, 68, 68, 0.16);
 }
 
-.admin-table-wrap {
+.admin-empty-wrap {
   flex: 1;
   min-height: 0;
-  overflow-x: auto;
-  overflow-y: auto;
+  display: grid;
+  place-items: center;
 }
 
 @media (max-width: 1200px) {
-  .admin-list-toolbar {
-    flex-wrap: wrap;
-  }
-
   .admin-list-toolbar__actions {
     width: 100%;
     justify-content: flex-end;
   }
 }
-
-.admin-review-preview {
-  max-width: 30rem;
-  color: var(--text-strong);
-  line-height: 1.65;
-}
-
 </style>

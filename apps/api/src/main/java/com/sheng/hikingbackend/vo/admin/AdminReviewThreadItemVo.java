@@ -10,29 +10,21 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class AdminReviewListItemVo {
+public class AdminReviewThreadItemVo {
 
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     @JsonSerialize(using = ToStringSerializer.class)
-    private Long trailId;
-    private String trailName;
-
-    @JsonSerialize(using = ToStringSerializer.class)
     private Long userId;
+
     private String authorUsername;
     private String avatar;
     private String avatarBg;
     private String avatarMediaUrl;
-    private Integer rating;
     private String text;
     private String status;
-    private String parentText;
     private String moderationReason;
     private LocalDateTime moderatedAt;
-
-    @JsonSerialize(using = ToStringSerializer.class)
-    private Long parentId;
     private LocalDateTime createdAt;
 }

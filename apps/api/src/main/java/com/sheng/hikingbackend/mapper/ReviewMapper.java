@@ -39,6 +39,7 @@ public interface ReviewMapper extends BaseMapper<Review> {
             LEFT JOIN media_files mf ON mf.id = u.avatar_media_id
             WHERE r.trail_id = #{trailId}
               AND r.parent_id IS NULL
+              AND r.status = 'active'
               <if test="cursor != null">
                 AND (
                   r.created_at &lt; (SELECT created_at FROM reviews WHERE id = #{cursor})
@@ -77,6 +78,7 @@ public interface ReviewMapper extends BaseMapper<Review> {
             JOIN users u ON u.id = r.user_id
             LEFT JOIN media_files mf ON mf.id = u.avatar_media_id
             WHERE r.trail_id = #{trailId}
+              AND r.status = 'active'
               AND (
                 r.parent_id IN
                 <foreach collection="rootIds" item="rootId" open="(" separator="," close=")">
@@ -105,6 +107,7 @@ public interface ReviewMapper extends BaseMapper<Review> {
             FROM reviews
             WHERE trail_id = #{trailId}
               AND parent_id IS NULL
+              AND status = 'active'
             """)
     TrailReviewStatsVo selectTrailReviewStats(@Param("trailId") Long trailId);
 
@@ -112,13 +115,26 @@ public interface ReviewMapper extends BaseMapper<Review> {
             <script>
             SELECT
               r.id,
+              r.trail_id,
+              r.user_id,
+              r.parent_id,
+              r.rating,
               r.text,
+              r.status,
+              r.moderation_reason,
+              r.moderated_at,
               u.username AS author_username,
+              u.avatar,
+              u.avatar_bg,
+              mf.url AS avatar_media_url,
               t.name AS trail_name,
+              parent.text AS parent_text,
               r.created_at
             FROM reviews r
             JOIN users u ON u.id = r.user_id
+            LEFT JOIN media_files mf ON mf.id = u.avatar_media_id
             LEFT JOIN trails t ON t.id = r.trail_id
+            LEFT JOIN reviews parent ON parent.id = r.parent_id
             <where>
               <if test="query.keyword != null and query.keyword != ''">
                 AND r.text LIKE CONCAT('%', #{query.keyword}, '%')
@@ -129,6 +145,9 @@ public interface ReviewMapper extends BaseMapper<Review> {
               <if test="query.authorKeyword != null and query.authorKeyword != ''">
                 AND u.username LIKE CONCAT('%', #{query.authorKeyword}, '%')
               </if>
+              <if test="query.status != null and query.status != ''">
+                AND r.status = #{query.status}
+              </if>
             </where>
             ORDER BY r.created_at DESC, r.id DESC
             </script>
@@ -136,6 +155,61 @@ public interface ReviewMapper extends BaseMapper<Review> {
     IPage<AdminReviewQueryRow> selectAdminReviewPage(
             Page<AdminReviewQueryRow> page,
             @Param("query") AdminReviewPageRequest query);
+
+    @Select("""
+            SELECT
+              r.id,
+              r.trail_id,
+              r.user_id,
+              r.parent_id,
+              r.rating,
+              r.text,
+              r.status,
+              r.moderation_reason,
+              r.moderated_at,
+              u.username AS author_username,
+              u.avatar,
+              u.avatar_bg,
+              mf.url AS avatar_media_url,
+              t.name AS trail_name,
+              parent.text AS parent_text,
+              r.created_at
+            FROM reviews r
+            JOIN users u ON u.id = r.user_id
+            LEFT JOIN media_files mf ON mf.id = u.avatar_media_id
+            LEFT JOIN trails t ON t.id = r.trail_id
+            LEFT JOIN reviews parent ON parent.id = r.parent_id
+            WHERE r.id = #{reviewId}
+            """)
+    AdminReviewQueryRow selectAdminReviewDetailById(@Param("reviewId") Long reviewId);
+
+    @Select("""
+            SELECT
+              r.id,
+              r.trail_id,
+              r.user_id,
+              r.parent_id,
+              r.rating,
+              r.text,
+              r.status,
+              r.moderation_reason,
+              r.moderated_at,
+              u.username AS author_username,
+              u.avatar,
+              u.avatar_bg,
+              mf.url AS avatar_media_url,
+              t.name AS trail_name,
+              parent.text AS parent_text,
+              r.created_at
+            FROM reviews r
+            JOIN users u ON u.id = r.user_id
+            LEFT JOIN media_files mf ON mf.id = u.avatar_media_id
+            LEFT JOIN trails t ON t.id = r.trail_id
+            LEFT JOIN reviews parent ON parent.id = r.parent_id
+            WHERE r.parent_id = #{parentId}
+            ORDER BY r.created_at ASC, r.id ASC
+            """)
+    List<AdminReviewQueryRow> selectAdminReviewRepliesByParentId(@Param("parentId") Long parentId);
 
     @Select("SELECT COUNT(*) FROM reviews")
     long countAllReviews();
