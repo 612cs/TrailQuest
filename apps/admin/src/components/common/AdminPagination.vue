@@ -26,10 +26,7 @@ const summary = computed(() => `第 ${props.current} 页 / 共 ${props.totalPage
       :current="props.current"
       :total="props.totalPages"
       :max-visible="5"
-      :style="{
-        '--pagination-active-bg': 'var(--primary)',
-        '--pagination-active-text': '#fff'
-      }"
+      class="admin-pagination__inner"
       @update:current="emit('update:current', $event)"
     />
   </div>
@@ -42,6 +39,11 @@ const summary = computed(() => `第 ${props.current} 页 / 共 ${props.totalPage
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.admin-pagination :deep(.shared-pagination) {
+  --pagination-active-bg: var(--primary);
+  --pagination-active-text: #fff;
 }
 
 @media (max-width: 720px) {
