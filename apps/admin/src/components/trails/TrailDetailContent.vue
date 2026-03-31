@@ -1,22 +1,49 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue'
 import { Clock3, MapPinned, Mountain, Tag } from 'lucide-vue-next'
+
+import ImagePreviewModal from '@trailquest/ui/components/ImagePreviewModal.vue'
 
 import StatusBadge from '../common/StatusBadge.vue'
 import type { AdminTrailDetail } from '../../types/admin'
 import { formatDateTime } from '../../utils/format'
 
-defineProps<{
+const props = defineProps<{
   detail: AdminTrailDetail
 }>()
+
+const previewVisible = ref(false)
+const previewIndex = ref(0)
+
+const previewImages = computed(() => {
+  const candidates = [
+    props.detail.image,
+    ...props.detail.gallery.map((item) => item.url),
+  ].filter((value): value is string => Boolean(value))
+
+  return Array.from(new Set(candidates))
+})
+
+function openPreviewByUrl(url: string) {
+  const index = previewImages.value.findIndex((item) => item === url)
+  previewIndex.value = index >= 0 ? index : 0
+  previewVisible.value = true
+}
 </script>
 
 <template>
   <div class="admin-detail-layout">
     <article class="admin-detail-hero">
-      <div class="admin-detail-hero__image">
+      <button
+        class="admin-detail-hero__image"
+        :class="{ 'admin-detail-hero__image--clickable': previewImages.length > 0 }"
+        type="button"
+        :disabled="previewImages.length === 0"
+        @click="detail.image && openPreviewByUrl(detail.image)"
+      >
         <img v-if="detail.image" :src="detail.image" :alt="detail.name" />
         <div v-else class="admin-detail-hero__placeholder">TrailQuest</div>
-      </div>
+      </button>
 
       <div class="admin-detail-hero__content">
         <div class="admin-detail-hero__top">
@@ -88,10 +115,26 @@ defineProps<{
     <section class="admin-card admin-detail-card">
       <h3>相册</h3>
       <div v-if="detail.gallery.length" class="admin-detail-gallery">
-        <img v-for="item in detail.gallery" :key="item.url" :src="item.url" :alt="detail.name" />
+        <button
+          v-for="item in detail.gallery"
+          :key="item.url"
+          class="admin-detail-gallery__item"
+          type="button"
+          @click="openPreviewByUrl(item.url)"
+        >
+          <img :src="item.url" :alt="detail.name" />
+        </button>
       </div>
       <div v-else class="admin-detail-track-empty">暂无相册图片。</div>
     </section>
+
+    <ImagePreviewModal
+      :show="previewVisible"
+      :images="previewImages"
+      :initial-index="previewIndex"
+      @update:show="previewVisible = $event"
+      @close="previewVisible = false"
+    />
   </div>
 </template>
 
@@ -112,10 +155,17 @@ defineProps<{
 }
 
 .admin-detail-hero__image {
+  padding: 0;
+  border: 0;
   min-height: 220px;
   overflow: hidden;
   border-radius: 20px;
   background: var(--bg-elevated);
+}
+
+.admin-detail-hero__image--clickable,
+.admin-detail-gallery__item {
+  cursor: zoom-in;
 }
 
 .admin-detail-hero__image img,
@@ -211,6 +261,13 @@ defineProps<{
   gap: 0.8rem;
 }
 
+.admin-detail-gallery__item {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.admin-detail-gallery__item img,
 .admin-detail-gallery img {
   width: 100%;
   height: 180px;

@@ -57,8 +57,10 @@ function openDetail(id: string | number) {
 
 <style scoped>
 .admin-table-wrap {
-  margin-top: 1rem;
   overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .admin-table-row {

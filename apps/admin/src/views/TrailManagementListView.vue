@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { RefreshCcw, Search } from 'lucide-vue-next'
 
+import AdminPagination from '../components/common/AdminPagination.vue'
 import EmptyState from '../components/common/EmptyState.vue'
 import TrailManagementTable from '../components/trails/TrailManagementTable.vue'
 import { useTrailManagementList } from '../composables/useTrailManagementList'
@@ -20,7 +21,6 @@ const {
   totalPages,
   load,
   resetFilters,
-  changePage,
 } = useTrailManagementList()
 
 function openDetail(id: string) {
@@ -34,98 +34,95 @@ onMounted(() => {
 
 <template>
   <section class="admin-card admin-section">
-    <div class="admin-list-header">
-      <div>
-        <h2 class="admin-title">路线管理</h2>
-        <p class="admin-subtitle">管理已进入系统的路线，支持下架与恢复公开展示。</p>
-      </div>
-      <button class="admin-button admin-button-secondary" type="button" @click="load()">
-        <RefreshCcw :size="16" :stroke-width="2" />
-        刷新
-      </button>
-    </div>
-
-    <div class="admin-list-filters admin-grid-3">
-      <label>
-        <span>展示状态</span>
-        <select v-model="status" class="admin-select" @change="load(1)">
+    <div class="admin-list-toolbar">
+      <select v-model="status" class="admin-select" aria-label="展示状态" @change="load(1)">
           <option value="">全部</option>
           <option value="active">正常</option>
           <option value="deleted">已下架</option>
-        </select>
-      </label>
-      <label>
-        <span>关键词</span>
-        <input v-model="keyword" class="admin-input" placeholder="路线名称 / 地点" @keyup.enter="load(1)" />
-      </label>
-      <label>
-        <span>作者</span>
-        <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" @keyup.enter="load(1)" />
-      </label>
-    </div>
-
-    <div class="admin-list-actions">
-      <button class="admin-button admin-button-primary" type="button" @click="load(1)">
-        <Search :size="16" :stroke-width="2" />
-        搜索
-      </button>
-      <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
-    </div>
-
-    <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
-
-    <TrailManagementTable v-if="list.length" :items="list" @open="openDetail" />
-
-    <div v-else class="admin-empty-wrap">
-      <div v-if="loading" class="admin-muted">正在加载路线管理列表...</div>
-      <EmptyState
-        v-else
-        title="暂无路线数据"
-        description="当前筛选条件下没有匹配的路线。"
-      />
-    </div>
-
-    <div class="admin-pagination">
-      <span class="admin-muted">第 {{ pageNum }} 页 / 共 {{ totalPages }} 页，共 {{ total }} 条</span>
-      <div class="admin-pagination__actions">
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum <= 1 || loading" @click="changePage(-1)">上一页</button>
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum >= totalPages || loading" @click="changePage(1)">下一页</button>
+      </select>
+      <input v-model="keyword" class="admin-input" placeholder="路线名称 / 地点" aria-label="关键词" @keyup.enter="load(1)" />
+      <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" aria-label="作者" @keyup.enter="load(1)" />
+      <div class="admin-list-toolbar__actions">
+        <button class="admin-button admin-button-primary" type="button" @click="load(1)">
+          <Search :size="16" :stroke-width="2" />
+          搜索
+        </button>
+        <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+        <button class="admin-button admin-button-secondary" type="button" @click="load()">
+          <RefreshCcw :size="16" :stroke-width="2" />
+          刷新
+        </button>
       </div>
+    </div>
+
+    <div class="admin-list-body">
+      <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
+
+      <TrailManagementTable v-if="list.length" :items="list" @open="openDetail" />
+
+      <div v-else class="admin-empty-wrap">
+        <div v-if="loading" class="admin-muted">正在加载路线管理列表...</div>
+        <EmptyState
+          v-else
+          title="暂无路线数据"
+          description="当前筛选条件下没有匹配的路线。"
+        />
+      </div>
+
+      <AdminPagination
+        :current="pageNum"
+        :total-pages="totalPages"
+        :total-items="total"
+        @update:current="load"
+      />
     </div>
   </section>
 </template>
 
 <style scoped>
-.admin-list-header,
-.admin-list-actions,
-.admin-pagination {
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-list-toolbar,
+.admin-list-toolbar__actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.admin-list-filters {
+.admin-list-toolbar {
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.admin-list-toolbar > .admin-input,
+.admin-list-toolbar > .admin-select {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.admin-list-toolbar__actions {
+  flex: 0 0 auto;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.admin-list-body {
+  flex: 1;
+  min-height: 0;
   margin-top: 1rem;
-}
-
-.admin-list-filters label {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.admin-list-filters span {
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-.admin-list-actions {
-  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .admin-list-error {
-  margin-top: 1rem;
   border-radius: 16px;
   padding: 0.85rem 1rem;
   color: var(--danger);
@@ -134,15 +131,20 @@ onMounted(() => {
 }
 
 .admin-empty-wrap {
-  margin-top: 1rem;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
 }
 
-.admin-pagination {
-  margin-top: 1rem;
-}
+@media (max-width: 1200px) {
+  .admin-list-toolbar {
+    flex-wrap: wrap;
+  }
 
-.admin-pagination__actions {
-  display: flex;
-  gap: 0.6rem;
+  .admin-list-toolbar__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 </style>

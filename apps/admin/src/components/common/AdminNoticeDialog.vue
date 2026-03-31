@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ModalShell from '@trailquest/ui/components/ModalShell.vue'
+
 const props = withDefaults(defineProps<{
   show: boolean
   title?: string
@@ -21,52 +23,37 @@ function handleClose() {
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition name="admin-dialog">
-      <div v-if="props.show" class="admin-dialog">
-        <div class="admin-dialog__backdrop" @click="handleClose" />
-        <section class="admin-dialog__panel admin-card" role="dialog" aria-modal="true" :aria-label="props.title">
-          <header class="admin-dialog__header">
-            <h3>{{ props.title }}</h3>
-          </header>
-          <div class="admin-dialog__body">
-            <p>{{ props.message }}</p>
-          </div>
-          <footer class="admin-dialog__footer">
-            <button class="admin-button admin-button-primary" type="button" @click="handleClose">
-              {{ props.buttonText }}
-            </button>
-          </footer>
-        </section>
+  <ModalShell
+    :show="props.show"
+    :aria-label="props.title"
+    :panel-style="{ width: 'min(460px, 100%)', borderRadius: '24px' }"
+    :header-style="{ padding: '1.2rem 1.2rem 0', display: 'flex', alignItems: 'center' }"
+    :body-style="{ padding: '0.8rem 1.2rem 0' }"
+    :footer-style="{ padding: '1rem 1.2rem 1.2rem' }"
+    @update:show="emit('update:show', $event)"
+    @close="emit('close')"
+  >
+    <template #header>
+      <div class="admin-dialog__header">
+        <h3>{{ props.title }}</h3>
       </div>
-    </Transition>
-  </Teleport>
+    </template>
+
+    <div class="admin-dialog__body">
+      <p>{{ props.message }}</p>
+    </div>
+
+    <template #footer>
+      <div class="admin-dialog__footer">
+        <button class="admin-button admin-button-primary" type="button" @click="handleClose">
+          {{ props.buttonText }}
+        </button>
+      </div>
+    </template>
+  </ModalShell>
 </template>
 
 <style scoped>
-.admin-dialog {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  display: grid;
-  place-items: center;
-  padding: 1.5rem;
-}
-
-.admin-dialog__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(8, 12, 9, 0.48);
-  backdrop-filter: blur(6px);
-}
-
-.admin-dialog__panel {
-  position: relative;
-  width: min(460px, 100%);
-  padding: 1.2rem;
-  border-radius: 24px;
-}
-
 .admin-dialog__header h3 {
   margin: 0;
   color: var(--text-strong);
@@ -89,27 +76,5 @@ function handleClose() {
 .admin-dialog__footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 1rem;
-}
-
-.admin-dialog-enter-active,
-.admin-dialog-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.admin-dialog-enter-active .admin-dialog__panel,
-.admin-dialog-leave-active .admin-dialog__panel {
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.admin-dialog-enter-from,
-.admin-dialog-leave-to {
-  opacity: 0;
-}
-
-.admin-dialog-enter-from .admin-dialog__panel,
-.admin-dialog-leave-to .admin-dialog__panel {
-  opacity: 0;
-  transform: translateY(10px) scale(0.98);
 }
 </style>

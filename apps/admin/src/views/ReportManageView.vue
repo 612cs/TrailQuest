@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { FlagTriangleRight, RefreshCcw, CheckCheck } from 'lucide-vue-next'
 
 import { fetchAdminReports, resolveReport } from '../api/admin'
+import AdminPagination from '../components/common/AdminPagination.vue'
 import EmptyState from '../components/common/EmptyState.vue'
 import StatusBadge from '../components/common/StatusBadge.vue'
 import type { AdminReportListItem } from '../types/admin'
@@ -32,15 +33,6 @@ async function load(page = pageNum.value) {
   }
 }
 
-function changePage(delta: number) {
-  const next = pageNum.value + delta
-  const totalPages = Math.max(1, Math.ceil(total.value / pageSize.value))
-  if (next < 1 || next > totalPages) {
-    return
-  }
-  load(next)
-}
-
 async function handleResolve(id: string | number) {
   actionLoading.value = true
   errorMessage.value = ''
@@ -59,77 +51,94 @@ onMounted(load)
 
 <template>
   <section class="admin-card admin-section">
-    <div class="admin-list-header">
-      <div>
-        <h2 class="admin-title">举报处理</h2>
-        <p class="admin-subtitle">当前举报入口仍在前台接入中，后台先保留治理入口与空态。</p>
-      </div>
+    <div class="admin-list-toolbar admin-list-toolbar--single">
+      <div class="admin-muted">当前举报入口仍在前台接入中，先保留治理入口。</div>
       <button class="admin-button admin-button-secondary" type="button" @click="load()">
         <RefreshCcw :size="16" :stroke-width="2" />
         刷新
       </button>
     </div>
 
-    <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
+    <div class="admin-list-body">
+      <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
 
-    <div v-if="list.length" class="admin-table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>对象类型</th>
-            <th>对象 ID</th>
-            <th>状态</th>
-            <th>原因</th>
-            <th>时间</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in list" :key="item.id">
-            <td>{{ item.targetType }}</td>
-            <td>{{ item.targetId }}</td>
-            <td><StatusBadge :status="item.status" /></td>
-            <td>{{ item.reason }}</td>
-            <td>{{ formatDateTime(item.createdAt) }}</td>
-            <td>
-              <button class="admin-button admin-button-secondary" type="button" :disabled="actionLoading" @click="handleResolve(item.id)">
-                <CheckCheck :size="16" :stroke-width="2" />
-                处理
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <EmptyState
-      v-else
-      title="暂未接入前台举报来源"
-      description="当前版本先预留后台治理入口，等前台举报链路上线后再接入真实数据。"
-      :icon="FlagTriangleRight"
-    />
-
-    <div class="admin-pagination">
-      <span class="admin-muted">第 {{ pageNum }} 页 / 共 {{ Math.max(1, Math.ceil(total / pageSize)) }} 页，共 {{ total }} 条</span>
-      <div class="admin-pagination__actions">
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum <= 1 || loading" @click="changePage(-1)">上一页</button>
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum >= Math.ceil(total / pageSize) || loading" @click="changePage(1)">下一页</button>
+      <div v-if="list.length" class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>对象类型</th>
+              <th>对象 ID</th>
+              <th>状态</th>
+              <th>原因</th>
+              <th>时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in list" :key="item.id">
+              <td>{{ item.targetType }}</td>
+              <td>{{ item.targetId }}</td>
+              <td><StatusBadge :status="item.status" /></td>
+              <td>{{ item.reason }}</td>
+              <td>{{ formatDateTime(item.createdAt) }}</td>
+              <td>
+                <button class="admin-button admin-button-secondary" type="button" :disabled="actionLoading" @click="handleResolve(item.id)">
+                  <CheckCheck :size="16" :stroke-width="2" />
+                  处理
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
+      <EmptyState
+        v-else
+        title="暂未接入前台举报来源"
+        description="当前版本先预留后台治理入口，等前台举报链路上线后再接入真实数据。"
+        :icon="FlagTriangleRight"
+      />
+
+      <AdminPagination
+        :current="pageNum"
+        :total-pages="Math.max(1, Math.ceil(total / pageSize))"
+        :total-items="total"
+        @update:current="load"
+      />
     </div>
   </section>
 </template>
 
 <style scoped>
-.admin-list-header,
-.admin-pagination {
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-list-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.admin-list-error {
+.admin-list-toolbar--single {
+  flex-wrap: wrap;
+}
+
+.admin-list-body {
+  flex: 1;
+  min-height: 0;
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-list-error {
   border-radius: 16px;
   padding: 0.85rem 1rem;
   color: var(--danger);
@@ -138,16 +147,10 @@ onMounted(load)
 }
 
 .admin-table-wrap {
-  margin-top: 1rem;
+  flex: 1;
+  min-height: 0;
   overflow-x: auto;
+  overflow-y: auto;
 }
 
-.admin-pagination {
-  margin-top: 1rem;
-}
-
-.admin-pagination__actions {
-  display: flex;
-  gap: 0.6rem;
-}
 </style>

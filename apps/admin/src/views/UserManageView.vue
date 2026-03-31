@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { RefreshCcw, Search, UsersRound } from 'lucide-vue-next'
 
+import AdminPagination from '../components/common/AdminPagination.vue'
 import AdminConfirmDialog from '../components/common/AdminConfirmDialog.vue'
 import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
 import EmptyState from '../components/common/EmptyState.vue'
@@ -21,7 +22,6 @@ const {
   totalPages,
   load,
   resetFilters,
-  changePage,
   banUser,
   unbanUser,
 } = useUserManagement()
@@ -86,63 +86,51 @@ onMounted(() => {
 
 <template>
   <section class="admin-card admin-section">
-    <div class="admin-list-header">
-      <div>
-        <h2 class="admin-title">用户管理</h2>
-        <p class="admin-subtitle">查看账号状态、封禁时间与基础活跃度，并支持封禁与解封。</p>
-      </div>
-      <button class="admin-button admin-button-secondary" type="button" @click="load()">
-        <RefreshCcw :size="16" :stroke-width="2" />
-        刷新
-      </button>
-    </div>
-
-    <div class="admin-list-filters admin-grid-2">
-      <label>
-        <span>关键词</span>
-        <input v-model="keyword" class="admin-input" placeholder="用户名、邮箱或所在地" @keyup.enter="load(1)" />
-      </label>
-      <label>
-        <span>角色</span>
-        <select v-model="role" class="admin-select" @change="load(1)">
+    <div class="admin-list-toolbar">
+      <input v-model="keyword" class="admin-input" placeholder="用户名、邮箱或所在地" aria-label="关键词" @keyup.enter="load(1)" />
+      <select v-model="role" class="admin-select" aria-label="角色" @change="load(1)">
           <option value="">全部角色</option>
           <option value="USER">普通用户</option>
           <option value="ADMIN">管理员</option>
-        </select>
-      </label>
-    </div>
-
-    <div class="admin-list-actions">
-      <button class="admin-button admin-button-primary" type="button" @click="load(1)">
-        <Search :size="16" :stroke-width="2" />
-        搜索
-      </button>
-      <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
-    </div>
-
-    <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
-
-    <UserManagementTable
-      v-if="list.length"
-      :items="list"
-      :action-loading="actionLoading"
-      @ban="openBanDialog"
-      @unban="openUnbanDialog"
-    />
-
-    <EmptyState
-      v-else-if="!loading"
-      title="暂无用户数据"
-      description="当前筛选条件下没有匹配的用户。"
-      :icon="UsersRound"
-    />
-
-    <div class="admin-pagination">
-      <span class="admin-muted">第 {{ pageNum }} 页 / 共 {{ totalPages }} 页，共 {{ total }} 位用户</span>
-      <div class="admin-pagination__actions">
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum <= 1 || loading" @click="changePage(-1)">上一页</button>
-        <button class="admin-button admin-button-secondary" type="button" :disabled="pageNum >= totalPages || loading" @click="changePage(1)">下一页</button>
+      </select>
+      <div class="admin-list-toolbar__actions">
+        <button class="admin-button admin-button-primary" type="button" @click="load(1)">
+          <Search :size="16" :stroke-width="2" />
+          搜索
+        </button>
+        <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
+        <button class="admin-button admin-button-secondary" type="button" @click="load()">
+          <RefreshCcw :size="16" :stroke-width="2" />
+          刷新
+        </button>
       </div>
+    </div>
+
+    <div class="admin-list-body">
+      <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
+
+      <UserManagementTable
+        v-if="list.length"
+        :items="list"
+        :action-loading="actionLoading"
+        @ban="openBanDialog"
+        @unban="openUnbanDialog"
+      />
+
+      <EmptyState
+        v-else-if="!loading"
+        title="暂无用户数据"
+        description="当前筛选条件下没有匹配的用户。"
+        :icon="UsersRound"
+      />
+
+      <AdminPagination
+        :current="pageNum"
+        :total-pages="totalPages"
+        :total-items="total"
+        item-label="位用户"
+        @update:current="load"
+      />
     </div>
 
     <AdminConfirmDialog
@@ -175,36 +163,49 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.admin-list-header,
-.admin-list-actions,
-.admin-pagination {
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-list-toolbar,
+.admin-list-toolbar__actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.admin-list-filters {
+.admin-list-toolbar {
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.admin-list-toolbar > .admin-input,
+.admin-list-toolbar > .admin-select {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.admin-list-toolbar__actions {
+  flex: 0 0 auto;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.admin-list-body {
+  flex: 1;
+  min-height: 0;
   margin-top: 1rem;
-}
-
-.admin-list-filters label {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.admin-list-filters span {
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-.admin-list-actions {
-  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .admin-list-error {
-  margin-top: 1rem;
   border-radius: 16px;
   padding: 0.85rem 1rem;
   color: var(--danger);
@@ -212,12 +213,15 @@ onMounted(() => {
   border: 1px solid rgba(181, 68, 68, 0.16);
 }
 
-.admin-pagination {
-  margin-top: 1rem;
+@media (max-width: 1200px) {
+  .admin-list-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .admin-list-toolbar__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 
-.admin-pagination__actions {
-  display: flex;
-  gap: 0.6rem;
-}
 </style>
