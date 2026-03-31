@@ -143,3 +143,46 @@ export interface AdminHomeHeroSetting {
   usingDefault: boolean
   updatedAt?: string | null
 }
+
+export interface AdminOptionGroup {
+  groupCode: string
+  groupName: string
+  description?: string | null
+  status: 'active' | 'inactive' | string
+  itemCount: number
+  allowCreate: boolean
+}
+
+export interface AdminOptionItem {
+  id: string | number
+  code: string
+  label: string
+  subLabel?: string | null
+  description?: string | null
+  icon?: string | null
+  sort: number
+  enabled: boolean
+  builtin: boolean
+  extra: Record<string, unknown>
+}
+
+export interface AdminCreateOptionItemRequest {
+  itemCode: string
+  itemLabel: string
+  itemSubLabel?: string | null
+  description?: string | null
+  iconName?: string | null
+  sortOrder: number
+  enabled: boolean
+  extra?: Record<string, unknown>
+}
+
+export interface AdminUpdateOptionItemRequest {
+  itemLabel: string
+  itemSubLabel?: string | null
+  description?: string | null
+  iconName?: string | null
+  sortOrder: number
+  enabled: boolean
+  extra?: Record<string, unknown>
+}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
+import { useRouter } from 'vue-router'
 import { LoaderCircle, MoonStar, RefreshCcw, SunMedium, Upload, UserCircle2, Settings2 } from 'lucide-vue-next'
 
 import { fetchAdminHomeHeroSetting, updateAdminHomeHeroSetting } from '../api/admin'
@@ -11,6 +12,7 @@ import { mediaUrlOf, resolveUploadErrorMessage, uploadAdminImage } from '../util
 
 const authStore = useAdminAuthStore(pinia)
 const themeStore = useThemeStore(pinia)
+const router = useRouter()
 
 const user = computed(() => authStore.user)
 const heroImageUrl = ref('')
@@ -131,6 +133,20 @@ onMounted(() => {
         <Settings2 :size="18" :stroke-width="2" />
         <span>当前版本聚焦路线审核、评论治理与举报占位。</span>
       </div>
+    </section>
+
+    <section class="admin-card admin-section">
+      <h2 class="admin-title">配置中心</h2>
+      <p class="admin-subtitle">统一管理首页活动入口、搜索筛选项和徒步画像展示项。</p>
+
+      <div class="admin-setting-note">
+        <Settings2 :size="18" :stroke-width="2" />
+        <span>支持调整展示名称、图标、排序和启用状态，不改变底层语义 code。</span>
+      </div>
+
+      <button class="admin-button admin-button-primary admin-setting-theme" type="button" @click="router.push({ name: 'config-center' })">
+        进入配置中心
+      </button>
     </section>
 
     <section class="admin-card admin-section admin-grid-2 admin-setting-hero">

@@ -3,6 +3,9 @@ import type {
   AdminBanUserRequest,
   AdminDashboardSummary,
   AdminHomeHeroSetting,
+  AdminCreateOptionItemRequest,
+  AdminOptionGroup,
+  AdminOptionItem,
   AdminReportListItem,
   AdminReportPageQuery,
   AdminReviewListItem,
@@ -12,6 +15,7 @@ import type {
   AdminTrailListItem,
   AdminTrailManagementPageQuery,
   AdminTrailPageQuery,
+  AdminUpdateOptionItemRequest,
   AdminUserListItem,
   AdminUserPageQuery,
 } from '../types/admin'
@@ -105,4 +109,20 @@ export function fetchAdminHomeHeroSetting() {
 
 export function updateAdminHomeHeroSetting(payload: { imageUrl?: string | null }) {
   return http.post<void>('/api/admin/settings/home-hero', payload)
+}
+
+export function fetchAdminOptionGroups() {
+  return http.get<AdminOptionGroup[]>('/api/admin/config/groups')
+}
+
+export function fetchAdminOptionGroupItems(groupCode: string) {
+  return http.get<AdminOptionItem[]>(`/api/admin/config/groups/${groupCode}/items`)
+}
+
+export function createAdminOptionItem(groupCode: string, payload: AdminCreateOptionItemRequest) {
+  return http.post<AdminOptionItem>(`/api/admin/config/groups/${groupCode}/items`, payload)
+}
+
+export function updateAdminOptionItem(groupCode: string, itemId: string | number, payload: AdminUpdateOptionItemRequest) {
+  return http.put<AdminOptionItem>(`/api/admin/config/groups/${groupCode}/items/${itemId}`, payload)
 }

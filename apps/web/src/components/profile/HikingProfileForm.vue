@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { computed, onMounted } from 'vue'
+
 import BaseIcon from '../common/BaseIcon.vue'
+import { useOptionConfigStore } from '../../stores/useOptionConfigStore'
 import type { HikingProfileFormValue } from '../../types/hikingProfile'
 
 const props = withDefaults(defineProps<{
@@ -13,23 +16,29 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: HikingProfileFormValue): void
 }>()
 
-const experienceOptions = [
+const DEFAULT_EXPERIENCE_OPTIONS = [
   { value: 'beginner', label: '新手', icon: 'Sprout' },
   { value: 'intermediate', label: '进阶', icon: 'Mountain' },
   { value: 'expert', label: '老驴', icon: 'Compass' },
 ] as const
 
-const trailStyleOptions = [
+const DEFAULT_TRAIL_STYLE_OPTIONS = [
   { value: 'city_weekend', label: '城市周边', icon: 'Trees' },
   { value: 'long_distance', label: '长线徒步', icon: 'Map' },
   { value: 'both', label: '都走', icon: 'Route' },
 ] as const
 
-const packPreferenceOptions = [
+const DEFAULT_PACK_PREFERENCE_OPTIONS = [
   { value: 'light', label: '轻装', icon: 'Backpack' },
   { value: 'heavy', label: '重装', icon: 'Package2' },
   { value: 'both', label: '都可以', icon: 'Scale' },
 ] as const
+
+const optionConfigStore = useOptionConfigStore()
+
+const experienceOptions = computed(() => resolveOptions('hiking_experience_level', DEFAULT_EXPERIENCE_OPTIONS))
+const trailStyleOptions = computed(() => resolveOptions('hiking_trail_style', DEFAULT_TRAIL_STYLE_OPTIONS))
+const packPreferenceOptions = computed(() => resolveOptions('hiking_pack_preference', DEFAULT_PACK_PREFERENCE_OPTIONS))
 
 function patchValue<K extends keyof HikingProfileFormValue>(key: K, value: HikingProfileFormValue[K]) {
   emit('update:modelValue', {
@@ -37,6 +46,32 @@ function patchValue<K extends keyof HikingProfileFormValue>(key: K, value: Hikin
     [key]: value,
   })
 }
+
+function resolveOptions(
+  groupCode: string,
+  fallback: ReadonlyArray<{ value: string; label: string; icon: string }>,
+) {
+  return optionConfigStore.getGroup(groupCode, fallback.map((item, index) => ({
+    code: item.value,
+    label: item.label,
+    icon: item.icon,
+    sort: index + 1,
+    enabled: true,
+    extra: {},
+  }))).map((item) => ({
+    value: item.code,
+    label: item.label,
+    icon: item.icon || 'Footprints',
+  }))
+}
+
+onMounted(() => {
+  void optionConfigStore.ensureGroups([
+    'hiking_experience_level',
+    'hiking_trail_style',
+    'hiking_pack_preference',
+  ])
+})
 </script>
 
 <template>
@@ -55,7 +90,7 @@ function patchValue<K extends keyof HikingProfileFormValue>(key: K, value: Hikin
           :style="modelValue.experienceLevel === option.value
             ? 'border-color: var(--color-primary-500); background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--color-primary-500);'
             : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-secondary);'"
-          @click="patchValue('experienceLevel', option.value)"
+          @click="patchValue('experienceLevel', option.value as HikingProfileFormValue['experienceLevel'])"
         >
           <BaseIcon :name="option.icon" :size="16" class="mb-2" />
           <span class="block">{{ option.label }}</span>
@@ -77,7 +112,7 @@ function patchValue<K extends keyof HikingProfileFormValue>(key: K, value: Hikin
           :style="modelValue.trailStyle === option.value
             ? 'border-color: var(--color-primary-500); background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--color-primary-500);'
             : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-secondary);'"
-          @click="patchValue('trailStyle', option.value)"
+          @click="patchValue('trailStyle', option.value as HikingProfileFormValue['trailStyle'])"
         >
           <BaseIcon :name="option.icon" :size="16" class="mb-2" />
           <span class="block">{{ option.label }}</span>
@@ -99,7 +134,7 @@ function patchValue<K extends keyof HikingProfileFormValue>(key: K, value: Hikin
           :style="modelValue.packPreference === option.value
             ? 'border-color: var(--color-primary-500); background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--color-primary-500);'
             : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-secondary);'"
-          @click="patchValue('packPreference', option.value)"
+          @click="patchValue('packPreference', option.value as HikingProfileFormValue['packPreference'])"
         >
           <BaseIcon :name="option.icon" :size="16" class="mb-2" />
           <span class="block">{{ option.label }}</span>

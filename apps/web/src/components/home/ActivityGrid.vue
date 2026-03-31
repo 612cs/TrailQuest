@@ -1,14 +1,38 @@
 <script setup lang="ts">
-import BaseIcon from '../common/BaseIcon.vue'
+import { computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-const activities = [
-  { name: '徒步', icon: 'Footprints' },
-  { name: '跑步', icon: 'Activity' },
-  { name: '骑行', icon: 'Bike' },
-  { name: '宠物友好', icon: 'PawPrint' },
-  { name: '背包客', icon: 'Backpack' },
-  { name: '轮椅友好', icon: 'Accessibility' },
-]
+import BaseIcon from '../common/BaseIcon.vue'
+import { useOptionConfigStore } from '../../stores/useOptionConfigStore'
+
+const DEFAULT_ACTIVITIES = [
+  { code: 'hiking', label: '徒步', icon: 'Footprints', extra: { query: '徒步' }, sort: 1, enabled: true },
+  { code: 'running', label: '跑步', icon: 'Activity', extra: { query: '跑步' }, sort: 2, enabled: true },
+  { code: 'cycling', label: '骑行', icon: 'Bike', extra: { query: '骑行' }, sort: 3, enabled: true },
+  { code: 'pet_friendly', label: '宠物友好', icon: 'PawPrint', extra: { query: '宠物友好' }, sort: 4, enabled: true },
+  { code: 'backpacking', label: '背包客', icon: 'Backpack', extra: { query: '背包客' }, sort: 5, enabled: true },
+  { code: 'wheelchair_friendly', label: '轮椅友好', icon: 'Accessibility', extra: { query: '轮椅友好' }, sort: 6, enabled: true },
+] as const
+
+const router = useRouter()
+const optionConfigStore = useOptionConfigStore()
+
+const activities = computed(() => optionConfigStore.getGroup('home_activity', [...DEFAULT_ACTIVITIES])
+  .filter((item) => item.enabled !== false)
+  .map((item) => ({
+    code: item.code,
+    name: item.label,
+    icon: item.icon || 'Footprints',
+    query: typeof item.extra?.query === 'string' ? item.extra.query : item.label,
+  })))
+
+function handleActivityClick(query: string) {
+  void router.push({ path: '/search', query: { q: query } })
+}
+
+onMounted(() => {
+  void optionConfigStore.ensureGroups(['home_activity'])
+})
 </script>
 
 <template>
@@ -18,9 +42,10 @@ const activities = [
       <div class="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
         <button
           v-for="(activity, i) in activities"
-          :key="activity.name"
+          :key="activity.code"
           class="card card-hover flex flex-col items-center justify-center gap-2 py-5 sm:py-6 px-3 animate-fade-in-up"
           :class="`stagger-${i + 1}`"
+          @click="handleActivityClick(activity.query)"
         >
           <div class="text-primary-500">
             <BaseIcon :name="activity.icon" :size="32" />

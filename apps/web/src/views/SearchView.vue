@@ -7,6 +7,7 @@ import ViewToggle from '../components/search/ViewToggle.vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import TrailHorizontalCard from '../components/trail/TrailHorizontalCard.vue'
 import { fetchTrails } from '../api/trails'
+import { useOptionConfigStore } from '../stores/useOptionConfigStore'
 import { useTrailFeedRefreshStore } from '../stores/useTrailFeedRefreshStore'
 import { useTrailInteractionStore } from '../stores/useTrailInteractionStore'
 import type { TrailListItem } from '../types/trail'
@@ -21,6 +22,7 @@ const errorMessage = ref('')
 const trails = ref<TrailListItem[]>([])
 const trailInteractionStore = useTrailInteractionStore()
 const trailFeedRefreshStore = useTrailFeedRefreshStore()
+const optionConfigStore = useOptionConfigStore()
 
 const filterModel = ref<Record<string, string>>({
   difficulty: 'all',
@@ -49,52 +51,62 @@ onMounted(() => {
     isInitialLoad.value = false
   }, 1000)
 
+  void optionConfigStore.ensureGroups([
+    'search_difficulty',
+    'search_distance',
+    'search_pack_type',
+    'search_duration_type',
+  ])
+
   if (route.query.q === undefined) {
     void loadTrails()
   }
 })
 
-const filters: FilterItem[] = [
+const DEFAULT_FILTERS: Record<string, Array<{ label: string; value: string }>> = {
+  search_difficulty: [
+    { label: '简单', value: 'easy' },
+    { label: '适中', value: 'moderate' },
+    { label: '困难', value: 'hard' },
+  ],
+  search_distance: [
+    { label: '5km以内', value: 'short' },
+    { label: '5-10km', value: 'medium' },
+    { label: '10km以上', value: 'long' },
+  ],
+  search_pack_type: [
+    { label: '轻装', value: 'light' },
+    { label: '重装', value: 'heavy' },
+    { label: '轻重皆可', value: 'both' },
+  ],
+  search_duration_type: [
+    { label: '单日', value: 'single_day' },
+    { label: '多日', value: 'multi_day' },
+  ],
+}
+
+const filters = computed<FilterItem[]>(() => [
   {
     key: 'difficulty',
     label: '难度',
-    options: [
-      { label: '全部难度', value: 'all' },
-      { label: '简单', value: 'easy' },
-      { label: '适中', value: 'moderate' },
-      { label: '困难', value: 'hard' }
-    ]
+    options: [{ label: '全部难度', value: 'all' }, ...resolveConfigOptions('search_difficulty')],
   },
   {
     key: 'distance',
     label: '路线长度',
-    options: [
-      { label: '全部长度', value: 'all' },
-      { label: '5km以内', value: 'short' },
-      { label: '5-10km', value: 'medium' },
-      { label: '10km以上', value: 'long' }
-    ]
+    options: [{ label: '全部长度', value: 'all' }, ...resolveConfigOptions('search_distance')],
   },
   {
     key: 'packType',
     label: '装备',
-    options: [
-      { label: '全部装备', value: 'all' },
-      { label: '轻装', value: 'light' },
-      { label: '重装', value: 'heavy' },
-      { label: '轻重皆可', value: 'both' }
-    ]
+    options: [{ label: '全部装备', value: 'all' }, ...resolveConfigOptions('search_pack_type')],
   },
   {
     key: 'durationType',
     label: '耗时',
-    options: [
-      { label: '全部时长', value: 'all' },
-      { label: '单日', value: 'single_day' },
-      { label: '多日', value: 'multi_day' }
-    ]
-  }
-]
+    options: [{ label: '全部时长', value: 'all' }, ...resolveConfigOptions('search_duration_type')],
+  },
+])
 
 const handleSearch = () => {
   currentSearchQuery.value = searchInput.value
@@ -150,6 +162,20 @@ async function loadTrails() {
 
 function withAllAsUndefined(value?: string) {
   return !value || value === 'all' ? undefined : value
+}
+
+function resolveConfigOptions(groupCode: keyof typeof DEFAULT_FILTERS) {
+  const fallback = DEFAULT_FILTERS[groupCode] ?? []
+  return optionConfigStore.getGroup(groupCode, fallback.map((item, index) => ({
+    code: item.value,
+    label: item.label,
+    sort: index + 1,
+    enabled: true,
+    extra: {},
+  }))).map((item) => ({
+    label: item.label,
+    value: item.code,
+  }))
 }
 </script>
 
