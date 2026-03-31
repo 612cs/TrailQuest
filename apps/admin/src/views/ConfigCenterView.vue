@@ -244,20 +244,6 @@ onMounted(() => {
 
 <template>
   <section class="admin-section admin-config">
-    <div class="admin-card admin-config__header">
-      <div>
-        <p class="admin-config__eyebrow">TRAILQUEST CONFIG CENTER</p>
-        <h1 class="admin-title">配置中心</h1>
-        <p class="admin-subtitle">独立管理徒步画像、首页活动探索和搜索筛选配置。</p>
-      </div>
-      <div class="admin-config__header-actions">
-        <button class="admin-button admin-button-secondary" type="button" :disabled="loadingGroups || loadingItems" @click="loadGroups">
-          <RefreshCcw :size="16" :stroke-width="2" />
-          刷新
-        </button>
-      </div>
-    </div>
-
     <div class="admin-config__layout">
       <aside class="admin-card admin-config__sidebar">
         <h2 class="admin-title">分类导航</h2>
