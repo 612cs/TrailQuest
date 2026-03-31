@@ -17,16 +17,23 @@ import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.config.CustomUserDetails;
 import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
 import com.sheng.hikingbackend.dto.admin.AdminHomeHeroUpdateRequest;
+import com.sheng.hikingbackend.dto.admin.AdminOperationLogPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
+import com.sheng.hikingbackend.dto.admin.AdminReviewActionRequest;
+import com.sheng.hikingbackend.dto.admin.AdminReviewBatchActionRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.service.AdminService;
+import com.sheng.hikingbackend.service.AdminOperationLogService;
 import com.sheng.hikingbackend.service.AuthService;
 import com.sheng.hikingbackend.service.SiteSettingService;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
+import com.sheng.hikingbackend.vo.admin.AdminOperationLogDetailVo;
+import com.sheng.hikingbackend.vo.admin.AdminOperationLogListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReportListItemVo;
+import com.sheng.hikingbackend.vo.admin.AdminReviewDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailListItemVo;
@@ -45,6 +52,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AdminOperationLogService adminOperationLogService;
     private final AuthService authService;
     private final SiteSettingService siteSettingService;
 
@@ -56,6 +64,16 @@ public class AdminController {
     @GetMapping("/dashboard/summary")
     public ApiResponse<AdminDashboardSummaryVo> summary() {
         return ApiResponse.success(adminService.getDashboardSummary());
+    }
+
+    @GetMapping("/operation-logs")
+    public ApiResponse<PageResponse<AdminOperationLogListItemVo>> pageOperationLogs(@Valid AdminOperationLogPageRequest request) {
+        return ApiResponse.success(adminOperationLogService.pageLogs(request));
+    }
+
+    @GetMapping("/operation-logs/{id}")
+    public ApiResponse<AdminOperationLogDetailVo> operationLogDetail(@PathVariable Long id) {
+        return ApiResponse.success(adminOperationLogService.getLogDetail(id));
     }
 
     @GetMapping("/trails")
@@ -138,10 +156,51 @@ public class AdminController {
         return ApiResponse.success(adminService.pageReviews(request));
     }
 
-    @DeleteMapping("/reviews/{id}")
-    public ApiResponse<Void> deleteReview(@PathVariable Long id) {
-        adminService.deleteReview(id);
-        return ApiResponse.success("评论删除成功", null);
+    @GetMapping("/reviews/{id}")
+    public ApiResponse<AdminReviewDetailVo> reviewDetail(@PathVariable Long id) {
+        return ApiResponse.success(adminService.getReviewDetail(id));
+    }
+
+    @PostMapping("/reviews/{id}/hide")
+    public ApiResponse<Void> hideReview(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody AdminReviewActionRequest request) {
+        adminService.hideReview(id, userDetails.getId(), request);
+        return ApiResponse.success("评论已隐藏", null);
+    }
+
+    @PostMapping("/reviews/{id}/restore")
+    public ApiResponse<Void> restoreReview(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        adminService.restoreReview(id, userDetails.getId());
+        return ApiResponse.success("评论已恢复", null);
+    }
+
+    @PostMapping("/reviews/{id}/delete")
+    public ApiResponse<Void> deleteReview(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody AdminReviewActionRequest request) {
+        adminService.deleteReview(id, userDetails.getId(), request);
+        return ApiResponse.success("评论已删除", null);
+    }
+
+    @PostMapping("/reviews/batch-hide")
+    public ApiResponse<Void> batchHideReviews(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody AdminReviewBatchActionRequest request) {
+        adminService.batchHideReviews(userDetails.getId(), request);
+        return ApiResponse.success("评论已批量隐藏", null);
+    }
+
+    @PostMapping("/reviews/batch-restore")
+    public ApiResponse<Void> batchRestoreReviews(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody AdminReviewBatchActionRequest request) {
+        adminService.batchRestoreReviews(userDetails.getId(), request);
+        return ApiResponse.success("评论已批量恢复", null);
     }
 
     @GetMapping("/reports")
@@ -165,8 +224,10 @@ public class AdminController {
     }
 
     @PostMapping("/reports/{id}/resolve")
-    public ApiResponse<Void> resolveReport(@PathVariable Long id) {
-        adminService.resolveReport(id);
+    public ApiResponse<Void> resolveReport(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        adminService.resolveReport(id, userDetails.getId());
         return ApiResponse.success("举报处理成功", null);
     }
 }

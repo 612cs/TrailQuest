@@ -4,24 +4,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
-import com.sheng.hikingbackend.entity.AdminOperationLog;
 import com.sheng.hikingbackend.entity.Trail;
 import com.sheng.hikingbackend.entity.User;
 import com.sheng.hikingbackend.mapper.AdminOperationLogMapper;
@@ -30,6 +28,7 @@ import com.sheng.hikingbackend.mapper.TrailImageMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.TrailTrackMapper;
 import com.sheng.hikingbackend.mapper.UserMapper;
+import com.sheng.hikingbackend.service.AdminOperationLogService;
 import com.sheng.hikingbackend.service.ReviewService;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +52,8 @@ class AdminServiceImplTest {
     private UserMapper userMapper;
     @Mock
     private AdminOperationLogMapper adminOperationLogMapper;
+    @Mock
+    private AdminOperationLogService adminOperationLogService;
 
     private AdminServiceImpl adminService;
 
@@ -66,7 +67,7 @@ class AdminServiceImplTest {
                 trailTrackMapper,
                 userMapper,
                 adminOperationLogMapper,
-                new ObjectMapper());
+                adminOperationLogService);
     }
 
     @Test
@@ -84,7 +85,16 @@ class AdminServiceImplTest {
         assertEquals(ADMIN_ID, user.getBannedBy());
         assertNotNull(user.getBannedAt());
         verify(userMapper).updateById(user);
-        verify(adminOperationLogMapper).insert(any(AdminOperationLog.class));
+        verify(adminOperationLogService).record(
+                eq(ADMIN_ID),
+                eq("user_management"),
+                eq("user_ban"),
+                eq("user"),
+                eq(USER_ID),
+                eq("hiker"),
+                eq("发布违规内容"),
+                any(Map.class),
+                any(Map.class));
     }
 
     @Test
@@ -102,7 +112,16 @@ class AdminServiceImplTest {
         assertEquals(null, user.getBannedBy());
         assertEquals(null, user.getBannedAt());
         verify(userMapper).updateById(user);
-        verify(adminOperationLogMapper).insert(any(AdminOperationLog.class));
+        verify(adminOperationLogService).record(
+                eq(ADMIN_ID),
+                eq("user_management"),
+                eq("user_unban"),
+                eq("user"),
+                eq(USER_ID),
+                eq("hiker"),
+                eq("恢复账号"),
+                any(Map.class),
+                any(Map.class));
     }
 
     @Test
@@ -130,7 +149,16 @@ class AdminServiceImplTest {
 
         assertEquals("deleted", trail.getStatus());
         verify(trailMapper).updateById(trail);
-        verify(adminOperationLogMapper).insert(any(AdminOperationLog.class));
+        verify(adminOperationLogService).record(
+                eq(ADMIN_ID),
+                eq("trail_management"),
+                eq("trail_offline"),
+                eq("trail"),
+                eq(TRAIL_ID),
+                eq("Sunrise Trail"),
+                eq("路线下架"),
+                any(Map.class),
+                any(Map.class));
     }
 
     @Test
@@ -142,9 +170,16 @@ class AdminServiceImplTest {
 
         assertEquals("active", trail.getStatus());
         verify(trailMapper).updateById(trail);
-        ArgumentCaptor<AdminOperationLog> captor = ArgumentCaptor.forClass(AdminOperationLog.class);
-        verify(adminOperationLogMapper).insert(captor.capture());
-        assertEquals("trail.restore", captor.getValue().getActionType());
+        verify(adminOperationLogService).record(
+                eq(ADMIN_ID),
+                eq("trail_management"),
+                eq("trail_restore"),
+                eq("trail"),
+                eq(TRAIL_ID),
+                eq("Sunrise Trail"),
+                eq("路线恢复"),
+                any(Map.class),
+                any(Map.class));
     }
 
     @Test
@@ -169,7 +204,7 @@ class AdminServiceImplTest {
                 () -> adminService.offlineTrail(TRAIL_ID, ADMIN_ID));
 
         assertEquals("TRAIL_NOT_APPROVED", exception.getCode());
-        verify(adminOperationLogMapper, never()).insert(any(AdminOperationLog.class));
+        verify(adminOperationLogService, never()).record(any(), any(), any(), any(), any(), any(), any(), any(), any());
     }
 
     private User buildUser(String status) {
@@ -184,6 +219,7 @@ class AdminServiceImplTest {
     private Trail buildTrail(String status, String reviewStatus) {
         Trail trail = new Trail();
         trail.setId(TRAIL_ID);
+        trail.setName("Sunrise Trail");
         trail.setStatus(status);
         trail.setReviewStatus(reviewStatus);
         trail.setCreatedAt(LocalDateTime.now().minusHours(8));

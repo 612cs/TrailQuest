@@ -42,6 +42,9 @@ public class ReviewServiceImpl implements ReviewService {
 
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int MAX_PAGE_SIZE = 20;
+    private static final String REVIEW_STATUS_ACTIVE = "active";
+    private static final String REVIEW_STATUS_HIDDEN = "hidden";
+    private static final String REVIEW_STATUS_DELETED = "deleted";
 
     private final ReviewMapper reviewMapper;
     private final ReviewImageMapper reviewImageMapper;
@@ -102,6 +105,10 @@ public class ReviewServiceImpl implements ReviewService {
         review.setText(request.getText().trim());
         review.setReplyTo(targetReview == null ? null : normalizeReplyTo(request.getReplyTo(), targetReview));
         review.setTimeLabel("刚刚");
+        review.setStatus(REVIEW_STATUS_ACTIVE);
+        review.setModerationReason(null);
+        review.setModeratedBy(null);
+        review.setModeratedAt(null);
         review.setCreatedAt(now);
         reviewMapper.insert(review);
 
@@ -145,30 +152,35 @@ public class ReviewServiceImpl implements ReviewService {
         if (!Objects.equals(review.getUserId(), userId)) {
             throw BusinessException.forbidden("REVIEW_DELETE_FORBIDDEN", "只能删除自己的评论");
         }
-
-        Trail trail = ensureTrailExists(review.getTrailId());
-        reviewMapper.deleteById(reviewId);
-        TrailReviewStatsVo stats = refreshTrailReviewStats(trail);
-
-        return DeleteReviewResponse.builder()
-                .deletedReviewId(reviewId)
-                .trailRating(scaleRating(stats.getAverageRating()))
-                .trailReviewCount(stats.getReviewCount() == null ? 0 : stats.getReviewCount().intValue())
-                .build();
+        return moderateReview(reviewId, userId, REVIEW_STATUS_DELETED, "用户自行删除");
     }
 
     @Override
     @Transactional
     public DeleteReviewResponse deleteReviewAsAdmin(Long reviewId) {
+        return moderateReview(reviewId, null, REVIEW_STATUS_DELETED, "管理员删除");
+    }
+
+    @Override
+    @Transactional
+    public DeleteReviewResponse moderateReview(Long reviewId, Long operatorId, String status, String reason) {
         Review review = reviewMapper.selectById(reviewId);
         if (review == null) {
             throw BusinessException.notFound("REVIEW_NOT_FOUND", "评论不存在");
         }
+        validateTargetStatus(status);
+        if (Objects.equals(review.getStatus(), status)) {
+            throw BusinessException.badRequest("REVIEW_STATUS_UNCHANGED", "评论已处于目标状态");
+        }
 
         Trail trail = ensureTrailExists(review.getTrailId());
-        reviewMapper.deleteById(reviewId);
-        TrailReviewStatsVo stats = refreshTrailReviewStats(trail);
+        review.setStatus(status);
+        review.setModerationReason(reason == null || reason.isBlank() ? null : reason.trim());
+        review.setModeratedBy(operatorId);
+        review.setModeratedAt(LocalDateTime.now());
+        reviewMapper.updateById(review);
 
+        TrailReviewStatsVo stats = refreshTrailReviewStats(trail);
         return DeleteReviewResponse.builder()
                 .deletedReviewId(reviewId)
                 .trailRating(scaleRating(stats.getAverageRating()))
@@ -190,7 +202,9 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         Review parentReview = reviewMapper.selectById(request.getParentId());
-        if (parentReview == null || !belongsToTrail(parentReview, request.getTrailId())) {
+        if (parentReview == null
+                || !REVIEW_STATUS_ACTIVE.equals(parentReview.getStatus())
+                || !belongsToTrail(parentReview, request.getTrailId())) {
             throw BusinessException.badRequest("PARENT_REVIEW_NOT_FOUND", "回复目标不存在");
         }
         return parentReview;
@@ -256,6 +270,12 @@ public class ReviewServiceImpl implements ReviewService {
             current = reviewMapper.selectById(current.getParentId());
         }
         return lineage;
+    }
+
+    private void validateTargetStatus(String status) {
+        if (!REVIEW_STATUS_HIDDEN.equals(status) && !REVIEW_STATUS_DELETED.equals(status) && !REVIEW_STATUS_ACTIVE.equals(status)) {
+            throw BusinessException.badRequest("REVIEW_STATUS_INVALID", "评论状态非法");
+        }
     }
 
     private List<String> saveReviewImages(Long reviewId, List<String> images) {

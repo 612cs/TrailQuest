@@ -23,6 +23,12 @@ const routes = [
         meta: { title: '后台首页', requiresAuth: true },
       },
       {
+        path: 'operation-logs',
+        name: 'operation-logs',
+        component: () => import('../views/OperationLogView.vue'),
+        meta: { title: '操作日志', requiresAuth: true },
+      },
+      {
         path: 'trails/review',
         name: 'trail-review-list',
         component: () => import('../views/TrailReviewListView.vue'),

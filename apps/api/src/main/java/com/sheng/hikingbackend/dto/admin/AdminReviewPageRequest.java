@@ -14,6 +14,7 @@ public class AdminReviewPageRequest extends PageRequest {
     private String keyword;
     private String trailKeyword;
     private String authorKeyword;
+    private String status;
 
     public String getKeyword() {
         return normalize(keyword);
@@ -25,6 +26,10 @@ public class AdminReviewPageRequest extends PageRequest {
 
     public String getAuthorKeyword() {
         return normalize(authorKeyword);
+    }
+
+    public String getStatus() {
+        return normalize(status);
     }
 
     private String normalize(String value) {
