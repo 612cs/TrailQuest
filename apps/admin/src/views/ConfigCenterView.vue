@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { ArrowLeft, Plus, RefreshCcw, Save } from 'lucide-vue-next'
-import { useRouter } from 'vue-router'
+import { Plus, RefreshCcw, Save } from 'lucide-vue-next'
 
 import {
   createAdminOptionItem,
@@ -30,6 +29,13 @@ interface ItemDraft {
   builtin: boolean
 }
 
+interface GroupCategory {
+  key: string
+  title: string
+  description: string
+  groups: AdminOptionGroup[]
+}
+
 const ICON_OPTIONS = [
   'Accessibility',
   'Activity',
@@ -47,7 +53,6 @@ const ICON_OPTIONS = [
   'Trees',
 ] as const
 
-const router = useRouter()
 const groups = ref<AdminOptionGroup[]>([])
 const selectedGroupCode = ref('')
 const items = ref<AdminOptionItem[]>([])
@@ -71,6 +76,38 @@ const newItem = ref<ItemDraft>({
 })
 
 const selectedGroup = computed(() => groups.value.find((group) => group.groupCode === selectedGroupCode.value) ?? null)
+const groupCategories = computed<GroupCategory[]>(() => {
+  const allGroups = groups.value
+  return [
+    {
+      key: 'hiking-profile',
+      title: '徒步画像',
+      description: '管理用户画像中的经验、路线偏好和负重偏好展示项。',
+      groups: allGroups.filter((group) => [
+        'hiking_experience_level',
+        'hiking_trail_style',
+        'hiking_pack_preference',
+      ].includes(group.groupCode)),
+    },
+    {
+      key: 'home-activity',
+      title: '首页活动探索',
+      description: '管理首页底部按活动探索卡片，包括名称、图标、排序和搜索预设词。',
+      groups: allGroups.filter((group) => group.groupCode === 'home_activity'),
+    },
+    {
+      key: 'search-config',
+      title: '搜索配置',
+      description: '管理搜索页的难度、长度、装备和耗时筛选展示项。',
+      groups: allGroups.filter((group) => [
+        'search_difficulty',
+        'search_distance',
+        'search_pack_type',
+        'search_duration_type',
+      ].includes(group.groupCode)),
+    },
+  ].filter((category) => category.groups.length > 0)
+})
 
 watch(selectedGroupCode, (groupCode) => {
   if (!groupCode) {
@@ -211,13 +248,9 @@ onMounted(() => {
       <div>
         <p class="admin-config__eyebrow">TRAILQUEST CONFIG CENTER</p>
         <h1 class="admin-title">配置中心</h1>
-        <p class="admin-subtitle">统一管理首页活动入口、搜索筛选项和徒步画像展示项。</p>
+        <p class="admin-subtitle">独立管理徒步画像、首页活动探索和搜索筛选配置。</p>
       </div>
       <div class="admin-config__header-actions">
-        <button class="admin-button admin-button-secondary" type="button" @click="router.push({ name: 'settings' })">
-          <ArrowLeft :size="16" :stroke-width="2" />
-          返回设置
-        </button>
         <button class="admin-button admin-button-secondary" type="button" :disabled="loadingGroups || loadingItems" @click="loadGroups">
           <RefreshCcw :size="16" :stroke-width="2" />
           刷新
@@ -227,22 +260,34 @@ onMounted(() => {
 
     <div class="admin-config__layout">
       <aside class="admin-card admin-config__sidebar">
-        <h2 class="admin-title">配置分组</h2>
-        <p class="admin-subtitle">先选择分组，再编辑具体配置项。</p>
+        <h2 class="admin-title">分类导航</h2>
+        <p class="admin-subtitle">按业务模块查看和维护配置项。</p>
 
         <div v-if="loadingGroups" class="admin-muted">正在加载分组...</div>
-        <button
-          v-for="group in groups"
-          :key="group.groupCode"
-          type="button"
-          class="admin-config__group"
-          :class="{ active: selectedGroupCode === group.groupCode }"
-          @click="selectedGroupCode = group.groupCode"
-        >
-          <strong>{{ group.groupName }}</strong>
-          <span>{{ group.groupCode }}</span>
-          <small>{{ group.itemCount }} 项</small>
-        </button>
+        <div v-else class="admin-config__category-list">
+          <section
+            v-for="category in groupCategories"
+            :key="category.key"
+            class="admin-config__category"
+          >
+            <header class="admin-config__category-header">
+              <strong>{{ category.title }}</strong>
+              <p>{{ category.description }}</p>
+            </header>
+            <button
+              v-for="group in category.groups"
+              :key="group.groupCode"
+              type="button"
+              class="admin-config__group"
+              :class="{ active: selectedGroupCode === group.groupCode }"
+              @click="selectedGroupCode = group.groupCode"
+            >
+              <strong>{{ group.groupName }}</strong>
+              <span>{{ group.groupCode }}</span>
+              <small>{{ group.itemCount }} 项</small>
+            </button>
+          </section>
+        </div>
       </aside>
 
       <div class="admin-card admin-config__content">
@@ -421,6 +466,32 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+.admin-config__category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.8rem;
+  min-height: 0;
+  overflow: auto;
+}
+
+.admin-config__category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.admin-config__category-header strong {
+  color: var(--text-strong);
+}
+
+.admin-config__category-header p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
 }
 
 .admin-config__group {

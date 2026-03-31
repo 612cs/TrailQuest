@@ -71,10 +71,14 @@ const routes = [
         meta: { title: '设置', requiresAuth: true },
       },
       {
-        path: 'settings/config-center',
+        path: 'config-center',
         name: 'config-center',
         component: () => import('../views/ConfigCenterView.vue'),
         meta: { title: '配置中心', requiresAuth: true },
+      },
+      {
+        path: 'settings/config-center',
+        redirect: '/config-center',
       },
     ],
   },
