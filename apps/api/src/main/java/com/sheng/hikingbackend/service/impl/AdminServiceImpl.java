@@ -1,6 +1,7 @@
 package com.sheng.hikingbackend.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.common.enums.TrailReviewStatus;
 import com.sheng.hikingbackend.common.enums.UserStatus;
@@ -23,17 +22,16 @@ import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
-import com.sheng.hikingbackend.entity.AdminOperationLog;
 import com.sheng.hikingbackend.entity.Review;
 import com.sheng.hikingbackend.entity.Trail;
 import com.sheng.hikingbackend.entity.User;
-import com.sheng.hikingbackend.mapper.AdminOperationLogMapper;
 import com.sheng.hikingbackend.mapper.ReviewMapper;
 import com.sheng.hikingbackend.mapper.TrailImageMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.TrailTrackMapper;
 import com.sheng.hikingbackend.mapper.UserMapper;
 import com.sheng.hikingbackend.service.AdminService;
+import com.sheng.hikingbackend.service.AdminOperationLogService;
 import com.sheng.hikingbackend.service.ReviewService;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
 import com.sheng.hikingbackend.vo.admin.AdminReportListItemVo;
@@ -66,8 +64,7 @@ public class AdminServiceImpl implements AdminService {
     private final TrailImageMapper trailImageMapper;
     private final TrailTrackMapper trailTrackMapper;
     private final UserMapper userMapper;
-    private final AdminOperationLogMapper adminOperationLogMapper;
-    private final ObjectMapper objectMapper;
+    private final AdminOperationLogService adminOperationLogService;
 
     @Override
     public AdminDashboardSummaryVo getDashboardSummary() {
@@ -130,8 +127,18 @@ public class AdminServiceImpl implements AdminService {
         user.setBannedAt(LocalDateTime.now());
         userMapper.updateById(user);
 
-        logAction("user.ban", "user", userId, adminUserId, request.getReason(), Map.of(
-                "status", user.getStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "user_management",
+                "user_ban",
+                "user",
+                userId,
+                user.getUsername(),
+                request.getReason(),
+                snapshot("status", UserStatus.ACTIVE.getCode()),
+                snapshot(
+                        "status", user.getStatus(),
+                        "banReason", user.getBanReason()));
     }
 
     @Override
@@ -148,8 +155,16 @@ public class AdminServiceImpl implements AdminService {
         user.setBannedAt(null);
         userMapper.updateById(user);
 
-        logAction("user.unban", "user", userId, adminUserId, "恢复账号", Map.of(
-                "status", user.getStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "user_management",
+                "user_unban",
+                "user",
+                userId,
+                user.getUsername(),
+                "恢复账号",
+                snapshot("status", UserStatus.BANNED.getCode()),
+                snapshot("status", user.getStatus()));
     }
 
     @Override
@@ -184,9 +199,20 @@ public class AdminServiceImpl implements AdminService {
         trail.setReviewedAt(LocalDateTime.now());
         trailMapper.updateById(trail);
 
-        logAction("trail.approve", "trail", trailId, adminUserId, "审核通过", Map.of(
-                "status", trail.getStatus(),
-                "reviewStatus", trail.getReviewStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "trail_review",
+                "trail_approve",
+                "trail",
+                trailId,
+                trail.getName(),
+                "审核通过",
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", TrailReviewStatus.PENDING.getCode()),
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", trail.getReviewStatus()));
     }
 
     @Override
@@ -200,9 +226,22 @@ public class AdminServiceImpl implements AdminService {
         trail.setReviewedAt(LocalDateTime.now());
         trailMapper.updateById(trail);
 
-        logAction("trail.reject", "trail", trailId, adminUserId, remark, Map.of(
-                "status", trail.getStatus(),
-                "reviewStatus", trail.getReviewStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "trail_review",
+                "trail_reject",
+                "trail",
+                trailId,
+                trail.getName(),
+                remark,
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", TrailReviewStatus.PENDING.getCode(),
+                        "reviewRemark", null),
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", trail.getReviewStatus(),
+                        "reviewRemark", trail.getReviewRemark()));
     }
 
     @Override
@@ -219,9 +258,20 @@ public class AdminServiceImpl implements AdminService {
         trail.setStatus("deleted");
         trailMapper.updateById(trail);
 
-        logAction("trail.offline", "trail", trailId, adminUserId, "路线下架", Map.of(
-                "status", trail.getStatus(),
-                "reviewStatus", trail.getReviewStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "trail_management",
+                "trail_offline",
+                "trail",
+                trailId,
+                trail.getName(),
+                "路线下架",
+                snapshot(
+                        "status", "active",
+                        "reviewStatus", trail.getReviewStatus()),
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", trail.getReviewStatus()));
     }
 
     @Override
@@ -235,9 +285,20 @@ public class AdminServiceImpl implements AdminService {
         trail.setStatus("active");
         trailMapper.updateById(trail);
 
-        logAction("trail.restore", "trail", trailId, adminUserId, "路线恢复", Map.of(
-                "status", trail.getStatus(),
-                "reviewStatus", trail.getReviewStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "trail_management",
+                "trail_restore",
+                "trail",
+                trailId,
+                trail.getName(),
+                "路线恢复",
+                snapshot(
+                        "status", "deleted",
+                        "reviewStatus", trail.getReviewStatus()),
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", trail.getReviewStatus()));
     }
 
     @Override
@@ -338,10 +399,20 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void resolveReport(Long reportId) {
+    public void resolveReport(Long reportId, Long adminUserId) {
         if (reportId == null) {
             throw BusinessException.badRequest("REPORT_ID_REQUIRED", "举报 ID 不能为空");
         }
+        adminOperationLogService.record(
+                adminUserId,
+                "report_management",
+                "report_resolve",
+                "report",
+                reportId,
+                null,
+                "处理举报",
+                snapshot("status", "pending"),
+                snapshot("status", "resolved"));
     }
 
     private AdminTrailListItemVo toAdminTrailListItem(TrailQueryRow row) {
@@ -468,8 +539,22 @@ public class AdminServiceImpl implements AdminService {
         }
 
         reviewService.moderateReview(reviewId, adminUserId, targetStatus, remark);
-        logAction(actionType, "review", reviewId, adminUserId, remark, Map.of(
-                "status", targetStatus));
+        String actionCode = switch (actionType) {
+            case "review.hide" -> "review_hide";
+            case "review.restore" -> "review_restore";
+            case "review.delete" -> "review_delete";
+            default -> actionType;
+        };
+        adminOperationLogService.record(
+                adminUserId,
+                "review_management",
+                actionCode,
+                "review",
+                reviewId,
+                review.getText(),
+                remark,
+                snapshot("status", review.getStatus()),
+                snapshot("status", targetStatus));
     }
 
     private String normalizeRequiredRemark(String remark, String errorMessage) {
@@ -477,6 +562,14 @@ public class AdminServiceImpl implements AdminService {
             throw BusinessException.badRequest("REVIEW_REMARK_REQUIRED", errorMessage);
         }
         return remark.trim();
+    }
+
+    private Map<String, Object> snapshot(Object... keyValues) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (int index = 0; index < keyValues.length; index += 2) {
+            result.put(String.valueOf(keyValues[index]), keyValues[index + 1]);
+        }
+        return result;
     }
 
     private List<String> splitTags(String tagsCsv) {
@@ -516,34 +609,5 @@ public class AdminServiceImpl implements AdminService {
                 .elevationLossMeters(track.getElevationLossMeters())
                 .durationSeconds(track.getDurationSeconds())
                 .build();
-    }
-
-    private void logAction(
-            String actionType,
-            String targetType,
-            Long targetId,
-            Long operatorId,
-            String remark,
-            Map<String, Object> metadata) {
-        AdminOperationLog log = new AdminOperationLog();
-        log.setActionType(actionType);
-        log.setTargetType(targetType);
-        log.setTargetId(targetId);
-        log.setOperatorId(operatorId);
-        log.setRemark(remark);
-        log.setMetadataJson(writeMetadata(metadata));
-        log.setCreatedAt(LocalDateTime.now());
-        adminOperationLogMapper.insert(log);
-    }
-
-    private String writeMetadata(Map<String, Object> metadata) {
-        if (metadata == null || metadata.isEmpty()) {
-            return null;
-        }
-        try {
-            return objectMapper.writeValueAsString(metadata);
-        } catch (JsonProcessingException ex) {
-            throw new IllegalStateException("failed to serialize admin operation metadata", ex);
-        }
     }
 }

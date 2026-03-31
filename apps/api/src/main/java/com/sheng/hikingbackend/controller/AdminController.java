@@ -17,6 +17,7 @@ import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.config.CustomUserDetails;
 import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
 import com.sheng.hikingbackend.dto.admin.AdminHomeHeroUpdateRequest;
+import com.sheng.hikingbackend.dto.admin.AdminOperationLogPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewActionRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewBatchActionRequest;
@@ -25,9 +26,12 @@ import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.service.AdminService;
+import com.sheng.hikingbackend.service.AdminOperationLogService;
 import com.sheng.hikingbackend.service.AuthService;
 import com.sheng.hikingbackend.service.SiteSettingService;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
+import com.sheng.hikingbackend.vo.admin.AdminOperationLogDetailVo;
+import com.sheng.hikingbackend.vo.admin.AdminOperationLogListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReportListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewListItemVo;
@@ -48,6 +52,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AdminOperationLogService adminOperationLogService;
     private final AuthService authService;
     private final SiteSettingService siteSettingService;
 
@@ -59,6 +64,16 @@ public class AdminController {
     @GetMapping("/dashboard/summary")
     public ApiResponse<AdminDashboardSummaryVo> summary() {
         return ApiResponse.success(adminService.getDashboardSummary());
+    }
+
+    @GetMapping("/operation-logs")
+    public ApiResponse<PageResponse<AdminOperationLogListItemVo>> pageOperationLogs(@Valid AdminOperationLogPageRequest request) {
+        return ApiResponse.success(adminOperationLogService.pageLogs(request));
+    }
+
+    @GetMapping("/operation-logs/{id}")
+    public ApiResponse<AdminOperationLogDetailVo> operationLogDetail(@PathVariable Long id) {
+        return ApiResponse.success(adminOperationLogService.getLogDetail(id));
     }
 
     @GetMapping("/trails")
@@ -209,8 +224,10 @@ public class AdminController {
     }
 
     @PostMapping("/reports/{id}/resolve")
-    public ApiResponse<Void> resolveReport(@PathVariable Long id) {
-        adminService.resolveReport(id);
+    public ApiResponse<Void> resolveReport(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        adminService.resolveReport(id, userDetails.getId());
         return ApiResponse.success("举报处理成功", null);
     }
 }

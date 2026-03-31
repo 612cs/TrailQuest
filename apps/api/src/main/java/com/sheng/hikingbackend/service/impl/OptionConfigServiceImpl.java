@@ -18,12 +18,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.dto.admin.AdminCreateSystemOptionItemRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUpdateSystemOptionItemRequest;
-import com.sheng.hikingbackend.entity.AdminOperationLog;
 import com.sheng.hikingbackend.entity.SystemOptionGroup;
 import com.sheng.hikingbackend.entity.SystemOptionItem;
-import com.sheng.hikingbackend.mapper.AdminOperationLogMapper;
 import com.sheng.hikingbackend.mapper.SystemOptionGroupMapper;
 import com.sheng.hikingbackend.mapper.SystemOptionItemMapper;
+import com.sheng.hikingbackend.service.AdminOperationLogService;
 import com.sheng.hikingbackend.service.OptionConfigService;
 import com.sheng.hikingbackend.vo.config.AdminSystemOptionGroupVo;
 import com.sheng.hikingbackend.vo.config.AdminSystemOptionItemVo;
@@ -55,7 +54,7 @@ public class OptionConfigServiceImpl implements OptionConfigService {
 
     private final SystemOptionGroupMapper groupMapper;
     private final SystemOptionItemMapper itemMapper;
-    private final AdminOperationLogMapper adminOperationLogMapper;
+    private final AdminOperationLogService adminOperationLogService;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -145,9 +144,16 @@ public class OptionConfigServiceImpl implements OptionConfigService {
         item.setUpdatedAt(LocalDateTime.now());
         itemMapper.insert(item);
 
-        logAction("config.option.create", item.getId(), adminUserId, Map.of(
-                "groupCode", groupCode,
-                "itemCode", itemCode));
+        adminOperationLogService.record(
+                adminUserId,
+                "config_center",
+                "option_item_create",
+                "option_item",
+                item.getId(),
+                item.getItemLabel(),
+                "创建配置项",
+                Map.of(),
+                buildSnapshot(groupCode, item));
         return toAdminItemVo(item);
     }
 
@@ -156,6 +162,8 @@ public class OptionConfigServiceImpl implements OptionConfigService {
     public AdminSystemOptionItemVo updateAdminGroupItem(String groupCode, Long itemId, Long adminUserId, AdminUpdateSystemOptionItemRequest request) {
         SystemOptionGroup group = requireGroup(groupCode);
         SystemOptionItem item = requireItem(group.getId(), itemId);
+        Map<String, Object> beforeSnapshot = buildSnapshot(groupCode, item);
+        boolean enabledChanged = !item.getEnabled().equals(Boolean.TRUE.equals(request.getEnabled()));
 
         validateIconName(request.getIconName());
         applyCommonFields(item, request.getItemLabel(), request.getItemSubLabel(), request.getDescription(), request.getIconName(),
@@ -163,9 +171,16 @@ public class OptionConfigServiceImpl implements OptionConfigService {
         item.setUpdatedAt(LocalDateTime.now());
         itemMapper.updateById(item);
 
-        logAction("config.option.update", item.getId(), adminUserId, Map.of(
-                "groupCode", groupCode,
-                "itemCode", item.getItemCode()));
+        adminOperationLogService.record(
+                adminUserId,
+                "config_center",
+                enabledChanged ? "option_item_toggle" : "option_item_update",
+                "option_item",
+                item.getId(),
+                item.getItemLabel(),
+                enabledChanged ? "切换配置项启用状态" : "更新配置项",
+                beforeSnapshot,
+                buildSnapshot(groupCode, item));
         return toAdminItemVo(item);
     }
 
@@ -296,19 +311,16 @@ public class OptionConfigServiceImpl implements OptionConfigService {
         return StringUtils.hasText(value) ? value.trim() : null;
     }
 
-    private void logAction(String actionType, Long targetId, Long operatorId, Map<String, Object> metadata) {
-        AdminOperationLog log = new AdminOperationLog();
-        log.setActionType(actionType);
-        log.setTargetType("system_option_item");
-        log.setTargetId(targetId);
-        log.setOperatorId(operatorId);
-        log.setRemark(actionType);
-        try {
-            log.setMetadataJson(objectMapper.writeValueAsString(metadata));
-        } catch (JsonProcessingException exception) {
-            throw BusinessException.badRequest("OPTION_LOG_METADATA_INVALID", "配置操作日志写入失败");
-        }
-        log.setCreatedAt(LocalDateTime.now());
-        adminOperationLogMapper.insert(log);
+    private Map<String, Object> buildSnapshot(String groupCode, SystemOptionItem item) {
+        Map<String, Object> snapshot = new LinkedHashMap<>();
+        snapshot.put("groupCode", groupCode);
+        snapshot.put("itemCode", item.getItemCode());
+        snapshot.put("label", item.getItemLabel());
+        snapshot.put("subLabel", item.getItemSubLabel());
+        snapshot.put("description", item.getDescription());
+        snapshot.put("iconName", item.getIconName());
+        snapshot.put("sortOrder", item.getSortOrder());
+        snapshot.put("enabled", item.getEnabled());
+        return snapshot;
     }
 }

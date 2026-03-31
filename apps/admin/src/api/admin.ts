@@ -2,6 +2,9 @@ import { http } from './http'
 import type {
   AdminBanUserRequest,
   AdminDashboardSummary,
+  AdminOperationLogDetail,
+  AdminOperationLogListItem,
+  AdminOperationLogPageQuery,
   AdminHomeHeroSetting,
   AdminCreateOptionItemRequest,
   AdminOptionGroup,
@@ -34,6 +37,16 @@ function cleanQuery(query: Record<string, QueryValue>) {
 
 export function fetchDashboardSummary() {
   return http.get<AdminDashboardSummary>('/api/admin/dashboard/summary')
+}
+
+export function fetchAdminOperationLogs(query: AdminOperationLogPageQuery = {}) {
+  return http.get<PageResponse<AdminOperationLogListItem>>('/api/admin/operation-logs', {
+    params: cleanQuery({ pageNum: 1, pageSize: 10, ...query }),
+  })
+}
+
+export function fetchAdminOperationLogDetail(id: string | number) {
+  return http.get<AdminOperationLogDetail>(`/api/admin/operation-logs/${id}`)
 }
 
 export function fetchAdminTrails(query: AdminTrailPageQuery = {}) {

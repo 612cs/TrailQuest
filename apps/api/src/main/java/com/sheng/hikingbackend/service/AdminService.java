@@ -59,5 +59,5 @@ public interface AdminService {
 
     PageResponse<AdminReportListItemVo> pageReports(long pageNum, long pageSize);
 
-    void resolveReport(Long reportId);
+    void resolveReport(Long reportId, Long adminUserId);
 }

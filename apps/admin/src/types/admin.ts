@@ -5,6 +5,41 @@ export interface AdminDashboardSummary {
   userCount: number
 }
 
+export interface AdminOperationLogListItem {
+  id: string | number
+  operatorId: string | number
+  operatorName: string
+  operatorRole: string
+  moduleCode: string
+  actionCode: string
+  targetType: string
+  targetId?: string | number | null
+  targetTitle?: string | null
+  reason?: string | null
+  resultStatus: 'success' | 'failed' | string
+  createdAt: string
+}
+
+export interface AdminOperationLogDetail {
+  id: string | number
+  operatorId: string | number
+  operatorName: string
+  operatorRole: string
+  moduleCode: string
+  actionCode: string
+  targetType: string
+  targetId?: string | number | null
+  targetTitle?: string | null
+  reason?: string | null
+  resultStatus: 'success' | 'failed' | string
+  beforeSnapshot: Record<string, unknown>
+  afterSnapshot: Record<string, unknown>
+  requestId?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
+  createdAt: string
+}
+
 export interface AdminTrailListItem {
   id: string | number
   image?: string | null
@@ -169,6 +204,18 @@ export interface AdminReviewBatchActionRequest {
 export interface AdminReportPageQuery {
   pageNum?: number
   pageSize?: number
+}
+
+export interface AdminOperationLogPageQuery {
+  pageNum?: number
+  pageSize?: number
+  moduleCode?: string
+  actionCode?: string
+  operatorKeyword?: string
+  targetType?: string
+  targetId?: string
+  dateFrom?: string
+  dateTo?: string
 }
 
 export interface AdminUserListItem {

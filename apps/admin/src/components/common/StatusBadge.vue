@@ -15,6 +15,10 @@ const meta = computed(() => {
       return { label: '已驳回', className: 'admin-badge admin-badge-rejected' }
     case 'resolved':
       return { label: '已处理', className: 'admin-badge admin-badge-approved' }
+    case 'success':
+      return { label: '成功', className: 'admin-badge admin-badge-approved' }
+    case 'failed':
+      return { label: '失败', className: 'admin-badge admin-badge-rejected' }
     case 'hidden':
       return { label: '已隐藏', className: 'admin-badge admin-badge-neutral' }
     case 'disabled':
