@@ -1,8 +1,45 @@
 export interface AdminDashboardSummary {
   pendingTrailCount: number
-  reviewCount: number
   pendingReportCount: number
-  userCount: number
+  hiddenReviewCount: number
+  todayNewUserCount: number
+  todayNewTrailCount: number
+  todayNewReviewCount: number
+  offlineTrailCount: number
+  reportedReviewCount: number
+  trends: AdminDashboardTrendItem[]
+  recentRisks: AdminDashboardRiskItem[]
+}
+
+export interface AdminDashboardTrendItem {
+  date: string
+  newTrailCount: number
+  newReviewCount: number
+  newReportCount: number
+  newUserCount: number
+}
+
+export interface AdminDashboardRiskItem {
+  type: string
+  title: string
+  description: string
+  targetType?: string | null
+  targetId?: string | number | null
+  targetTitle?: string | null
+  priority: 'high' | 'medium' | 'low' | string
+  createdAt: string
+}
+
+export interface AdminDashboardTodoItem {
+  key: string
+  title: string
+  count: number
+  description: string
+  actionLabel: string
+  to: {
+    path: string
+    query?: Record<string, string | undefined>
+  }
 }
 
 export interface AdminOperationLogListItem {

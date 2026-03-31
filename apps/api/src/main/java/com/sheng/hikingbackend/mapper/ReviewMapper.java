@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
 import com.sheng.hikingbackend.entity.Review;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardDailyCountRow;
 import com.sheng.hikingbackend.vo.admin.AdminReviewQueryRow;
 import com.sheng.hikingbackend.vo.review.ReviewQueryRow;
 import com.sheng.hikingbackend.vo.review.TrailReviewStatsVo;
@@ -213,4 +214,21 @@ public interface ReviewMapper extends BaseMapper<Review> {
 
     @Select("SELECT COUNT(*) FROM reviews")
     long countAllReviews();
+
+    @Select("SELECT COUNT(*) FROM reviews WHERE status = 'hidden'")
+    long countHiddenReviews();
+
+    @Select("SELECT COUNT(*) FROM reviews WHERE DATE(created_at) = CURDATE()")
+    long countTodayNewReviews();
+
+    @Select("""
+            SELECT
+              DATE(created_at) AS metric_date,
+              COUNT(*) AS metric_count
+            FROM reviews
+            WHERE created_at >= #{startDateTime}
+            GROUP BY DATE(created_at)
+            ORDER BY DATE(created_at) ASC
+            """)
+    List<AdminDashboardDailyCountRow> selectDailyNewReviewCounts(@Param("startDateTime") java.time.LocalDateTime startDateTime);
 }

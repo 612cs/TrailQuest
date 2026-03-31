@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.entity.User;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardDailyCountRow;
 import com.sheng.hikingbackend.vo.admin.AdminUserQueryRow;
 import com.sheng.hikingbackend.vo.user.UserCardQueryRow;
 import com.sheng.hikingbackend.vo.user.UserStatsQueryRow;
@@ -24,6 +25,20 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Select("SELECT COUNT(*) FROM users")
     Long countAllUsers();
+
+    @Select("SELECT COUNT(*) FROM users WHERE DATE(created_at) = CURDATE()")
+    Long countTodayNewUsers();
+
+    @Select("""
+            SELECT
+              DATE(created_at) AS metric_date,
+              COUNT(*) AS metric_count
+            FROM users
+            WHERE created_at >= #{startDateTime}
+            GROUP BY DATE(created_at)
+            ORDER BY DATE(created_at) ASC
+            """)
+    java.util.List<AdminDashboardDailyCountRow> selectDailyNewUserCounts(@Param("startDateTime") java.time.LocalDateTime startDateTime);
 
     @Select("""
             SELECT

@@ -22,6 +22,7 @@ import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
 import com.sheng.hikingbackend.entity.Trail;
 import com.sheng.hikingbackend.entity.User;
+import com.sheng.hikingbackend.mapper.AdminOperationLogMapper;
 import com.sheng.hikingbackend.mapper.ReviewMapper;
 import com.sheng.hikingbackend.mapper.TrailImageMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
@@ -50,6 +51,8 @@ class AdminServiceImplTest {
     @Mock
     private UserMapper userMapper;
     @Mock
+    private AdminOperationLogMapper adminOperationLogMapper;
+    @Mock
     private AdminOperationLogService adminOperationLogService;
 
     private AdminServiceImpl adminService;
@@ -63,6 +66,7 @@ class AdminServiceImplTest {
                 trailImageMapper,
                 trailTrackMapper,
                 userMapper,
+                adminOperationLogMapper,
                 adminOperationLogService);
     }
 

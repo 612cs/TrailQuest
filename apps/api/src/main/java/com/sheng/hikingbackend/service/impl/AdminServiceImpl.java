@@ -1,9 +1,11 @@
 package com.sheng.hikingbackend.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
 import com.sheng.hikingbackend.entity.Review;
 import com.sheng.hikingbackend.entity.Trail;
 import com.sheng.hikingbackend.entity.User;
+import com.sheng.hikingbackend.mapper.AdminOperationLogMapper;
 import com.sheng.hikingbackend.mapper.ReviewMapper;
 import com.sheng.hikingbackend.mapper.TrailImageMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
@@ -33,7 +36,11 @@ import com.sheng.hikingbackend.mapper.UserMapper;
 import com.sheng.hikingbackend.service.AdminService;
 import com.sheng.hikingbackend.service.AdminOperationLogService;
 import com.sheng.hikingbackend.service.ReviewService;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardDailyCountRow;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardRiskItemVo;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardRiskQueryRow;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardTrendItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReportListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewListItemVo;
@@ -64,15 +71,26 @@ public class AdminServiceImpl implements AdminService {
     private final TrailImageMapper trailImageMapper;
     private final TrailTrackMapper trailTrackMapper;
     private final UserMapper userMapper;
+    private final AdminOperationLogMapper adminOperationLogMapper;
     private final AdminOperationLogService adminOperationLogService;
 
     @Override
     public AdminDashboardSummaryVo getDashboardSummary() {
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(6);
+        LocalDateTime trendStartAt = startDate.atStartOfDay();
+
         return AdminDashboardSummaryVo.builder()
-                .pendingTrailCount(Math.toIntExact(trailMapper.countPendingReviewTrails()))
-                .reviewCount(Math.toIntExact(reviewMapper.countAllReviews()))
+                .pendingTrailCount(trailMapper.countPendingReviewTrails())
                 .pendingReportCount(0)
-                .userCount(Math.toIntExact(userMapper.countAllUsers()))
+                .hiddenReviewCount(reviewMapper.countHiddenReviews())
+                .todayNewUserCount(defaultLong(userMapper.countTodayNewUsers()))
+                .todayNewTrailCount(trailMapper.countTodayNewTrails())
+                .todayNewReviewCount(reviewMapper.countTodayNewReviews())
+                .offlineTrailCount(trailMapper.countOfflineTrails())
+                .reportedReviewCount(0)
+                .trends(buildDashboardTrends(startDate, today, trendStartAt))
+                .recentRisks(buildRecentRisks())
                 .build();
     }
 
@@ -570,6 +588,106 @@ public class AdminServiceImpl implements AdminService {
             result.put(String.valueOf(keyValues[index]), keyValues[index + 1]);
         }
         return result;
+    }
+
+    private List<AdminDashboardTrendItemVo> buildDashboardTrends(
+            LocalDate startDate,
+            LocalDate endDate,
+            LocalDateTime trendStartAt) {
+        Map<LocalDate, Long> trailTrendMap = toDailyCountMap(trailMapper.selectDailyNewTrailCounts(trendStartAt));
+        Map<LocalDate, Long> reviewTrendMap = toDailyCountMap(reviewMapper.selectDailyNewReviewCounts(trendStartAt));
+        Map<LocalDate, Long> userTrendMap = toDailyCountMap(userMapper.selectDailyNewUserCounts(trendStartAt));
+
+        return startDate.datesUntil(endDate.plusDays(1))
+                .map(date -> AdminDashboardTrendItemVo.builder()
+                        .date(date.toString())
+                        .newTrailCount(trailTrendMap.getOrDefault(date, 0L))
+                        .newReviewCount(reviewTrendMap.getOrDefault(date, 0L))
+                        .newReportCount(0)
+                        .newUserCount(userTrendMap.getOrDefault(date, 0L))
+                        .build())
+                .toList();
+    }
+
+    private List<AdminDashboardRiskItemVo> buildRecentRisks() {
+        return adminOperationLogMapper.selectDashboardRecentRisks(6).stream()
+                .map(this::toDashboardRiskItem)
+                .toList();
+    }
+
+    private AdminDashboardRiskItemVo toDashboardRiskItem(AdminDashboardRiskQueryRow row) {
+        String title;
+        String description;
+        String type;
+        String priority;
+        switch (row.getActionCode()) {
+            case "trail_reject" -> {
+                type = "trail_rejected";
+                priority = "medium";
+                title = "路线审核被驳回";
+                description = buildRiskDescription(row, "该路线因信息不完整被驳回。");
+            }
+            case "user_ban" -> {
+                type = "user_banned";
+                priority = "high";
+                title = "用户已被封禁";
+                description = buildRiskDescription(row, "管理员已执行账号封禁。");
+            }
+            case "review_hide" -> {
+                type = "review_hidden";
+                priority = "high";
+                title = "评论已被隐藏";
+                description = buildRiskDescription(row, "评论因存在风险内容被隐藏。");
+            }
+            case "report_resolve" -> {
+                type = "report_resolved";
+                priority = "medium";
+                title = "举报已完成处理";
+                description = buildRiskDescription(row, "举报已进入已处理状态。");
+            }
+            default -> {
+                type = row.getActionCode();
+                priority = "low";
+                title = "后台风险事件";
+                description = buildRiskDescription(row, "系统记录了一条风险动态。");
+            }
+        }
+
+        return AdminDashboardRiskItemVo.builder()
+                .type(type)
+                .title(title)
+                .description(description)
+                .targetType(row.getTargetType())
+                .targetId(row.getTargetId() == null ? null : String.valueOf(row.getTargetId()))
+                .targetTitle(row.getTargetTitle())
+                .priority(priority)
+                .createdAt(row.getCreatedAt())
+                .build();
+    }
+
+    private String buildRiskDescription(AdminDashboardRiskQueryRow row, String fallback) {
+        if (row.getTargetTitle() != null && !row.getTargetTitle().isBlank() && row.getReason() != null && !row.getReason().isBlank()) {
+            return row.getTargetTitle() + "，原因：" + row.getReason();
+        }
+        if (row.getReason() != null && !row.getReason().isBlank()) {
+            return row.getReason();
+        }
+        if (row.getTargetTitle() != null && !row.getTargetTitle().isBlank()) {
+            return row.getTargetTitle();
+        }
+        return fallback;
+    }
+
+    private Map<LocalDate, Long> toDailyCountMap(List<AdminDashboardDailyCountRow> rows) {
+        return rows.stream().collect(Collectors.toMap(
+                AdminDashboardDailyCountRow::getMetricDate,
+                AdminDashboardDailyCountRow::getMetricCount,
+                Long::sum,
+                LinkedHashMap::new));
+    }
+
+    private long defaultLong(Long value) {
+        return value == null ? 0 : value;
     }
 
     private List<String> splitTags(String tagsCsv) {

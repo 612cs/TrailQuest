@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.sheng.hikingbackend.dto.admin.AdminOperationLogPageRequest;
 import com.sheng.hikingbackend.entity.AdminOperationLog;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardRiskQueryRow;
 import com.sheng.hikingbackend.vo.admin.AdminOperationLogQueryRow;
 
 @Mapper
@@ -89,4 +90,19 @@ public interface AdminOperationLogMapper extends BaseMapper<AdminOperationLog> {
             LIMIT 1
             """)
     AdminOperationLogQueryRow selectAdminOperationLogDetailById(@Param("logId") Long logId);
+
+    @Select("""
+            SELECT
+              l.action_code,
+              l.target_type,
+              l.target_id,
+              l.target_title,
+              l.reason,
+              l.created_at
+            FROM admin_operation_logs l
+            WHERE l.action_code IN ('trail_reject', 'user_ban', 'review_hide', 'report_resolve')
+            ORDER BY l.created_at DESC, l.id DESC
+            LIMIT #{limit}
+            """)
+    java.util.List<AdminDashboardRiskQueryRow> selectDashboardRecentRisks(@Param("limit") long limit);
 }
