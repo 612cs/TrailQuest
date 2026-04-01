@@ -140,7 +140,8 @@ function isSelected(id: string | number) {
 }
 
 .admin-table td {
-  vertical-align: middle !important;
+  vertical-align: middle;
+  height: 100%;
 }
 
 .review-table__checkbox-cell {
@@ -170,6 +171,7 @@ function isSelected(id: string | number) {
   align-items: center;
   gap: 0.5rem;
   font-weight: 500;
+  min-height: 2.5rem;
 }
 
 
@@ -216,6 +218,7 @@ function isSelected(id: string | number) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: 2.5rem;
 }
 
 .action-icon {
