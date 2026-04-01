@@ -66,7 +66,6 @@ function isSelected(id: string | number) {
           </td>
           <td @click="emit('detail', item)">
             <div class="trail-info">
-              <span class="trail-icon">🏞️</span>
               <span>{{ item.trailName }}</span>
             </div>
           </td>
@@ -169,9 +168,6 @@ function isSelected(id: string | number) {
   font-weight: 500;
 }
 
-.trail-icon {
-  font-size: 1.1rem;
-}
 
 .review-table__author {
   display: flex;
