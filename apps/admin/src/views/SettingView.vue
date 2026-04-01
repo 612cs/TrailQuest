@@ -1,7 +1,20 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
-import { LoaderCircle, MoonStar, RefreshCcw, SunMedium, Upload, UserCircle2, Settings2 } from 'lucide-vue-next'
+import { 
+  LoaderCircle, 
+  MoonStar, 
+  RefreshCcw, 
+  SunMedium, 
+  Palette,
+  Trees,
+  UserPen,
+  Copy,
+  History,
+  Save,
+  RotateCcw,
+  CloudUpload
+} from 'lucide-vue-next'
 
 import { fetchAdminHomeHeroSetting, updateAdminHomeHeroSetting } from '../api/admin'
 import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
@@ -88,302 +101,675 @@ function resetHeroSetting() {
   void saveHeroSetting()
 }
 
+function copyUrl() {
+  if (heroImageUrl.value) {
+    navigator.clipboard.writeText(heroImageUrl.value)
+  }
+}
+
 onMounted(() => {
   void loadHeroSetting()
 })
 </script>
 
 <template>
-  <div class="admin-grid-2">
-    <section class="admin-card admin-section">
-      <h2 class="admin-title">账户信息</h2>
-      <p class="admin-subtitle">当前后台登录状态与账号概览。</p>
+  <div class="settings-view">
+    <!-- Header -->
+    <header class="settings-header">
+      <h1 class="page-title">设置中心</h1>
+      <p class="page-subtitle">管理您的账户偏好、系统外观及全局配置。</p>
+    </header>
 
-      <div class="admin-setting-account" v-if="user">
-        <div class="admin-setting-account__avatar">
-          <img v-if="user.avatarMediaUrl" :src="user.avatarMediaUrl" :alt="user.username" />
-          <span v-else>{{ user.username.slice(0, 2).toUpperCase() }}</span>
-        </div>
-        <div>
-          <strong>{{ user.username }}</strong>
-          <p>{{ user.email || '暂无邮箱' }}</p>
-          <span class="admin-badge admin-badge-approved">管理员</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="admin-card admin-section">
-      <h2 class="admin-title">外观设置</h2>
-      <p class="admin-subtitle">TrailQuest 绿色主题，支持浅色与深色。</p>
-
-      <button class="admin-button admin-button-secondary admin-setting-theme" type="button" @click="themeStore.toggle">
-        <SunMedium v-if="themeStore.isDark === false" :size="18" :stroke-width="2" />
-        <MoonStar v-else :size="18" :stroke-width="2" />
-        切换为{{ themeStore.themeLabel === '浅色' ? '深色' : '浅色' }}模式
-      </button>
-    </section>
-
-    <section class="admin-card admin-section">
-      <h2 class="admin-title">后台说明</h2>
-      <div class="admin-setting-note">
-        <UserCircle2 :size="18" :stroke-width="2" />
-        <span>后台登录继续复用前台 /api/auth/login 与 /api/auth/me。</span>
-      </div>
-      <div class="admin-setting-note">
-        <Settings2 :size="18" :stroke-width="2" />
-        <span>当前版本聚焦路线审核、评论治理与举报占位。</span>
-      </div>
-    </section>
-
-    <section class="admin-card admin-section">
-      <h2 class="admin-title">配置中心</h2>
-      <p class="admin-subtitle">统一管理首页活动入口、搜索筛选项和徒步画像展示项。</p>
-
-      <div class="admin-setting-note">
-        <Settings2 :size="18" :stroke-width="2" />
-        <span>支持调整展示名称、图标、排序和启用状态，不改变底层语义 code。</span>
-      </div>
-
-      <button class="admin-button admin-button-primary admin-setting-theme" type="button" @click="router.push({ name: 'config-center' })">
-        进入配置中心
-      </button>
-    </section>
-
-    <section class="admin-card admin-section admin-grid-2 admin-setting-hero">
-      <div>
-        <div class="admin-setting-hero__header">
-          <div>
-            <h2 class="admin-title">首页大屏图片</h2>
-            <p class="admin-subtitle">从本地选择图片后会自动上传到阿里云 OSS，并将图片地址设置为首页大图。</p>
+    <!-- Bento Grid -->
+    <div class="bento-grid">
+      <!-- Left Column: Identity & System -->
+      <div class="bento-column bento-column--left">
+        <!-- Account Card -->
+        <section class="settings-card account-card text-center" v-if="user">
+          <div class="avatar-wrapper">
+            <img v-if="user.avatarMediaUrl" :src="user.avatarMediaUrl" :alt="user.username" class="user-avatar" />
+            <div v-else class="user-avatar-placeholder">{{ user.username.slice(0, 1) }}</div>
+            <button class="edit-badge"><UserPen :size="14" /></button>
           </div>
-          <button class="admin-button admin-button-secondary" type="button" :disabled="heroLoading || heroSaving || heroUploading" @click="loadHeroSetting">
-            <RefreshCcw :size="16" :stroke-width="2" />
-            刷新
-          </button>
-        </div>
+          <h3 class="user-name">{{ user.username }}</h3>
+          <p class="user-email">{{ user.email || 'admin@trailquest.com' }}</p>
+          <div class="role-tag">系统管理员</div>
+        </section>
 
-        <label class="admin-setting-field">
-          <span>上传首页大图</span>
-          <input
-            ref="heroFileInput"
-            class="admin-file-input"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            @change="handleHeroFileChange"
-          />
-          <button
-            class="admin-button admin-button-primary admin-setting-upload"
-            type="button"
-            :disabled="heroUploading || heroSaving"
-            @click="openHeroFilePicker"
-          >
-            <LoaderCircle v-if="heroUploading" class="admin-spin" :size="16" :stroke-width="2" />
-            <Upload v-else :size="16" :stroke-width="2" />
-            {{ heroUploading ? `上传中 ${heroUploadProgress}%` : '选择图片并上传' }}
-          </button>
-          <small class="admin-setting-hint">支持 JPG、PNG、WEBP。上传成功后会自动写入首页配置，不需要手动复制链接。</small>
-        </label>
+        <!-- Appearance Card -->
+        <section class="settings-card appearance-card">
+          <h4 class="card-subtitle"><Palette :size="16" /> 外观设置</h4>
+          <div class="theme-switch-row">
+            <div class="theme-info">
+              <SunMedium v-if="!themeStore.isDark" :size="20" class="theme-icon" />
+              <MoonStar v-else :size="20" class="theme-icon" />
+              <span class="theme-label">{{ themeStore.isDark ? '深色模式' : '浅色模式' }}</span>
+            </div>
+            <button 
+              class="theme-toggle" 
+              :class="{ 'is-active': themeStore.isDark }"
+              @click="themeStore.toggle"
+            >
+              <div class="toggle-thumb"></div>
+            </button>
+          </div>
+          <p class="card-hint">根据环境光线调节系统亮度，保护视力的同时也更加节能。</p>
+        </section>
 
-        <label class="admin-setting-field">
-          <span>当前 OSS 地址</span>
-          <input
-            v-model="heroImageUrl"
-            class="admin-input"
-            type="text"
-            readonly
-            placeholder="上传成功后会自动显示 OSS 图片地址"
-          />
-        </label>
-
-        <div v-if="heroError" class="admin-setting-error">{{ heroError }}</div>
-
-        <div class="admin-setting-actions">
-          <button class="admin-button admin-button-secondary" type="button" :disabled="heroSaving || heroUploading" @click="resetHeroSetting">
-            恢复默认
-          </button>
-        </div>
+        <!-- System Statement -->
+        <section class="settings-card statement-card">
+          <div class="statement-content">
+            <h3 class="statement-title">系统定位</h3>
+            <p class="statement-text">
+              TrailQuest Admin 是专为户外步道设计的数字化管理核心。通过实时数据流，我们旨在为管理者提供“数字巡林”的一站式决策支持。
+            </p>
+          </div>
+          <Trees :size="120" class="statement-icon" />
+        </section>
       </div>
 
-      <div class="admin-setting-hero__preview">
-        <h3>实时预览</h3>
-        <div v-if="heroImageUrl" class="admin-setting-hero__image">
-          <img :src="heroImageUrl" alt="首页大屏预览" />
-        </div>
-        <div v-else class="admin-setting-hero__empty">
-          当前未配置额外大图，前台会继续使用默认首屏图片。
+      <!-- Right Column: Hero Management -->
+      <div class="bento-column bento-column--right">
+        <section class="settings-card hero-management">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">首页大屏影像管理</h2>
+              <p class="card-desc">管理移动端及网页端首页的视觉引导区域</p>
+            </div>
+            <div class="header-tools">
+              <button class="tool-btn" @click="loadHeroSetting" :disabled="heroLoading"><RefreshCcw :size="18" /></button>
+              <button class="tool-btn"><History :size="18" /></button>
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div class="preview-stage group">
+            <img v-if="heroImageUrl" :src="heroImageUrl" alt="Hero Preview" class="preview-img" />
+            <div v-else class="preview-empty">
+              <CloudUpload :size="48" />
+              <p>暂未设置自定义大图</p>
+            </div>
+            <div class="preview-overlay">
+              <div class="preview-labels">
+                <span class="preview-tag">实时预览</span>
+              </div>
+              <div class="preview-content">
+                <h4 class="preview-headline">纵横群山，探索未知境界</h4>
+              </div>
+            </div>
+            <div class="oss-status">OSS 在线</div>
+          </div>
+
+          <!-- Controls -->
+          <div class="controls-grid">
+            <div class="input-group">
+              <label class="input-label">资源 URL</label>
+              <div class="input-wrapper">
+                <input 
+                  type="text" 
+                  class="styled-input" 
+                  readonly 
+                  :value="heroImageUrl || '等待上传成功...'"
+                  placeholder="https://oss.trailquest.com/..."
+                />
+                <button class="copy-btn" @click="copyUrl"><Copy :size="16" /></button>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">上传状态</label>
+              <div class="status-panel">
+                <div class="status-info">
+                  <span class="status-badge" :class="{ 'is-uploaded': heroImageUrl }">
+                    {{ heroUploading ? '上传中' : (heroImageUrl ? '上传成功' : '待上传') }}
+                  </span>
+                  <span class="status-percent">{{ heroUploading ? `${heroUploadProgress}%` : (heroImageUrl ? '100%' : '0%') }}</span>
+                </div>
+                <div class="progress-bar">
+                  <div 
+                    class="progress-fill" 
+                    :style="{ width: heroUploading ? `${heroUploadProgress}%` : (heroImageUrl ? '100%' : '0%') }"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Area -->
+          <div class="upload-zone" @click="openHeroFilePicker">
+            <input 
+              ref="heroFileInput" 
+              type="file" 
+              class="hidden" 
+              accept="image/*" 
+              @change="handleHeroFileChange"
+            />
+            <div class="upload-icon">
+              <CloudUpload v-if="!heroUploading" :size="32" />
+              <LoaderCircle v-else :size="32" class="animate-spin" />
+            </div>
+            <div class="upload-text">
+              <p class="primary-text">点击或拖拽新影像至此处</p>
+              <p class="secondary-text">支持 JPG, PNG, WebP (最大 5MB)，建议 16:9</p>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="action-footer">
+            <button class="reset-link" @click="resetHeroSetting">
+              <RotateCcw :size="14" /> 恢复出厂默认值
+            </button>
+            <div class="action-buttons">
+              <button class="btn btn--secondary" @click="router.push({ name: 'config-center' })">进入配置中心</button>
+              <button class="btn btn--primary" @click="saveHeroSetting" :disabled="heroSaving">
+                <Save :size="18" /> 保存全局配置
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Footer Meta -->
+    <footer class="settings-footer">
+      <div class="copyright">© 2026 TRAILQUEST DIGITAL ECOSYSTEM</div>
+      <div class="footer-links">
+        <a href="#">隐私协议</a>
+        <div class="system-status">
+          <span class="status-dot"></span>
+          系统状态：良好
         </div>
       </div>
-    </section>
+    </footer>
+
+    <AdminNoticeDialog
+      v-model:show="heroDialogShow"
+      title="更新成功"
+      message="首页大屏配置已同步，前台页面刷新后即可看到最新视觉。"
+    />
   </div>
-
-  <AdminNoticeDialog
-    v-model:show="heroDialogShow"
-    title="保存成功"
-    message="首页大屏图片已经上传并更新，前台首页刷新后会显示最新图片。"
-  />
 </template>
 
 <style scoped>
-.admin-setting-account {
+.settings-view {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2.5rem;
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 1rem;
-  padding: 1rem;
-  border-radius: 18px;
-  background: var(--bg-soft);
+  flex-direction: column;
+  gap: 2.5rem;
 }
 
-.admin-setting-account__avatar {
-  width: 3.5rem;
-  height: 3.5rem;
+.page-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0;
+}
+
+/* Bento Grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+}
+
+.bento-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bento-column--left { grid-column: span 4; }
+.bento-column--right { grid-column: span 8; }
+
+.settings-card {
+  background: white;
+  border-radius: 24px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+/* Account Card */
+.account-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
+
+.avatar-wrapper {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.user-avatar, .user-avatar-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--bg-soft);
+  box-shadow: var(--shadow);
+}
+
+.user-avatar-placeholder {
   display: grid;
   place-items: center;
-  overflow: hidden;
-  border-radius: 18px;
-  border: 1px solid var(--border);
-  color: var(--primary);
-  background: var(--bg-elevated);
+  background: var(--primary);
+  color: white;
+  font-size: 2.5rem;
   font-weight: 800;
 }
 
-.admin-setting-account__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.edit-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 3px solid white;
+  cursor: pointer;
 }
 
-.admin-setting-account strong {
-  display: block;
+.user-name {
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--text-strong);
+  margin: 0;
 }
 
-.admin-setting-account p {
-  margin: 0.25rem 0 0.55rem;
+.user-email {
+  font-size: 0.875rem;
   color: var(--text-muted);
+  margin: 0.5rem 0 1rem;
 }
 
-.admin-setting-theme {
-  margin-top: 1rem;
+.role-tag {
+  background: rgba(47, 106, 58, 0.1);
+  color: #2f6a3a;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-.admin-setting-note {
+/* Appearance Card */
+.card-subtitle {
   display: flex;
-  align-items: flex-start;
-  gap: 0.7rem;
-  margin-top: 1rem;
-  padding: 0.95rem 1rem;
-  border-radius: 16px;
-  background: var(--bg-soft);
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
   color: var(--text-muted);
-  line-height: 1.7;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
 }
 
-.admin-setting-hero {
-  grid-column: 1 / -1;
-  align-items: start;
-}
-
-.admin-setting-hero__header,
-.admin-setting-actions {
+.theme-switch-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  background: var(--bg-soft);
+  padding: 1rem;
+  border-radius: 16px;
 }
 
-.admin-setting-field {
-  display: grid;
-  gap: 0.55rem;
-  margin-top: 1rem;
+.theme-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.admin-setting-field span {
+.theme-icon { color: var(--primary); }
+.theme-label { font-weight: 600; font-size: 0.9375rem; }
+
+.theme-toggle {
+  width: 48px;
+  height: 24px;
+  background: #cbd5e1;
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.theme-toggle.is-active { background: var(--primary); }
+
+.toggle-thumb {
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.is-active .toggle-thumb { transform: translateX(24px); }
+
+.card-hint {
+  font-size: 0.8125rem;
   color: var(--text-muted);
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-.admin-file-input {
-  display: none;
-}
-
-.admin-setting-upload {
-  width: fit-content;
-}
-
-.admin-setting-hint {
-  color: var(--text-dim);
+  margin-top: 1rem;
   line-height: 1.6;
 }
 
-.admin-setting-actions {
-  justify-content: flex-start;
-  margin-top: 1rem;
+/* Statement Card */
+.statement-card {
+  background: var(--primary);
+  color: white;
+  position: relative;
+  overflow: hidden;
+  height: 200px;
 }
 
-.admin-setting-error {
-  margin-top: 1rem;
-  border-radius: 16px;
-  padding: 0.85rem 1rem;
-  color: var(--danger);
-  background: rgba(181, 68, 68, 0.08);
-  border: 1px solid rgba(181, 68, 68, 0.16);
+.statement-content { position: relative; z-index: 2; }
+.statement-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem; }
+.statement-text { font-size: 0.875rem; line-height: 1.6; opacity: 0.9; }
+
+.statement-icon {
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  opacity: 0.1;
+  transform: rotate(-10deg);
 }
 
-.admin-setting-hero__preview h3 {
-  margin: 0 0 0.8rem;
+/* Hero Management */
+.hero-management {
+  padding: 2.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.card-title { font-size: 1.5rem; font-weight: 700; color: var(--text-strong); margin: 0; }
+.card-desc { font-size: 0.9375rem; color: var(--text-muted); margin: 0.25rem 0 0; }
+
+.header-tools { display: flex; gap: 0.5rem; }
+.tool-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tool-btn:hover { background: white; color: var(--primary); border-color: var(--primary-soft); }
+
+/* Preview Stage */
+.preview-stage {
+  aspect-ratio: 21 / 10;
+  background: var(--bg-soft);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+  border: 4px solid var(--bg-soft);
+  margin-bottom: 2rem;
+}
+
+.preview-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+.preview-stage:hover .preview-img { transform: scale(1.05); }
+
+.preview-empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--text-muted);
+}
+
+.preview-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 2rem;
+  color: white;
+}
+
+.preview-tag {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.preview-headline { font-size: 1.25rem; font-weight: 700; margin-top: 0.5rem; }
+
+.oss-status {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255,255,255,0.8);
+  color: var(--primary);
+  font-size: 0.625rem;
+  font-weight: 800;
+  padding: 0.25rem 0.6rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+/* Controls Grid */
+.controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.6rem;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.styled-input {
+  flex: 1;
+  background: var(--bg-soft);
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  font-family: monospace;
   color: var(--text-strong);
 }
 
-.admin-setting-hero__image,
-.admin-setting-hero__empty {
-  min-height: 260px;
-  border-radius: 22px;
-  border: 1px solid var(--border);
+.copy-btn {
+  width: 44px;
   background: var(--bg-soft);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
 }
+.copy-btn:hover { background: var(--border); color: var(--text-strong); }
 
-.admin-setting-hero__image {
+/* Progress Panel */
+.status-panel { display: flex; flex-direction: column; gap: 0.5rem; }
+.status-info { display: flex; justify-content: space-between; align-items: center; }
+
+.status-badge {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  background: var(--bg-soft);
+  color: var(--text-muted);
+}
+.status-badge.is-uploaded { background: rgba(47, 106, 58, 0.12); color: #2f6a3a; }
+
+.status-percent { font-size: 0.75rem; font-weight: 700; color: var(--text-strong); }
+
+.progress-bar {
+  height: 6px;
+  background: var(--bg-soft);
+  border-radius: 3px;
   overflow: hidden;
 }
 
-.admin-setting-hero__image img {
-  width: 100%;
+.progress-fill {
   height: 100%;
-  object-fit: cover;
+  background: var(--primary);
+  transition: width 0.3s ease;
 }
 
-.admin-setting-hero__empty {
+/* Upload Zone */
+.upload-zone {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border: 2px dashed var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: rgba(var(--primary-rgb), 0.02);
+}
+
+.upload-zone:hover {
+  background: var(--bg-soft);
+  border-color: var(--primary-soft);
+}
+
+.upload-icon {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
   display: grid;
   place-items: center;
-  padding: 1.4rem;
+  color: var(--primary);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.upload-text .primary-text { font-weight: 700; font-size: 0.9375rem; margin: 0; }
+.upload-text .secondary-text { font-size: 0.75rem; color: var(--text-muted); margin: 0.25rem 0 0; }
+
+/* Action Footer */
+.action-footer {
+  margin-top: auto;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reset-link {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+.reset-link:hover { text-decoration: underline; }
+
+.action-buttons { display: flex; gap: 1rem; }
+
+.btn {
+  padding: 0.75rem 1.75rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
+}
+.btn--primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.3); }
+
+.btn--secondary { background: var(--bg-soft); color: var(--text-strong); }
+.btn--secondary:hover { background: var(--border); }
+
+/* Footer */
+.settings-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.625rem;
+  font-weight: 800;
   color: var(--text-muted);
-  text-align: center;
-  line-height: 1.8;
+  letter-spacing: 0.1em;
 }
 
-.admin-spin {
-  animation: admin-rotate 1s linear infinite;
+.footer-links { display: flex; gap: 1.5rem; align-items: center; }
+.footer-links a:hover { color: var(--primary); }
+
+.system-status { display: flex; align-items: center; gap: 0.4rem; }
+.status-dot { width: 6px; height: 6px; background: #2f6a3a; border-radius: 50%; }
+
+@media (max-width: 1024px) {
+  .bento-grid { grid-template-columns: 1fr; }
+  .bento-column--left, .bento-column--right { grid-column: span 12; }
 }
 
-@media (max-width: 900px) {
-  .admin-setting-hero {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-setting-hero__header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-
-@keyframes admin-rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@media (max-width: 640px) {
+  .controls-grid { grid-template-columns: 1fr; }
+  .action-footer { flex-direction: column; gap: 1.5rem; align-items: flex-start; }
 }
 </style>
