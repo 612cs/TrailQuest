@@ -139,6 +139,10 @@ function isSelected(id: string | number) {
   background: var(--bg-soft);
 }
 
+.admin-table td {
+  vertical-align: middle !important;
+}
+
 .review-table__checkbox-cell {
   width: 3rem;
 }
