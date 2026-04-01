@@ -22,8 +22,6 @@ export function useReviewManagement() {
   const pageNum = ref(1)
   const pageSize = ref(10)
   const keyword = ref('')
-  const trailKeyword = ref('')
-  const authorKeyword = ref('')
   const status = ref('')
   const errorMessage = ref('')
   const selectedIds = ref<string[]>([])
@@ -57,8 +55,6 @@ export function useReviewManagement() {
         pageNum: page,
         pageSize: pageSize.value,
         keyword: keyword.value.trim() || undefined,
-        trailKeyword: trailKeyword.value.trim() || undefined,
-        authorKeyword: authorKeyword.value.trim() || undefined,
         status: status.value || undefined,
       })
       list.value = result.list
@@ -75,8 +71,6 @@ export function useReviewManagement() {
 
   function resetFilters() {
     keyword.value = ''
-    trailKeyword.value = ''
-    authorKeyword.value = ''
     status.value = ''
     void load(1)
   }
@@ -268,8 +262,6 @@ export function useReviewManagement() {
     pageNum,
     pageSize,
     keyword,
-    trailKeyword,
-    authorKeyword,
     status,
     errorMessage,
     totalPages,

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { EyeOff, Info, RotateCcw, Trash2 } from 'lucide-vue-next'
 import StatusBadge from '../common/StatusBadge.vue'
 import { formatDateTime } from '../../utils/format'
 import type { AdminReviewListItem } from '../../types/admin'
@@ -35,13 +36,11 @@ function isSelected(id: string | number) {
               @change="emit('toggle-select-all', ($event.target as HTMLInputElement).checked)"
             />
           </th>
-          <th>评论</th>
+          <th>评论内容</th>
+          <th>关联路线</th>
           <th>作者</th>
-          <th>路线</th>
-          <th>父评论</th>
           <th>状态</th>
-          <th>治理备注</th>
-          <th>时间</th>
+          <th>发布时间</th>
           <th>操作</th>
         </tr>
       </thead>
@@ -50,7 +49,6 @@ function isSelected(id: string | number) {
           v-for="item in props.items"
           :key="item.id"
           class="review-table__row"
-          @click="emit('detail', item)"
         >
           <td class="review-table__checkbox-cell" @click.stop>
             <input
@@ -59,48 +57,66 @@ function isSelected(id: string | number) {
               @change="emit('toggle-select', { id: String(item.id), checked: ($event.target as HTMLInputElement).checked })"
             />
           </td>
-          <td class="review-table__content-cell">
-            <strong>{{ item.text }}</strong>
-            <small v-if="item.rating">评分 {{ item.rating }} / 5</small>
+          <td class="review-table__content-cell" @click="emit('detail', item)">
+            <div class="review-table__text-summary">
+              <strong>{{ item.text }}</strong>
+              <small v-if="item.rating" class="rating-badge">评分 {{ item.rating }}</small>
+            </div>
+            <small class="review-id">ID: #{{ item.id }}</small>
           </td>
-          <td>
-            <div class="review-table__author">
-              <div class="review-table__avatar" :style="item.avatarMediaUrl ? '' : `background:${item.avatarBg || 'var(--bg-soft)'}`">
-                <img v-if="item.avatarMediaUrl" :src="item.avatarMediaUrl" :alt="item.authorUsername" />
-                <span v-else>{{ item.avatar || item.authorUsername.slice(0, 2).toUpperCase() }}</span>
-              </div>
-              <div>
-                <strong>{{ item.authorUsername }}</strong>
-              </div>
+          <td @click="emit('detail', item)">
+            <div class="trail-info">
+              <span class="trail-icon">🏞️</span>
+              <span>{{ item.trailName }}</span>
             </div>
           </td>
-          <td>{{ item.trailName }}</td>
-          <td class="review-table__parent-cell">{{ item.parentText || '--' }}</td>
-          <td><StatusBadge :status="item.status" /></td>
-          <td class="review-table__reason-cell">{{ item.moderationReason || '--' }}</td>
-          <td>
-            <strong>{{ formatDateTime(item.createdAt) }}</strong>
-            <small v-if="item.moderatedAt">治理于 {{ formatDateTime(item.moderatedAt) }}</small>
+          <td @click="emit('detail', item)">
+            <div class="review-table__author">
+              <div class="review-table__avatar-mini" :style="item.avatarMediaUrl ? '' : `background:${item.avatarBg || 'var(--bg-soft)'}`">
+                <img v-if="item.avatarMediaUrl" :src="item.avatarMediaUrl" :alt="item.authorUsername" />
+                <span v-else>{{ item.avatar || item.authorUsername.slice(0, 1).toUpperCase() }}</span>
+              </div>
+              <span>{{ item.authorUsername }}</span>
+            </div>
+          </td>
+          <td @click="emit('detail', item)"><StatusBadge :status="item.status" /></td>
+          <td @click="emit('detail', item)">
+            <div class="time-cell">
+              {{ formatDateTime(item.createdAt) }}
+            </div>
           </td>
           <td class="review-table__actions" @click.stop>
-            <button class="admin-button admin-button-secondary" type="button" @click="emit('detail', item)">详情</button>
+            <button class="action-icon info" type="button" title="详情" @click="emit('detail', item)">
+              <Info :size="18" />
+            </button>
+            
             <button
               v-if="item.status === 'active'"
-              class="admin-button admin-button-secondary"
+              class="action-icon hide"
               type="button"
+              title="隐藏"
               @click="emit('hide', item)"
             >
-              隐藏
+              <EyeOff :size="18" />
             </button>
             <button
               v-else
-              class="admin-button admin-button-primary"
+              class="action-icon restore"
               type="button"
+              title="恢复"
               @click="emit('restore', item)"
             >
-              恢复
+              <RotateCcw :size="18" />
             </button>
-            <button class="admin-button admin-button-danger" type="button" @click="emit('delete', item)">删除</button>
+            
+            <button 
+              class="action-icon delete" 
+              type="button" 
+              title="删除" 
+              @click="emit('delete', item)"
+            >
+              <Trash2 :size="18" />
+            </button>
           </td>
         </tr>
       </tbody>
@@ -128,63 +144,103 @@ function isSelected(id: string | number) {
   width: 3rem;
 }
 
-.review-table__content-cell,
-.review-table__author,
-.review-table__actions {
+.review-table__content-cell {
+  max-width: 20rem;
+}
+
+.review-table__text-summary {
   display: flex;
-  gap: 0.75rem;
-}
-
-.review-table__content-cell,
-.review-table__author {
-  flex-direction: column;
-}
-
-.review-table__content-cell strong,
-.review-table__author strong {
-  color: var(--text-strong);
-}
-
-.review-table__content-cell small,
-.review-table__author small,
-.review-table__actions small,
-.review-table__reason-cell,
-.review-table__parent-cell,
-.review-table td small {
-  color: var(--text-muted);
-}
-
-.review-table__author {
-  flex-direction: row;
   align-items: center;
+  gap: 0.5rem;
 }
 
-.review-table__avatar {
-  width: 2.5rem;
-  height: 2.5rem;
+.review-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.trail-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.trail-icon {
+  font-size: 1.1rem;
+}
+
+.review-table__author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-table__avatar-mini {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
   overflow: hidden;
-  border-radius: 999px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--border);
-  color: #fff;
+  font-size: 0.65rem;
   font-weight: 700;
+  color: white;
+  background: var(--primary);
 }
 
-.review-table__avatar img {
+.review-table__avatar-mini img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.review-table__actions {
-  flex-wrap: wrap;
-  align-items: center;
+.rating-badge {
+  background: var(--bg-soft);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
-.review-table__reason-cell,
-.review-table__parent-cell {
-  max-width: 18rem;
-  line-height: 1.65;
+.time-cell {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.review-table__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-icon {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-icon.info { color: #6e8e6b; }
+.action-icon.hide { color: #8a8a8a; }
+.action-icon.restore { color: #5a9e70; }
+.action-icon.delete { color: #d67a7a; }
+
+.action-icon:hover {
+  background: var(--bg-soft);
+  transform: scale(1.1);
+}
+
+.action-icon.delete:hover {
+  background: rgba(214, 122, 122, 0.1);
 }
 </style>

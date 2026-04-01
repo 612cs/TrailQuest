@@ -19,8 +19,6 @@ const {
   total,
   pageNum,
   keyword,
-  trailKeyword,
-  authorKeyword,
   status,
   errorMessage,
   totalPages,
@@ -61,27 +59,16 @@ onMounted(() => {
     <section class="settings-card list-view-card">
       <div class="list-toolbar">
         <div class="filter-group">
-          <input
-            v-model="keyword"
-            class="styled-input"
-            placeholder="评论内容关键词"
-            aria-label="评论关键字"
-            @keyup.enter="load(1)"
-          />
-          <input
-            v-model="trailKeyword"
-            class="styled-input"
-            placeholder="路线名称"
-            aria-label="路线关键字"
-            @keyup.enter="load(1)"
-          />
-          <input
-            v-model="authorKeyword"
-            class="styled-input"
-            placeholder="作者昵称"
-            aria-label="作者"
-            @keyup.enter="load(1)"
-          />
+          <div class="search-input-wrapper">
+            <Search :size="16" class="search-icon" />
+            <input
+              v-model="keyword"
+              class="styled-input searching-input"
+              placeholder="搜索评论内容、路线或作者..."
+              aria-label="综合搜索"
+              @keyup.enter="load(1)"
+            />
+          </div>
           <select
             v-model="status"
             class="styled-select"
@@ -226,9 +213,28 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
+.search-input-wrapper {
+  position: relative;
+  flex: 2;
+  min-width: 300px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.searching-input {
+  padding-left: 2.75rem !important;
+}
+
 .styled-input, .styled-select {
   background: var(--bg-soft);
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 0.6rem 1rem;
   font-size: 0.875rem;
@@ -242,7 +248,7 @@ onMounted(() => {
   outline: none;
   background: white;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 .action-group {
