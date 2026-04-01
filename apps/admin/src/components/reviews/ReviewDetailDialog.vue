@@ -20,9 +20,9 @@ const emit = defineEmits<{
   <ModalShell
     :show="props.show"
     aria-label="评论详情"
-    :panel-style="{ width: 'min(920px, 100%)', borderRadius: '24px' }"
+    :panel-style="{ width: 'min(920px, 100%)', borderRadius: '24px', maxHeight: '90vh' }"
     :header-style="{ padding: '1.2rem 1.2rem 0', display: 'flex', alignItems: 'center' }"
-    :body-style="{ padding: '1rem 1.2rem 1.2rem' }"
+    :body-style="{ padding: '1rem 1.2rem 1.2rem', overflowY: 'auto' }"
     @update:show="emit('update:show', $event)"
   >
     <template #header>
