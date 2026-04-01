@@ -9,7 +9,7 @@ import DashboardTodoPanel from '../components/dashboard/DashboardTodoPanel.vue'
 import DashboardTrendChart from '../components/dashboard/DashboardTrendChart.vue'
 import { useDashboardSummary } from '../composables/useDashboardSummary'
 
-const { summary, loading, errorMessage, refreshedAt, todoItems, loadSummary } = useDashboardSummary()
+const { summary, loading, refreshedAt, todoItems, loadSummary } = useDashboardSummary()
 
 onMounted(() => {
   void loadSummary()
@@ -18,72 +18,140 @@ onMounted(() => {
 
 <template>
   <div class="admin-dashboard">
-    <div class="admin-dashboard__toolbar">
+    <!-- Toolbar -->
+    <header class="dashboard-header">
       <div>
-        <h1 class="admin-title">后台工作台</h1>
-        <p class="admin-subtitle">把待办、风险和趋势放到同一个首页里，减少在各模块之间来回切换。</p>
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-subtitle">Welcome back, managing your trails and community.</p>
       </div>
-      <div class="admin-dashboard__toolbar-actions">
-        <div>
-          <span class="admin-muted">最近刷新</span>
-          <strong class="admin-dashboard__refreshed-at">{{ refreshedAt || '--' }}</strong>
-        </div>
-        <button class="admin-button admin-button-secondary" type="button" @click="loadSummary">
-          <RefreshCcw :size="16" :stroke-width="2" />
-          刷新
+      <div class="header-actions">
+        <span class="refresh-time" v-if="refreshedAt">Last updated: {{ refreshedAt }}</span>
+        <button class="icon-button" @click="loadSummary" :disabled="loading">
+          <RefreshCcw :size="18" :class="{ 'animate-spin': loading }" />
         </button>
       </div>
-    </div>
+    </header>
 
-    <div v-if="errorMessage" class="admin-dashboard__error">{{ errorMessage }}</div>
+    <!-- Content Sections -->
+    <main class="dashboard-content">
+      <!-- 1. Overview Statistics -->
+      <section class="content-section">
+        <DashboardOverviewCards :summary="summary" :loading="loading" />
+      </section>
 
-    <DashboardOverviewCards :summary="summary" :loading="loading" />
+      <!-- 2. Two-Column Grid: Tasks & Risks -->
+      <div class="dashboard-grid">
+        <section class="content-section card-wrapper">
+          <DashboardTodoPanel :items="todoItems" :loading="loading" />
+        </section>
+        <section class="content-section card-wrapper">
+          <DashboardRiskFeed :items="summary?.recentRisks ?? []" :loading="loading" />
+        </section>
+      </div>
 
-    <div class="admin-grid-2">
-      <DashboardTodoPanel :items="todoItems" :loading="loading" />
-      <DashboardRiskFeed :items="summary?.recentRisks ?? []" :loading="loading" />
-    </div>
-
-    <div class="admin-grid-2">
-      <DashboardTrendChart :items="summary?.trends ?? []" :loading="loading" />
-      <DashboardQuickLinks />
-    </div>
+      <!-- 3. Bottom Grid: Trends & Quick Actions -->
+      <div class="dashboard-grid">
+        <section class="content-section card-wrapper">
+          <DashboardTrendChart :items="summary?.trends ?? []" :loading="loading" />
+        </section>
+        <section class="content-section card-wrapper">
+          <DashboardQuickLinks />
+        </section>
+      </div>
+    </main>
   </div>
 </template>
 
 <style scoped>
 .admin-dashboard {
-  display: grid;
-  gap: 1rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
 }
 
-.admin-dashboard__toolbar,
-.admin-dashboard__toolbar-actions {
+.dashboard-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
 }
 
-.admin-dashboard__error {
-  border-radius: 16px;
-  padding: 0.85rem 1rem;
-  color: var(--danger);
-  background: rgba(181, 68, 68, 0.08);
-  border: 1px solid rgba(181, 68, 68, 0.16);
-}
-
-.admin-dashboard__refreshed-at {
-  display: block;
-  margin-top: 0.2rem;
+.page-title {
+  font-size: 2rem;
+  font-weight: 800;
   color: var(--text-strong);
+  margin: 0;
+  letter-spacing: -0.025em;
 }
 
-@media (max-width: 768px) {
-  .admin-dashboard__toolbar,
-  .admin-dashboard__toolbar-actions {
-    align-items: flex-start;
-    flex-direction: column;
+.page-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.refresh-time {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.icon-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-strong);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: var(--bg-soft);
+  border-color: var(--primary-soft);
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+}
+
+.card-wrapper {
+  background: white;
+  padding: 1.75rem;
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-dashboard {
+    padding: 1rem;
   }
 }
 </style>
+

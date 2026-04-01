@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-
 import { formatDateTime } from '../../utils/format'
 import type { AdminDashboardRiskItem } from '../../types/admin'
 
@@ -10,130 +9,134 @@ const props = defineProps<{
 }>()
 
 const normalizedItems = computed(() =>
-  props.items.map((item) => ({
+  props.items.slice(0, 4).map((item) => ({
     ...item,
     to:
       item.targetType === 'trail'
         ? { path: `/trails/review/${item.targetId}` }
         : item.targetType === 'review'
           ? { path: '/reviews', query: { status: 'hidden' } }
-          : item.targetType === 'user'
-            ? { path: '/users' }
-            : item.targetType === 'report'
-              ? { path: '/reports' }
-              : { path: '/dashboard' },
+          : { path: '/dashboard' },
   })),
 )
 
 function priorityLabel(priority: string) {
-  if (priority === 'high') {
-    return '高优先级'
-  }
-  if (priority === 'medium') {
-    return '中优先级'
-  }
-  return '低优先级'
+  if (priority === 'high') return '高风险'
+  if (priority === 'medium') return '中风险'
+  return '低风险'
 }
 </script>
 
 <template>
-  <section class="admin-card admin-section">
-    <div class="dashboard-section__heading">
-      <div>
-        <h2 class="admin-title">最近风险动态</h2>
-        <p class="admin-subtitle">最近发生的治理动作和风险变化。</p>
+  <div class="dashboard-risk">
+    <div class="section-header">
+      <h2 class="admin-title">最近风险动态</h2>
+      <RouterLink to="/operation-logs" class="view-all">查看全部</RouterLink>
+    </div>
+
+    <div v-if="loading" class="loading-placeholder">正在加载...</div>
+
+    <div v-else class="risk-list">
+      <div v-for="item in normalizedItems" :key="item.createdAt" class="risk-card">
+        <div class="risk-card__header">
+          <span class="risk-card__time">{{ formatDateTime(item.createdAt) }}</span>
+          <span class="risk-badge" :data-priority="item.priority">{{ priorityLabel(item.priority) }}</span>
+        </div>
+        <h3 class="risk-card__title">{{ item.title }}</h3>
+        <p class="risk-card__desc">{{ item.description }}</p>
+        <RouterLink :to="item.to" class="risk-card__link">查看详情</RouterLink>
       </div>
     </div>
-
-    <div v-if="loading" class="dashboard-risk__empty admin-muted">正在加载风险动态...</div>
-
-    <div v-else-if="normalizedItems.length" class="dashboard-risk">
-      <article v-for="item in normalizedItems" :key="`${item.type}-${item.createdAt}-${item.targetId}`" class="dashboard-risk__item">
-        <div class="dashboard-risk__top">
-          <span class="dashboard-risk__badge" :data-priority="item.priority">{{ priorityLabel(item.priority) }}</span>
-          <span class="dashboard-risk__time">{{ formatDateTime(item.createdAt) }}</span>
-        </div>
-        <strong class="dashboard-risk__title">{{ item.title }}</strong>
-        <p class="dashboard-risk__desc">{{ item.description }}</p>
-        <RouterLink class="dashboard-risk__action" :to="item.to">查看详情</RouterLink>
-      </article>
-    </div>
-
-    <div v-else class="dashboard-risk__empty admin-muted">当前没有新的风险动态。</div>
-  </section>
+  </div>
 </template>
 
 <style scoped>
-.dashboard-section__heading,
-.dashboard-risk__top {
+.dashboard-risk {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
 }
 
-.dashboard-risk,
-.dashboard-risk__item {
-  display: grid;
-  gap: 0.8rem;
-}
-
-.dashboard-risk {
-  margin-top: 1rem;
-}
-
-.dashboard-risk__item {
-  padding: 1rem 1.05rem;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-soft) 84%, transparent), var(--bg-surface));
-}
-
-.dashboard-risk__badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 0.35rem 0.7rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-.dashboard-risk__badge[data-priority='high'] {
-  color: var(--danger);
-  background: rgba(181, 68, 68, 0.12);
-}
-
-.dashboard-risk__badge[data-priority='medium'] {
-  color: var(--warning);
-  background: rgba(181, 122, 33, 0.14);
-}
-
-.dashboard-risk__badge[data-priority='low'] {
-  color: var(--text-muted);
-  background: var(--bg-soft);
-}
-
-.dashboard-risk__time,
-.dashboard-risk__desc,
-.dashboard-risk__empty {
-  color: var(--text-muted);
-}
-
-.dashboard-risk__title {
-  color: var(--text-strong);
-}
-
-.dashboard-risk__desc {
-  margin: 0;
-  line-height: 1.7;
-}
-
-.dashboard-risk__action {
+.view-all {
+  font-size: 0.8125rem;
   color: var(--primary);
   font-weight: 600;
 }
 
-.dashboard-risk__empty {
-  padding: 1rem 0 0.2rem;
+.risk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.risk-card {
+  padding: 1.25rem;
+  background: var(--bg-surface);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s ease;
+}
+
+.risk-card:hover {
+  border-color: var(--primary-soft);
+}
+
+.risk-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.risk-card__time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.risk-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.risk-badge[data-priority='high'] { color: #b54444; background: rgba(181, 68, 68, 0.08); }
+.risk-badge[data-priority='medium'] { color: #b57a21; background: rgba(181, 122, 33, 0.08); }
+.risk-badge[data-priority='low'] { color: #6b7668; background: rgba(107, 118, 104, 0.08); }
+
+.risk-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.risk-card__desc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.risk-card__link {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: 0.25rem;
+}
+
+.loading-placeholder {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
 }
 </style>
+

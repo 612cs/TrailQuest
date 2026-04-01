@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { FlagTriangleRight, MessageSquareMore, Mountain, Route, UsersRound } from 'lucide-vue-next'
-
+import { FlagTriangleRight, MessageSquareMore, Mountain, Route, UsersRound, TriangleAlert } from 'lucide-vue-next'
 import type { AdminDashboardSummary } from '../../types/admin'
 
 defineProps<{
@@ -8,173 +7,233 @@ defineProps<{
   loading: boolean
 }>()
 
-const cards = [
+const primaryCards = [
   {
     key: 'pendingTrailCount',
-    title: '待审核路线',
-    description: '需要运营尽快完成首轮审核。',
+    title: '路线审核',
+    description: '待处理 42',
     icon: Mountain,
     to: { path: '/trails/review', query: { reviewStatus: 'pending' } },
+    color: 'green'
   },
   {
     key: 'pendingReportCount',
     title: '待处理举报',
-    description: '举报模块预留治理入口，后续可直接承接真实工单。',
+    description: '18 条紧急处理',
     icon: FlagTriangleRight,
     to: { path: '/reports' },
+    color: 'red'
   },
   {
     key: 'hiddenReviewCount',
-    title: '已隐藏评论',
-    description: '隐藏评论总量可快速反映社区风险热度。',
+    title: '已屏蔽评论',
+    description: '盘点已违规标记',
     icon: MessageSquareMore,
     to: { path: '/reviews', query: { status: 'hidden' } },
+    color: 'neutral'
   },
+] as const
+
+const secondaryCards = [
   {
     key: 'todayNewUserCount',
-    title: '今日新增用户',
-    description: '跟踪今日拉新情况和后台访问压力。',
+    title: '今日新增粉丝',
     icon: UsersRound,
-    to: { path: '/users' },
+    color: 'green'
   },
   {
     key: 'todayNewTrailCount',
     title: '今日新增路线',
-    description: '判断内容供给是否在持续增长。',
     icon: Route,
-    to: { path: '/trails/review' },
+    color: 'cyan'
   },
   {
     key: 'todayNewReviewCount',
-    title: '今日新增评论',
-    description: '观察社区互动强度与治理工作量。',
+    title: '今日新增评价',
     icon: MessageSquareMore,
-    to: { path: '/reviews' },
+    color: 'blue'
   },
 ] as const
 
-function valueOf(summary: AdminDashboardSummary | null, key: (typeof cards)[number]['key']) {
-  if (!summary) {
-    return 0
-  }
-  return summary[key]
+function valueOf(summary: AdminDashboardSummary | null, key: string) {
+  if (!summary) return 0
+  return (summary as any)[key] ?? 0
 }
 </script>
 
 <template>
-  <section class="admin-card admin-section">
-    <div class="dashboard-section__heading">
-      <div>
-        <h2 class="admin-title">治理概览</h2>
-        <p class="admin-subtitle">优先展示今天最关键的待办和新增信号。</p>
-      </div>
-    </div>
-
-    <div class="dashboard-overview">
+  <div class="dashboard-overview">
+    <!-- Top Row: Primary Cards -->
+    <div class="overview-grid overview-grid--primary">
       <RouterLink
-        v-for="item in cards"
+        v-for="item in primaryCards"
         :key="item.key"
-        class="dashboard-overview__card"
+        class="primary-card"
+        :data-color="item.color"
         :to="item.to"
       >
-        <div class="dashboard-overview__icon">
-          <component :is="item.icon" :size="18" :stroke-width="2" />
+        <div class="primary-card__icon">
+          <component :is="item.icon" :size="20" />
         </div>
-        <div class="dashboard-overview__body">
-          <p class="dashboard-overview__title">{{ item.title }}</p>
-          <p class="dashboard-overview__value">{{ loading ? '...' : valueOf(summary, item.key) }}</p>
-          <p class="dashboard-overview__desc">{{ item.description }}</p>
+        <div class="primary-card__content">
+          <p class="primary-card__label">{{ item.title }}</p>
+          <p class="primary-card__value">{{ loading ? '...' : valueOf(summary, item.key) }}</p>
+          <p class="primary-card__desc">{{ item.description }}</p>
         </div>
       </RouterLink>
     </div>
-  </section>
+
+    <!-- Middle Row: Secondary Stats -->
+    <div class="overview-grid overview-grid--secondary">
+      <div
+        v-for="item in secondaryCards"
+        :key="item.key"
+        class="secondary-card"
+        :data-color="item.color"
+      >
+        <div class="secondary-card__icon">
+          <component :is="item.icon" :size="18" />
+        </div>
+        <div class="secondary-card__content">
+          <p class="secondary-card__label">{{ item.title }}</p>
+          <p class="secondary-card__value">{{ loading ? '...' : valueOf(summary, item.key).toLocaleString() }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-.dashboard-section__heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
 .dashboard-overview {
   display: grid;
+  gap: 1rem;
+}
+
+.overview-grid {
+  display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: 1.25rem;
 }
 
-.dashboard-overview__card {
-  display: flex;
-  gap: 1rem;
-  padding: 1.15rem;
-  border-radius: 22px;
+/* Primary Cards Styling */
+.primary-card {
+  position: relative;
+  padding: 1.5rem;
+  border-radius: 20px;
+  background: var(--bg-surface);
   border: 1px solid var(--border);
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--bg-surface) 78%, transparent), color-mix(in srgb, var(--primary-soft) 36%, transparent)),
-    var(--bg-surface);
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.dashboard-overview__card:hover {
+.primary-card:hover {
   transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
   box-shadow: var(--shadow);
+  border-color: var(--primary-soft);
 }
 
-.dashboard-overview__icon {
+.primary-card__icon {
+  width: 3rem;
+  height: 3rem;
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 18px;
-  color: var(--primary);
-  background: var(--primary-soft);
-  flex: none;
+  border-radius: 12px;
 }
 
-.dashboard-overview__body {
-  min-width: 0;
+.primary-card[data-color="green"] .primary-card__icon {
+  background: rgba(47, 106, 58, 0.08);
+  color: #2f6a3a;
+}
+.primary-card[data-color="red"] .primary-card__icon {
+  background: rgba(181, 68, 68, 0.08);
+  color: #b54444;
+}
+.primary-card[data-color="neutral"] .primary-card__icon {
+  background: rgba(107, 118, 104, 0.08);
+  color: #6b7668;
 }
 
-.dashboard-overview__title,
-.dashboard-overview__desc {
+.primary-card__label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
   margin: 0;
 }
 
-.dashboard-overview__title {
-  color: var(--text-muted);
-  font-size: 0.92rem;
-}
-
-.dashboard-overview__value {
-  margin: 0.45rem 0 0;
+.primary-card__value {
+  font-size: 2.25rem;
+  font-weight: 700;
   color: var(--text-strong);
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1.05;
+  margin: 0.25rem 0;
+  line-height: 1;
 }
 
-.dashboard-overview__desc {
-  margin-top: 0.55rem;
+.primary-card__desc {
+  font-size: 0.75rem;
   color: var(--text-muted);
-  line-height: 1.6;
-  font-size: 0.9rem;
+  margin: 0;
 }
 
-@media (max-width: 1280px) {
-  .dashboard-overview {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.primary-card[data-color="red"] .primary-card__desc {
+  color: #b54444;
+  font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .dashboard-overview {
+/* Secondary Cards Styling */
+.secondary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.secondary-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.secondary-card[data-color="green"]::before { background: #2f6a3a; }
+.secondary-card[data-color="cyan"]::before { background: #00838f; }
+.secondary-card[data-color="blue"]::before { background: #1565c0; }
+
+.secondary-card__icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--bg-soft);
+  color: var(--primary);
+}
+
+.secondary-card__label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.secondary-card__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0;
+  line-height: 1.2;
+}
+
+@media (max-width: 1024px) {
+  .overview-grid {
     grid-template-columns: 1fr;
   }
 }
 </style>
+
