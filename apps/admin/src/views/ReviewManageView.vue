@@ -58,7 +58,17 @@ onMounted(() => {
   <div class="list-page-container">
     <section class="settings-card list-view-card">
       <div class="list-toolbar">
-        <div class="filter-group">
+        <div v-if="selectedIds.length > 0" class="batch-action-wrapper animate-fade-in-up">
+          <ReviewBatchActionBar
+            :selected-count="selectedIds.length"
+            :active-count="selectedActiveIds.length"
+            :restorable-count="selectedRestorableIds.length"
+            @batch-hide="requestBatchHide"
+            @batch-restore="requestBatchRestore"
+            @clear="toggleSelectAllCurrent(false)"
+          />
+        </div>
+        <div v-else class="filter-group">
           <div class="search-input-wrapper">
             <Search :size="16" class="search-icon" />
             <input
@@ -71,7 +81,7 @@ onMounted(() => {
           </div>
           <select
             v-model="status"
-            class="styled-select"
+            class="styled-select status-select"
             aria-label="评论状态"
             @change="load(1)"
           >
@@ -92,16 +102,6 @@ onMounted(() => {
           </button>
         </div>
       </div>
-
-      <ReviewBatchActionBar
-        v-if="selectedIds.length"
-        :selected-count="selectedIds.length"
-        :active-count="selectedActiveIds.length"
-        :restorable-count="selectedRestorableIds.length"
-        @batch-hide="requestBatchHide"
-        @batch-restore="requestBatchRestore"
-        @clear="toggleSelectAllCurrent(false)"
-      />
 
       <div class="list-body">
         <div v-if="errorMessage" class="notice-alert is-error">{{ errorMessage }}</div>
@@ -204,6 +204,7 @@ onMounted(() => {
   gap: 1.5rem;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
+  min-height: 44px;
 }
 
 .filter-group {
@@ -215,8 +216,8 @@ onMounted(() => {
 
 .search-input-wrapper {
   position: relative;
-  flex: 2;
-  min-width: 300px;
+  flex: 3;
+  min-width: 400px;
 }
 
 .search-icon {
@@ -232,6 +233,11 @@ onMounted(() => {
   padding-left: 2.75rem !important;
 }
 
+.status-select {
+  flex: 0 0 160px !important;
+  min-width: 160px !important;
+}
+
 .styled-input, .styled-select {
   background: var(--bg-soft);
   border: 1px solid var(--border);
@@ -239,9 +245,11 @@ onMounted(() => {
   padding: 0.6rem 1rem;
   font-size: 0.875rem;
   color: var(--text-strong);
-  min-width: 140px;
-  flex: 1;
   transition: all 0.2s;
+}
+
+.batch-action-wrapper {
+  flex: 1;
 }
 
 .styled-input:focus, .styled-select:focus {
