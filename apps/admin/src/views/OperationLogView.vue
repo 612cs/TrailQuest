@@ -85,11 +85,6 @@ onMounted(() => {
 
 <template>
   <div class="list-page-container">
-    <header class="page-header">
-      <h1 class="page-title">操作日志</h1>
-      <p class="page-subtitle">追溯管理员在系统内的关键操作与历史记录，便于安全审计与故障排查。</p>
-    </header>
-
     <section class="settings-card list-view-card">
       <div class="list-toolbar">
         <div class="filter-group filter-group--large">
@@ -176,23 +171,6 @@ onMounted(() => {
   padding: 0;
 }
 
-.page-header {
-  margin-bottom: 0.5rem;
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-strong);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.page-subtitle {
-  font-size: 0.9375rem;
-  color: var(--text-muted);
-  margin: 0.5rem 0 0;
-}
 
 .settings-card {
   background: white;

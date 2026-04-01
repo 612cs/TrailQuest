@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { RefreshCcw } from 'lucide-vue-next'
 
 import DashboardOverviewCards from '../components/dashboard/DashboardOverviewCards.vue'
 import DashboardQuickLinks from '../components/dashboard/DashboardQuickLinks.vue'
@@ -9,7 +8,7 @@ import DashboardTodoPanel from '../components/dashboard/DashboardTodoPanel.vue'
 import DashboardTrendChart from '../components/dashboard/DashboardTrendChart.vue'
 import { useDashboardSummary } from '../composables/useDashboardSummary'
 
-const { summary, loading, refreshedAt, todoItems, loadSummary } = useDashboardSummary()
+const { summary, loading, todoItems, loadSummary } = useDashboardSummary()
 
 onMounted(() => {
   void loadSummary()
@@ -18,20 +17,6 @@ onMounted(() => {
 
 <template>
   <div class="admin-dashboard">
-    <!-- Toolbar -->
-    <header class="dashboard-header">
-      <div>
-        <h1 class="page-title">Admin Dashboard</h1>
-        <p class="page-subtitle">Welcome back, managing your trails and community.</p>
-      </div>
-      <div class="header-actions">
-        <span class="refresh-time" v-if="refreshedAt">Last updated: {{ refreshedAt }}</span>
-        <button class="icon-button" @click="loadSummary" :disabled="loading">
-          <RefreshCcw :size="18" :class="{ 'animate-spin': loading }" />
-        </button>
-      </div>
-    </header>
-
     <!-- Content Sections -->
     <main class="dashboard-content">
       <!-- 1. Overview Statistics -->
@@ -72,30 +57,14 @@ onMounted(() => {
   gap: 2.5rem;
 }
 
-.dashboard-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-strong);
-  margin: 0;
-  letter-spacing: -0.025em;
-}
-
-.page-subtitle {
-  font-size: 0.9375rem;
-  color: var(--text-muted);
-  margin: 0.5rem 0 0;
-}
-
 .header-actions {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  z-index: 10;
 }
 
 .refresh-time {

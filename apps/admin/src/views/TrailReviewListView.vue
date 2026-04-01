@@ -34,13 +34,6 @@ onMounted(() => {
 
 <template>
   <div class="list-page-container">
-    <!-- Header -->
-    <header class="page-header">
-      <h1 class="page-title">路线发布审核</h1>
-      <p class="page-subtitle">审核用户新发布或修改的徒步路线，确保平台内容合规与专业。</p>
-    </header>
-
-    <!-- Main List Card -->
     <section class="settings-card list-view-card">
       <div class="list-toolbar">
         <div class="filter-group">
@@ -103,23 +96,6 @@ onMounted(() => {
   padding: 0;
 }
 
-.page-header {
-  margin-bottom: 0.5rem;
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-strong);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.page-subtitle {
-  font-size: 0.9375rem;
-  color: var(--text-muted);
-  margin: 0.5rem 0 0;
-}
 
 .settings-card {
   background: white;

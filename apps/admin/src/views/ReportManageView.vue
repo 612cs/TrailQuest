@@ -51,13 +51,6 @@ onMounted(load)
 
 <template>
   <div class="list-page-container">
-    <!-- Header -->
-    <header class="page-header">
-      <h1 class="page-title">举报处理</h1>
-      <p class="page-subtitle">管理用户举报信息，及时处理违规内容，维护社区健康环境。</p>
-    </header>
-
-    <!-- Main List Card -->
     <section class="settings-card list-view-card">
       <div class="list-toolbar">
         <div class="notice-alert is-warning">当前举报入口仍在前台接入中，先保留治理入口。</div>
@@ -129,23 +122,6 @@ onMounted(load)
   padding: 0;
 }
 
-.page-header {
-  margin-bottom: 0.5rem;
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--text-strong);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.page-subtitle {
-  font-size: 0.9375rem;
-  color: var(--text-muted);
-  margin: 0.5rem 0 0;
-}
 
 .settings-card {
   background: white;

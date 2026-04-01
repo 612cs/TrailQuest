@@ -57,11 +57,6 @@ function navigate(path: string) {
         <span v-if="!props.collapsed">{{ item.title }}</span>
       </button>
     </nav>
-
-    <div class="admin-sidebar__footer" v-if="!props.collapsed">
-      <p>内容治理最小集</p>
-      <small>Pure Admin 风格 · TrailQuest Green</small>
-    </div>
   </aside>
 </template>
 
@@ -86,19 +81,19 @@ function navigate(path: string) {
   gap: 0.85rem;
   margin-bottom: 1.2rem;
   padding: 0.9rem 0.85rem;
-  border-radius: 20px;
+  border-radius: 16px;
   background: var(--bg-soft);
 }
 
 .admin-sidebar__logo {
   display: grid;
   place-items: center;
-  width: 2.4rem;
-  height: 2.4rem;
-  border-radius: 14px;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 12px;
   color: #fff;
   background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 72%, black));
-  box-shadow: 0 16px 36px rgba(47, 94, 37, 0.24);
+  box-shadow: 0 12px 24px rgba(47, 94, 37, 0.15);
 }
 
 .admin-sidebar__brand-text {
@@ -110,12 +105,13 @@ function navigate(path: string) {
 
 .admin-sidebar__brand-text strong {
   color: var(--text-strong);
+  font-size: 0.9375rem;
+  font-weight: 700;
 }
 
-.admin-sidebar__brand-text span,
-.admin-sidebar__footer p,
-.admin-sidebar__footer small {
+.admin-sidebar__brand-text span {
   color: var(--text-muted);
+  font-size: 0.75rem;
 }
 
 .admin-sidebar__nav {
@@ -132,45 +128,25 @@ function navigate(path: string) {
   gap: 0.75rem;
   width: 100%;
   border: 1px solid transparent;
-  border-radius: 18px;
-  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
   text-align: left;
-  transition:
-    background-color 0.18s ease,
-    color 0.18s ease,
-    border-color 0.18s ease,
-    transform 0.18s ease;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
 .admin-sidebar__nav-item:hover {
-  transform: translateX(2px);
   background: var(--bg-soft);
   color: var(--text-strong);
 }
 
 .admin-sidebar__nav-item.active {
-  border-color: color-mix(in srgb, var(--primary) 28%, transparent);
   background: color-mix(in srgb, var(--primary) 12%, transparent);
   color: var(--primary);
-}
-
-.admin-sidebar__footer {
-  margin-top: 1rem;
-  padding: 0.95rem 1rem;
-  border-radius: 18px;
-  background: var(--bg-soft);
-}
-
-.admin-sidebar__footer p {
-  margin: 0 0 0.3rem;
-  font-weight: 600;
-}
-
-.admin-sidebar__footer small {
-  display: block;
 }
 
 @media (max-width: 1200px) {

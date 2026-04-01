@@ -114,12 +114,6 @@ onMounted(() => {
 
 <template>
   <div class="settings-view">
-    <!-- Header -->
-    <header class="settings-header">
-      <h1 class="page-title">设置中心</h1>
-      <p class="page-subtitle">管理您的账户偏好、系统外观及全局配置。</p>
-    </header>
-
     <!-- Bento Grid -->
     <div class="bento-grid">
       <!-- Left Column: Identity & System -->
@@ -300,19 +294,6 @@ onMounted(() => {
   gap: 2.5rem;
 }
 
-.page-title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: var(--text-strong);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.page-subtitle {
-  font-size: 1rem;
-  color: var(--text-muted);
-  margin: 0.5rem 0 0;
-}
 
 /* Bento Grid */
 .bento-grid {

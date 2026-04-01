@@ -244,11 +244,6 @@ onMounted(() => {
 
 <template>
   <div class="settings-view">
-    <header class="settings-header">
-      <h1 class="page-title">配置中心</h1>
-      <p class="page-subtitle">按业务模块查看和维护配置项，支持动态新增和修改选项配置。</p>
-    </header>
-
     <div class="bento-grid">
       <!-- Sidebar / Group List -->
       <div class="bento-column bento-column--left">
@@ -432,23 +427,6 @@ onMounted(() => {
   height: 100%;
 }
 
-.settings-header {
-  margin-bottom: 0.5rem;
-}
-
-.page-title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: var(--text-strong);
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.page-subtitle {
-  font-size: 0.9375rem;
-  color: var(--text-muted);
-  margin: 0.5rem 0 0;
-}
 
 /* Bento Grid */
 .bento-grid {
