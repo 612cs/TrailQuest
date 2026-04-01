@@ -49,12 +49,9 @@ onMounted(() => {
 
 <style scoped>
 .admin-dashboard {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
 .header-actions {

@@ -58,14 +58,13 @@ function handleLogout() {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 0 1.5rem 1.5rem 0; /* No top padding */
   overflow: hidden;
 }
 
 .admin-shell__content {
   flex: 1;
   min-height: 0;
-  padding: 1rem 0.25rem 0.25rem 0;
+  padding: 20px;
   overflow-y: auto;
 }
 

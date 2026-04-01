@@ -418,12 +418,9 @@ onMounted(() => {
 
 <style scoped>
 .settings-view {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
   height: 100%;
 }
 
