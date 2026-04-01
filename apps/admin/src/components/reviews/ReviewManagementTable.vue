@@ -71,7 +71,6 @@ function isSelected(id: string | number) {
               </div>
               <div>
                 <strong>{{ item.authorUsername }}</strong>
-                <small>ID {{ item.userId }}</small>
               </div>
             </div>
           </td>
