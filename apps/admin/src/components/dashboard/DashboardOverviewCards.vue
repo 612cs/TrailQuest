@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FlagTriangleRight, MessageSquareMore, Mountain, Route, UsersRound, TriangleAlert } from 'lucide-vue-next'
+import { FlagTriangleRight, MessageSquareMore, Mountain, Route, UsersRound } from 'lucide-vue-next'
 import type { AdminDashboardSummary } from '../../types/admin'
 
 defineProps<{

@@ -73,7 +73,7 @@ function openPreviewByUrl(url: string) {
     </article>
 
     <div class="admin-grid-2 admin-detail-grid">
-      <section class="admin-card admin-detail-card">
+      <section class="settings-card admin-detail-card">
         <h3>基本信息</h3>
         <dl>
           <div><dt>作者</dt><dd>{{ detail.author.username }}</dd></div>
@@ -83,7 +83,7 @@ function openPreviewByUrl(url: string) {
         </dl>
       </section>
 
-      <section class="admin-card admin-detail-card">
+      <section class="settings-card admin-detail-card">
         <h3>结构化地点</h3>
         <dl>
           <div><dt>国家</dt><dd>{{ detail.geoCountry || '--' }}</dd></div>
@@ -96,12 +96,12 @@ function openPreviewByUrl(url: string) {
       </section>
     </div>
 
-    <section class="admin-card admin-detail-card">
+    <section class="settings-card admin-detail-card">
       <h3>路线描述</h3>
       <p class="admin-detail-copy">{{ detail.description || '暂无路线描述。' }}</p>
     </section>
 
-    <section class="admin-card admin-detail-card">
+    <section class="settings-card admin-detail-card">
       <h3>轨迹与建模</h3>
       <div v-if="detail.track.hasTrack" class="admin-detail-track">
         <span>海拔上升 {{ detail.track.elevationGainMeters ?? '--' }} m</span>
@@ -112,7 +112,7 @@ function openPreviewByUrl(url: string) {
       <div v-else class="admin-detail-track-empty">该路线暂未上传轨迹。</div>
     </section>
 
-    <section class="admin-card admin-detail-card">
+    <section class="settings-card admin-detail-card">
       <h3>相册</h3>
       <div v-if="detail.gallery.length" class="admin-detail-gallery">
         <button
@@ -141,16 +141,28 @@ function openPreviewByUrl(url: string) {
 <style scoped>
 .admin-detail-layout {
   display: grid;
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: 1.5rem;
+}
+
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.settings-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 
 .admin-detail-hero {
   display: grid;
   grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 24px;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 20px;
   background: var(--bg-soft);
 }
 
@@ -159,7 +171,7 @@ function openPreviewByUrl(url: string) {
   border: 0;
   min-height: 220px;
   overflow: hidden;
-  border-radius: 20px;
+  border-radius: 16px;
   background: var(--bg-elevated);
 }
 
@@ -203,6 +215,20 @@ function openPreviewByUrl(url: string) {
   justify-content: space-between;
 }
 
+.admin-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.admin-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0;
+}
+
 .admin-detail-meta span,
 .admin-tag,
 .admin-detail-track span {
@@ -213,40 +239,45 @@ function openPreviewByUrl(url: string) {
   border-radius: 999px;
   background: var(--bg-surface);
   color: var(--text-muted);
+  font-weight: 500;
 }
 
 .admin-tag {
   color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.08);
 }
 
 .admin-detail-card {
-  padding: 1.1rem;
+  padding: 1.5rem;
 }
 
 .admin-detail-card h3 {
-  margin: 0 0 0.8rem;
+  margin: 0 0 1rem;
   color: var(--text-strong);
+  font-weight: 700;
+  font-size: 1.125rem;
 }
 
 .admin-detail-card dl {
   display: grid;
-  gap: 0.75rem;
+  gap: 1rem;
   margin: 0;
 }
 
 .admin-detail-card dl div {
   display: grid;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .admin-detail-card dt {
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 0.875rem;
 }
 
 .admin-detail-card dd {
   margin: 0;
   color: var(--text-strong);
+  font-weight: 500;
 }
 
 .admin-detail-copy,
@@ -258,7 +289,7 @@ function openPreviewByUrl(url: string) {
 .admin-detail-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 .admin-detail-gallery__item {
@@ -272,7 +303,7 @@ function openPreviewByUrl(url: string) {
   width: 100%;
   height: 180px;
   object-fit: cover;
-  border-radius: 18px;
+  border-radius: 12px;
   border: 1px solid var(--border);
 }
 

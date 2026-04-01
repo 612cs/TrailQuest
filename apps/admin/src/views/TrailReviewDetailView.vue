@@ -93,47 +93,49 @@ watch(() => route.params.id, () => {
 </script>
 
 <template>
-  <section class="admin-card admin-section">
-    <div class="admin-detail-header">
-      <button class="admin-button admin-button-secondary" type="button" @click="router.push({ name: 'trail-review-list' })">
-        <ArrowLeft :size="16" :stroke-width="2" />
-        返回列表
+  <div class="detail-page-container">
+    <div class="detail-header">
+      <button class="btn btn--secondary" type="button" @click="router.push({ name: 'trail-review-list' })">
+        <ArrowLeft :size="16" :stroke-width="2" /> 返回列表
       </button>
-      <button class="admin-button admin-button-secondary" type="button" @click="loadDetail">
-        <RefreshCcw :size="16" :stroke-width="2" />
-        刷新
+      <button class="btn btn--secondary" type="button" @click="loadDetail">
+        <RefreshCcw :size="16" :stroke-width="2" /> 刷新
       </button>
     </div>
 
-    <div v-if="errorMessage" class="admin-detail-error">{{ errorMessage }}</div>
+    <div v-if="errorMessage" class="notice-alert is-error">{{ errorMessage }}</div>
 
     <template v-if="detail">
       <TrailDetailContent :detail="detail" />
 
-      <section class="admin-card admin-detail-card">
-        <h3>审核操作</h3>
-        <p class="admin-subtitle">通过或驳回该路线。驳回时必须填写审核原因。</p>
-        <div class="admin-detail-actions">
-          <button class="admin-button admin-button-primary" type="button" :disabled="actionLoading" @click="handleApprove">
-            <CheckCircle2 :size="16" :stroke-width="2" />
-            通过审核
+      <section class="settings-card action-card">
+        <div class="action-card__content">
+          <h3>审核操作</h3>
+          <p class="admin-subtitle">通过或驳回该路线。驳回时必须填写审核原因。</p>
+        </div>
+        <div class="action-card__buttons">
+          <button class="btn btn--primary" type="button" :disabled="actionLoading" @click="handleApprove">
+            <CheckCircle2 :size="16" :stroke-width="2" /> 通过审核
           </button>
-          <button class="admin-button admin-button-danger" type="button" :disabled="actionLoading" @click="rejectDialogVisible = true">
-            <XCircle :size="16" :stroke-width="2" />
-            驳回
+          <button class="btn btn--danger" type="button" :disabled="actionLoading" @click="rejectDialogVisible = true">
+            <XCircle :size="16" :stroke-width="2" /> 驳回
           </button>
         </div>
       </section>
     </template>
 
-    <EmptyState
-      v-else-if="!loading"
-      title="路线不存在"
-      description="当前路线审核记录不存在或已被删除。"
-      :icon="ImageIcon"
-    />
+    <div v-else-if="!loading" class="empty-wrap settings-card">
+      <EmptyState
+        title="路线不存在"
+        description="当前路线审核记录不存在或已被删除。"
+        :icon="ImageIcon"
+      />
+    </div>
 
-    <div v-else class="admin-detail-loading">正在加载路线详情...</div>
+    <div v-else class="loading-state">
+      <RefreshCcw class="animate-spin" :size="32" />
+      <p>正在加载路线详情...</p>
+    </div>
 
     <AdminConfirmDialog
       v-model:show="rejectDialogVisible"
@@ -153,43 +155,133 @@ watch(() => route.params.id, () => {
       :title="successDialog.title"
       :message="successDialog.message"
     />
-  </section>
+  </div>
 </template>
 
 <style scoped>
-.admin-detail-header,
-.admin-detail-actions {
+.detail-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.detail-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
 
-.admin-detail-error {
-  margin-top: 1rem;
-  border-radius: 16px;
+.notice-alert {
   padding: 0.85rem 1rem;
-  color: var(--danger);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.notice-alert.is-error {
   background: rgba(181, 68, 68, 0.08);
+  color: var(--danger);
   border: 1px solid rgba(181, 68, 68, 0.16);
 }
 
-.admin-detail-card {
-  margin-top: 1rem;
-  padding: 1.1rem;
+.settings-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 
-.admin-detail-card h3 {
-  margin: 0 0 0.6rem;
+.action-card {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
 }
 
-.admin-detail-actions {
-  justify-content: flex-start;
-  margin-top: 1rem;
+.action-card__content h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-strong);
 }
 
-.admin-detail-loading {
-  margin-top: 1rem;
+.admin-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.action-card__buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.15);
+}
+.btn--primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(var(--primary-rgb), 0.25);
+}
+
+.btn--danger {
+  background: rgba(181, 68, 68, 0.1);
+  color: var(--danger);
+}
+.btn--danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: white;
+}
+
+.btn--secondary {
+  background: var(--bg-soft);
+  color: var(--text-strong);
+  border-color: var(--border);
+}
+.btn--secondary:hover:not(:disabled) {
+  background: white;
+  border-color: var(--primary-soft);
+  color: var(--primary);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.empty-wrap {
+  min-height: 400px;
+  display: grid;
+  place-items: center;
+}
+
+.loading-state {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
   color: var(--text-muted);
 }
 </style>

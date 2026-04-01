@@ -243,346 +243,545 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="admin-section admin-config">
-    <div class="admin-config__layout">
-      <aside class="admin-card admin-config__sidebar">
-        <h2 class="admin-title">分类导航</h2>
-        <p class="admin-subtitle">按业务模块查看和维护配置项。</p>
+  <div class="settings-view">
+    <header class="settings-header">
+      <h1 class="page-title">配置中心</h1>
+      <p class="page-subtitle">按业务模块查看和维护配置项，支持动态新增和修改选项配置。</p>
+    </header>
 
-        <div v-if="loadingGroups" class="admin-muted">正在加载分组...</div>
-        <div v-else class="admin-config__category-list">
-          <section
-            v-for="category in groupCategories"
-            :key="category.key"
-            class="admin-config__category"
-          >
-            <header class="admin-config__category-header">
-              <strong>{{ category.title }}</strong>
-              <p>{{ category.description }}</p>
-            </header>
-            <button
-              v-for="group in category.groups"
-              :key="group.groupCode"
-              type="button"
-              class="admin-config__group"
-              :class="{ active: selectedGroupCode === group.groupCode }"
-              @click="selectedGroupCode = group.groupCode"
+    <div class="bento-grid">
+      <!-- Sidebar / Group List -->
+      <div class="bento-column bento-column--left">
+        <aside class="settings-card sidebar-card">
+          <h2 class="card-title">分类导航</h2>
+          
+          <div v-if="loadingGroups" class="loading-state">
+            <RefreshCcw class="animate-spin" :size="24" />
+            <p>正在加载分组...</p>
+          </div>
+          <div v-else class="category-list">
+            <section
+              v-for="category in groupCategories"
+              :key="category.key"
+              class="category-section"
             >
-              <strong>{{ group.groupName }}</strong>
-              <span>{{ group.groupCode }}</span>
-              <small>{{ group.itemCount }} 项</small>
-            </button>
-          </section>
-        </div>
-      </aside>
+              <header class="category-header">
+                <strong>{{ category.title }}</strong>
+                <p>{{ category.description }}</p>
+              </header>
+              <button
+                v-for="group in category.groups"
+                :key="group.groupCode"
+                type="button"
+                class="group-button"
+                :class="{ 'is-active': selectedGroupCode === group.groupCode }"
+                @click="selectedGroupCode = group.groupCode"
+              >
+                <div class="group-info">
+                  <strong class="group-name">{{ group.groupName }}</strong>
+                  <span class="group-code">{{ group.groupCode }}</span>
+                </div>
+                <div class="group-count">{{ group.itemCount }} 项</div>
+              </button>
+            </section>
+          </div>
+        </aside>
+      </div>
 
-      <div class="admin-card admin-config__content">
+      <!-- Content Area -->
+      <div class="bento-column bento-column--right">
         <template v-if="selectedGroup">
-          <div class="admin-config__content-header">
-            <div>
-              <h2 class="admin-title">{{ selectedGroup.groupName }}</h2>
-              <p class="admin-subtitle">{{ selectedGroup.description || '当前分组暂无补充说明。' }}</p>
+          <section class="settings-card group-header-card">
+            <div class="group-header-info">
+              <h2 class="card-title">{{ selectedGroup.groupName }}</h2>
+              <p class="card-desc">{{ selectedGroup.description || '当前分组暂无补充说明。' }}</p>
             </div>
-            <span class="admin-badge" :class="selectedGroup.status === 'active' ? 'admin-badge-approved' : 'admin-badge-neutral'">
+            <div class="status-badge" :class="selectedGroup.status === 'active' ? 'is-active' : 'is-inactive'">
               {{ selectedGroup.status === 'active' ? '启用中' : '未启用' }}
-            </span>
+            </div>
+          </section>
+
+          <div v-if="errorMessage" class="notice-alert is-error">{{ errorMessage }}</div>
+
+          <div v-if="loadingItems" class="empty-wrap settings-card">
+            <div class="loading-state">
+              <RefreshCcw class="animate-spin" :size="32" />
+              <p>正在加载配置项...</p>
+            </div>
           </div>
 
-          <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
-
-          <div v-if="loadingItems" class="admin-empty-wrap">
-            <div class="admin-muted">正在加载配置项...</div>
-          </div>
-
-          <div v-else class="admin-config__items">
-            <div v-if="selectedGroup.allowCreate" class="admin-panel admin-config__create">
-              <div class="admin-config__create-header">
-                <h3>新增配置项</h3>
-                <button class="admin-button admin-button-primary" type="button" :disabled="creating" @click="createItem">
+          <div v-else class="items-container">
+            <!-- Create Item Form -->
+            <section v-if="selectedGroup.allowCreate" class="settings-card item-card create-item-card">
+              <div class="item-header">
+                <h3 class="item-title">新增配置项</h3>
+                <button class="btn btn--primary" type="button" :disabled="creating" @click="createItem">
                   <Plus :size="16" :stroke-width="2" />
                   {{ creating ? '创建中...' : '新增' }}
                 </button>
               </div>
 
-              <div class="admin-config__grid">
-                <label class="admin-setting-field">
-                  <span>编码</span>
-                  <input v-model="newItem.code" class="admin-input" type="text" placeholder="例如 hiking" />
-                </label>
-                <label class="admin-setting-field">
-                  <span>名称</span>
-                  <input v-model="newItem.itemLabel" class="admin-input" type="text" placeholder="例如 徒步" />
-                </label>
-                <label class="admin-setting-field">
-                  <span>图标</span>
-                  <select v-model="newItem.iconName" class="admin-select">
+              <div class="controls-grid">
+                <div class="input-group">
+                  <label class="input-label">编码</label>
+                  <input v-model="newItem.code" class="styled-input" type="text" placeholder="例如 hiking" />
+                </div>
+                <div class="input-group">
+                  <label class="input-label">名称</label>
+                  <input v-model="newItem.itemLabel" class="styled-input" type="text" placeholder="例如 徒步" />
+                </div>
+                <div class="input-group">
+                  <label class="input-label">图标</label>
+                  <select v-model="newItem.iconName" class="styled-select">
                     <option v-for="icon in ICON_OPTIONS" :key="icon" :value="icon">{{ icon }}</option>
                   </select>
-                </label>
-                <label class="admin-setting-field">
-                  <span>排序</span>
-                  <input v-model.number="newItem.sortOrder" class="admin-input" type="number" min="1" />
-                </label>
-                <label class="admin-setting-field admin-setting-field--full">
-                  <span>搜索预设词</span>
-                  <input v-model="newItem.query" class="admin-input" type="text" placeholder="用于首页活动入口点击后的搜索词" />
-                </label>
+                </div>
+                <div class="input-group">
+                  <label class="input-label">排序</label>
+                  <input v-model.number="newItem.sortOrder" class="styled-input" type="number" min="1" />
+                </div>
+                <div class="input-group input-group--full" v-if="selectedGroup.groupCode === 'home_activity'">
+                  <label class="input-label">搜索预设词</label>
+                  <input v-model="newItem.query" class="styled-input" type="text" placeholder="用于首页活动入口点击后的搜索词" />
+                </div>
               </div>
-            </div>
+            </section>
 
-            <EmptyState
-              v-if="!drafts.length"
-              title="当前分组暂无配置项"
-              description="可以先补齐基础配置后再接入前台展示。"
-            />
-
-            <div v-else class="admin-config__item-list">
-              <article v-for="draft in drafts" :key="draft.id" class="admin-panel admin-config__item">
-                <div class="admin-config__item-header">
-                  <div>
-                    <strong>{{ draft.itemLabel || draft.code }}</strong>
-                    <p>{{ draft.code }}</p>
+            <!-- Items List -->
+            <template v-if="drafts.length">
+              <section v-for="draft in drafts" :key="draft.id" class="settings-card item-card">
+                <div class="item-header">
+                  <div class="item-info">
+                    <strong class="item-title">{{ draft.itemLabel || draft.code }}</strong>
+                    <span class="item-code">{{ draft.code }}</span>
                   </div>
                   <button
-                    class="admin-button admin-button-primary"
+                    class="btn btn--primary"
                     type="button"
                     :disabled="savingId === draft.id"
                     @click="saveDraft(draft)"
                   >
                     <Save :size="16" :stroke-width="2" />
-                    {{ savingId === draft.id ? '保存中...' : '保存' }}
+                    {{ savingId === draft.id ? '保存中...' : '保存修改' }}
                   </button>
                 </div>
 
-                <div class="admin-config__grid">
-                  <label class="admin-setting-field">
-                    <span>名称</span>
-                    <input v-model="draft.itemLabel" class="admin-input" type="text" />
-                  </label>
-                  <label class="admin-setting-field">
-                    <span>副文案</span>
-                    <input v-model="draft.itemSubLabel" class="admin-input" type="text" />
-                  </label>
-                  <label class="admin-setting-field">
-                    <span>图标</span>
-                    <select v-model="draft.iconName" class="admin-select">
+                <div class="controls-grid">
+                  <div class="input-group">
+                    <label class="input-label">名称</label>
+                    <input v-model="draft.itemLabel" class="styled-input" type="text" />
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">副文案</label>
+                    <input v-model="draft.itemSubLabel" class="styled-input" type="text" />
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">图标</label>
+                    <select v-model="draft.iconName" class="styled-select">
                       <option value="">无图标</option>
                       <option v-for="icon in ICON_OPTIONS" :key="icon" :value="icon">{{ icon }}</option>
                     </select>
-                  </label>
-                  <label class="admin-setting-field">
-                    <span>排序</span>
-                    <input v-model.number="draft.sortOrder" class="admin-input" type="number" min="1" />
-                  </label>
-                  <label class="admin-setting-field">
-                    <span>启用状态</span>
-                    <select v-model="draft.enabled" class="admin-select">
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">排序</label>
+                    <input v-model.number="draft.sortOrder" class="styled-input" type="number" min="1" />
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">启用状态</label>
+                    <select v-model="draft.enabled" class="styled-select">
                       <option :value="true">启用</option>
                       <option :value="false">停用</option>
                     </select>
-                  </label>
-                  <label class="admin-setting-field">
-                    <span>是否内建</span>
-                    <input class="admin-input" type="text" :value="draft.builtin ? '是' : '否'" readonly />
-                  </label>
-                  <label class="admin-setting-field admin-setting-field--full">
-                    <span>说明</span>
-                    <input v-model="draft.description" class="admin-input" type="text" />
-                  </label>
-                  <label class="admin-setting-field admin-setting-field--full" v-if="selectedGroup.groupCode === 'home_activity'">
-                    <span>搜索预设词</span>
-                    <input v-model="draft.query" class="admin-input" type="text" />
-                  </label>
+                  </div>
+                  <div class="input-group">
+                    <label class="input-label">是否内建</label>
+                    <input class="styled-input is-readonly" type="text" :value="draft.builtin ? '是' : '否'" readonly disabled />
+                  </div>
+                  <div class="input-group input-group--full">
+                    <label class="input-label">说明</label>
+                    <input v-model="draft.description" class="styled-input" type="text" />
+                  </div>
+                  <div class="input-group input-group--full" v-if="selectedGroup.groupCode === 'home_activity'">
+                    <label class="input-label">搜索预设词</label>
+                    <input v-model="draft.query" class="styled-input" type="text" />
+                  </div>
                 </div>
-              </article>
+              </section>
+            </template>
+            <div v-else class="empty-wrap settings-card">
+              <EmptyState
+                title="当前分组暂无配置项"
+                description="可以先补齐基础配置然后再接入前台展示。"
+              />
             </div>
           </div>
         </template>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <style scoped>
-.admin-section {
+.settings-view {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-}
-
-.admin-config {
-  gap: 1rem;
+  gap: 2rem;
   height: 100%;
 }
 
-.admin-config__header,
-.admin-config__sidebar,
-.admin-config__content {
-  padding: 1.2rem 1.3rem;
+.settings-header {
+  margin-bottom: 0.5rem;
 }
 
-.admin-config__header,
-.admin-config__content-header,
-.admin-config__header-actions,
-.admin-config__create-header,
-.admin-config__item-header {
+.page-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0;
+}
+
+/* Bento Grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.bento-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 0;
+}
+
+.bento-column--left { 
+  grid-column: span 4; 
+}
+.bento-column--right { 
+  grid-column: span 8; 
+  overflow-y: auto;
+  padding-right: 0.5rem; /* Add some padding for scrollbar */
+}
+
+/* Scrollbar styling for the right column */
+.bento-column--right::-webkit-scrollbar {
+  width: 6px;
+}
+.bento-column--right::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 10px;
+}
+
+.settings-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.sidebar-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem;
+  color: var(--text-strong);
+}
+
+.card-desc {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0.25rem 0 0;
+}
+
+/* Category List */
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+}
+
+.category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.category-header strong {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.25rem;
+}
+
+.category-header p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.group-button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-}
-
-.admin-config__eyebrow {
-  margin: 0 0 0.35rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.32em;
-  color: var(--text-muted);
-}
-
-.admin-config__layout {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: 18rem minmax(0, 1fr);
-  gap: 1rem;
-}
-
-.admin-config__sidebar,
-.admin-config__content {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.admin-config__category-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 0.8rem;
-  min-height: 0;
-  overflow: auto;
-}
-
-.admin-config__category {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.admin-config__category-header strong {
-  color: var(--text-strong);
-}
-
-.admin-config__category-header p {
-  margin: 0.25rem 0 0;
-  color: var(--text-muted);
-  font-size: 0.88rem;
-  line-height: 1.6;
-}
-
-.admin-config__group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.2rem;
   width: 100%;
-  margin-top: 0.75rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: transparent;
-  color: var(--text-strong);
-  cursor: pointer;
-}
-
-.admin-config__group span,
-.admin-config__group small,
-.admin-config__item-header p {
-  color: var(--text-muted);
-}
-
-.admin-config__group.active {
-  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
-  background: color-mix(in srgb, var(--primary) 10%, transparent);
-}
-
-.admin-config__items,
-.admin-config__item-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-height: 0;
-}
-
-.admin-config__items {
-  flex: 1;
-  margin-top: 1rem;
-  overflow: auto;
-}
-
-.admin-config__create,
-.admin-config__item {
   padding: 1rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.admin-config__create-header h3,
-.admin-config__item-header strong {
-  margin: 0;
-  color: var(--text-strong);
+.group-button:hover {
+  background: var(--bg-soft);
+  border-color: var(--primary-soft);
 }
 
-.admin-config__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem 1rem;
-  margin-top: 1rem;
+.group-button.is-active {
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
+  border-color: var(--primary);
 }
 
-.admin-setting-field {
+.group-info {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.25rem;
 }
 
-.admin-setting-field span {
+.group-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+.group-button.is-active .group-name {
+  color: var(--primary);
+}
+
+.group-code {
+  font-size: 0.75rem;
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-family: monospace;
 }
 
-.admin-setting-field--full {
+.group-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  background: var(--bg-surface);
+  border-radius: 6px;
+  color: var(--text-muted);
+}
+.group-button.is-active .group-count {
+  background: white;
+  color: var(--primary);
+}
+
+/* Right Column Content */
+.group-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.75rem;
+  border-radius: 99px;
+}
+.status-badge.is-active {
+  background: rgba(47, 106, 58, 0.1);
+  color: #2f6a3a;
+}
+.status-badge.is-inactive {
+  background: var(--bg-soft);
+  color: var(--text-muted);
+}
+
+.items-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-item-card {
+  border: 1.5px dashed var(--border);
+  background: var(--bg-soft);
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.item-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.item-code {
+  font-family: monospace;
+  font-size: 0.8125rem;
+  padding: 0.2rem 0.5rem;
+  background: var(--bg-surface);
+  border-radius: 6px;
+  color: var(--text-muted);
+}
+
+/* Form Controls */
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.input-group--full {
   grid-column: 1 / -1;
 }
 
-.admin-list-error {
-  margin-top: 1rem;
-  border-radius: 16px;
-  padding: 0.85rem 1rem;
-  color: var(--danger);
+.input-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.styled-input, .styled-select {
+  background: var(--bg-soft);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-strong);
+  transition: all 0.2s;
+  width: 100%;
+}
+.create-item-card .styled-input, 
+.create-item-card .styled-select {
+  background: white;
+}
+
+.styled-input:focus, .styled-select:focus {
+  outline: none;
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.styled-input.is-readonly {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s;
+  border: none;
+}
+.btn--primary {
+  background: var(--primary);
+  color: white;
+}
+.btn--primary:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.notice-alert {
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+.notice-alert.is-error {
   background: rgba(181, 68, 68, 0.08);
+  color: var(--danger);
   border: 1px solid rgba(181, 68, 68, 0.16);
 }
 
-.admin-empty-wrap {
-  flex: 1;
-  display: grid;
-  place-items: center;
+.empty-wrap, .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-muted);
+  gap: 1rem;
 }
 
-@media (max-width: 1200px) {
-  .admin-config__layout {
+@media (max-width: 1024px) {
+  .bento-grid {
     grid-template-columns: 1fr;
+    overflow-y: auto;
   }
-
-  .admin-config__grid {
+  .bento-column--left, .bento-column--right {
+    grid-column: span 12;
+    overflow-y: visible;
+  }
+  .sidebar-card {
+    height: auto;
+    max-height: 400px;
+  }
+}
+@media (max-width: 640px) {
+  .controls-grid {
     grid-template-columns: 1fr;
-  }
-
-  .admin-config__header,
-  .admin-config__content-header,
-  .admin-config__header-actions,
-  .admin-config__create-header,
-  .admin-config__item-header {
-    flex-wrap: wrap;
   }
 }
 </style>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { KeyRound, ShieldCheck, Sparkles } from 'lucide-vue-next'
+import { KeyRound, ShieldCheck, Sparkles, Trees } from 'lucide-vue-next'
 
 import { useAdminAuthStore } from '../stores/auth'
 import { pinia } from '../stores/pinia'
@@ -44,193 +44,344 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="admin-login-page admin-page">
-    <div class="admin-login-page__glow" />
-    <main class="admin-login-card admin-card">
-      <section class="admin-login-card__hero">
-        <div class="admin-login-card__eyebrow">TrailQuest Admin</div>
-        <h1>内容治理后台</h1>
-        <p>
-          路线审核、评论管理、举报处理的最小工作台。
-          绿色系、低噪音、可快速扩展。
-        </p>
+  <div class="login-view">
+    <div class="login-background"></div>
+    <div class="login-overlay"></div>
+    
+    <main class="login-bento-container">
+      <div class="login-bento-card">
+        <!-- Brand/Hero Section -->
+        <section class="login-hero">
+          <div class="hero-content">
+            <div class="brand-eyebrow">TrailQuest Digital Ecosystem</div>
+            <h1 class="hero-title">内容治理后台</h1>
+            <p class="hero-desc">
+              步道管理、数据洞察与用户服务的数字指挥仓。
+              体验新一代的极简管理界面设计。
+            </p>
+            
+            <div class="feature-badges">
+              <span class="badge"><ShieldCheck :size="14" /> 权限校验</span>
+              <span class="badge"><Sparkles :size="14" /> 沉浸式主题</span>
+              <span class="badge"><KeyRound :size="14" /> SSO 登录</span>
+            </div>
+          </div>
+          <Trees :size="180" class="hero-icon-bg" />
+        </section>
 
-        <div class="admin-login-card__feature-list">
-          <span><ShieldCheck :size="16" :stroke-width="2" /> 管理员权限校验</span>
-          <span><Sparkles :size="16" :stroke-width="2" /> TrailQuest 主题化</span>
-          <span><KeyRound :size="16" :stroke-width="2" /> 复用现有登录体系</span>
-        </div>
-      </section>
+        <!-- Form Section -->
+        <section class="login-form-section">
+          <div class="form-header">
+            <h2>管理员登录</h2>
+            <p>基于身份验证进入工作界面</p>
+          </div>
 
-      <section class="admin-login-card__form-wrap">
-        <div class="admin-login-card__form-header">
-          <h2>管理员登录</h2>
-          <p>使用现有 /api/auth/login 与 /api/auth/me</p>
-        </div>
+          <div v-if="hintMessage" class="notice-alert is-warning">{{ hintMessage }}</div>
+          <div v-if="errorMessage" class="notice-alert is-error">{{ errorMessage }}</div>
 
-        <div v-if="hintMessage" class="admin-login-card__notice">{{ hintMessage }}</div>
-        <div v-if="errorMessage" class="admin-login-card__error">{{ errorMessage }}</div>
+          <form class="auth-form" @submit.prevent="handleSubmit">
+            <div class="input-group">
+              <label class="input-label">邮箱</label>
+              <input 
+                v-model="email" 
+                class="styled-input" 
+                type="email" 
+                placeholder="admin@example.com" 
+                autocomplete="email" 
+              />
+            </div>
 
-        <form class="admin-login-form" @submit.prevent="handleSubmit">
-          <label>
-            <span>邮箱</span>
-            <input v-model="email" class="admin-input" type="email" placeholder="admin@example.com" autocomplete="email" />
-          </label>
+            <div class="input-group">
+              <label class="input-label">密码</label>
+              <input 
+                v-model="password" 
+                class="styled-input" 
+                type="password" 
+                placeholder="请输入密码" 
+                autocomplete="current-password" 
+              />
+            </div>
 
-          <label>
-            <span>密码</span>
-            <input v-model="password" class="admin-input" type="password" placeholder="请输入密码" autocomplete="current-password" />
-          </label>
-
-          <button class="admin-button admin-button-primary" type="submit" :disabled="loading">
-            {{ loading ? '登录中...' : '进入后台' }}
-          </button>
-        </form>
-      </section>
+            <button class="btn btn--primary login-submit-btn" type="submit" :disabled="loading">
+              {{ loading ? '身份验证中...' : '进入控制台' }}
+            </button>
+          </form>
+          
+          <div class="form-footer">
+            <p>未授权访问将被严格记录并审计。© 2026 TrailQuest</p>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 </template>
 
 <style scoped>
-.admin-login-page {
+.login-view {
   position: relative;
   display: grid;
   place-items: center;
   min-height: 100vh;
   padding: 1.5rem;
   overflow: hidden;
+  background-color: var(--bg-body);
 }
 
-.admin-login-page__glow {
+.login-background {
+  position: absolute;
+  inset: -10%;
+  background-image: url('https://images.unsplash.com/photo-1542382156909-9ae37b3f56fd?q=80&w=2000&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  filter: blur(20px);
+  z-index: 0;
+}
+
+.login-overlay {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 18% 18%, rgba(47, 94, 37, 0.18), transparent 30%),
-    radial-gradient(circle at 82% 20%, rgba(106, 165, 90, 0.16), transparent 26%),
-    radial-gradient(circle at 70% 80%, rgba(47, 94, 37, 0.12), transparent 34%);
-  pointer-events: none;
+  background: linear-gradient(135deg, rgba(var(--bg-body-rgb), 0.7) 0%, rgba(var(--bg-body-rgb), 0.95) 100%);
+  z-index: 0;
 }
 
-.admin-login-card {
+/* Bento Card Geometry */
+.login-bento-container {
   position: relative;
-  z-index: 1;
+  z-index: 10;
+  width: 100%;
+  max-width: 1024px;
+  perspective: 1000px;
+}
+
+.login-bento-card {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  width: min(1080px, 100%);
+  grid-template-columns: 1.2fr 1fr;
+  background: rgba(var(--bg-surface-rgb), 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 24px 48px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
   overflow: hidden;
 }
 
-.admin-login-card__hero {
-  padding: 2.5rem;
-  background: linear-gradient(135deg, rgba(47, 94, 37, 0.12), rgba(255, 255, 255, 0.24));
-  border-right: 1px solid var(--border);
+/* Left Hero */
+.login-hero {
+  position: relative;
+  padding: 4rem;
+  background: linear-gradient(145deg, rgba(var(--primary-rgb), 0.9), rgba(var(--primary-rgb), 0.95));
+  color: white;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
 }
 
-.admin-login-card__eyebrow {
-  margin-bottom: 0.8rem;
-  color: var(--primary);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.brand-eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1.5rem;
 }
 
-.admin-login-card__hero h1 {
-  margin: 0;
-  color: var(--text-strong);
-  font-size: clamp(2rem, 5vw, 3.2rem);
-  line-height: 1.05;
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+  letter-spacing: -0.02em;
 }
 
-.admin-login-card__hero p {
-  margin: 1rem 0 0;
-  color: var(--text-muted);
-  max-width: 28rem;
-  line-height: 1.8;
+.hero-desc {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 3rem;
+  max-width: 90%;
 }
 
-.admin-login-card__feature-list {
+.feature-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 1.5rem;
 }
 
-.admin-login-card__feature-list span {
+.badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.55rem 0.85rem;
-  border-radius: 999px;
-  color: var(--primary);
-  background: var(--bg-soft);
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border-radius: 99px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.admin-login-card__form-wrap {
-  padding: 2.2rem;
-  background: var(--bg-surface);
+.hero-icon-bg {
+  position: absolute;
+  right: -40px;
+  bottom: -40px;
+  color: rgba(255, 255, 255, 0.1);
+  transform: rotate(-15deg);
+  z-index: 1;
 }
 
-.admin-login-card__form-header h2 {
+/* Right Form Section */
+.login-form-section {
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(var(--bg-surface-rgb), 0.8);
+}
+
+.form-header {
+  margin-bottom: 2.5rem;
+}
+
+.form-header h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  margin: 0 0 0.5rem;
+}
+
+.form-header p {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
   margin: 0;
+}
+
+.notice-alert {
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.notice-alert.is-warning {
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+}
+
+.notice-alert.is-error {
+  background: rgba(181, 68, 68, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(181, 68, 68, 0.2);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-label {
+  font-size: 0.8125rem;
+  font-weight: 700;
   color: var(--text-strong);
 }
 
-.admin-login-card__form-header p {
-  margin: 0.35rem 0 0;
-  color: var(--text-muted);
+.styled-input {
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text-strong);
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
 }
 
-.admin-login-card__notice,
-.admin-login-card__error {
+.styled-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
+}
+
+.login-submit-btn {
   margin-top: 1rem;
-  border-radius: 16px;
-  padding: 0.85rem 1rem;
-  line-height: 1.65;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
 }
 
-.admin-login-card__notice {
-  color: var(--primary-strong);
-  background: rgba(47, 94, 37, 0.08);
-  border: 1px solid rgba(47, 94, 37, 0.16);
+.login-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.3);
 }
 
-.admin-login-card__error {
-  color: var(--danger);
-  background: rgba(181, 68, 68, 0.08);
-  border: 1px solid rgba(181, 68, 68, 0.18);
+.login-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
-.admin-login-form {
-  display: grid;
-  gap: 1rem;
-  margin-top: 1.2rem;
+.form-footer {
+  margin-top: 2rem;
+  text-align: center;
 }
 
-.admin-login-form label {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.admin-login-form label span {
+.form-footer p {
+  font-size: 0.75rem;
   color: var(--text-muted);
-  font-size: 0.92rem;
-  font-weight: 600;
+  margin: 0;
 }
 
-.admin-login-form button {
-  margin-top: 0.4rem;
-  padding-block: 0.95rem;
-}
-
-@media (max-width: 900px) {
-  .admin-login-card {
+@media (max-width: 1024px) {
+  .login-bento-card {
     grid-template-columns: 1fr;
   }
+  
+  .login-hero {
+    padding: 3rem;
+  }
+  
+  .login-form-section {
+    padding: 3rem;
+  }
+}
 
-  .admin-login-card__hero {
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
+@media (max-width: 640px) {
+  .login-hero {
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .hero-title {
+    font-size: 2.25rem;
+  }
+  
+  .login-form-section {
+    padding: 2.5rem 1.5rem;
   }
 }
 </style>

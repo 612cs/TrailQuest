@@ -84,62 +84,77 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="admin-card admin-section">
-    <div class="admin-list-toolbar">
-      <select v-model="moduleCode" class="admin-select" aria-label="模块" @change="load(1)">
-        <option v-for="item in moduleOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-      </select>
-      <select v-model="actionCode" class="admin-select" aria-label="动作" @change="load(1)">
-        <option v-for="item in actionOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-      </select>
-      <input v-model="operatorKeyword" class="admin-input" placeholder="操作人" aria-label="操作人" @keyup.enter="load(1)" />
-      <select v-model="targetType" class="admin-select" aria-label="对象类型" @change="load(1)">
-        <option v-for="item in targetTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
-      </select>
-      <input v-model="targetId" class="admin-input" placeholder="对象 ID" aria-label="对象 ID" @keyup.enter="load(1)" />
-      <input v-model="dateFrom" class="admin-input" type="date" aria-label="开始日期" @change="load(1)" />
-      <input v-model="dateTo" class="admin-input" type="date" aria-label="结束日期" @change="load(1)" />
-      <div class="admin-list-toolbar__actions">
-        <button class="admin-button admin-button-primary" type="button" @click="load(1)">
-          <Search :size="16" :stroke-width="2" />
-          搜索
-        </button>
-        <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
-        <button class="admin-button admin-button-secondary" type="button" @click="load()">
-          <RefreshCcw :size="16" :stroke-width="2" />
-          刷新
-        </button>
+  <div class="list-page-container">
+    <header class="page-header">
+      <h1 class="page-title">操作日志</h1>
+      <p class="page-subtitle">追溯管理员在系统内的关键操作与历史记录，便于安全审计与故障排查。</p>
+    </header>
+
+    <section class="settings-card list-view-card">
+      <div class="list-toolbar">
+        <div class="filter-group filter-group--large">
+          <select v-model="moduleCode" class="styled-select" aria-label="模块" @change="load(1)">
+            <option v-for="item in moduleOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          </select>
+          <select v-model="actionCode" class="styled-select" aria-label="动作" @change="load(1)">
+            <option v-for="item in actionOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          </select>
+          <input v-model="operatorKeyword" class="styled-input" placeholder="操作人" aria-label="操作人" @keyup.enter="load(1)" />
+          <select v-model="targetType" class="styled-select" aria-label="对象类型" @change="load(1)">
+            <option v-for="item in targetTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          </select>
+          <input v-model="targetId" class="styled-input" placeholder="对象 ID" aria-label="对象 ID" @keyup.enter="load(1)" />
+          <div class="date-range">
+            <input v-model="dateFrom" class="styled-input" type="date" aria-label="开始日期" @change="load(1)" />
+            <span class="date-sep">-</span>
+            <input v-model="dateTo" class="styled-input" type="date" aria-label="结束日期" @change="load(1)" />
+          </div>
+        </div>
+        
+        <div class="action-group">
+          <button class="btn btn--primary" type="button" @click="load(1)">
+            <Search :size="16" :stroke-width="2" /> 搜索
+          </button>
+          <button class="btn btn--secondary" type="button" @click="resetFilters">重置</button>
+          <button class="btn btn--secondary" type="button" @click="load()">
+            <RefreshCcw :size="16" :stroke-width="2" /> 刷新
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="admin-list-body">
-      <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
+      <div class="list-body">
+        <div v-if="errorMessage" class="notice-alert is-error">{{ errorMessage }}</div>
 
-      <OperationLogTable
-        v-if="list.length"
-        :items="list"
-        :module-label="moduleLabel"
-        :action-label="actionLabel"
-        @detail="openDetail"
-      />
+        <OperationLogTable
+          v-if="list.length"
+          :items="list"
+          :module-label="moduleLabel"
+          :action-label="actionLabel"
+          @detail="openDetail"
+        />
 
-      <div v-else class="admin-empty-wrap">
-        <div v-if="loading" class="admin-muted">正在加载操作日志...</div>
-        <EmptyState
-          v-else
-          title="暂无操作日志"
-          description="当前筛选条件下没有匹配的后台操作记录。"
-          :icon="ScrollText"
+        <div v-else class="empty-wrap">
+          <div v-if="loading" class="loading-state">
+            <RefreshCcw class="animate-spin" :size="24" />
+            <p>正在加载操作日志...</p>
+          </div>
+          <EmptyState
+            v-else
+            title="暂无操作日志"
+            description="当前筛选条件下没有匹配的后台操作记录。"
+            :icon="ScrollText"
+          />
+        </div>
+
+        <AdminPagination
+          class="pagination-wrap"
+          :current="pageNum"
+          :total-pages="totalPages"
+          :total-items="total"
+          @update:current="load"
         />
       </div>
-
-      <AdminPagination
-        :current="pageNum"
-        :total-pages="totalPages"
-        :total-items="total"
-        @update:current="load"
-      />
-    </div>
+    </section>
 
     <OperationLogDetailDialog
       :show="detailVisible"
@@ -149,70 +164,194 @@ onMounted(() => {
       :action-label="actionLabel"
       @update:show="closeDetail"
     />
-  </section>
+  </div>
 </template>
 
 <style scoped>
-.admin-section {
+.list-page-container {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
   height: 100%;
-  min-height: 0;
-  overflow: hidden;
+  padding: 0;
 }
 
-.admin-list-toolbar,
-.admin-list-toolbar__actions {
+.page-header {
+  margin-bottom: 0.5rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0;
+}
+
+.settings-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  flex-direction: column;
 }
 
-.admin-list-toolbar {
-  align-items: center;
+.list-view-card {
+  flex: 1;
+  min-height: 0;
+  padding: 1.5rem;
+}
+
+/* Toolbar */
+.list-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
-.admin-list-toolbar > .admin-input,
-.admin-list-toolbar > .admin-select {
-  flex: 1 1 12rem;
-  min-width: 0;
+.filter-group {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+  flex-wrap: wrap;
 }
 
-.admin-list-toolbar__actions {
-  flex: 0 0 auto;
+.filter-group--large .styled-input,
+.filter-group--large .styled-select {
+  flex: 1 1 140px;
+}
+
+.date-range {
+  display: flex;
   align-items: center;
-  flex-wrap: nowrap;
+  gap: 0.5rem;
+  flex: 1 1 280px;
 }
 
-.admin-list-body {
+.date-sep {
+  color: var(--text-muted);
+}
+
+.styled-input, .styled-select {
+  background: var(--bg-soft);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-strong);
+  min-width: 0;
+  flex: 1;
+  transition: all 0.2s;
+}
+
+.styled-input:focus, .styled-select:focus {
+  outline: none;
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.action-group {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 0.2rem;
+}
+
+.btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.15);
+}
+.btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(var(--primary-rgb), 0.25);
+}
+
+.btn--secondary {
+  background: var(--bg-soft);
+  color: var(--text-strong);
+  border-color: var(--border);
+}
+.btn--secondary:hover {
+  background: white;
+  border-color: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* Body */
+.list-body {
   flex: 1;
   min-height: 0;
-  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.admin-list-error {
-  border-radius: 16px;
+.notice-alert {
   padding: 0.85rem 1rem;
-  color: var(--danger);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.notice-alert.is-error {
   background: rgba(181, 68, 68, 0.08);
+  color: var(--danger);
   border: 1px solid rgba(181, 68, 68, 0.16);
 }
 
-.admin-empty-wrap {
+.empty-wrap {
   flex: 1;
-  min-height: 0;
   display: grid;
   place-items: center;
+  min-height: 300px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pagination-wrap {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
 }
 
 @media (max-width: 1200px) {
-  .admin-list-toolbar__actions {
-    width: 100%;
+  .list-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .action-group {
     justify-content: flex-end;
   }
 }

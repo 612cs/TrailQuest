@@ -66,39 +66,39 @@ function handleConfirm() {
     :show="props.show"
     :aria-label="props.title"
     :panel-style="{ width: 'min(520px, 100%)', borderRadius: '24px' }"
-    :header-style="{ padding: '1.2rem 1.2rem 0', display: 'flex', alignItems: 'center' }"
-    :body-style="{ padding: '0.8rem 1.2rem 0' }"
-    :footer-style="{ padding: '1rem 1.2rem 1.2rem' }"
+    :header-style="{ padding: '1.2rem 1.5rem 0', display: 'flex', alignItems: 'center' }"
+    :body-style="{ padding: '1rem 1.5rem 0' }"
+    :footer-style="{ padding: '1.2rem 1.5rem 1.5rem' }"
     @update:show="emit('update:show', $event)"
   >
     <template #header>
-      <div class="admin-dialog__header">
+      <div class="dialog-header">
         <h3>{{ props.title }}</h3>
       </div>
     </template>
 
-    <div class="admin-dialog__body">
-      <p>{{ props.message }}</p>
+    <div class="dialog-body">
+      <p class="dialog-message">{{ props.message }}</p>
 
-      <label v-if="props.requireReason" class="admin-dialog__field">
-        <span>{{ props.reasonLabel }}</span>
+      <label v-if="props.requireReason" class="dialog-field">
+        <span class="field-label">{{ props.reasonLabel }}</span>
         <textarea
           v-model="reason"
-          class="admin-textarea"
+          class="styled-textarea"
           rows="4"
           :placeholder="props.reasonPlaceholder"
         />
       </label>
 
-      <p v-if="localError" class="admin-dialog__error">{{ localError }}</p>
+      <p v-if="localError" class="dialog-error">{{ localError }}</p>
     </div>
 
     <template #footer>
-      <div class="admin-dialog__footer">
-        <button class="admin-button admin-button-secondary" type="button" :disabled="props.loading" @click="close">
+      <div class="dialog-footer">
+        <button class="btn btn--secondary" type="button" :disabled="props.loading" @click="close">
           {{ props.cancelText }}
         </button>
-        <button class="admin-button admin-button-primary" type="button" :disabled="confirmDisabled" @click="handleConfirm">
+        <button class="btn btn--primary" type="button" :disabled="confirmDisabled" @click="handleConfirm">
           {{ props.loading ? '处理中...' : props.confirmText }}
         </button>
       </div>
@@ -107,42 +107,108 @@ function handleConfirm() {
 </template>
 
 <style scoped>
-.admin-dialog__header h3 {
+.dialog-header h3 {
   margin: 0;
   color: var(--text-strong);
-  font-size: 1.12rem;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
-.admin-dialog__body {
-  margin-top: 0.8rem;
-  display: grid;
-  gap: 0.9rem;
+.dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-.admin-dialog__body p {
+.dialog-message {
   margin: 0;
   color: var(--text-muted);
-  line-height: 1.7;
+  line-height: 1.6;
+  font-size: 0.9375rem;
 }
 
-.admin-dialog__field {
-  display: grid;
+.dialog-field {
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
-.admin-dialog__field span {
-  color: var(--text-muted);
-  font-size: 0.92rem;
+.field-label {
+  color: var(--text-strong);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.styled-textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text-strong);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  transition: all 0.2s;
+}
+
+.styled-textarea:focus {
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.dialog-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
-.admin-dialog__error {
-  color: var(--danger);
-}
-
-.admin-dialog__footer {
+.dialog-footer {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.15);
+}
+.btn--primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(var(--primary-rgb), 0.25);
+}
+
+.btn--secondary {
+  background: var(--bg-soft);
+  color: var(--text-strong);
+  border-color: var(--border);
+}
+.btn--secondary:hover:not(:disabled) {
+  background: white;
+  border-color: var(--primary-soft);
+  color: var(--primary);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

@@ -85,70 +85,88 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="admin-card admin-section">
-    <div class="admin-list-toolbar">
-      <input v-model="keyword" class="admin-input" placeholder="用户名、邮箱或所在地" aria-label="关键词" @keyup.enter="load(1)" />
-      <select v-model="role" class="admin-select" aria-label="角色" @change="load(1)">
-          <option value="">全部角色</option>
-          <option value="USER">普通用户</option>
-          <option value="ADMIN">管理员</option>
-      </select>
-      <div class="admin-list-toolbar__actions">
-        <button class="admin-button admin-button-primary" type="button" @click="load(1)">
-          <Search :size="16" :stroke-width="2" />
-          搜索
-        </button>
-        <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
-        <button class="admin-button admin-button-secondary" type="button" @click="load()">
-          <RefreshCcw :size="16" :stroke-width="2" />
-          刷新
-        </button>
+  <div class="list-page-container">
+    <!-- Header -->
+    <header class="page-header">
+      <h1 class="page-title">用户管理</h1>
+      <p class="page-subtitle">检索平台用户，执行封禁、解封等账号级管控策略以维护社区秩序。</p>
+    </header>
+
+    <!-- Main List Card -->
+    <section class="settings-card list-view-card">
+      <div class="list-toolbar">
+        <div class="filter-group">
+          <input v-model="keyword" class="styled-input" placeholder="按用户名、邮箱或所在地检索" aria-label="关键词" @keyup.enter="load(1)" />
+          <select v-model="role" class="styled-select" aria-label="角色" @change="load(1)">
+            <option value="">全部系统角色</option>
+            <option value="USER">普通注册用户</option>
+            <option value="ADMIN">系统管理员</option>
+          </select>
+        </div>
+        
+        <div class="action-group">
+          <button class="btn btn--primary" type="button" @click="load(1)">
+            <Search :size="16" :stroke-width="2" /> 搜索
+          </button>
+          <button class="btn btn--secondary" type="button" @click="resetFilters">重置</button>
+          <button class="btn btn--secondary" type="button" @click="load()">
+            <RefreshCcw :size="16" :stroke-width="2" /> 刷新
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="admin-list-body">
-      <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
+      <div class="list-body">
+        <div v-if="errorMessage" class="notice-alert is-error">{{ errorMessage }}</div>
 
-      <UserManagementTable
-        v-if="list.length"
-        :items="list"
-        :action-loading="actionLoading"
-        @ban="openBanDialog"
-        @unban="openUnbanDialog"
-      />
+        <UserManagementTable
+          v-if="list.length"
+          :items="list"
+          :action-loading="actionLoading"
+          @ban="openBanDialog"
+          @unban="openUnbanDialog"
+        />
 
-      <EmptyState
-        v-else-if="!loading"
-        title="暂无用户数据"
-        description="当前筛选条件下没有匹配的用户。"
-        :icon="UsersRound"
-      />
+        <div v-else class="empty-wrap">
+          <div v-if="loading" class="loading-state">
+            <RefreshCcw class="animate-spin" :size="24" />
+            <p>正在加载用户数据...</p>
+          </div>
+          <EmptyState
+            v-else
+            title="暂无可匹配用户"
+            description="当前筛选条件下没有匹配的用户记录，请放宽搜索限制。"
+            :icon="UsersRound"
+          />
+        </div>
 
-      <AdminPagination
-        :current="pageNum"
-        :total-pages="totalPages"
-        :total-items="total"
-        item-label="位用户"
-        @update:current="load"
-      />
-    </div>
+        <AdminPagination
+          class="pagination-wrap"
+          :current="pageNum"
+          :total-pages="totalPages"
+          :total-items="total"
+          item-label="位用户"
+          @update:current="load"
+        />
+      </div>
+    </section>
 
+    <!-- Dialogs -->
     <AdminConfirmDialog
       v-model:show="banDialogVisible"
       title="确认封禁用户"
-      :message="targetUser ? `封禁 ${targetUser.username} 后，该账号将无法登录、发布和互动。` : '封禁后该账号将无法登录。'"
+      :message="targetUser ? `封禁 ${targetUser.username} 后，该账号将受到严格限制，无法继续访问 TrailQuest 功能。` : '确认执行封禁操作？'"
       confirm-text="确认封禁"
       :loading="actionLoading"
       require-reason
-      reason-label="封禁原因"
-      reason-placeholder="请输入封禁原因"
+      reason-label="封禁具体依据"
+      reason-placeholder="请简述违反条款或封禁理由"
       @confirm="handleBan"
     />
 
     <AdminConfirmDialog
       v-model:show="unbanDialogVisible"
       title="确认解封用户"
-      :message="targetUser ? `解封 ${targetUser.username} 后，该账号将恢复正常使用。` : '确认恢复该账号？'"
+      :message="targetUser ? `解封 ${targetUser.username} 后，限制将被解除。该用户功能恢复。` : '确认解除其违规惩罚？'"
       confirm-text="确认解封"
       :loading="actionLoading"
       @confirm="handleUnban"
@@ -159,69 +177,177 @@ onMounted(() => {
       :title="successDialog.title"
       :message="successDialog.message"
     />
-  </section>
+  </div>
 </template>
 
 <style scoped>
-.admin-section {
+.list-page-container {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
   height: 100%;
-  min-height: 0;
-  overflow: hidden;
+  padding: 0;
 }
 
-.admin-list-toolbar,
-.admin-list-toolbar__actions {
+.page-header {
+  margin-bottom: 0.5rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-strong);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0.5rem 0 0;
+}
+
+.settings-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+}
+
+.list-view-card {
+  flex: 1;
+  min-height: 0;
+  padding: 1.5rem;
+}
+
+/* Toolbar */
+.list-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.admin-list-toolbar {
+.filter-group {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.styled-input, .styled-select {
+  background: var(--bg-soft);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-strong);
+  min-width: 140px;
+  flex: 1;
+  transition: all 0.2s;
+}
+
+.styled-input:focus, .styled-select:focus {
+  outline: none;
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+}
+
+.action-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
   align-items: center;
-  flex-wrap: nowrap;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  border: 1px solid transparent;
 }
 
-.admin-list-toolbar > .admin-input,
-.admin-list-toolbar > .admin-select {
-  flex: 1 1 14rem;
-  min-width: 0;
+.btn--primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.15);
+}
+.btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(var(--primary-rgb), 0.25);
 }
 
-.admin-list-toolbar__actions {
-  flex: 0 0 auto;
-  align-items: center;
-  flex-wrap: nowrap;
+.btn--secondary {
+  background: var(--bg-soft);
+  color: var(--text-strong);
+  border-color: var(--border);
+}
+.btn--secondary:hover {
+  background: white;
+  border-color: var(--primary-soft);
+  color: var(--primary);
 }
 
-.admin-list-body {
+/* Body */
+.list-body {
   flex: 1;
   min-height: 0;
-  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.admin-list-error {
-  border-radius: 16px;
+.notice-alert {
   padding: 0.85rem 1rem;
-  color: var(--danger);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.notice-alert.is-error {
   background: rgba(181, 68, 68, 0.08);
+  color: var(--danger);
   border: 1px solid rgba(181, 68, 68, 0.16);
 }
 
-@media (max-width: 1200px) {
-  .admin-list-toolbar {
-    flex-wrap: wrap;
-  }
+.empty-wrap {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  min-height: 300px;
+}
 
-  .admin-list-toolbar__actions {
-    width: 100%;
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pagination-wrap {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 1200px) {
+  .filter-group {
+    flex: 1 1 100%;
+  }
+  .action-group {
+    flex: 1 1 100%;
     justify-content: flex-end;
   }
 }
-
 </style>

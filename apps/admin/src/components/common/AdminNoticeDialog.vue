@@ -27,25 +27,25 @@ function handleClose() {
     :show="props.show"
     :aria-label="props.title"
     :panel-style="{ width: 'min(460px, 100%)', borderRadius: '24px' }"
-    :header-style="{ padding: '1.2rem 1.2rem 0', display: 'flex', alignItems: 'center' }"
-    :body-style="{ padding: '0.8rem 1.2rem 0' }"
-    :footer-style="{ padding: '1rem 1.2rem 1.2rem' }"
+    :header-style="{ padding: '1.2rem 1.5rem 0', display: 'flex', alignItems: 'center' }"
+    :body-style="{ padding: '1rem 1.5rem 0' }"
+    :footer-style="{ padding: '1.2rem 1.5rem 1.5rem' }"
     @update:show="emit('update:show', $event)"
     @close="emit('close')"
   >
     <template #header>
-      <div class="admin-dialog__header">
+      <div class="dialog-header">
         <h3>{{ props.title }}</h3>
       </div>
     </template>
 
-    <div class="admin-dialog__body">
-      <p>{{ props.message }}</p>
+    <div class="dialog-body">
+      <p class="dialog-message">{{ props.message }}</p>
     </div>
 
     <template #footer>
-      <div class="admin-dialog__footer">
-        <button class="admin-button admin-button-primary" type="button" @click="handleClose">
+      <div class="dialog-footer">
+        <button class="btn btn--primary" type="button" @click="handleClose">
           {{ props.buttonText }}
         </button>
       </div>
@@ -54,27 +54,51 @@ function handleClose() {
 </template>
 
 <style scoped>
-.admin-dialog__header h3 {
+.dialog-header h3 {
   margin: 0;
   color: var(--text-strong);
-  font-size: 1.12rem;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
-.admin-dialog__body {
-  margin-top: 0.8rem;
-  padding: 0.9rem 1rem;
-  border-radius: 18px;
+.dialog-body {
   background: var(--bg-soft);
+  padding: 1.25rem;
+  border-radius: 16px;
 }
 
-.admin-dialog__body p {
+.dialog-message {
   margin: 0;
-  color: var(--text-muted);
-  line-height: 1.75;
+  color: var(--text-strong);
+  line-height: 1.6;
+  font-size: 0.9375rem;
 }
 
-.admin-dialog__footer {
+.dialog-footer {
   display: flex;
   justify-content: flex-end;
+}
+
+.btn {
+  padding: 0.6rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.15);
+}
+.btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(var(--primary-rgb), 0.25);
 }
 </style>
