@@ -1,64 +1,109 @@
 # Claude Code 常用命令
 
-本文档记录 TrailQuest 项目中常用的 Claude Code 命令。
+本文档记录 Claude Code CLI 的常用命令和操作。
 
-## 提交代码
+## 启动与基本操作
 
 ```bash
-# 查看当前改动
+# 启动 Claude Code（当前目录）
+claude
+
+# 在指定目录启动
+claude <目录路径>
+
+# 使用指定模型
+claude --model opus
+
+# 断点续话（恢复之前的对话）
+claude --resume
+
+# 查看帮助
+claude --help
+```
+
+## Slash Commands
+
+在对话中直接使用：
+
+| 命令 | 功能 |
+|------|------|
+| `/resume` | 断点续话 |
+| `/compact` | 压缩对话上下文 |
+| `/redo` | 重做最近一次操作 |
+| `/clear` | 清除对话历史 |
+| `/test` | 运行测试 |
+| `/review` | 代码审查模式 |
+| `/commit` | 提交代码 |
+| `/pr` | 创建 Pull Request |
+| `/help` | 显示帮助 |
+
+## Git 操作
+
+```bash
+# 查看当前状态
 git status
 
 # 查看具体改动
 git diff
 
-# 暂存文件并提交
-git add <文件路径>
-git commit -m "提交信息"
-```
-
-## 分支管理
-
-```bash
-# 查看所有分支
-git branch
+# 暂存并提交
+git add <文件>
+git commit -m "<提交信息>"
 
 # 切换分支
 git checkout <分支名>
 
-# 删除本地分支
-git branch -D <分支名>
+# 创建新分支
+git checkout -b <分支名>
 
-# 合并分支到当前分支
-git merge <分支名> --no-edit
-```
-
-## 同步远程
-
-```bash
 # 拉取远程更新
-git pull --rebase origin main
+git pull --rebase origin <分支名>
 
-# 推送本地提交
-git push origin main
+# 推送提交
+git push origin <分支名>
 ```
 
-## 代码同步问题处理
+## 处理冲突
 
 当出现 "divergent branches" 错误时：
 
 ```bash
-# 方式1: rebase（推荐保持线性历史）
-git pull --rebase origin main
+# 方式1: rebase（推荐）
+git pull --rebase origin <分支名>
 
-# 方式2: merge（会产生合并提交）
-git pull --merge origin main
+# 方式2: merge
+git pull --merge origin <分支名>
 
 # 解决冲突后继续
 git add <冲突文件>
 git rebase --continue
 
-# 或者放弃 rebase
+# 放弃 rebase
 git rebase --abort
+```
+
+## 快捷操作
+
+- `git status` - 查看当前状态
+- `git log --oneline -5` - 查看最近5条提交
+- `git branch -a` - 查看所有分支
+- `Glob <pattern>` - 搜索文件
+- `Grep <pattern>` - 搜索内容
+- `Read <file>` - 读取文件
+
+## 配置 MCP 服务器
+
+MCP 服务器在 `~/.claude/settings.json` 中配置：
+
+```json
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "npx",
+      "args": ["-y", "server-package"]
+    }
+  }
+}
 ```
 
 ## 项目运行
@@ -73,22 +118,3 @@ pnpm dev
 # 构建生产版本
 pnpm build
 ```
-
-## 文件操作
-
-```bash
-# 搜索文件
-Glob <pattern>
-
-# 搜索内容
-Grep <pattern>
-
-# 读取文件
-Read <file_path>
-```
-
-## 常用快捷操作
-
-- `git status` - 查看当前状态
-- `git log --oneline -5` - 查看最近5条提交
-- `git branch -a` - 查看所有分支（包括远程）
