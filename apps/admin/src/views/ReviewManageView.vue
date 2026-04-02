@@ -217,7 +217,7 @@ onMounted(() => {
 .search-input-wrapper {
   position: relative;
   flex: 3;
-  min-width: 400px;
+  min-width: 500px;
 }
 
 .search-icon {
@@ -239,6 +239,7 @@ onMounted(() => {
 }
 
 .styled-input, .styled-select {
+  min-width: 250px;
   background: var(--bg-soft);
   border: 1px solid var(--border);
   border-radius: 12px;

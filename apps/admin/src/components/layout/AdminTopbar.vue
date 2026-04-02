@@ -65,7 +65,7 @@ function userInitials() {
   background: var(--bg-surface);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  z-index: 100;
+  z-index: 10;
   transition: all 0.3s ease;
   height: 3.5rem;
 }
