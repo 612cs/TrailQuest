@@ -1,7 +1,7 @@
 {
   "name": "trailquest-monorepo",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
   "scripts": {
     "dev": "pnpm --dir apps/web dev",
     "dev:web": "pnpm --dir apps/web dev",
@@ -11,11 +11,19 @@
     "build:web": "pnpm --dir apps/web build",
     "build:admin": "pnpm --dir apps/admin build",
     "build:api": "./apps/api/mvnw -f apps/api/pom.xml clean package -DskipTests",
+    "lint": "oxlint apps/web apps/admin packages/ui",
+    "lint:fix": "oxlint --fix apps/web apps/admin packages/ui",
+    "format": "oxfmt package.json apps/web apps/admin packages/ui",
+    "format:check": "oxfmt --check package.json apps/web apps/admin packages/ui",
     "preview": "pnpm --dir apps/web preview",
     "preview:web": "pnpm --dir apps/web preview",
     "preview:admin": "pnpm --dir apps/admin preview",
     "test:api": "./apps/api/mvnw -f apps/api/pom.xml test",
     "test:web:unit": "pnpm --dir apps/web test:unit",
     "test:web:e2e": "pnpm --dir apps/web test:e2e"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.46.0",
+    "oxlint": "^1.61.0"
   }
 }

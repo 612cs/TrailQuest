@@ -1,0 +1,48 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "vitest", "vue"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/.vite/**",
+    "apps/api/**",
+    "DOCS/**",
+    "logs/**"
+  ],
+  "rules": {
+    "eslint/no-unused-vars": "off",
+    "import/no-cycle": "error",
+    "import/no-unassigned-import": "off",
+    "typescript/no-unused-vars": [
+      "error",
+      {
+        "args": "after-used",
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "unicorn/filename-case": "off",
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/no-importing-vitest-globals": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "apps/web/vite.config.ts",
+        "apps/web/vitest.config.ts",
+        "apps/web/playwright.config.ts",
+        "apps/admin/vite.config.ts"
+      ],
+      "globals": {
+        "__dirname": "readonly",
+        "process": "readonly"
+      }
+    }
+  ]
+}
