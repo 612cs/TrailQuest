@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Trash2, EyeOff, RotateCcw, XCircle } from 'lucide-vue-next'
+import { EyeOff, RotateCcw, XCircle } from 'lucide-vue-next'
 
 defineProps<{
   selectedCount: number
@@ -46,12 +46,7 @@ const emit = defineEmits<{
         <RotateCcw :size="16" />
         <span>批量恢复</span>
       </button>
-      <button 
-        class="batch-btn clear" 
-        type="button" 
-        title="清空选择"
-        @click="emit('clear')"
-      >
+      <button class="batch-btn clear" type="button" title="清空选择" @click="emit('clear')">
         <XCircle :size="16" />
         <span>清空</span>
       </button>
