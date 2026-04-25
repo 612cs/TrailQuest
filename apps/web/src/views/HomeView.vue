@@ -4,7 +4,6 @@ import TrailCard from '../components/TrailCard.vue'
 import HeroSection from '../components/home/HeroSection.vue'
 import ActivityGrid from '../components/home/ActivityGrid.vue'
 import BaseIcon from '../components/common/BaseIcon.vue'
-import DraggableChatButton from '../components/common/DraggableChatButton.vue'
 import SectionHeader from '../components/common/SectionHeader.vue'
 import { fetchTrails } from '../api/trails'
 import { useTrailFeedRefreshStore } from '../stores/useTrailFeedRefreshStore'
@@ -19,9 +18,9 @@ const errorMessage = ref('')
 const trailInteractionStore = useTrailInteractionStore()
 const trailFeedRefreshStore = useTrailFeedRefreshStore()
 
-const popularTrails = computed(() => trails.value
-  .map((trail) => trailInteractionStore.applyToTrail(trail))
-  .map(toHomeTrailCard))
+const popularTrails = computed(() =>
+  trails.value.map((trail) => trailInteractionStore.applyToTrail(trail)).map(toHomeTrailCard),
+)
 
 onMounted(() => {
   setTimeout(() => {
@@ -67,10 +66,13 @@ async function loadTrails() {
     <HeroSection />
 
     <!-- Popular Trails Section -->
-    <section class="py-10 sm:py-16 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto">
+    <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-16 lg:px-10">
       <SectionHeader title="近期热门步道" subtitle="本周精选热门探险活动。">
         <template #action>
-          <RouterLink to="/search" class="flex items-center gap-1 text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors">
+          <RouterLink
+            to="/search"
+            class="text-primary-500 hover:text-primary-600 flex items-center gap-1 text-sm font-medium transition-colors"
+          >
             查看全部
             <BaseIcon name="ChevronRight" :size="16" />
           </RouterLink>
@@ -78,16 +80,27 @@ async function loadTrails() {
       </SectionHeader>
 
       <!-- Trail Cards -->
-      <div v-if="isLoading" class="py-10 text-sm text-center" style="color: var(--text-secondary);">
+      <div v-if="isLoading" class="py-10 text-center text-sm" style="color: var(--text-secondary)">
         正在加载热门路线...
       </div>
-      <div v-else-if="errorMessage" class="card p-6 text-sm text-center" style="color: var(--color-hard);">
+      <div
+        v-else-if="errorMessage"
+        class="card p-6 text-center text-sm"
+        style="color: var(--color-hard)"
+      >
         {{ errorMessage }}
       </div>
-      <div v-else-if="popularTrails.length === 0" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+      <div
+        v-else-if="popularTrails.length === 0"
+        class="card p-6 text-center text-sm"
+        style="color: var(--text-secondary)"
+      >
         暂无热门路线
       </div>
-      <div v-else class="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible">
+      <div
+        v-else
+        class="scrollbar-hide flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible lg:grid-cols-3"
+      >
         <TrailCard
           v-for="trail in popularTrails"
           :key="trail.id"
@@ -102,8 +115,5 @@ async function loadTrails() {
     </section>
 
     <ActivityGrid />
-
-    <!-- AI Assistant Floating Button -->
-    <DraggableChatButton />
   </main>
 </template>
