@@ -1,27 +1,30 @@
 package com.sheng.hikingbackend.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.common.enums.TrailReviewStatus;
 import com.sheng.hikingbackend.common.enums.UserStatus;
 import com.sheng.hikingbackend.common.exception.BusinessException;
 import com.sheng.hikingbackend.dto.admin.AdminBanUserRequest;
 import com.sheng.hikingbackend.dto.admin.AdminRejectTrailRequest;
+import com.sheng.hikingbackend.dto.admin.AdminReviewActionRequest;
+import com.sheng.hikingbackend.dto.admin.AdminReviewBatchActionRequest;
 import com.sheng.hikingbackend.dto.admin.AdminReviewPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminUserPageRequest;
-import com.sheng.hikingbackend.entity.AdminOperationLog;
+import com.sheng.hikingbackend.entity.Review;
 import com.sheng.hikingbackend.entity.Trail;
 import com.sheng.hikingbackend.entity.User;
 import com.sheng.hikingbackend.mapper.AdminOperationLogMapper;
@@ -31,11 +34,18 @@ import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.TrailTrackMapper;
 import com.sheng.hikingbackend.mapper.UserMapper;
 import com.sheng.hikingbackend.service.AdminService;
+import com.sheng.hikingbackend.service.AdminOperationLogService;
 import com.sheng.hikingbackend.service.ReviewService;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardDailyCountRow;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardRiskItemVo;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardRiskQueryRow;
 import com.sheng.hikingbackend.vo.admin.AdminDashboardSummaryVo;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardTrendItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReportListItemVo;
+import com.sheng.hikingbackend.vo.admin.AdminReviewDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminReviewQueryRow;
+import com.sheng.hikingbackend.vo.admin.AdminReviewThreadItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailDetailVo;
 import com.sheng.hikingbackend.vo.admin.AdminTrailListItemVo;
 import com.sheng.hikingbackend.vo.admin.AdminUserListItemVo;
@@ -51,6 +61,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
 
+    private static final String REVIEW_STATUS_ACTIVE = "active";
+    private static final String REVIEW_STATUS_HIDDEN = "hidden";
+    private static final String REVIEW_STATUS_DELETED = "deleted";
+
     private final TrailMapper trailMapper;
     private final ReviewMapper reviewMapper;
     private final ReviewService reviewService;
@@ -58,15 +72,25 @@ public class AdminServiceImpl implements AdminService {
     private final TrailTrackMapper trailTrackMapper;
     private final UserMapper userMapper;
     private final AdminOperationLogMapper adminOperationLogMapper;
-    private final ObjectMapper objectMapper;
+    private final AdminOperationLogService adminOperationLogService;
 
     @Override
     public AdminDashboardSummaryVo getDashboardSummary() {
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(6);
+        LocalDateTime trendStartAt = startDate.atStartOfDay();
+
         return AdminDashboardSummaryVo.builder()
-                .pendingTrailCount(Math.toIntExact(trailMapper.countPendingReviewTrails()))
-                .reviewCount(Math.toIntExact(reviewMapper.countAllReviews()))
+                .pendingTrailCount(trailMapper.countPendingReviewTrails())
                 .pendingReportCount(0)
-                .userCount(Math.toIntExact(userMapper.countAllUsers()))
+                .hiddenReviewCount(reviewMapper.countHiddenReviews())
+                .todayNewUserCount(defaultLong(userMapper.countTodayNewUsers()))
+                .todayNewTrailCount(trailMapper.countTodayNewTrails())
+                .todayNewReviewCount(reviewMapper.countTodayNewReviews())
+                .offlineTrailCount(trailMapper.countOfflineTrails())
+                .reportedReviewCount(0)
+                .trends(buildDashboardTrends(startDate, today, trendStartAt))
+                .recentRisks(buildRecentRisks())
                 .build();
     }
 
@@ -121,8 +145,18 @@ public class AdminServiceImpl implements AdminService {
         user.setBannedAt(LocalDateTime.now());
         userMapper.updateById(user);
 
-        logAction("user.ban", "user", userId, adminUserId, request.getReason(), Map.of(
-                "status", user.getStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "user_management",
+                "user_ban",
+                "user",
+                userId,
+                user.getUsername(),
+                request.getReason(),
+                snapshot("status", UserStatus.ACTIVE.getCode()),
+                snapshot(
+                        "status", user.getStatus(),
+                        "banReason", user.getBanReason()));
     }
 
     @Override
@@ -139,8 +173,16 @@ public class AdminServiceImpl implements AdminService {
         user.setBannedAt(null);
         userMapper.updateById(user);
 
-        logAction("user.unban", "user", userId, adminUserId, "恢复账号", Map.of(
-                "status", user.getStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "user_management",
+                "user_unban",
+                "user",
+                userId,
+                user.getUsername(),
+                "恢复账号",
+                snapshot("status", UserStatus.BANNED.getCode()),
+                snapshot("status", user.getStatus()));
     }
 
     @Override
@@ -175,9 +217,20 @@ public class AdminServiceImpl implements AdminService {
         trail.setReviewedAt(LocalDateTime.now());
         trailMapper.updateById(trail);
 
-        logAction("trail.approve", "trail", trailId, adminUserId, "审核通过", Map.of(
-                "status", trail.getStatus(),
-                "reviewStatus", trail.getReviewStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "trail_review",
+                "trail_approve",
+                "trail",
+                trailId,
+                trail.getName(),
+                "审核通过",
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", TrailReviewStatus.PENDING.getCode()),
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", trail.getReviewStatus()));
     }
 
     @Override
@@ -191,9 +244,22 @@ public class AdminServiceImpl implements AdminService {
         trail.setReviewedAt(LocalDateTime.now());
         trailMapper.updateById(trail);
 
-        logAction("trail.reject", "trail", trailId, adminUserId, remark, Map.of(
-                "status", trail.getStatus(),
-                "reviewStatus", trail.getReviewStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "trail_review",
+                "trail_reject",
+                "trail",
+                trailId,
+                trail.getName(),
+                remark,
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", TrailReviewStatus.PENDING.getCode(),
+                        "reviewRemark", null),
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", trail.getReviewStatus(),
+                        "reviewRemark", trail.getReviewRemark()));
     }
 
     @Override
@@ -210,9 +276,20 @@ public class AdminServiceImpl implements AdminService {
         trail.setStatus("deleted");
         trailMapper.updateById(trail);
 
-        logAction("trail.offline", "trail", trailId, adminUserId, "路线下架", Map.of(
-                "status", trail.getStatus(),
-                "reviewStatus", trail.getReviewStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "trail_management",
+                "trail_offline",
+                "trail",
+                trailId,
+                trail.getName(),
+                "路线下架",
+                snapshot(
+                        "status", "active",
+                        "reviewStatus", trail.getReviewStatus()),
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", trail.getReviewStatus()));
     }
 
     @Override
@@ -226,9 +303,20 @@ public class AdminServiceImpl implements AdminService {
         trail.setStatus("active");
         trailMapper.updateById(trail);
 
-        logAction("trail.restore", "trail", trailId, adminUserId, "路线恢复", Map.of(
-                "status", trail.getStatus(),
-                "reviewStatus", trail.getReviewStatus()));
+        adminOperationLogService.record(
+                adminUserId,
+                "trail_management",
+                "trail_restore",
+                "trail",
+                trailId,
+                trail.getName(),
+                "路线恢复",
+                snapshot(
+                        "status", "deleted",
+                        "reviewStatus", trail.getReviewStatus()),
+                snapshot(
+                        "status", trail.getStatus(),
+                        "reviewStatus", trail.getReviewStatus()));
     }
 
     @Override
@@ -238,8 +326,19 @@ public class AdminServiceImpl implements AdminService {
         List<AdminReviewListItemVo> list = result.getRecords().stream()
                 .map(row -> AdminReviewListItemVo.builder()
                         .id(row.getId())
+                        .trailId(row.getTrailId())
+                        .userId(row.getUserId())
                         .text(row.getText())
+                        .rating(row.getRating())
+                        .status(row.getStatus())
+                        .parentId(row.getParentId())
+                        .parentText(row.getParentText())
+                        .moderationReason(row.getModerationReason())
+                        .moderatedAt(row.getModeratedAt())
                         .authorUsername(row.getAuthorUsername())
+                        .avatar(row.getAvatar())
+                        .avatarBg(row.getAvatarBg())
+                        .avatarMediaUrl(row.getAvatarMediaUrl())
                         .trailName(row.getTrailName())
                         .createdAt(row.getCreatedAt())
                         .build())
@@ -249,8 +348,67 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
-    public void deleteReview(Long reviewId) {
-        reviewService.deleteReviewAsAdmin(reviewId);
+    public AdminReviewDetailVo getReviewDetail(Long reviewId) {
+        AdminReviewQueryRow row = requireReviewRow(reviewId);
+        List<AdminReviewThreadItemVo> replies = reviewMapper.selectAdminReviewRepliesByParentId(reviewId).stream()
+                .map(this::toAdminReviewThreadItem)
+                .toList();
+        return AdminReviewDetailVo.builder()
+                .id(row.getId())
+                .trailId(row.getTrailId())
+                .trailName(row.getTrailName())
+                .rating(row.getRating())
+                .text(row.getText())
+                .status(row.getStatus())
+                .moderationReason(row.getModerationReason())
+                .moderatedAt(row.getModeratedAt())
+                .userId(row.getUserId())
+                .authorUsername(row.getAuthorUsername())
+                .avatar(row.getAvatar())
+                .avatarBg(row.getAvatarBg())
+                .avatarMediaUrl(row.getAvatarMediaUrl())
+                .parentId(row.getParentId())
+                .parentText(row.getParentText())
+                .replies(replies)
+                .createdAt(row.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void hideReview(Long reviewId, Long adminUserId, AdminReviewActionRequest request) {
+        String remark = normalizeRequiredRemark(request == null ? null : request.getRemark(), "隐藏评论时必须填写处理原因");
+        moderateReview(reviewId, adminUserId, REVIEW_STATUS_HIDDEN, remark, "review.hide");
+    }
+
+    @Override
+    @Transactional
+    public void restoreReview(Long reviewId, Long adminUserId) {
+        moderateReview(reviewId, adminUserId, REVIEW_STATUS_ACTIVE, "恢复显示", "review.restore");
+    }
+
+    @Override
+    @Transactional
+    public void deleteReview(Long reviewId, Long adminUserId, AdminReviewActionRequest request) {
+        String remark = normalizeRequiredRemark(request == null ? null : request.getRemark(), "删除评论时必须填写处理原因");
+        moderateReview(reviewId, adminUserId, REVIEW_STATUS_DELETED, remark, "review.delete");
+    }
+
+    @Override
+    @Transactional
+    public void batchHideReviews(Long adminUserId, AdminReviewBatchActionRequest request) {
+        String remark = normalizeRequiredRemark(request == null ? null : request.getRemark(), "批量隐藏时必须填写处理原因");
+        for (Long reviewId : request.getIds()) {
+            moderateReview(reviewId, adminUserId, REVIEW_STATUS_HIDDEN, remark, "review.hide");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void batchRestoreReviews(Long adminUserId, AdminReviewBatchActionRequest request) {
+        for (Long reviewId : request.getIds()) {
+            moderateReview(reviewId, adminUserId, REVIEW_STATUS_ACTIVE, "批量恢复显示", "review.restore");
+        }
     }
 
     @Override
@@ -259,10 +417,20 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void resolveReport(Long reportId) {
+    public void resolveReport(Long reportId, Long adminUserId) {
         if (reportId == null) {
             throw BusinessException.badRequest("REPORT_ID_REQUIRED", "举报 ID 不能为空");
         }
+        adminOperationLogService.record(
+                adminUserId,
+                "report_management",
+                "report_resolve",
+                "report",
+                reportId,
+                null,
+                "处理举报",
+                snapshot("status", "pending"),
+                snapshot("status", "resolved"));
     }
 
     private AdminTrailListItemVo toAdminTrailListItem(TrailQueryRow row) {
@@ -350,6 +518,178 @@ public class AdminServiceImpl implements AdminService {
         return user;
     }
 
+    private Review requireReview(Long reviewId) {
+        Review review = reviewMapper.selectById(reviewId);
+        if (review == null) {
+            throw BusinessException.notFound("REVIEW_NOT_FOUND", "评论不存在");
+        }
+        return review;
+    }
+
+    private AdminReviewQueryRow requireReviewRow(Long reviewId) {
+        AdminReviewQueryRow row = reviewMapper.selectAdminReviewDetailById(reviewId);
+        if (row == null) {
+            throw BusinessException.notFound("REVIEW_NOT_FOUND", "评论不存在");
+        }
+        return row;
+    }
+
+    private AdminReviewThreadItemVo toAdminReviewThreadItem(AdminReviewQueryRow row) {
+        return AdminReviewThreadItemVo.builder()
+                .id(row.getId())
+                .userId(row.getUserId())
+                .authorUsername(row.getAuthorUsername())
+                .avatar(row.getAvatar())
+                .avatarBg(row.getAvatarBg())
+                .avatarMediaUrl(row.getAvatarMediaUrl())
+                .text(row.getText())
+                .status(row.getStatus())
+                .moderationReason(row.getModerationReason())
+                .moderatedAt(row.getModeratedAt())
+                .createdAt(row.getCreatedAt())
+                .build();
+    }
+
+    private void moderateReview(Long reviewId, Long adminUserId, String targetStatus, String remark, String actionType) {
+        Review review = requireReview(reviewId);
+        if (targetStatus.equals(review.getStatus())) {
+            throw BusinessException.badRequest("REVIEW_STATUS_UNCHANGED", "评论已处于目标状态");
+        }
+
+        reviewService.moderateReview(reviewId, adminUserId, targetStatus, remark);
+        String actionCode = switch (actionType) {
+            case "review.hide" -> "review_hide";
+            case "review.restore" -> "review_restore";
+            case "review.delete" -> "review_delete";
+            default -> actionType;
+        };
+        adminOperationLogService.record(
+                adminUserId,
+                "review_management",
+                actionCode,
+                "review",
+                reviewId,
+                review.getText(),
+                remark,
+                snapshot("status", review.getStatus()),
+                snapshot("status", targetStatus));
+    }
+
+    private String normalizeRequiredRemark(String remark, String errorMessage) {
+        if (remark == null || remark.isBlank()) {
+            throw BusinessException.badRequest("REVIEW_REMARK_REQUIRED", errorMessage);
+        }
+        return remark.trim();
+    }
+
+    private Map<String, Object> snapshot(Object... keyValues) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        for (int index = 0; index < keyValues.length; index += 2) {
+            result.put(String.valueOf(keyValues[index]), keyValues[index + 1]);
+        }
+        return result;
+    }
+
+    private List<AdminDashboardTrendItemVo> buildDashboardTrends(
+            LocalDate startDate,
+            LocalDate endDate,
+            LocalDateTime trendStartAt) {
+        Map<LocalDate, Long> trailTrendMap = toDailyCountMap(trailMapper.selectDailyNewTrailCounts(trendStartAt));
+        Map<LocalDate, Long> reviewTrendMap = toDailyCountMap(reviewMapper.selectDailyNewReviewCounts(trendStartAt));
+        Map<LocalDate, Long> userTrendMap = toDailyCountMap(userMapper.selectDailyNewUserCounts(trendStartAt));
+
+        return startDate.datesUntil(endDate.plusDays(1))
+                .map(date -> AdminDashboardTrendItemVo.builder()
+                        .date(date.toString())
+                        .newTrailCount(trailTrendMap.getOrDefault(date, 0L))
+                        .newReviewCount(reviewTrendMap.getOrDefault(date, 0L))
+                        .newReportCount(0)
+                        .newUserCount(userTrendMap.getOrDefault(date, 0L))
+                        .build())
+                .toList();
+    }
+
+    private List<AdminDashboardRiskItemVo> buildRecentRisks() {
+        return adminOperationLogMapper.selectDashboardRecentRisks(6).stream()
+                .map(this::toDashboardRiskItem)
+                .toList();
+    }
+
+    private AdminDashboardRiskItemVo toDashboardRiskItem(AdminDashboardRiskQueryRow row) {
+        String title;
+        String description;
+        String type;
+        String priority;
+        switch (row.getActionCode()) {
+            case "trail_reject" -> {
+                type = "trail_rejected";
+                priority = "medium";
+                title = "路线审核被驳回";
+                description = buildRiskDescription(row, "该路线因信息不完整被驳回。");
+            }
+            case "user_ban" -> {
+                type = "user_banned";
+                priority = "high";
+                title = "用户已被封禁";
+                description = buildRiskDescription(row, "管理员已执行账号封禁。");
+            }
+            case "review_hide" -> {
+                type = "review_hidden";
+                priority = "high";
+                title = "评论已被隐藏";
+                description = buildRiskDescription(row, "评论因存在风险内容被隐藏。");
+            }
+            case "report_resolve" -> {
+                type = "report_resolved";
+                priority = "medium";
+                title = "举报已完成处理";
+                description = buildRiskDescription(row, "举报已进入已处理状态。");
+            }
+            default -> {
+                type = row.getActionCode();
+                priority = "low";
+                title = "后台风险事件";
+                description = buildRiskDescription(row, "系统记录了一条风险动态。");
+            }
+        }
+
+        return AdminDashboardRiskItemVo.builder()
+                .type(type)
+                .title(title)
+                .description(description)
+                .targetType(row.getTargetType())
+                .targetId(row.getTargetId() == null ? null : String.valueOf(row.getTargetId()))
+                .targetTitle(row.getTargetTitle())
+                .priority(priority)
+                .createdAt(row.getCreatedAt())
+                .build();
+    }
+
+    private String buildRiskDescription(AdminDashboardRiskQueryRow row, String fallback) {
+        if (row.getTargetTitle() != null && !row.getTargetTitle().isBlank() && row.getReason() != null && !row.getReason().isBlank()) {
+            return row.getTargetTitle() + "，原因：" + row.getReason();
+        }
+        if (row.getReason() != null && !row.getReason().isBlank()) {
+            return row.getReason();
+        }
+        if (row.getTargetTitle() != null && !row.getTargetTitle().isBlank()) {
+            return row.getTargetTitle();
+        }
+        return fallback;
+    }
+
+    private Map<LocalDate, Long> toDailyCountMap(List<AdminDashboardDailyCountRow> rows) {
+        return rows.stream().collect(Collectors.toMap(
+                AdminDashboardDailyCountRow::getMetricDate,
+                AdminDashboardDailyCountRow::getMetricCount,
+                Long::sum,
+                LinkedHashMap::new));
+    }
+
+    private long defaultLong(Long value) {
+        return value == null ? 0 : value;
+    }
+
     private List<String> splitTags(String tagsCsv) {
         if (tagsCsv == null || tagsCsv.isBlank()) {
             return List.of();
@@ -387,34 +727,5 @@ public class AdminServiceImpl implements AdminService {
                 .elevationLossMeters(track.getElevationLossMeters())
                 .durationSeconds(track.getDurationSeconds())
                 .build();
-    }
-
-    private void logAction(
-            String actionType,
-            String targetType,
-            Long targetId,
-            Long operatorId,
-            String remark,
-            Map<String, Object> metadata) {
-        AdminOperationLog log = new AdminOperationLog();
-        log.setActionType(actionType);
-        log.setTargetType(targetType);
-        log.setTargetId(targetId);
-        log.setOperatorId(operatorId);
-        log.setRemark(remark);
-        log.setMetadataJson(writeMetadata(metadata));
-        log.setCreatedAt(LocalDateTime.now());
-        adminOperationLogMapper.insert(log);
-    }
-
-    private String writeMetadata(Map<String, Object> metadata) {
-        if (metadata == null || metadata.isEmpty()) {
-            return null;
-        }
-        try {
-            return objectMapper.writeValueAsString(metadata);
-        } catch (JsonProcessingException ex) {
-            throw new IllegalStateException("failed to serialize admin operation metadata", ex);
-        }
     }
 }

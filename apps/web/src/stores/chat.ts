@@ -1,8 +1,22 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { buildAiWebSocketUrl, createAiConversation, deleteAiConversation, fetchAiConversations, fetchAiMessages, getAiAccessToken, parseAiSocketMessage } from '../api/ai'
-import type { AiConversationSummary, AiMessage, AiTrailCard, AiFollowUp, AiStreamEvent } from '../types/ai'
+import {
+  buildAiWebSocketUrl,
+  createAiConversation,
+  deleteAiConversation,
+  fetchAiConversations,
+  fetchAiMessages,
+  getAiAccessToken,
+  parseAiSocketMessage,
+} from '../api/ai'
+import type {
+  AiConversationSummary,
+  AiMessage,
+  AiTrailCard,
+  AiFollowUp,
+  AiStreamEvent,
+} from '../types/ai'
 import { ApiError } from '../types/api'
 
 function createLocalId(prefix: string) {
@@ -26,9 +40,10 @@ export const useChatStore = defineStore('chat', () => {
   const activeAssistantMessageId = ref('')
 
   const hasMessages = computed(() => messages.value.length > 0)
-  const activeConversation = computed(() => (
-    conversations.value.find((item) => String(item.id) === activeConversationId.value) ?? null
-  ))
+  const activeConversation = computed(
+    () =>
+      conversations.value.find((item) => String(item.id) === activeConversationId.value) ?? null,
+  )
 
   async function bootstrap() {
     if (isBootstrapping.value) {
@@ -52,7 +67,10 @@ export const useChatStore = defineStore('chat', () => {
 
   async function createConversation(title?: string) {
     const conversation = await createAiConversation(title)
-    conversations.value = [conversation, ...conversations.value.filter((item) => String(item.id) !== String(conversation.id))]
+    conversations.value = [
+      conversation,
+      ...conversations.value.filter((item) => String(item.id) !== String(conversation.id)),
+    ]
     activeConversationId.value = String(conversation.id)
     messages.value = []
     return conversation
@@ -66,7 +84,9 @@ export const useChatStore = defineStore('chat', () => {
 
   async function removeConversation(conversationId: string | number) {
     await deleteAiConversation(conversationId)
-    conversations.value = conversations.value.filter((item) => String(item.id) !== String(conversationId))
+    conversations.value = conversations.value.filter(
+      (item) => String(item.id) !== String(conversationId),
+    )
 
     if (activeConversationId.value === String(conversationId)) {
       const nextConversation = conversations.value[0]
@@ -93,7 +113,10 @@ export const useChatStore = defineStore('chat', () => {
     pendingUserMessage.value = ''
   }
 
-  async function sendMessage(text: string, context?: { currentCity?: string | null; currentTrailId?: string | number | null }) {
+  async function sendMessage(
+    text: string,
+    context?: { currentCity?: string | null; currentTrailId?: string | number | null },
+  ) {
     const trimmed = text.trim()
     if (!trimmed || isStreaming.value) {
       return
@@ -105,7 +128,9 @@ export const useChatStore = defineStore('chat', () => {
 
     let conversationId = activeConversationId.value
     if (!conversationId) {
-      const conversation = await createConversation(trimmed.length <= 18 ? trimmed : trimmed.slice(0, 18) + '...')
+      const conversation = await createConversation(
+        trimmed.length <= 18 ? trimmed : trimmed.slice(0, 18) + '...',
+      )
       conversationId = String(conversation.id)
     }
 
@@ -133,16 +158,18 @@ export const useChatStore = defineStore('chat', () => {
 
     try {
       await ensureSocketReady()
-      socket.value?.send(JSON.stringify({
-        type: 'chat.send',
-        conversationId,
-        message: trimmed,
-        context: {
-          currentCity: context?.currentCity ?? null,
-          currentTrailId: context?.currentTrailId ?? null,
-          useUserPreference: true,
-        },
-      }))
+      socket.value?.send(
+        JSON.stringify({
+          type: 'chat.send',
+          conversationId,
+          message: trimmed,
+          context: {
+            currentCity: context?.currentCity ?? null,
+            currentTrailId: context?.currentTrailId ?? null,
+            useUserPreference: true,
+          },
+        }),
+      )
       await waitForStreamComplete(assistantMessage.id)
       try {
         await refreshActiveConversation()
@@ -212,9 +239,9 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   function updateAssistantMessage(messageId: string, updater: (message: AiMessage) => AiMessage) {
-    messages.value = messages.value.map((message) => (
-      message.id === messageId ? updater(message) : message
-    ))
+    messages.value = messages.value.map((message) =>
+      message.id === messageId ? updater(message) : message,
+    )
   }
 
   function failActiveStream(message: string) {
@@ -247,11 +274,11 @@ export const useChatStore = defineStore('chat', () => {
       socket.value = ws
       let authed = false
 
-      ws.onopen = () => {
+      ws.addEventListener('open', () => {
         ws.send(JSON.stringify({ type: 'auth', token }))
-      }
+      })
 
-      ws.onmessage = (event) => {
+      ws.addEventListener('message', (event) => {
         try {
           const parsed = parseAiSocketMessage(String(event.data))
           if (!parsed) {
@@ -272,17 +299,17 @@ export const useChatStore = defineStore('chat', () => {
         } catch (error) {
           reject(error instanceof Error ? error : new Error('AI WebSocket 消息解析失败'))
         }
-      }
+      })
 
-      ws.onerror = () => {
+      ws.addEventListener('error', () => {
         if (!authed) {
           reject(new ApiError('AI 连接建立失败，请稍后重试', 'AI_SOCKET_CONNECT_FAILED', 500))
           return
         }
         failActiveStream('AI 连接中断，请重新发送这条消息')
-      }
+      })
 
-      ws.onclose = () => {
+      ws.addEventListener('close', () => {
         socket.value = null
         socketReadyPromise.value = null
         if (!authed) {
@@ -292,7 +319,7 @@ export const useChatStore = defineStore('chat', () => {
         if (isStreaming.value) {
           failActiveStream('AI 连接已断开，请重新发送这条消息')
         }
-      }
+      })
     })
 
     try {

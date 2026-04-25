@@ -31,15 +31,17 @@ export function useAmapLoader() {
         key: amapKey,
         version: '2.0',
         plugins: ['AMap.GeoJSON'], // 注册 GeoJSON 等级插件
-      }).then((AMap) => {
-        window.AMap = AMap
-        isReady.value = true
-        return AMap
-      }).catch((e) => {
-        const err = new Error(e?.message || '高德地图脚本加载失败')
-        loaderPromise = null
-        throw err
       })
+        .then((AMap) => {
+          window.AMap = AMap
+          isReady.value = true
+          return AMap
+        })
+        .catch((e) => {
+          const err = new Error(e?.message || '高德地图脚本加载失败')
+          loaderPromise = null
+          throw err
+        })
     }
 
     try {

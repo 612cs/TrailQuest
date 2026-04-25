@@ -4,21 +4,24 @@ import { computed, ref, watch } from 'vue'
 import { useOssImageUploader } from '../../composables/useOssImageUploader'
 import BaseIcon from '../common/BaseIcon.vue'
 
-const props = withDefaults(defineProps<{
-  mode?: 'review' | 'reply'
-  placeholder?: string
-  submitLabel?: string
-  compact?: boolean
-  disabled?: boolean
-  resetKey?: number
-}>(), {
-  mode: 'review',
-  placeholder: '分享你的徒步体验...',
-  submitLabel: '发布评论',
-  compact: false,
-  disabled: false,
-  resetKey: 0,
-})
+const props = withDefaults(
+  defineProps<{
+    mode?: 'review' | 'reply'
+    placeholder?: string
+    submitLabel?: string
+    compact?: boolean
+    disabled?: boolean
+    resetKey?: number
+  }>(),
+  {
+    mode: 'review',
+    placeholder: '分享你的徒步体验...',
+    submitLabel: '发布评论',
+    compact: false,
+    disabled: false,
+    resetKey: 0,
+  },
+)
 
 const emit = defineEmits<{
   submit: [review: { rating?: number; text: string; images: string[] }]
@@ -84,22 +87,22 @@ function handleSubmit() {
   })
 }
 
-watch(() => props.resetKey, () => {
-  resetForm()
-})
+watch(
+  () => props.resetKey,
+  () => {
+    resetForm()
+  },
+)
 </script>
 
 <template>
-  <div
-    class="card space-y-4"
-    :class="compact ? 'p-3 sm:p-4' : 'p-4 sm:p-5'"
-  >
-    <h3 v-if="!compact" class="text-sm font-semibold" style="color: var(--text-primary);">
+  <div class="card space-y-4" :class="compact ? 'p-3 sm:p-4' : 'p-4 sm:p-5'">
+    <h3 v-if="!compact" class="text-sm font-semibold" style="color: var(--text-primary)">
       {{ mode === 'review' ? '发表评论' : '写下回复' }}
     </h3>
 
     <div v-if="requiresRating" class="flex items-center gap-3">
-      <span class="text-xs" style="color: var(--text-secondary);">评分</span>
+      <span class="text-xs" style="color: var(--text-secondary)">评分</span>
       <div class="flex gap-0.5">
         <button
           v-for="i in 5"
@@ -114,11 +117,11 @@ watch(() => props.resetKey, () => {
           <BaseIcon
             name="Star"
             :size="compact ? 18 : 22"
-            :class="i <= (hoverRating || rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'"
+            :class="i <= (hoverRating || rating) ? 'fill-current text-yellow-400' : 'text-gray-300'"
           />
         </button>
       </div>
-      <span v-if="rating > 0" class="text-xs font-medium text-primary-500">
+      <span v-if="rating > 0" class="text-primary-500 text-xs font-medium">
         {{ ['', '很差', '较差', '一般', '不错', '很棒'][rating] }}
       </span>
     </div>
@@ -129,18 +132,22 @@ watch(() => props.resetKey, () => {
         :rows="compact ? 2 : 3"
         :placeholder="placeholder"
         :disabled="disabled"
-        class="w-full px-3 py-2.5 rounded-lg text-sm resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/30 disabled:opacity-60"
-        style="background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-default);"
+        class="focus:ring-primary-500/30 w-full resize-none rounded-lg px-3 py-2.5 text-sm transition-colors focus:ring-2 focus:outline-none disabled:opacity-60"
+        style="
+          background-color: var(--bg-input);
+          color: var(--text-primary);
+          border: 1px solid var(--border-default);
+        "
       />
     </div>
 
     <div class="space-y-3">
-      <div v-if="items.length > 0" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+      <div v-if="items.length > 0" class="grid grid-cols-3 gap-2 sm:grid-cols-4">
         <div
           v-for="item in items"
           :key="item.id"
-          class="relative group aspect-square overflow-hidden rounded-lg border"
-          style="border-color: var(--border-default);"
+          class="group relative aspect-square overflow-hidden rounded-lg border"
+          style="border-color: var(--border-default)"
         >
           <img :src="item.localUrl" alt="" class="h-full w-full object-cover" />
           <div class="absolute inset-x-0 bottom-0 bg-black/60 px-2 py-1 text-[10px] text-white">
@@ -150,7 +157,7 @@ watch(() => props.resetKey, () => {
           </div>
           <button
             type="button"
-            class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-500"
+            class="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-500"
             @click="removeImage(item.id)"
           >
             <BaseIcon name="X" :size="14" />
@@ -159,8 +166,8 @@ watch(() => props.resetKey, () => {
 
         <label
           v-if="canAddMore"
-          class="aspect-square rounded-lg border-2 border-dashed flex cursor-pointer flex-col items-center justify-center gap-1 transition-colors hover:border-primary-500 hover:bg-primary-500/5"
-          style="border-color: var(--border-default); color: var(--text-tertiary);"
+          class="hover:border-primary-500 hover:bg-primary-500/5 flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors"
+          style="border-color: var(--border-default); color: var(--text-tertiary)"
         >
           <BaseIcon name="Plus" :size="18" />
           <span class="text-xs">{{ items.length }}/9</span>
@@ -170,8 +177,8 @@ watch(() => props.resetKey, () => {
 
       <label
         v-else
-        class="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed px-3 py-3 transition-colors hover:border-primary-500 hover:bg-primary-500/5"
-        style="border-color: var(--border-default); color: var(--text-tertiary);"
+        class="hover:border-primary-500 hover:bg-primary-500/5 flex cursor-pointer items-center gap-2 rounded-xl border border-dashed px-3 py-3 transition-colors"
+        style="border-color: var(--border-default); color: var(--text-tertiary)"
       >
         <BaseIcon name="ImagePlus" :size="18" class="text-primary-500" />
         <span class="text-xs">上传图片，最多 9 张</span>
@@ -183,8 +190,12 @@ watch(() => props.resetKey, () => {
       <button
         type="button"
         :disabled="!canSubmit"
-        class="px-5 py-2 rounded-lg text-sm font-medium text-white transition-all duration-200 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-        :class="canSubmit ? 'bg-primary-500 hover:bg-primary-600 hover:shadow-md active:scale-[0.97]' : 'bg-gray-400'"
+        class="flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium text-white transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
+        :class="
+          canSubmit
+            ? 'bg-primary-500 hover:bg-primary-600 hover:shadow-md active:scale-[0.97]'
+            : 'bg-gray-400'
+        "
         @click="handleSubmit"
       >
         <BaseIcon v-if="isUploading" name="Loader2" :size="16" class="animate-spin" />

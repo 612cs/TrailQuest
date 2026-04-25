@@ -26,11 +26,7 @@ import type { TrailListItem } from '../types/trail'
 import type { TrailWeatherForecastDay, TrailWeatherResponse } from '../types/weather'
 import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
 import { mapWeatherToTrackScene } from '../utils/trackWeatherScene'
-import type {
-  CreateReviewPayload,
-  ReviewItem,
-  UserCard,
-} from '../types/review'
+import type { CreateReviewPayload, ReviewItem, UserCard } from '../types/review'
 
 const REVIEWS_PAGE_SIZE = 10
 
@@ -74,7 +70,7 @@ const { geo, resolve: resolveGeo } = useTrailGeo()
 
 const trailId = computed<EntityId>(() => {
   const rawId = route.params.id
-  return Array.isArray(rawId) ? rawId[0] ?? '' : String(rawId ?? '')
+  return Array.isArray(rawId) ? (rawId[0] ?? '') : String(rawId ?? '')
 })
 const detailFrom = computed(() => normalizeInternalPath(route.query.from))
 const displayTrail = computed(() => {
@@ -86,100 +82,127 @@ const activeUserCard = computed(() => {
   return userCardCache.value[activeUserCardId.value] ?? null
 })
 const detailImages = computed(() => {
-  const urls = [trailData.value?.image, ...(trailData.value?.gallery?.map((item) => item.url) ?? [])]
-    .filter((item): item is string => !!item)
+  const urls = [
+    trailData.value?.image,
+    ...(trailData.value?.gallery?.map((item) => item.url) ?? []),
+  ].filter((item): item is string => !!item)
 
   return urls.filter((url, index) => urls.indexOf(url) === index)
 })
 
-watch(trailId, async (newId) => {
-  if (!newId) {
-    reviews.value = []
-    nextReviewCursor.value = null
-    hasMoreReviews.value = false
-    return
-  }
+watch(
+  trailId,
+  async (newId) => {
+    if (!newId) {
+      reviews.value = []
+      nextReviewCursor.value = null
+      hasMoreReviews.value = false
+      return
+    }
 
-  await loadInitialReviews(newId)
-}, { immediate: true })
+    await loadInitialReviews(newId)
+  },
+  { immediate: true },
+)
 
-watch(trailId, async (newId) => {
-  if (!newId) {
-    trailData.value = null
-    return
-  }
+watch(
+  trailId,
+  async (newId) => {
+    if (!newId) {
+      trailData.value = null
+      return
+    }
 
-  isLoading.value = true
-  errorMessage.value = ''
+    isLoading.value = true
+    errorMessage.value = ''
 
-  try {
-    const data = await fetchTrailDetail(newId)
-    trailData.value = data
-    trailInteractionStore.hydrateTrail(data)
-  } catch (error) {
-    trailData.value = null
-    errorMessage.value = error instanceof Error ? error.message : '路线详情加载失败'
-  } finally {
-    isLoading.value = false
-  }
-}, { immediate: true })
+    try {
+      const data = await fetchTrailDetail(newId)
+      trailData.value = data
+      trailInteractionStore.hydrateTrail(data)
+    } catch (error) {
+      trailData.value = null
+      errorMessage.value = error instanceof Error ? error.message : '路线详情加载失败'
+    } finally {
+      isLoading.value = false
+    }
+  },
+  { immediate: true },
+)
 
-watch(trailData, async (trail, _prev, onCleanup) => {
-  if (!trail) {
-    trailWeather.value = null
-    weatherErrorMessage.value = ''
-    weatherLoading.value = false
-    landscapePrediction.value = null
-    landscapeErrorMessage.value = ''
-    landscapeLoading.value = false
-    return
-  }
-  const controller = new AbortController()
-  onCleanup(() => controller.abort())
-
-  void resolveGeo({
-    ip: trail.ip,
-    locationLabel: `${trail.location} ${trail.name}`,
-    signal: controller.signal,
-  })
-
-  weatherLoading.value = true
-  weatherErrorMessage.value = ''
-  trailWeather.value = null
-  landscapeLoading.value = true
-  landscapeErrorMessage.value = ''
-  landscapePrediction.value = null
-
-  try {
-    const [weatherResult, landscapeResult] = await Promise.allSettled([
-      fetchTrailWeather(trail.id, controller.signal),
-      fetchTrailLandscapePrediction(trail.id, 7, controller.signal),
-    ])
-
-    if (weatherResult.status === 'fulfilled') {
-      trailWeather.value = weatherResult.value
-    } else if (!(weatherResult.reason instanceof DOMException && weatherResult.reason.name === 'AbortError')) {
-      weatherErrorMessage.value = weatherResult.reason instanceof Error ? weatherResult.reason.message : '天气数据加载失败'
+watch(
+  trailData,
+  async (trail, _prev, onCleanup) => {
+    if (!trail) {
       trailWeather.value = null
-    }
-
-    if (landscapeResult.status === 'fulfilled') {
-      landscapePrediction.value = landscapeResult.value
-    } else if (!(landscapeResult.reason instanceof DOMException && landscapeResult.reason.name === 'AbortError')) {
-      landscapeErrorMessage.value = landscapeResult.reason instanceof Error ? landscapeResult.reason.message : '景观预测加载失败'
+      weatherErrorMessage.value = ''
+      weatherLoading.value = false
       landscapePrediction.value = null
+      landscapeErrorMessage.value = ''
+      landscapeLoading.value = false
+      return
     }
-  } catch (error) {
-    if (!(error instanceof DOMException && error.name === 'AbortError')) {
-      const message = error instanceof Error ? error.message : '环境数据加载失败'
-      weatherErrorMessage.value = message
-      landscapeErrorMessage.value = message
+    const controller = new AbortController()
+    onCleanup(() => controller.abort())
+
+    void resolveGeo({
+      ip: trail.ip,
+      locationLabel: `${trail.location} ${trail.name}`,
+      signal: controller.signal,
+    })
+
+    weatherLoading.value = true
+    weatherErrorMessage.value = ''
+    trailWeather.value = null
+    landscapeLoading.value = true
+    landscapeErrorMessage.value = ''
+    landscapePrediction.value = null
+
+    try {
+      const [weatherResult, landscapeResult] = await Promise.allSettled([
+        fetchTrailWeather(trail.id, controller.signal),
+        fetchTrailLandscapePrediction(trail.id, 7, controller.signal),
+      ])
+
+      if (weatherResult.status === 'fulfilled') {
+        trailWeather.value = weatherResult.value
+      } else if (
+        !(
+          weatherResult.reason instanceof DOMException && weatherResult.reason.name === 'AbortError'
+        )
+      ) {
+        weatherErrorMessage.value =
+          weatherResult.reason instanceof Error ? weatherResult.reason.message : '天气数据加载失败'
+        trailWeather.value = null
+      }
+
+      if (landscapeResult.status === 'fulfilled') {
+        landscapePrediction.value = landscapeResult.value
+      } else if (
+        !(
+          landscapeResult.reason instanceof DOMException &&
+          landscapeResult.reason.name === 'AbortError'
+        )
+      ) {
+        landscapeErrorMessage.value =
+          landscapeResult.reason instanceof Error
+            ? landscapeResult.reason.message
+            : '景观预测加载失败'
+        landscapePrediction.value = null
+      }
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === 'AbortError')) {
+        const message = error instanceof Error ? error.message : '环境数据加载失败'
+        weatherErrorMessage.value = message
+        landscapeErrorMessage.value = message
+      }
+    } finally {
+      weatherLoading.value = false
+      landscapeLoading.value = false
     }
-  } finally {
-    weatherLoading.value = false
-    landscapeLoading.value = false
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 
 const heroProps = computed(() => {
   const t = displayTrail.value!
@@ -212,21 +235,24 @@ const mapCenter = computed(() => geo.value?.center ?? null)
 const locationCity = computed(() => geo.value?.city ?? trailData.value?.location ?? '')
 const forecast = computed<TrailWeatherForecastDay[]>(() => trailWeather.value?.forecast ?? [])
 const weatherOverview = computed<TrailWeatherForecastDay | null>(() => forecast.value[0] ?? null)
-const detailTrackViewerData = computed(() => createTrackViewerData({
-  title: trailData.value?.name ?? null,
-  fileName: trailData.value?.track?.originalFileName ?? null,
-  distanceMeters: typeof trailData.value?.track?.distanceMeters === 'number'
-    ? trailData.value.track.distanceMeters
-    : null,
-  elevationGainMeters: typeof trailData.value?.track?.elevationGainMeters === 'number'
-    ? trailData.value.track.elevationGainMeters
-    : null,
-  geoJson: trailData.value?.track?.geoJson,
-}))
-const detailWeatherScene = computed(() => mapWeatherToTrackScene(
-  weatherOverview.value?.textDay,
-  weatherOverview.value?.windScaleDay,
-))
+const detailTrackViewerData = computed(() =>
+  createTrackViewerData({
+    title: trailData.value?.name ?? null,
+    fileName: trailData.value?.track?.originalFileName ?? null,
+    distanceMeters:
+      typeof trailData.value?.track?.distanceMeters === 'number'
+        ? trailData.value.track.distanceMeters
+        : null,
+    elevationGainMeters:
+      typeof trailData.value?.track?.elevationGainMeters === 'number'
+        ? trailData.value.track.elevationGainMeters
+        : null,
+    geoJson: trailData.value?.track?.geoJson,
+  }),
+)
+const detailWeatherScene = computed(() =>
+  mapWeatherToTrackScene(weatherOverview.value?.textDay, weatherOverview.value?.windScaleDay),
+)
 const canManageTrail = computed(() => !!displayTrail.value?.ownedByCurrentUser)
 const canEditTrail = computed(() => !!displayTrail.value?.editableByCurrentUser)
 
@@ -241,7 +267,12 @@ async function handleCreateReview(payload: { rating?: number; text: string; imag
   })
 }
 
-async function handleCreateReply(payload: { parentId: string; text: string; replyTo?: string; images: string[] }) {
+async function handleCreateReply(payload: {
+  parentId: string
+  text: string
+  replyTo?: string
+  images: string[]
+}) {
   if (!trailData.value || isSubmittingReview.value) return
 
   await submitReview({
@@ -261,10 +292,10 @@ async function submitReview(payload: CreateReviewPayload) {
     const result = await createReview(payload)
     trailData.value = trailData.value
       ? {
-        ...trailData.value,
-        rating: result.trailRating,
-        reviewCount: result.trailReviewCount,
-      }
+          ...trailData.value,
+          rating: result.trailRating,
+          reviewCount: result.trailReviewCount,
+        }
       : trailData.value
 
     const inserted = insertReview(result.review)
@@ -305,7 +336,13 @@ async function loadInitialReviews(targetTrailId: EntityId) {
 }
 
 async function loadMoreReviews() {
-  if (!trailData.value || !hasMoreReviews.value || isLoadingMoreReviews.value || !nextReviewCursor.value) return
+  if (
+    !trailData.value ||
+    !hasMoreReviews.value ||
+    isLoadingMoreReviews.value ||
+    !nextReviewCursor.value
+  )
+    return
 
   isLoadingMoreReviews.value = true
   loadMoreErrorMessage.value = ''
@@ -359,7 +396,10 @@ async function confirmDeleteReview() {
 }
 
 function closeDeleteConfirm() {
-  if (pendingDeleteReview.value && deletingIds.value.includes(String(pendingDeleteReview.value.id))) {
+  if (
+    pendingDeleteReview.value &&
+    deletingIds.value.includes(String(pendingDeleteReview.value.id))
+  ) {
     return
   }
   pendingDeleteReview.value = null
@@ -459,8 +499,6 @@ function closeDeleteTrailDialog() {
   pendingDeleteTrail.value = false
 }
 
-
-
 function normalizeInternalPath(value: unknown) {
   if (typeof value !== 'string' || !value.startsWith('/')) {
     return null
@@ -534,17 +572,21 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
 <template>
   <main v-if="trailData">
     <div class="glass-header sticky top-0 z-40 px-4 py-3">
-      <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <button @click="handleBack" class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500 cursor-pointer" style="color: var(--text-secondary);">
+      <div class="mx-auto flex max-w-6xl items-center justify-between">
+        <button
+          @click="handleBack"
+          class="hover:text-primary-500 flex cursor-pointer items-center gap-1 text-sm font-medium transition-colors"
+          style="color: var(--text-secondary)"
+        >
           <BaseIcon name="ChevronLeft" :size="20" />
           返回
         </button>
-        <h2 class="text-sm font-semibold" style="color: var(--text-primary);">路线详情</h2>
+        <h2 class="text-sm font-semibold" style="color: var(--text-primary)">路线详情</h2>
         <div class="flex items-center gap-1">
           <button
             v-if="canManageTrail"
             type="button"
-            class="p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-45 cursor-pointer"
+            class="cursor-pointer p-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-45"
             :class="canEditTrail ? 'text-secondary hover:text-primary-500' : 'text-tertiary'"
             :disabled="!canEditTrail"
             :title="canEditTrail ? '编辑路线' : '发布超过48小时后不能再编辑'"
@@ -555,29 +597,32 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
           <button
             v-if="canManageTrail"
             type="button"
-            class="p-1.5 text-secondary transition-colors hover:text-primary-500 cursor-pointer"
+            class="text-secondary hover:text-primary-500 cursor-pointer p-1.5 transition-colors"
             title="删除路线"
             @click="handleDeleteTrail"
           >
             <BaseIcon name="Trash2" :size="20" />
           </button>
-          <button 
+          <button
             v-if="trailData?.track?.downloadUrl"
-            class="p-1.5 text-secondary transition-colors hover:text-primary-500 cursor-pointer" 
+            class="text-secondary hover:text-primary-500 cursor-pointer p-1.5 transition-colors"
             title="下载轨迹"
             @click="handleDownloadTrack"
           >
             <BaseIcon name="Download" :size="20" />
           </button>
-          <button class="p-1.5 text-secondary transition-colors hover:text-primary-500 cursor-pointer" @click="handleShare" title="分享路线">
+          <button
+            class="text-secondary hover:text-primary-500 cursor-pointer p-1.5 transition-colors"
+            @click="handleShare"
+            title="分享路线"
+          >
             <BaseIcon name="Share" :size="20" />
           </button>
         </div>
       </div>
     </div>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-24 space-y-8">
-      
+    <div class="mx-auto max-w-6xl space-y-8 px-4 py-6 pb-24 sm:px-6">
       <!-- Top Section: Hero & Stats -->
       <DetailHero
         v-bind="heroProps"
@@ -589,12 +634,15 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
       />
 
       <!-- Description Section -->
-      <div class="card p-5 space-y-3">
-        <h3 class="text-base font-semibold flex items-center gap-2" style="color: var(--text-primary);">
+      <div class="card space-y-3 p-5">
+        <h3
+          class="flex items-center gap-2 text-base font-semibold"
+          style="color: var(--text-primary)"
+        >
           <BaseIcon name="Info" :size="18" class="text-primary-500" />
           路线介绍
         </h3>
-        <p class="text-sm leading-relaxed whitespace-pre-line" style="color: var(--text-secondary);">
+        <p class="text-sm leading-relaxed whitespace-pre-line" style="color: var(--text-secondary)">
           {{ displayTrail?.description ?? trailData.description }}
         </p>
       </div>
@@ -609,17 +657,25 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
       />
 
       <!-- Conditions & 3D Viewer Section (Side-by-Side on Desktop) -->
-      <div :class="['grid grid-cols-1 gap-6 items-stretch', detailTrackViewerData ? 'lg:grid-cols-2' : '']">
+      <div
+        :class="[
+          'grid grid-cols-1 items-stretch gap-6',
+          detailTrackViewerData ? 'lg:grid-cols-2' : '',
+        ]"
+      >
         <!-- Left: Weather Dashboard -->
-        <div class="card p-6 flex flex-col h-full">
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-bold flex items-center gap-2" style="color: var(--text-primary);">
+        <div class="card flex h-full flex-col p-6">
+          <div class="mb-6 flex items-center justify-between">
+            <h3
+              class="flex items-center gap-2 text-lg font-bold"
+              style="color: var(--text-primary)"
+            >
               <BaseIcon name="CloudSun" :size="22" class="text-primary-500" />
               路线环境与天气
             </h3>
           </div>
 
-          <div class="space-y-6 flex-1">
+          <div class="flex-1 space-y-6">
             <!-- Current Weather -->
             <WeatherSection
               :day="weatherOverview"
@@ -637,16 +693,18 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
 
             <!-- Forecast List -->
             <div class="mt-6 border-t border-white/5">
-              <h4 class="text-sm font-medium mb-4" style="color: var(--text-secondary);">未来七天预报</h4>
+              <h4 class="mb-4 text-sm font-medium" style="color: var(--text-secondary)">
+                未来七天预报
+              </h4>
               <WeatherForecast :forecast="forecast" />
             </div>
           </div>
         </div>
 
         <!-- Right: 3D Track Viewer -->
-        <div v-if="detailTrackViewerData" class="h-[500px] lg:h-auto min-h-[500px]">
+        <div v-if="detailTrackViewerData" class="h-[500px] min-h-[500px] lg:h-auto">
           <TrailTrackViewer
-            class="h-full rounded-2xl overflow-hidden shadow-2xl border border-white/5"
+            class="h-full overflow-hidden rounded-2xl border border-white/5 shadow-2xl"
             :data="detailTrackViewerData"
             :weather-scene="detailWeatherScene"
             mode="detail"
@@ -657,7 +715,7 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
       </div>
 
       <!-- Reviews Section (Full Width) -->
-      <div class="pt-8 border-t border-white/5">
+      <div class="border-t border-white/5 pt-8">
         <ReviewList
           :reviews="reviews"
           :average-rating="trailData.rating"
@@ -683,8 +741,6 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
           @close-user-card="closeUserCard"
         />
       </div>
-
-
     </div>
 
     <ConfirmDialog
@@ -694,8 +750,14 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
       confirm-text="确认删除"
       cancel-text="暂不删除"
       tone="danger"
-      :confirm-loading="!!pendingDeleteReview && deletingIds.includes(String(pendingDeleteReview.id))"
-      @update:show="(value) => { if (!value) closeDeleteConfirm() }"
+      :confirm-loading="
+        !!pendingDeleteReview && deletingIds.includes(String(pendingDeleteReview.id))
+      "
+      @update:show="
+        (value) => {
+          if (!value) closeDeleteConfirm()
+        }
+      "
       @cancel="closeDeleteConfirm"
       @confirm="confirmDeleteReview"
     />
@@ -708,25 +770,29 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
       cancel-text="暂不删除"
       tone="danger"
       :confirm-loading="isDeletingTrail"
-      @update:show="(value) => { if (!value) closeDeleteTrailDialog() }"
+      @update:show="
+        (value) => {
+          if (!value) closeDeleteTrailDialog()
+        }
+      "
       @cancel="closeDeleteTrailDialog"
       @confirm="confirmDeleteTrail"
     />
-
   </main>
-  <main v-else class="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+  <main v-else class="mx-auto max-w-4xl px-4 py-10 sm:px-6">
     <div class="card p-8 text-center">
-      <p v-if="isLoading" class="text-sm" style="color: var(--text-secondary);">正在加载路线详情...</p>
-      <p v-else-if="errorMessage" class="text-sm" style="color: var(--color-hard);">{{ errorMessage }}</p>
-      <p v-else class="text-sm" style="color: var(--text-secondary);">未找到该路线</p>
+      <p v-if="isLoading" class="text-sm" style="color: var(--text-secondary)">
+        正在加载路线详情...
+      </p>
+      <p v-else-if="errorMessage" class="text-sm" style="color: var(--color-hard)">
+        {{ errorMessage }}
+      </p>
+      <p v-else class="text-sm" style="color: var(--text-secondary)">未找到该路线</p>
     </div>
   </main>
 
   <!-- Fullscreen Track Viewer -->
-  <div
-    v-if="isViewerFullscreen"
-    class="fixed inset-0 z-[100] bg-black animate-fade-in"
-  >
+  <div v-if="isViewerFullscreen" class="animate-fade-in fixed inset-0 z-[100] bg-black">
     <TrailTrackViewer
       v-if="detailTrackViewerData"
       class="h-full w-full"

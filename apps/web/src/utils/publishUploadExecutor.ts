@@ -16,15 +16,23 @@ function loadImageSize(file: File) {
     const objectUrl = URL.createObjectURL(file)
     const image = new Image()
 
-    image.onload = () => {
-      resolve({ width: image.width, height: image.height })
-      URL.revokeObjectURL(objectUrl)
-    }
+    image.addEventListener(
+      'load',
+      () => {
+        resolve({ width: image.width, height: image.height })
+        URL.revokeObjectURL(objectUrl)
+      },
+      { once: true },
+    )
 
-    image.onerror = () => {
-      URL.revokeObjectURL(objectUrl)
-      reject(new Error('无法读取图片尺寸'))
-    }
+    image.addEventListener(
+      'error',
+      () => {
+        URL.revokeObjectURL(objectUrl)
+        reject(new Error('无法读取图片尺寸'))
+      },
+      { once: true },
+    )
 
     image.src = objectUrl
   })
@@ -45,9 +53,11 @@ function inferTrackMimeType(file: File) {
 }
 
 function createOssClient(sts: Awaited<ReturnType<typeof createUploadSts>>) {
-  const testClient = (globalThis as typeof globalThis & {
-    __TRAILQUEST_TEST_OSS_CLIENT__?: OSS | { multipartUpload: OSS['multipartUpload'] }
-  }).__TRAILQUEST_TEST_OSS_CLIENT__
+  const testClient = (
+    globalThis as typeof globalThis & {
+      __TRAILQUEST_TEST_OSS_CLIENT__?: OSS | { multipartUpload: OSS['multipartUpload'] }
+    }
+  ).__TRAILQUEST_TEST_OSS_CLIENT__
 
   if (testClient) {
     return testClient
@@ -98,10 +108,7 @@ export async function uploadPublishImage(
   })
 }
 
-export async function uploadPublishTrack(
-  file: File,
-  onProgress?: (progress: number) => void,
-) {
+export async function uploadPublishTrack(file: File, onProgress?: (progress: number) => void) {
   const mimeType = inferTrackMimeType(file)
   const extension = getExtension(file)
   const sts = await createUploadSts({

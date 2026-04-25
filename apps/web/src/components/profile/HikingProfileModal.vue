@@ -25,11 +25,12 @@ const formValue = ref<HikingProfileFormValue>({
   location: '',
 })
 
-const canSave = computed(() =>
-  !isSaving.value
-  && !!formValue.value.experienceLevel
-  && !!formValue.value.trailStyle
-  && !!formValue.value.packPreference,
+const canSave = computed(
+  () =>
+    !isSaving.value &&
+    !!formValue.value.experienceLevel &&
+    !!formValue.value.trailStyle &&
+    !!formValue.value.packPreference,
 )
 
 watch(
@@ -106,7 +107,7 @@ function buildCompleteHikingProfile(form: HikingProfileFormValue): HikingProfile
     @update:show="$emit('update:show', $event)"
   >
     <div class="space-y-4">
-      <p class="text-sm leading-6" style="color: var(--text-secondary);">
+      <p class="text-sm leading-6" style="color: var(--text-secondary)">
         告诉 TrailQuest 你更偏好的徒步方式，后续推荐和社区内容会更贴近你的节奏。
       </p>
 
@@ -117,15 +118,15 @@ function buildCompleteHikingProfile(form: HikingProfileFormValue): HikingProfile
       <div class="flex justify-end gap-3">
         <button
           type="button"
-          class="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-primary-500/10"
-          style="color: var(--text-secondary);"
+          class="hover:bg-primary-500/10 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+          style="color: var(--text-secondary)"
           @click="$emit('update:show', false)"
         >
           取消
         </button>
         <button
           type="button"
-          class="rounded-lg bg-primary-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
+          class="bg-primary-500 hover:bg-primary-600 rounded-lg px-6 py-2 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="!canSave"
           @click="handleSave"
         >

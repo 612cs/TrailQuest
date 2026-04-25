@@ -131,24 +131,14 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <transition name="modal-fade" appear>
-      <div
-        v-if="isVisible"
-        class="image-preview"
-        @click.self="closePreview"
-      >
+      <div v-if="isVisible" class="image-preview" @click.self="closePreview">
         <div class="image-preview__backdrop" @click="closePreview" />
 
-        <button
-          type="button"
-          class="image-preview__close"
-          @click="closePreview"
-        >
+        <button type="button" class="image-preview__close" @click="closePreview">
           <X :size="22" :stroke-width="2" />
         </button>
 
-        <div class="image-preview__counter">
-          {{ currentIndex + 1 }} / {{ images.length }}
-        </div>
+        <div class="image-preview__counter">{{ currentIndex + 1 }} / {{ images.length }}</div>
 
         <button
           v-if="currentIndex > 0"
@@ -179,10 +169,7 @@ onUnmounted(() => {
           </transition>
         </div>
 
-        <div
-          v-if="hasMultiple"
-          class="image-preview__thumbs"
-        >
+        <div v-if="hasMultiple" class="image-preview__thumbs">
           <button
             v-for="(src, index) in images"
             :key="`${src}-${index}`"
@@ -308,7 +295,10 @@ onUnmounted(() => {
   background: transparent;
   opacity: 0.6;
   cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease,
+    border-color 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -340,7 +330,9 @@ onUnmounted(() => {
 
 .modal-fade-enter-active,
 .modal-fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s cubic-bezier(0.2, 0, 0, 1);
   transform-origin: center center;
 }
 

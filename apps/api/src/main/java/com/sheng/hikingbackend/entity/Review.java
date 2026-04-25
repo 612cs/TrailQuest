@@ -37,6 +37,17 @@ public class Review {
     @TableField("reply_to")
     private String replyTo;
 
+    private String status;
+
+    @TableField("moderation_reason")
+    private String moderationReason;
+
+    @TableField("moderated_by")
+    private Long moderatedBy;
+
+    @TableField("moderated_at")
+    private LocalDateTime moderatedAt;
+
     @TableField("created_at")
     private LocalDateTime createdAt;
 }

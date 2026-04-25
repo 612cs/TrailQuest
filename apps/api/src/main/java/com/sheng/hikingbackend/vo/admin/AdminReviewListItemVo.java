@@ -27,6 +27,10 @@ public class AdminReviewListItemVo {
     private String avatarMediaUrl;
     private Integer rating;
     private String text;
+    private String status;
+    private String parentText;
+    private String moderationReason;
+    private LocalDateTime moderatedAt;
 
     @JsonSerialize(using = ToStringSerializer.class)
     private Long parentId;

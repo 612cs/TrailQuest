@@ -13,6 +13,26 @@ type TrailLikeState = Pick<
   'id' | 'likes' | 'favorites' | 'likedByCurrentUser' | 'favoritedByCurrentUser'
 >
 
+function normalizeTrail(trail: TrailLikeState): TrailInteractionState {
+  return {
+    trailId: trail.id,
+    likes: trail.likes ?? 0,
+    favorites: trail.favorites ?? 0,
+    likedByCurrentUser: Boolean(trail.likedByCurrentUser),
+    favoritedByCurrentUser: Boolean(trail.favoritedByCurrentUser),
+  }
+}
+
+function normalizeInteraction(result: TrailInteractionResult): TrailInteractionState {
+  return {
+    trailId: result.trailId,
+    likes: result.likes ?? 0,
+    favorites: result.favorites ?? 0,
+    likedByCurrentUser: Boolean(result.likedByCurrentUser),
+    favoritedByCurrentUser: Boolean(result.favoritedByCurrentUser),
+  }
+}
+
 export const useTrailInteractionStore = defineStore('trailInteraction', () => {
   const interactionMap = ref<Record<string, TrailInteractionState>>({})
   const likePendingMap = ref<Record<string, boolean>>({})
@@ -67,12 +87,16 @@ export const useTrailInteractionStore = defineStore('trailInteraction', () => {
     likePendingMap.value[String(trail.id)] = true
 
     try {
-      const result = previous.likedByCurrentUser ? await unlikeTrail(trail.id) : await likeTrail(trail.id)
+      const result = previous.likedByCurrentUser
+        ? await unlikeTrail(trail.id)
+        : await likeTrail(trail.id)
       applyInteractionResult(result)
       return true
     } catch (error) {
       interactionMap.value[String(trail.id)] = previous
-      flashStore.showError(resolveErrorMessage(error, previous.likedByCurrentUser ? '取消点赞失败' : '点赞失败'))
+      flashStore.showError(
+        resolveErrorMessage(error, previous.likedByCurrentUser ? '取消点赞失败' : '点赞失败'),
+      )
       return false
     } finally {
       likePendingMap.value[String(trail.id)] = false
@@ -98,12 +122,16 @@ export const useTrailInteractionStore = defineStore('trailInteraction', () => {
     favoritePendingMap.value[String(trail.id)] = true
 
     try {
-      const result = previous.favoritedByCurrentUser ? await unfavoriteTrail(trail.id) : await favoriteTrail(trail.id)
+      const result = previous.favoritedByCurrentUser
+        ? await unfavoriteTrail(trail.id)
+        : await favoriteTrail(trail.id)
       applyInteractionResult(result)
       return true
     } catch (error) {
       interactionMap.value[String(trail.id)] = previous
-      flashStore.showError(resolveErrorMessage(error, previous.favoritedByCurrentUser ? '取消收藏失败' : '收藏失败'))
+      flashStore.showError(
+        resolveErrorMessage(error, previous.favoritedByCurrentUser ? '取消收藏失败' : '收藏失败'),
+      )
       return false
     } finally {
       favoritePendingMap.value[String(trail.id)] = false
@@ -123,26 +151,6 @@ export const useTrailInteractionStore = defineStore('trailInteraction', () => {
     const normalized = normalizeTrail(trail)
     interactionMap.value[String(trail.id)] = normalized
     return { ...normalized }
-  }
-
-  function normalizeTrail(trail: TrailLikeState): TrailInteractionState {
-    return {
-      trailId: trail.id,
-      likes: trail.likes ?? 0,
-      favorites: trail.favorites ?? 0,
-      likedByCurrentUser: Boolean(trail.likedByCurrentUser),
-      favoritedByCurrentUser: Boolean(trail.favoritedByCurrentUser),
-    }
-  }
-
-  function normalizeInteraction(result: TrailInteractionResult): TrailInteractionState {
-    return {
-      trailId: result.trailId,
-      likes: result.likes ?? 0,
-      favorites: result.favorites ?? 0,
-      likedByCurrentUser: Boolean(result.likedByCurrentUser),
-      favoritedByCurrentUser: Boolean(result.favoritedByCurrentUser),
-    }
   }
 
   function resolveErrorMessage(error: unknown, fallback: string) {

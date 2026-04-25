@@ -80,21 +80,31 @@ async function handleShare(post: TrailListItem) {
 </script>
 
 <template>
-  <main class="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+  <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
     <!-- Header -->
     <div class="mb-8">
-      <h1 class="text-2xl sm:text-3xl font-bold" style="color: var(--text-primary);">社区动态</h1>
-      <p class="text-sm mt-2" style="color: var(--text-secondary);">来自像你一样的探险者的实时自然发现。</p>
+      <h1 class="text-2xl font-bold sm:text-3xl" style="color: var(--text-primary)">社区动态</h1>
+      <p class="mt-2 text-sm" style="color: var(--text-secondary)">
+        来自像你一样的探险者的实时自然发现。
+      </p>
     </div>
 
     <!-- Posts -->
-    <div v-if="isLoading" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+    <div v-if="isLoading" class="card p-6 text-center text-sm" style="color: var(--text-secondary)">
       正在加载社区动态...
     </div>
-    <div v-else-if="errorMessage" class="card p-6 text-sm text-center" style="color: var(--color-hard);">
+    <div
+      v-else-if="errorMessage"
+      class="card p-6 text-center text-sm"
+      style="color: var(--color-hard)"
+    >
       {{ errorMessage }}
     </div>
-    <div v-else-if="currentPosts.length === 0" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+    <div
+      v-else-if="currentPosts.length === 0"
+      class="card p-6 text-center text-sm"
+      style="color: var(--text-secondary)"
+    >
       暂无社区动态
     </div>
     <div v-else class="space-y-5">
@@ -113,11 +123,7 @@ async function handleShare(post: TrailListItem) {
 
     <!-- Pagination -->
     <div class="mt-8">
-      <Pagination
-        v-model:current="currentPage"
-        :total="totalPages"
-        :max-visible="3"
-      />
+      <Pagination v-model:current="currentPage" :total="totalPages" :max-visible="3" />
     </div>
   </main>
 </template>

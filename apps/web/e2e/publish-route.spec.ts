@@ -21,22 +21,31 @@ const fakeUser = {
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('trailquest_access_token', 'test-token')
-    localStorage.setItem('trailquest_user_profile', JSON.stringify({
-      id: 'user-1001',
-      username: '测试用户',
-      avatar: '测',
-      avatarBg: '#1f6b3b',
-      role: '徒步爱好者',
-      joinDate: '2026年3月',
-      postCount: 3,
-      savedCount: 2,
-      bio: '',
-      location: '萍乡',
-      hikingProfile: null,
-    }))
+    localStorage.setItem(
+      'trailquest_user_profile',
+      JSON.stringify({
+        id: 'user-1001',
+        username: '测试用户',
+        avatar: '测',
+        avatarBg: '#1f6b3b',
+        role: '徒步爱好者',
+        joinDate: '2026年3月',
+        postCount: 3,
+        savedCount: 2,
+        bio: '',
+        location: '萍乡',
+        hikingProfile: null,
+      }),
+    )
 
-    ;(window as Window & { __TRAILQUEST_TEST_OSS_CLIENT__: unknown }).__TRAILQUEST_TEST_OSS_CLIENT__ = {
-      multipartUpload: async (_objectKey: string, _file: File, options?: { progress?: (percentage: number) => void }) => {
+    ;(
+      window as Window & { __TRAILQUEST_TEST_OSS_CLIENT__: unknown }
+    ).__TRAILQUEST_TEST_OSS_CLIENT__ = {
+      multipartUpload: async (
+        _objectKey: string,
+        _file: File,
+        options?: { progress?: (percentage: number) => void },
+      ) => {
         options?.progress?.(1)
         return { res: { status: 200 } }
       },
@@ -67,7 +76,11 @@ test.beforeEach(async ({ page }) => {
   })
 
   await page.route('**/api/uploads/complete', async (route) => {
-    const body = route.request().postDataJSON() as { bizType: string; url: string; originalName: string }
+    const body = route.request().postDataJSON() as {
+      bizType: string
+      url: string
+      originalName: string
+    }
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -217,7 +230,24 @@ test.beforeEach(async ({ page }) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ success: true, code: 'OK', message: '天气加载成功', data: { locationContext: { lng: 114.12, lat: 27.45, resolvedFrom: 'start_coordinate' }, forecast: [], source: { provider: 'qweather', cached: false, dailyReady: true, currentReady: true, hourlyReady: true, astroReady: false, lightPollutionReady: false } } }),
+      body: JSON.stringify({
+        success: true,
+        code: 'OK',
+        message: '天气加载成功',
+        data: {
+          locationContext: { lng: 114.12, lat: 27.45, resolvedFrom: 'start_coordinate' },
+          forecast: [],
+          source: {
+            provider: 'qweather',
+            cached: false,
+            dailyReady: true,
+            currentReady: true,
+            hourlyReady: true,
+            astroReady: false,
+            lightPollutionReady: false,
+          },
+        },
+      }),
     })
   })
 
@@ -225,7 +255,35 @@ test.beforeEach(async ({ page }) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ success: true, code: 'OK', message: '景观预测加载成功', data: { cloudSea: { enabled: true, score: 0.32, confidence: 0.62, bestWindow: '04:00-07:00', resolvedFrom: 'weather_hourly' }, rime: { enabled: true, score: 0.08, confidence: 0.58, bestWindow: '04:00-07:00', resolvedFrom: 'weather_hourly' }, icicle: { enabled: true, score: 0.05, confidence: 0.56, bestWindow: '00:00-06:00', resolvedFrom: 'weather_hourly' }, source: { provider: 'qweather' } } }),
+      body: JSON.stringify({
+        success: true,
+        code: 'OK',
+        message: '景观预测加载成功',
+        data: {
+          cloudSea: {
+            enabled: true,
+            score: 0.32,
+            confidence: 0.62,
+            bestWindow: '04:00-07:00',
+            resolvedFrom: 'weather_hourly',
+          },
+          rime: {
+            enabled: true,
+            score: 0.08,
+            confidence: 0.58,
+            bestWindow: '04:00-07:00',
+            resolvedFrom: 'weather_hourly',
+          },
+          icicle: {
+            enabled: true,
+            score: 0.05,
+            confidence: 0.56,
+            bestWindow: '00:00-06:00',
+            resolvedFrom: 'weather_hourly',
+          },
+          source: { provider: 'qweather' },
+        },
+      }),
     })
   })
 })

@@ -1,6 +1,11 @@
 import { http } from './http'
 import type { EntityId } from '../types/id'
-import type { PageResponse, TrailInteractionResult, TrailListItem, TrailListParams } from '../types/trail'
+import type {
+  PageResponse,
+  TrailInteractionResult,
+  TrailListItem,
+  TrailListParams,
+} from '../types/trail'
 
 export interface CreateTrailPayload {
   name: string

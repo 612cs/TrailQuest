@@ -29,8 +29,12 @@ const formData = ref({
 
 const currentAvatarUpload = computed(() => avatarUploader.items.value[0] ?? null)
 const isAvatarUploading = computed(() => avatarUploader.isUploading.value)
-const previewAvatarUrl = computed(() => currentAvatarUpload.value?.localUrl || userStore.profile?.avatarMediaUrl || '')
-const avatarUploadError = computed(() => currentAvatarUpload.value?.status === 'error' ? currentAvatarUpload.value.errorMessage : '')
+const previewAvatarUrl = computed(
+  () => currentAvatarUpload.value?.localUrl || userStore.profile?.avatarMediaUrl || '',
+)
+const avatarUploadError = computed(() =>
+  currentAvatarUpload.value?.status === 'error' ? currentAvatarUpload.value.errorMessage : '',
+)
 const pendingAvatarMediaId = computed(() => {
   if (currentAvatarUpload.value?.status === 'success') {
     return currentAvatarUpload.value.mediaId
@@ -38,7 +42,9 @@ const pendingAvatarMediaId = computed(() => {
   return userStore.profile?.avatarMediaId ?? null
 })
 const saveDisabled = computed(() => !userStore.profile || isSaving.value || isAvatarUploading.value)
-const previewAvatarText = computed(() => buildAvatarText(formData.value.username, userStore.profile?.avatar ?? 'U'))
+const previewAvatarText = computed(() =>
+  buildAvatarText(formData.value.username, userStore.profile?.avatar ?? 'U'),
+)
 const previewAvatarBg = computed(() => userStore.profile?.avatarBg ?? 'var(--primary-500)')
 
 watch(
@@ -122,10 +128,13 @@ function buildAvatarText(username: string, fallback: string) {
     @close="closeModal"
   >
     <div class="space-y-5">
-      <div class="flex items-center gap-4 rounded-2xl border p-4" style="border-color: var(--border-default); background-color: var(--bg-tag);">
+      <div
+        class="flex items-center gap-4 rounded-2xl border p-4"
+        style="border-color: var(--border-default); background-color: var(--bg-tag)"
+      >
         <button
           type="button"
-          class="group relative shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60"
+          class="group focus-visible:ring-primary-500/60 relative shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2"
           @click="triggerAvatarUpload"
         >
           <div
@@ -150,7 +159,9 @@ function buildAvatarText(username: string, fallback: string) {
             v-else
             class="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/28 opacity-0 transition-opacity group-hover:opacity-100"
           >
-            <span class="flex h-11 w-11 items-center justify-center rounded-full bg-white/92 text-slate-900 shadow-sm">
+            <span
+              class="flex h-11 w-11 items-center justify-center rounded-full bg-white/92 text-slate-900 shadow-sm"
+            >
               <BaseIcon name="ImageUp" :size="22" />
             </span>
           </div>
@@ -158,13 +169,13 @@ function buildAvatarText(username: string, fallback: string) {
 
         <div class="min-w-0 flex-1 space-y-2">
           <div>
-            <p class="text-sm font-semibold" style="color: var(--text-primary);">头像</p>
-            <p class="text-xs leading-5" style="color: var(--text-secondary);">
+            <p class="text-sm font-semibold" style="color: var(--text-primary)">头像</p>
+            <p class="text-xs leading-5" style="color: var(--text-secondary)">
               点击左侧头像即可更换，支持 JPG、PNG、WEBP，上传后仅在点击“保存更改”后正式生效。
             </p>
           </div>
 
-          <p v-if="avatarUploadError" class="text-xs" style="color: var(--color-hard);">
+          <p v-if="avatarUploadError" class="text-xs" style="color: var(--color-hard)">
             {{ avatarUploadError }}
           </p>
         </div>
@@ -179,46 +190,52 @@ function buildAvatarText(username: string, fallback: string) {
       </div>
 
       <div class="space-y-1.5">
-        <label class="block text-sm font-medium" style="color: var(--text-secondary);">邮箱</label>
+        <label class="block text-sm font-medium" style="color: var(--text-secondary)">邮箱</label>
         <input
           :value="userStore.profile?.email ?? ''"
           type="email"
           readonly
           tabindex="-1"
-          class="w-full rounded-xl border px-4 py-2.5 text-sm cursor-default focus:outline-none focus:ring-0"
-          style="border-color: var(--border-default); background-color: var(--bg-tag); color: var(--text-secondary);"
+          class="w-full cursor-default rounded-xl border px-4 py-2.5 text-sm focus:ring-0 focus:outline-none"
+          style="
+            border-color: var(--border-default);
+            background-color: var(--bg-tag);
+            color: var(--text-secondary);
+          "
         />
       </div>
 
       <div class="space-y-1.5">
-        <label class="block text-sm font-medium" style="color: var(--text-secondary);">昵称</label>
+        <label class="block text-sm font-medium" style="color: var(--text-secondary)">昵称</label>
         <input
           v-model="formData.username"
           type="text"
-          class="w-full rounded-xl border bg-transparent px-4 py-2.5 text-sm transition-colors focus:border-primary-500 focus:outline-none"
-          style="border-color: var(--border-default); color: var(--text-primary);"
+          class="focus:border-primary-500 w-full rounded-xl border bg-transparent px-4 py-2.5 text-sm transition-colors focus:outline-none"
+          style="border-color: var(--border-default); color: var(--text-primary)"
           placeholder="请输入昵称"
         />
       </div>
 
       <div class="space-y-1.5">
-        <label class="block text-sm font-medium" style="color: var(--text-secondary);">所在地</label>
+        <label class="block text-sm font-medium" style="color: var(--text-secondary)">所在地</label>
         <input
           v-model="formData.location"
           type="text"
-          class="w-full rounded-xl border bg-transparent px-4 py-2.5 text-sm transition-colors focus:border-primary-500 focus:outline-none"
-          style="border-color: var(--border-default); color: var(--text-primary);"
+          class="focus:border-primary-500 w-full rounded-xl border bg-transparent px-4 py-2.5 text-sm transition-colors focus:outline-none"
+          style="border-color: var(--border-default); color: var(--text-primary)"
           placeholder="例如：中国，上海"
         />
       </div>
 
       <div class="space-y-1.5">
-        <label class="block text-sm font-medium" style="color: var(--text-secondary);">个人简介</label>
+        <label class="block text-sm font-medium" style="color: var(--text-secondary)"
+          >个人简介</label
+        >
         <textarea
           v-model="formData.bio"
           rows="4"
-          class="w-full resize-none rounded-xl border bg-transparent px-4 py-2.5 text-sm transition-colors focus:border-primary-500 focus:outline-none"
-          style="border-color: var(--border-default); color: var(--text-primary);"
+          class="focus:border-primary-500 w-full resize-none rounded-xl border bg-transparent px-4 py-2.5 text-sm transition-colors focus:outline-none"
+          style="border-color: var(--border-default); color: var(--text-primary)"
           placeholder="介绍一下自己..."
         />
       </div>
@@ -228,16 +245,16 @@ function buildAvatarText(username: string, fallback: string) {
       <div class="flex justify-end gap-3">
         <button
           type="button"
-          class="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-primary-500/10"
+          class="hover:bg-primary-500/10 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
           :disabled="isSaving"
-          style="color: var(--text-secondary);"
+          style="color: var(--text-secondary)"
           @click="closeModal"
         >
           取消
         </button>
         <button
           type="button"
-          class="rounded-lg bg-primary-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-60"
+          class="bg-primary-500 hover:bg-primary-600 rounded-lg px-6 py-2 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="saveDisabled"
           @click="handleSave"
         >

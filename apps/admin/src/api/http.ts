@@ -42,13 +42,17 @@ async function request<T>(path: string, options: RequestOptions = {}) {
   if (rawText) {
     try {
       payload = JSON.parse(rawText) as ApiResponse<T>
-    } catch (error) {
+    } catch {
       throw new ApiError('服务返回了非 JSON 响应', 'INVALID_RESPONSE', response.status)
     }
   }
 
   if (!response.ok) {
-    throw new ApiError(payload?.message || response.statusText || '请求失败', payload?.code || 'HTTP_ERROR', response.status)
+    throw new ApiError(
+      payload?.message || response.statusText || '请求失败',
+      payload?.code || 'HTTP_ERROR',
+      response.status,
+    )
   }
 
   if (!payload) {
@@ -56,7 +60,11 @@ async function request<T>(path: string, options: RequestOptions = {}) {
   }
 
   if (!payload.success) {
-    throw new ApiError(payload.message || '请求失败', payload.code || 'REQUEST_FAILED', response.status)
+    throw new ApiError(
+      payload.message || '请求失败',
+      payload.code || 'REQUEST_FAILED',
+      response.status,
+    )
   }
 
   return payload.data

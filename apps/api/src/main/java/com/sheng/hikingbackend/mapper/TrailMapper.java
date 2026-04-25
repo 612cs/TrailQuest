@@ -12,6 +12,7 @@ import com.sheng.hikingbackend.dto.admin.AdminTrailManagementPageRequest;
 import com.sheng.hikingbackend.dto.admin.AdminTrailPageRequest;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
 import com.sheng.hikingbackend.entity.Trail;
+import com.sheng.hikingbackend.vo.admin.AdminDashboardDailyCountRow;
 import com.sheng.hikingbackend.vo.trail.TrailInteractionVo;
 import com.sheng.hikingbackend.vo.trail.TrailQueryRow;
 
@@ -571,6 +572,31 @@ public interface TrailMapper extends BaseMapper<Trail> {
               AND review_status = 'pending'
             """)
     long countPendingReviewTrails();
+
+    @Select("""
+            SELECT COUNT(*)
+            FROM trails
+            WHERE status = 'deleted'
+            """)
+    long countOfflineTrails();
+
+    @Select("""
+            SELECT COUNT(*)
+            FROM trails
+            WHERE DATE(created_at) = CURDATE()
+            """)
+    long countTodayNewTrails();
+
+    @Select("""
+            SELECT
+              DATE(created_at) AS metric_date,
+              COUNT(*) AS metric_count
+            FROM trails
+            WHERE created_at >= #{startDateTime}
+            GROUP BY DATE(created_at)
+            ORDER BY DATE(created_at) ASC
+            """)
+    java.util.List<AdminDashboardDailyCountRow> selectDailyNewTrailCounts(@Param("startDateTime") java.time.LocalDateTime startDateTime);
 
     @Update("""
             UPDATE trails

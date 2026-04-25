@@ -34,7 +34,7 @@ const formatItems = computed(() => {
   return remainingForecast.map((day) => {
     const minT = Math.min(day.tempMax ?? 0, day.tempMin ?? 0)
     const maxT = Math.max(day.tempMax ?? 0, day.tempMin ?? 0)
-    
+
     // Format date string (YYYY-MM-DD -> MM-DD)
     const dateParts = day.date.split('-')
     const formattedDate = dateParts.length >= 3 ? `${dateParts[1]}-${dateParts[2]}` : day.date
@@ -55,24 +55,30 @@ const formatItems = computed(() => {
 
 <template>
   <div class="grid grid-cols-2 gap-3" v-if="formatItems.length > 0">
-    <div 
-      v-for="item in formatItems" 
-      :key="item.id" 
-      class="p-3.5 bg-white/3 rounded-2xl border border-primary-500/10 flex flex-col gap-3 hover:bg-white/5 transition-colors"
+    <div
+      v-for="item in formatItems"
+      :key="item.id"
+      class="border-primary-500/10 flex flex-col gap-3 rounded-2xl border bg-white/3 p-3.5 transition-colors hover:bg-white/5"
     >
       <div class="flex items-center justify-between">
         <div class="flex flex-col">
-          <span class="text-sm font-medium" style="color: var(--text-primary);">{{ item.weekday }}</span>
-          <span class="text-[10px] uppercase tracking-wider" style="color: var(--text-tertiary);">{{ item.date }}</span>
+          <span class="text-sm font-medium" style="color: var(--text-primary)">{{
+            item.weekday
+          }}</span>
+          <span class="text-[10px] tracking-wider uppercase" style="color: var(--text-tertiary)">{{
+            item.date
+          }}</span>
         </div>
-        <div :class="['p-1.5 rounded-lg bg-white/5', item.iconColor]">
+        <div :class="['rounded-lg bg-white/5 p-1.5', item.iconColor]">
           <BaseIcon :name="item.icon" :size="18" />
         </div>
       </div>
-      
+
       <div class="flex items-baseline gap-2">
-        <span class="text-base font-bold" style="color: var(--text-primary);">{{ item.maxTemp }}°</span>
-        <span class="text-xs" style="color: var(--text-secondary);">{{ item.minTemp }}°</span>
+        <span class="text-base font-bold" style="color: var(--text-primary)"
+          >{{ item.maxTemp }}°</span
+        >
+        <span class="text-xs" style="color: var(--text-secondary)">{{ item.minTemp }}°</span>
       </div>
     </div>
   </div>

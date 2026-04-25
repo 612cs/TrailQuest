@@ -1,8 +1,80 @@
 export interface AdminDashboardSummary {
   pendingTrailCount: number
-  reviewCount: number
   pendingReportCount: number
-  userCount: number
+  hiddenReviewCount: number
+  todayNewUserCount: number
+  todayNewTrailCount: number
+  todayNewReviewCount: number
+  offlineTrailCount: number
+  reportedReviewCount: number
+  trends: AdminDashboardTrendItem[]
+  recentRisks: AdminDashboardRiskItem[]
+}
+
+export interface AdminDashboardTrendItem {
+  date: string
+  newTrailCount: number
+  newReviewCount: number
+  newReportCount: number
+  newUserCount: number
+}
+
+export interface AdminDashboardRiskItem {
+  type: string
+  title: string
+  description: string
+  targetType?: string | null
+  targetId?: string | number | null
+  targetTitle?: string | null
+  priority: 'high' | 'medium' | 'low' | string
+  createdAt: string
+}
+
+export interface AdminDashboardTodoItem {
+  key: string
+  title: string
+  count: number
+  description: string
+  actionLabel: string
+  to: {
+    path: string
+    query?: Record<string, string | undefined>
+  }
+}
+
+export interface AdminOperationLogListItem {
+  id: string | number
+  operatorId: string | number
+  operatorName: string
+  operatorRole: string
+  moduleCode: string
+  actionCode: string
+  targetType: string
+  targetId?: string | number | null
+  targetTitle?: string | null
+  reason?: string | null
+  resultStatus: 'success' | 'failed' | string
+  createdAt: string
+}
+
+export interface AdminOperationLogDetail {
+  id: string | number
+  operatorId: string | number
+  operatorName: string
+  operatorRole: string
+  moduleCode: string
+  actionCode: string
+  targetType: string
+  targetId?: string | number | null
+  targetTitle?: string | null
+  reason?: string | null
+  resultStatus: 'success' | 'failed' | string
+  beforeSnapshot: Record<string, unknown>
+  afterSnapshot: Record<string, unknown>
+  requestId?: string | null
+  ipAddress?: string | null
+  userAgent?: string | null
+  createdAt: string
 }
 
 export interface AdminTrailListItem {
@@ -64,9 +136,54 @@ export interface AdminTrailDetail {
 
 export interface AdminReviewListItem {
   id: string | number
+  trailId: string | number
+  userId: string | number
   text: string
+  rating?: number | null
+  status: 'active' | 'hidden' | 'deleted' | string
   authorUsername: string
+  avatar?: string | null
+  avatarBg?: string | null
+  avatarMediaUrl?: string | null
   trailName: string
+  parentId?: string | number | null
+  parentText?: string | null
+  moderationReason?: string | null
+  moderatedAt?: string | null
+  createdAt: string
+}
+
+export interface AdminReviewThreadItem {
+  id: string | number
+  userId: string | number
+  authorUsername: string
+  avatar?: string | null
+  avatarBg?: string | null
+  avatarMediaUrl?: string | null
+  text: string
+  status: 'active' | 'hidden' | 'deleted' | string
+  moderationReason?: string | null
+  moderatedAt?: string | null
+  createdAt: string
+}
+
+export interface AdminReviewDetail {
+  id: string | number
+  trailId: string | number
+  trailName: string
+  rating?: number | null
+  text: string
+  status: 'active' | 'hidden' | 'deleted' | string
+  moderationReason?: string | null
+  moderatedAt?: string | null
+  userId: string | number
+  authorUsername: string
+  avatar?: string | null
+  avatarBg?: string | null
+  avatarMediaUrl?: string | null
+  parentId?: string | number | null
+  parentText?: string | null
+  replies: AdminReviewThreadItem[]
   createdAt: string
 }
 
@@ -109,11 +226,33 @@ export interface AdminReviewPageQuery {
   keyword?: string
   trailKeyword?: string
   authorKeyword?: string
+  status?: string
+}
+
+export interface AdminReviewActionRequest {
+  remark: string
+}
+
+export interface AdminReviewBatchActionRequest {
+  ids: Array<string | number>
+  remark?: string
 }
 
 export interface AdminReportPageQuery {
   pageNum?: number
   pageSize?: number
+}
+
+export interface AdminOperationLogPageQuery {
+  pageNum?: number
+  pageSize?: number
+  moduleCode?: string
+  actionCode?: string
+  operatorKeyword?: string
+  targetType?: string
+  targetId?: string
+  dateFrom?: string
+  dateTo?: string
 }
 
 export interface AdminUserListItem {

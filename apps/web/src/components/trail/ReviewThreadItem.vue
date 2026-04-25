@@ -71,7 +71,7 @@ function handleOpenUserCard(userId: EntityId) {
       type="button"
       class="shrink-0 overflow-hidden rounded-full border transition-transform hover:scale-[1.03]"
       :class="avatarSizeClass"
-      style="border-color: var(--border-default);"
+      style="border-color: var(--border-default)"
       @click="handleOpenUserCard(review.author.id)"
     >
       <img
@@ -90,20 +90,25 @@ function handleOpenUserCard(userId: EntityId) {
     </button>
 
     <div class="min-w-0 flex-1">
-      <div class="flex items-center gap-2 flex-wrap">
+      <div class="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          class="font-semibold text-left transition-colors hover:text-primary-500"
+          class="hover:text-primary-500 text-left font-semibold transition-colors"
           :class="level === 0 ? 'text-sm' : 'text-xs'"
-          style="color: var(--text-primary);"
+          style="color: var(--text-primary)"
           @click="handleOpenUserCard(review.author.id)"
         >
           {{ review.author.username }}
         </button>
-        <span v-if="review.replyTo" :class="metaTextClass" style="color: var(--text-tertiary);">
-          回复 <span class="font-medium" style="color: var(--text-secondary);">@{{ review.replyTo }}</span>
+        <span v-if="review.replyTo" :class="metaTextClass" style="color: var(--text-tertiary)">
+          回复
+          <span class="font-medium" style="color: var(--text-secondary)"
+            >@{{ review.replyTo }}</span
+          >
         </span>
-        <span class="ml-auto" :class="metaTextClass" style="color: var(--text-tertiary);">{{ review.time }}</span>
+        <span class="ml-auto" :class="metaTextClass" style="color: var(--text-tertiary)">{{
+          review.time
+        }}</span>
       </div>
 
       <div v-if="review.rating" class="my-1 flex gap-0.5">
@@ -112,13 +117,15 @@ function handleOpenUserCard(userId: EntityId) {
           :key="index"
           name="Star"
           :size="14"
-          :class="index <= review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'"
+          :class="index <= review.rating ? 'fill-current text-yellow-400' : 'text-gray-300'"
         />
       </div>
 
-      <p class="leading-relaxed" :class="bodyTextClass" style="color: var(--text-secondary);">{{ review.text }}</p>
+      <p class="leading-relaxed" :class="bodyTextClass" style="color: var(--text-secondary)">
+        {{ review.text }}
+      </p>
 
-      <div v-if="review.images.length > 0" class="mt-2 flex gap-2 flex-wrap">
+      <div v-if="review.images.length > 0" class="mt-2 flex flex-wrap gap-2">
         <button
           v-for="(image, imageIndex) in review.images"
           :key="`${review.id}-${imageIndex}`"
@@ -127,16 +134,20 @@ function handleOpenUserCard(userId: EntityId) {
           :class="imageThumbClass"
           @click="handlePreview(review.images, imageIndex)"
         >
-          <img :src="image" alt="" class="h-full w-full object-cover transition-transform hover:scale-105" />
+          <img
+            :src="image"
+            alt=""
+            class="h-full w-full object-cover transition-transform hover:scale-105"
+          />
         </button>
       </div>
 
-      <div class="mt-2 flex items-center gap-3 flex-wrap">
+      <div class="mt-2 flex flex-wrap items-center gap-3">
         <button
           type="button"
-          class="flex items-center gap-1 font-medium transition-colors hover:text-primary-500"
+          class="hover:text-primary-500 flex items-center gap-1 font-medium transition-colors"
           :class="metaTextClass"
-          style="color: var(--text-tertiary);"
+          style="color: var(--text-tertiary)"
           @click="handleStartReply(review)"
         >
           <BaseIcon name="Reply" :size="replyButtonIconSize" />
@@ -146,9 +157,9 @@ function handleOpenUserCard(userId: EntityId) {
         <button
           v-if="isOwnComment"
           type="button"
-          class="flex items-center gap-1 font-medium transition-colors hover:text-[var(--color-hard)] disabled:opacity-60 disabled:cursor-not-allowed"
+          class="flex items-center gap-1 font-medium transition-colors hover:text-[var(--color-hard)] disabled:cursor-not-allowed disabled:opacity-60"
           :class="metaTextClass"
-          style="color: var(--text-tertiary);"
+          style="color: var(--text-tertiary)"
           :disabled="isDeleting"
           @click="handleDelete(review)"
         >
@@ -170,7 +181,7 @@ function handleOpenUserCard(userId: EntityId) {
         <button
           type="button"
           class="mt-2 text-xs"
-          style="color: var(--text-tertiary);"
+          style="color: var(--text-tertiary)"
           @click="emit('cancelReply')"
         >
           取消回复
@@ -181,7 +192,7 @@ function handleOpenUserCard(userId: EntityId) {
         v-if="review.replies.length > 0"
         class="mt-3 space-y-3 border-l-2 pl-4"
         :class="level >= 1 ? 'pl-3' : ''"
-        style="border-color: var(--border-default);"
+        style="border-color: var(--border-default)"
       >
         <ReviewThreadItem
           v-for="reply in review.replies"

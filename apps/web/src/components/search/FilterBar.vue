@@ -45,56 +45,57 @@ function closeDropdown() {
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-2 pb-1" style="background-color: transparent;">
-    <div
-      v-for="filter in filters"
-      :key="filter.key"
-      class="relative shrink-0"
-    >
+  <div class="flex flex-wrap items-center gap-2 pb-1" style="background-color: transparent">
+    <div v-for="filter in filters" :key="filter.key" class="relative shrink-0">
       <!-- Filter Button -->
       <button
         @click="toggleDropdown(filter.key)"
-        class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+        class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
         :style="{
-          backgroundColor: modelValue[filter.key] !== 'all' ? 'var(--color-primary-500)' : 'var(--bg-tag)',
-          color: modelValue[filter.key] !== 'all' ? 'var(--text-inverse)' : 'var(--text-secondary)'
+          backgroundColor:
+            modelValue[filter.key] !== 'all' ? 'var(--color-primary-500)' : 'var(--bg-tag)',
+          color: modelValue[filter.key] !== 'all' ? 'var(--text-inverse)' : 'var(--text-secondary)',
         }"
       >
-        {{ filter.options.find(o => o.value === modelValue[filter.key])?.label || filter.label }}
+        {{ filter.options.find((o) => o.value === modelValue[filter.key])?.label || filter.label }}
         <BaseIcon name="ChevronDown" :size="14" />
       </button>
 
       <!-- Dropdown Menu -->
       <div
         v-if="activeDropdown === filter.key"
-        class="absolute top-full left-0 mt-1 w-32 rounded-lg shadow-lg border z-10 overflow-hidden"
-        style="border-color: var(--border-default); background-color: var(--bg-card);"
+        class="absolute top-full left-0 z-10 mt-1 w-32 overflow-hidden rounded-lg border shadow-lg"
+        style="border-color: var(--border-default); background-color: var(--bg-card)"
       >
         <button
           v-for="option in filter.options"
           :key="option.value"
           @click="selectOption(filter.key, option.value)"
-          class="w-full text-left px-4 py-2 text-sm transition-colors"
+          class="w-full px-4 py-2 text-left text-sm transition-colors"
           :style="{
-             color: modelValue[filter.key] === option.value ? 'var(--color-primary-500)' : 'var(--text-primary)',
-             backgroundColor: modelValue[filter.key] === option.value ? 'var(--bg-tag)' : 'transparent'
+            color:
+              modelValue[filter.key] === option.value
+                ? 'var(--color-primary-500)'
+                : 'var(--text-primary)',
+            backgroundColor:
+              modelValue[filter.key] === option.value ? 'var(--bg-tag)' : 'transparent',
           }"
         >
           {{ option.label }}
         </button>
       </div>
-      
+
       <!-- Click outside overlay layer (simple approach) -->
-      <div 
-        v-if="activeDropdown === filter.key" 
-        class="fixed inset-0 z-0" 
+      <div
+        v-if="activeDropdown === filter.key"
+        class="fixed inset-0 z-0"
         @click="closeDropdown"
       ></div>
     </div>
 
     <!-- Extra slot (for "更多筛选" or other custom buttons) -->
     <template v-if="$slots.extra">
-      <div class="w-px h-5 mx-1 shrink-0" style="background-color: var(--border-default);"></div>
+      <div class="mx-1 h-5 w-px shrink-0" style="background-color: var(--border-default)"></div>
       <slot name="extra" />
     </template>
   </div>

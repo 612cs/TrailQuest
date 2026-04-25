@@ -28,7 +28,7 @@ const filterModel = ref<Record<string, string>>({
   difficulty: 'all',
   packType: 'all',
   durationType: 'all',
-  distance: 'all'
+  distance: 'all',
 })
 
 const route = useRoute()
@@ -43,7 +43,7 @@ watch(
       void loadTrails()
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 onMounted(() => {
@@ -113,9 +113,9 @@ const handleSearch = () => {
   void loadTrails()
 }
 
-const filteredTrails = computed(() => trails.value
-  .map((trail) => trailInteractionStore.applyToTrail(trail))
-  .map(toSearchTrailCard))
+const filteredTrails = computed(() =>
+  trails.value.map((trail) => trailInteractionStore.applyToTrail(trail)).map(toSearchTrailCard),
+)
 
 watch(
   filterModel,
@@ -166,33 +166,38 @@ function withAllAsUndefined(value?: string) {
 
 function resolveConfigOptions(groupCode: keyof typeof DEFAULT_FILTERS) {
   const fallback = DEFAULT_FILTERS[groupCode] ?? []
-  return optionConfigStore.getGroup(groupCode, fallback.map((item, index) => ({
-    code: item.value,
-    label: item.label,
-    sort: index + 1,
-    enabled: true,
-    extra: {},
-  }))).map((item) => ({
-    label: item.label,
-    value: item.code,
-  }))
+  return optionConfigStore
+    .getGroup(
+      groupCode,
+      fallback.map((item, index) => ({
+        code: item.value,
+        label: item.label,
+        sort: index + 1,
+        enabled: true,
+        extra: {},
+      })),
+    )
+    .map((item) => ({
+      label: item.label,
+      value: item.code,
+    }))
 }
 </script>
 
 <template>
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10">
+  <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-10">
     <!-- Search & Filters -->
-    <div class="space-y-4 mb-6">
+    <div class="mb-6 space-y-4">
       <div class="flex gap-3">
-        <SearchBar 
-          v-model="searchInput" 
-          placeholder="搜索路线、地点或描述..." 
+        <SearchBar
+          v-model="searchInput"
+          placeholder="搜索路线、地点或描述..."
           class="flex-1"
           @keydown.enter="handleSearch"
         />
-        <button 
+        <button
           @click="handleSearch"
-          class="px-5 py-3 bg-primary-500 text-white rounded-xl text-sm font-medium hover:bg-primary-600 active:bg-primary-700 transition-colors shrink-0 flex items-center justify-center gap-1"
+          class="bg-primary-500 hover:bg-primary-600 active:bg-primary-700 flex shrink-0 items-center justify-center gap-1 rounded-xl px-5 py-3 text-sm font-medium text-white transition-colors"
         >
           <BaseIcon name="Search" :size="16" />
           搜索
@@ -202,8 +207,8 @@ function resolveConfigOptions(groupCode: keyof typeof DEFAULT_FILTERS) {
       <FilterBar :filters="filters" v-model="filterModel">
         <template #extra>
           <button
-            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium shrink-0 border transition-colors hover:border-primary-500/30"
-            style="border-color: var(--border-default); color: var(--text-secondary);"
+            class="hover:border-primary-500/30 flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors"
+            style="border-color: var(--border-default); color: var(--text-secondary)"
           >
             <BaseIcon name="Filter" :size="14" />
             更多筛选
@@ -213,19 +218,32 @@ function resolveConfigOptions(groupCode: keyof typeof DEFAULT_FILTERS) {
     </div>
 
     <!-- Results Header -->
-    <div class="flex items-center justify-between py-3 mb-4 border-b" style="border-color: var(--border-default);">
-      <h3 class="text-sm font-medium" style="color: var(--text-secondary);">找到 {{ filteredTrails.length }} 条符合条件的路线</h3>
+    <div
+      class="mb-4 flex items-center justify-between border-b py-3"
+      style="border-color: var(--border-default)"
+    >
+      <h3 class="text-sm font-medium" style="color: var(--text-secondary)">
+        找到 {{ filteredTrails.length }} 条符合条件的路线
+      </h3>
       <ViewToggle v-model="activeView" />
     </div>
 
     <!-- Trail List -->
-    <div v-if="isLoading" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+    <div v-if="isLoading" class="card p-6 text-center text-sm" style="color: var(--text-secondary)">
       正在加载路线...
     </div>
-    <div v-else-if="errorMessage" class="card p-6 text-sm text-center" style="color: var(--color-hard);">
+    <div
+      v-else-if="errorMessage"
+      class="card p-6 text-center text-sm"
+      style="color: var(--color-hard)"
+    >
       {{ errorMessage }}
     </div>
-    <div v-else-if="filteredTrails.length === 0" class="card p-6 text-sm text-center" style="color: var(--text-secondary);">
+    <div
+      v-else-if="filteredTrails.length === 0"
+      class="card p-6 text-center text-sm"
+      style="color: var(--text-secondary)"
+    >
       暂无符合条件的路线
     </div>
     <div v-else class="space-y-4 sm:space-y-5">

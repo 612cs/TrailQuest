@@ -20,12 +20,12 @@ const emit = defineEmits<{
       type="text"
       :placeholder="placeholder || '搜索...'"
       class="w-full bg-transparent text-sm focus:outline-none"
-      style="color: var(--text-primary);"
+      style="color: var(--text-primary)"
     />
     <button
       v-show="modelValue"
       @click="emit('update:modelValue', '')"
-      class="p-1.5 rounded-md hover:bg-primary-500/10 transition-colors"
+      class="hover:bg-primary-500/10 rounded-md p-1.5 transition-colors"
       style="color: var(--text-tertiary)"
     >
       <BaseIcon name="X" :size="16" />

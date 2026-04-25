@@ -14,4 +14,6 @@ public interface ReviewService {
     DeleteReviewResponse deleteReview(Long userId, Long reviewId);
 
     DeleteReviewResponse deleteReviewAsAdmin(Long reviewId);
+
+    DeleteReviewResponse moderateReview(Long reviewId, Long operatorId, String status, String reason);
 }

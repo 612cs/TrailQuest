@@ -15,7 +15,8 @@ interface AuthResult {
 
 function buildErrorResult(error: unknown): AuthResult {
   if (error instanceof ApiError) {
-    const noPermission = error.status === 403 || error.code === 'FORBIDDEN' || error.code === 'ADMIN_ONLY'
+    const noPermission =
+      error.status === 403 || error.code === 'FORBIDDEN' || error.code === 'ADMIN_ONLY'
     return {
       success: false,
       message: noPermission ? '当前账号没有后台权限' : error.message,
@@ -53,7 +54,12 @@ export const useAdminAuthStore = defineStore('admin-auth', () => {
       const currentUser = await authApi.fetchCurrentUser()
       if (currentUser.role !== 'ADMIN') {
         clearAuth()
-        return { success: false, message: '当前账号没有后台权限', code: 'ADMIN_ONLY', noPermission: true }
+        return {
+          success: false,
+          message: '当前账号没有后台权限',
+          code: 'ADMIN_ONLY',
+          noPermission: true,
+        }
       }
       user.value = currentUser
       return { success: true }
@@ -72,12 +78,22 @@ export const useAdminAuthStore = defineStore('admin-auth', () => {
       setToken(payload.accessToken)
       if (payload.user.role !== 'ADMIN') {
         clearAuth()
-        return { success: false, message: '当前账号没有后台权限', code: 'ADMIN_ONLY', noPermission: true }
+        return {
+          success: false,
+          message: '当前账号没有后台权限',
+          code: 'ADMIN_ONLY',
+          noPermission: true,
+        }
       }
       const currentUser = await authApi.fetchCurrentUser()
       if (currentUser.role !== 'ADMIN') {
         clearAuth()
-        return { success: false, message: '当前账号没有后台权限', code: 'ADMIN_ONLY', noPermission: true }
+        return {
+          success: false,
+          message: '当前账号没有后台权限',
+          code: 'ADMIN_ONLY',
+          noPermission: true,
+        }
       }
       user.value = currentUser
       ready.value = true

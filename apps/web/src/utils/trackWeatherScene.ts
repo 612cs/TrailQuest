@@ -1,10 +1,14 @@
 import type { TrackWeatherScene } from '../types/trackViewer'
 
-export function mapWeatherToTrackScene(weatherLabel?: string | null, windPower?: string | number | null): TrackWeatherScene {
+export function mapWeatherToTrackScene(
+  weatherLabel?: string | null,
+  windPower?: string | number | null,
+): TrackWeatherScene {
   const label = (weatherLabel ?? '').trim()
-  const numericWindPower = typeof windPower === 'number'
-    ? windPower
-    : Number(String(windPower ?? '').match(/\d+/)?.[0] ?? '0')
+  const numericWindPower =
+    typeof windPower === 'number'
+      ? windPower
+      : Number(String(windPower ?? '').match(/\d+/)?.[0] ?? '0')
 
   if (label.includes('雪') || label.includes('冰雹') || label.includes('冻雨')) {
     return 'snow'
@@ -22,7 +26,12 @@ export function mapWeatherToTrackScene(weatherLabel?: string | null, windPower?:
     return 'overcast'
   }
 
-  if (label.includes('多云') || label.includes('少云') || label.includes('晴间多云') || label.includes('云')) {
+  if (
+    label.includes('多云') ||
+    label.includes('少云') ||
+    label.includes('晴间多云') ||
+    label.includes('云')
+  ) {
     return 'partly_cloudy'
   }
 

@@ -18,8 +18,20 @@ public class AdminOperationLog {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
-    @TableField("action_type")
-    private String actionType;
+    @TableField("operator_id")
+    private Long operatorId;
+
+    @TableField("operator_name")
+    private String operatorName;
+
+    @TableField("operator_role")
+    private String operatorRole;
+
+    @TableField("module_code")
+    private String moduleCode;
+
+    @TableField("action_code")
+    private String actionCode;
 
     @TableField("target_type")
     private String targetType;
@@ -27,13 +39,28 @@ public class AdminOperationLog {
     @TableField("target_id")
     private Long targetId;
 
-    @TableField("operator_id")
-    private Long operatorId;
+    @TableField("target_title")
+    private String targetTitle;
 
-    private String remark;
+    private String reason;
 
-    @TableField("metadata_json")
-    private String metadataJson;
+    @TableField("result_status")
+    private String resultStatus;
+
+    @TableField("before_snapshot")
+    private String beforeSnapshot;
+
+    @TableField("after_snapshot")
+    private String afterSnapshot;
+
+    @TableField("request_id")
+    private String requestId;
+
+    @TableField("ip_address")
+    private String ipAddress;
+
+    @TableField("user_agent")
+    private String userAgent;
 
     @TableField("created_at")
     private LocalDateTime createdAt;

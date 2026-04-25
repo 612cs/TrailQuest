@@ -55,34 +55,52 @@ const detailLink = computed(() => ({
 <template>
   <RouterLink
     :to="detailLink"
-    class="card card-hover block overflow-hidden min-w-[280px] sm:min-w-[320px] cursor-pointer"
+    class="card card-hover block min-w-[280px] cursor-pointer overflow-hidden sm:min-w-[320px]"
   >
     <!-- Image -->
     <div class="relative aspect-[4/3] overflow-hidden">
-      <img :src="image" :alt="name" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
+      <img
+        :src="image"
+        :alt="name"
+        class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+      />
       <div class="absolute top-3 right-3 flex items-center gap-2">
         <button
-          class="group w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200 active:scale-90 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300/60"
-          style="background-color: rgba(255,255,255,0.88); box-shadow: 0 2px 8px rgba(0,0,0,0.15);"
+          class="group flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-red-300/60 focus-visible:outline-none active:scale-90 disabled:cursor-not-allowed disabled:opacity-60"
+          style="
+            background-color: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          "
           :disabled="props.isLikePending"
           @click.prevent="$emit('toggle-like')"
         >
           <BaseIcon
             name="Heart"
             :size="16"
-            :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'text-surface-500 group-hover:text-red-400'"
+            :class="
+              props.likedByCurrentUser
+                ? 'fill-red-400 text-red-400'
+                : 'text-surface-500 group-hover:text-red-400'
+            "
           />
         </button>
         <button
-          class="group w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-200 active:scale-90 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/60"
-          style="background-color: rgba(255,255,255,0.88); box-shadow: 0 2px 8px rgba(0,0,0,0.15);"
+          class="group focus-visible:ring-primary-300/60 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm transition-all duration-200 focus-visible:ring-2 focus-visible:outline-none active:scale-90 disabled:cursor-not-allowed disabled:opacity-60"
+          style="
+            background-color: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          "
           :disabled="props.isFavoritePending"
           @click.prevent="$emit('toggle-favorite')"
         >
           <BaseIcon
             name="Bookmark"
             :size="16"
-            :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'text-surface-500 group-hover:text-primary-500'"
+            :class="
+              props.favoritedByCurrentUser
+                ? 'text-primary-500 fill-primary-500'
+                : 'text-surface-500 group-hover:text-primary-500'
+            "
           />
         </button>
       </div>
@@ -95,9 +113,12 @@ const detailLink = computed(() => ({
     </div>
 
     <!-- Content -->
-    <div class="p-4 space-y-2.5">
+    <div class="space-y-2.5 p-4">
       <!-- Title -->
-      <h3 class="font-semibold text-base leading-tight line-clamp-1" style="color: var(--text-primary);">
+      <h3
+        class="line-clamp-1 text-base leading-tight font-semibold"
+        style="color: var(--text-primary)"
+      >
         {{ name }}
       </h3>
 
@@ -105,32 +126,50 @@ const detailLink = computed(() => ({
       <div class="flex items-center justify-between gap-4">
         <div class="flex items-center gap-1.5">
           <BaseIcon name="Star" :size="14" class="text-primary-500 fill-current" />
-          <span class="text-sm font-semibold text-primary-500">{{ rating }}</span>
-          <span class="text-xs" style="color: var(--text-tertiary);">{{ reviews }}</span>
+          <span class="text-primary-500 text-sm font-semibold">{{ rating }}</span>
+          <span class="text-xs" style="color: var(--text-tertiary)">{{ reviews }}</span>
         </div>
 
-        <div class="flex items-center gap-4 text-xs" style="color: var(--text-secondary);">
+        <div class="flex items-center gap-4 text-xs" style="color: var(--text-secondary)">
           <button
-            class="group flex items-center gap-1.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300/60 rounded-md"
+            class="group flex items-center gap-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:ring-red-300/60 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="props.isLikePending"
             @click.prevent="$emit('toggle-like')"
           >
-            <BaseIcon name="Heart" :size="14" :class="props.likedByCurrentUser ? 'text-red-400 fill-red-400' : 'group-hover:text-red-400'" />
-            <span class="group-hover:text-red-400">{{ likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes }}</span>
+            <BaseIcon
+              name="Heart"
+              :size="14"
+              :class="
+                props.likedByCurrentUser ? 'fill-red-400 text-red-400' : 'group-hover:text-red-400'
+              "
+            />
+            <span class="group-hover:text-red-400">{{
+              likes >= 1000 ? (likes / 1000).toFixed(1) + 'k' : likes
+            }}</span>
           </button>
           <button
-            class="group flex items-center gap-1.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/60 rounded-md"
+            class="group focus-visible:ring-primary-300/60 flex items-center gap-1.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="props.isFavoritePending"
             @click.prevent="$emit('toggle-favorite')"
           >
-            <BaseIcon name="Bookmark" :size="14" :class="props.favoritedByCurrentUser ? 'text-primary-500 fill-primary-500' : 'group-hover:text-primary-500'" />
-            <span class="group-hover:text-primary-500">{{ favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites }}</span>
+            <BaseIcon
+              name="Bookmark"
+              :size="14"
+              :class="
+                props.favoritedByCurrentUser
+                  ? 'text-primary-500 fill-primary-500'
+                  : 'group-hover:text-primary-500'
+              "
+            />
+            <span class="group-hover:text-primary-500">{{
+              favorites >= 1000 ? (favorites / 1000).toFixed(1) + 'k' : favorites
+            }}</span>
           </button>
         </div>
       </div>
 
       <!-- Stats -->
-      <div class="flex items-center justify-between text-xs" style="color: var(--text-secondary);">
+      <div class="flex items-center justify-between text-xs" style="color: var(--text-secondary)">
         <div class="flex items-center gap-1">
           <BaseIcon name="TrendingUp" :size="14" />
           <span>{{ distance }}</span>

@@ -16,6 +16,16 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 })
 
+Object.defineProperty(URL, 'createObjectURL', {
+  writable: true,
+  value: vi.fn(() => 'blob:mock'),
+})
+
+Object.defineProperty(URL, 'revokeObjectURL', {
+  writable: true,
+  value: vi.fn(),
+})
+
 afterEach(() => {
   localStorage.clear()
   sessionStorage.clear()

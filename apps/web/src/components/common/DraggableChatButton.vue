@@ -104,7 +104,7 @@ onBeforeUnmount(() => {
 <template>
   <button
     type="button"
-    class="fixed z-40 w-14 h-14 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-lg hover:bg-primary-600 hover:shadow-xl transition-colors duration-200 touch-none select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-300/70"
+    class="bg-primary-500 hover:bg-primary-600 focus-visible:ring-primary-300/70 fixed z-40 flex h-14 w-14 touch-none items-center justify-center rounded-full text-white shadow-lg transition-colors duration-200 select-none hover:shadow-xl focus-visible:ring-2 focus-visible:outline-none"
     :style="buttonStyle"
     aria-label="打开 AI 助手"
     @pointerdown="handlePointerDown"

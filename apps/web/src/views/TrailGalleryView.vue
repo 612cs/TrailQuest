@@ -21,7 +21,7 @@ const previewIndex = ref(0)
 
 const trailId = computed<EntityId>(() => {
   const rawId = route.params.id
-  return Array.isArray(rawId) ? rawId[0] ?? '' : String(rawId ?? '')
+  return Array.isArray(rawId) ? (rawId[0] ?? '') : String(rawId ?? '')
 })
 
 const returnTo = computed(() => {
@@ -47,8 +47,10 @@ const detailFrom = computed(() => {
 })
 
 const galleryImages = computed(() => {
-  const urls = [trailData.value?.image, ...(trailData.value?.gallery?.map((item) => item.url) ?? [])]
-    .filter((item): item is string => !!item)
+  const urls = [
+    trailData.value?.image,
+    ...(trailData.value?.gallery?.map((item) => item.url) ?? []),
+  ].filter((item): item is string => !!item)
 
   return urls.filter((url, index) => urls.indexOf(url) === index)
 })
@@ -57,6 +59,10 @@ const WORD = 'TRAIL'
 const ROW_COUNT = 5
 const REPEAT_COUNT = 100
 const PARALLAX_FACTOR = 0.15 // Slightly slower for better effect
+
+function getGsap() {
+  return (window as Window & { gsap?: any }).gsap
+}
 
 const backgroundRows = computed(() =>
   Array.from({ length: ROW_COUNT }, (_, index) => ({
@@ -94,7 +100,6 @@ watch(
 )
 
 function handleCameraMove(payload: { x: number; max: number }) {
-  const getGsap = () => (window as any).gsap
   const gsap = getGsap()
   if (!gsap) return
   const desktopRows = document.querySelectorAll('.gallery-poster-desktop .gallery-poster-word')
@@ -161,11 +166,7 @@ function handleBack() {
         </div>
 
         <div class="gallery-topbar">
-          <button
-            type="button"
-            class="gallery-action"
-            @click="handleBack"
-          >
+          <button type="button" class="gallery-action" @click="handleBack">
             <BaseIcon name="ChevronLeft" :size="18" />
             返回详情
           </button>
@@ -173,11 +174,7 @@ function handleBack() {
       </template>
 
       <div v-else class="gallery-fallback" aria-live="polite">
-        <BaseIcon
-          name="Loader2"
-          :size="32"
-          class="animate-spin gallery-fallback-icon"
-        />
+        <BaseIcon name="Loader2" :size="32" class="gallery-fallback-icon animate-spin" />
       </div>
     </div>
 
@@ -193,7 +190,11 @@ function handleBack() {
 
 <style scoped>
 .gallery-page {
-  --gallery-word-green: color-mix(in srgb, var(--color-primary-200) 36%, var(--color-primary-400) 64%);
+  --gallery-word-green: color-mix(
+    in srgb,
+    var(--color-primary-200) 36%,
+    var(--color-primary-400) 64%
+  );
   --gallery-word-white: rgba(255, 255, 255, 0.3);
   --gallery-word-shadow: rgba(5, 18, 8, 0.82);
   --gallery-dot: rgba(126, 186, 121, 0.24);
@@ -348,14 +349,20 @@ function handleBack() {
   border-radius: 999px;
   cursor: pointer;
   font-size: 0.88rem;
-  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .gallery-action:hover {
   transform: translateY(-1px);
   border-color: rgba(185, 222, 176, 0.52);
   background: rgba(79, 154, 72, 0.08);
-  box-shadow: 0 0 0 1px rgba(185, 222, 176, 0.14), 0 12px 24px rgba(22, 52, 24, 0.18);
+  box-shadow:
+    0 0 0 1px rgba(185, 222, 176, 0.14),
+    0 12px 24px rgba(22, 52, 24, 0.18);
 }
 
 .gallery-action-solid {

@@ -22,35 +22,38 @@ const subtitle = computed(() => {
   }
   return props.fallbackCity ? `${props.fallbackCity} · 暂无预报数据` : '暂无预报数据'
 })
-
 </script>
 
 <template>
   <section class="animate-fade-in-up stagger-1">
     <div class="flex items-start justify-between">
       <div>
-        <h3 class="text-sm font-medium" style="color: var(--text-primary);">未来天气概览</h3>
-        <div class="flex items-baseline gap-2 mt-2">
-          <span class="text-5xl font-bold tracking-tighter" style="color: var(--text-primary);">{{ day?.tempMax ?? '--' }}°</span>
-          <span class="text-lg font-medium" style="color: var(--text-secondary);">{{ day?.textDay || (isLoading ? '加载中' : '暂无预报') }}</span>
+        <h3 class="text-sm font-medium" style="color: var(--text-primary)">未来天气概览</h3>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span class="text-5xl font-bold tracking-tighter" style="color: var(--text-primary)"
+            >{{ day?.tempMax ?? '--' }}°</span
+          >
+          <span class="text-lg font-medium" style="color: var(--text-secondary)">{{
+            day?.textDay || (isLoading ? '加载中' : '暂无预报')
+          }}</span>
         </div>
-        <p class="text-sm mt-1 flex items-center gap-1" style="color: var(--text-tertiary);">
+        <p class="mt-1 flex items-center gap-1 text-sm" style="color: var(--text-tertiary)">
           <BaseIcon name="MapPin" :size="14" />
           {{ subtitle }}
         </p>
       </div>
-      
+
       <!-- Right side compact metrics -->
-      <div class="flex flex-col gap-2 text-sm text-right mt-1">
-        <div class="flex items-center justify-end gap-2" style="color: var(--text-secondary);">
+      <div class="mt-1 flex flex-col gap-2 text-right text-sm">
+        <div class="flex items-center justify-end gap-2" style="color: var(--text-secondary)">
           <BaseIcon name="Droplets" :size="14" />
           <span>湿度 {{ day?.humidity ?? '--' }}%</span>
         </div>
-        <div class="flex items-center justify-end gap-2" style="color: var(--text-secondary);">
+        <div class="flex items-center justify-end gap-2" style="color: var(--text-secondary)">
           <BaseIcon name="Wind" :size="14" />
           <span>{{ day?.windDirDay || '' }} {{ day?.windScaleDay || '--' }}级</span>
         </div>
-        <div class="flex items-center justify-end gap-2" style="color: var(--text-secondary);">
+        <div class="flex items-center justify-end gap-2" style="color: var(--text-secondary)">
           <BaseIcon name="MoonStar" :size="14" />
           <span>夜间 {{ day?.textNight || '--' }} {{ day?.tempMin ?? '--' }}°</span>
         </div>

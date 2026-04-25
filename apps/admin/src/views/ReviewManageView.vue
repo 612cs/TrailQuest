@@ -1,209 +1,351 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { RefreshCcw, Search, Trash2 } from 'lucide-vue-next'
+import { onMounted } from 'vue'
+import { MessageSquareMore, RefreshCcw, Search } from 'lucide-vue-next'
 
-import { deleteAdminReview, fetchAdminReviews } from '../api/admin'
+import AdminConfirmDialog from '../components/common/AdminConfirmDialog.vue'
+import AdminNoticeDialog from '../components/common/AdminNoticeDialog.vue'
 import AdminPagination from '../components/common/AdminPagination.vue'
 import EmptyState from '../components/common/EmptyState.vue'
-import { formatDateTime } from '../utils/format'
-import type { AdminReviewListItem } from '../types/admin'
+import ReviewBatchActionBar from '../components/reviews/ReviewBatchActionBar.vue'
+import ReviewDetailDialog from '../components/reviews/ReviewDetailDialog.vue'
+import ReviewManagementTable from '../components/reviews/ReviewManagementTable.vue'
+import { useReviewManagement } from '../composables/useReviewManagement'
 
-const loading = ref(false)
-const list = ref<AdminReviewListItem[]>([])
-const total = ref(0)
-const pageNum = ref(1)
-const pageSize = ref(10)
-const keyword = ref('')
-const trailKeyword = ref('')
-const authorKeyword = ref('')
-const errorMessage = ref('')
+const {
+  loading,
+  actionLoading,
+  detailLoading,
+  list,
+  total,
+  pageNum,
+  keyword,
+  status,
+  errorMessage,
+  totalPages,
+  selectedIds,
+  selectedActiveIds,
+  selectedRestorableIds,
+  allCurrentSelected,
+  detailVisible,
+  detail,
+  confirmVisible,
+  confirmConfig,
+  noticeVisible,
+  noticeTitle,
+  noticeMessage,
+  load,
+  resetFilters,
+  toggleSelection,
+  toggleSelectAllCurrent,
+  openDetail,
+  closeDetail,
+  requestHide,
+  requestRestore,
+  requestDelete,
+  requestBatchHide,
+  requestBatchRestore,
+  closeConfirm,
+  submitConfirm,
+} = useReviewManagement()
 
-async function load(page = pageNum.value) {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    const result = await fetchAdminReviews({
-      pageNum: page,
-      pageSize: pageSize.value,
-      keyword: keyword.value.trim() || undefined,
-      trailKeyword: trailKeyword.value.trim() || undefined,
-      authorKeyword: authorKeyword.value.trim() || undefined,
-    })
-    list.value = result.list
-    total.value = result.total
-    pageNum.value = result.pageNum
-    pageSize.value = result.pageSize
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '评论列表加载失败'
-  } finally {
-    loading.value = false
-  }
-}
-
-async function handleDelete(id: string | number) {
-  if (!window.confirm('确认删除这条评论吗？')) {
-    return
-  }
-  loading.value = true
-  try {
-    await deleteAdminReview(id)
-    await load(pageNum.value)
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '删除评论失败'
-  } finally {
-    loading.value = false
-  }
-}
-
-function resetFilters() {
-  keyword.value = ''
-  trailKeyword.value = ''
-  authorKeyword.value = ''
-  load(1)
-}
-
-onMounted(load)
+onMounted(() => {
+  void load()
+})
 </script>
 
 <template>
-  <section class="admin-card admin-section">
-    <div class="admin-list-toolbar">
-      <input v-model="keyword" class="admin-input" placeholder="评论内容" aria-label="评论关键字" @keyup.enter="load(1)" />
-      <input v-model="trailKeyword" class="admin-input" placeholder="路线名称" aria-label="路线关键字" @keyup.enter="load(1)" />
-      <input v-model="authorKeyword" class="admin-input" placeholder="作者昵称" aria-label="作者" @keyup.enter="load(1)" />
-      <div class="admin-list-toolbar__actions">
-        <button class="admin-button admin-button-primary" type="button" @click="load(1)">
-          <Search :size="16" :stroke-width="2" />
-          搜索
-        </button>
-        <button class="admin-button admin-button-secondary" type="button" @click="resetFilters">重置</button>
-        <button class="admin-button admin-button-secondary" type="button" @click="load()">
-          <RefreshCcw :size="16" :stroke-width="2" />
-          刷新
-        </button>
+  <div class="list-page-container">
+    <section class="settings-card list-view-card">
+      <div class="list-toolbar">
+        <div v-if="selectedIds.length > 0" class="batch-action-wrapper animate-fade-in-up">
+          <ReviewBatchActionBar
+            :selected-count="selectedIds.length"
+            :active-count="selectedActiveIds.length"
+            :restorable-count="selectedRestorableIds.length"
+            @batch-hide="requestBatchHide"
+            @batch-restore="requestBatchRestore"
+            @clear="toggleSelectAllCurrent(false)"
+          />
+        </div>
+        <div v-else class="filter-group">
+          <div class="search-input-wrapper">
+            <Search :size="16" class="search-icon" />
+            <input
+              v-model="keyword"
+              class="styled-input searching-input"
+              placeholder="搜索评论内容、路线或作者..."
+              aria-label="综合搜索"
+              @keyup.enter="load(1)"
+            />
+          </div>
+          <select
+            v-model="status"
+            class="styled-select status-select"
+            aria-label="评论状态"
+            @change="load(1)"
+          >
+            <option value="">全部状态</option>
+            <option value="active">正常展示</option>
+            <option value="hidden">已隐藏</option>
+            <option value="deleted">已删除</option>
+          </select>
+        </div>
+
+        <div class="action-group">
+          <button class="btn btn--primary" type="button" @click="load(1)">
+            <Search :size="16" :stroke-width="2" /> 搜索
+          </button>
+          <button class="btn btn--secondary" type="button" @click="resetFilters">重置</button>
+          <button class="btn btn--secondary" type="button" @click="load()">
+            <RefreshCcw :size="16" :stroke-width="2" /> 刷新
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="admin-list-body">
-      <div v-if="errorMessage" class="admin-list-error">{{ errorMessage }}</div>
+      <div class="list-body">
+        <div v-if="errorMessage" class="notice-alert is-error">{{ errorMessage }}</div>
 
-      <div v-if="list.length" class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>评论</th>
-              <th>作者</th>
-              <th>路线</th>
-              <th>时间</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in list" :key="item.id">
-              <td class="admin-review-preview">{{ item.text }}</td>
-              <td>{{ item.authorUsername }}</td>
-              <td>{{ item.trailName }}</td>
-              <td>{{ formatDateTime(item.createdAt) }}</td>
-              <td>
-                <button class="admin-button admin-button-danger" type="button" :disabled="loading" @click="handleDelete(item.id)">
-                  <Trash2 :size="16" :stroke-width="2" />
-                  删除
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <ReviewManagementTable
+          v-if="list.length"
+          :items="list"
+          :selected-ids="selectedIds"
+          :all-current-selected="allCurrentSelected"
+          @toggle-select-all="toggleSelectAllCurrent"
+          @toggle-select="toggleSelection($event.id, $event.checked)"
+          @detail="openDetail($event.id)"
+          @hide="requestHide"
+          @restore="requestRestore"
+          @delete="requestDelete"
+        />
+
+        <div v-else class="empty-wrap">
+          <div v-if="loading" class="loading-state">
+            <RefreshCcw class="animate-spin" :size="24" />
+            <p>正在加载评论数据...</p>
+          </div>
+          <EmptyState
+            v-else
+            title="暂无评论数据"
+            description="当前筛选条件下没有匹配的评论记录。"
+            :icon="MessageSquareMore"
+          />
+        </div>
+
+        <AdminPagination
+          class="pagination-wrap"
+          :current="pageNum"
+          :total-pages="totalPages"
+          :total-items="total"
+          @update:current="load"
+        />
       </div>
+    </section>
 
-      <EmptyState
-        v-else-if="!loading"
-        title="暂无评论"
-        description="当前筛选条件下没有评论数据。"
-      />
+    <!-- Dialogs -->
+    <ReviewDetailDialog
+      :show="detailVisible"
+      :detail="detail"
+      :loading="detailLoading"
+      @update:show="closeDetail"
+    />
 
-      <AdminPagination
-        :current="pageNum"
-        :total-pages="Math.max(1, Math.ceil(total / pageSize))"
-        :total-items="total"
-        @update:current="load"
-      />
-    </div>
-  </section>
+    <AdminConfirmDialog
+      v-model:show="confirmVisible"
+      :title="confirmConfig.title"
+      :message="confirmConfig.message"
+      :confirm-text="confirmConfig.confirmText"
+      :loading="actionLoading"
+      :require-reason="confirmConfig.requireReason"
+      :reason-label="confirmConfig.reasonLabel"
+      :reason-placeholder="confirmConfig.reasonPlaceholder"
+      @update:show="!$event && closeConfirm()"
+      @confirm="submitConfirm"
+    />
+
+    <AdminNoticeDialog v-model:show="noticeVisible" :title="noticeTitle" :message="noticeMessage" />
+  </div>
 </template>
 
 <style scoped>
-.admin-section {
+.list-page-container {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
   height: 100%;
-  min-height: 0;
-  overflow: hidden;
+  padding: 0;
 }
 
-.admin-list-toolbar,
-.admin-list-toolbar__actions {
+.settings-card {
+  background: white;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+}
+
+.list-view-card {
+  flex: 1;
+  min-height: 0;
+  padding: 1.5rem;
+}
+
+/* Toolbar */
+.list-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  min-height: 44px;
 }
 
-.admin-list-toolbar {
+.filter-group {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+  position: relative;
+  flex: 3;
+  min-width: 500px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.searching-input {
+  padding-left: 2.75rem !important;
+}
+
+.status-select {
+  flex: 0 0 160px !important;
+  min-width: 160px !important;
+}
+
+.styled-input,
+.styled-select {
+  min-width: 250px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-strong);
+  transition: all 0.2s;
+}
+
+.batch-action-wrapper {
+  flex: 1;
+}
+
+.styled-input:focus,
+.styled-select:focus {
+  outline: none;
+  background: white;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.action-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
   align-items: center;
-  flex-wrap: nowrap;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  border: 1px solid transparent;
 }
 
-.admin-list-toolbar > .admin-input,
-.admin-list-toolbar > .admin-select {
-  flex: 1 1 14rem;
-  min-width: 0;
+.btn--primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.15);
+}
+.btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(var(--primary-rgb), 0.25);
 }
 
-.admin-list-toolbar__actions {
-  flex: 0 0 auto;
-  align-items: center;
-  flex-wrap: nowrap;
+.btn--secondary {
+  background: var(--bg-soft);
+  color: var(--text-strong);
+  border-color: var(--border);
+}
+.btn--secondary:hover {
+  background: white;
+  border-color: var(--primary-soft);
+  color: var(--primary);
 }
 
-.admin-list-body {
+/* Body */
+.list-body {
   flex: 1;
   min-height: 0;
-  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.admin-list-error {
-  border-radius: 16px;
+.notice-alert {
   padding: 0.85rem 1rem;
-  color: var(--danger);
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.notice-alert.is-error {
   background: rgba(181, 68, 68, 0.08);
+  color: var(--danger);
   border: 1px solid rgba(181, 68, 68, 0.16);
 }
 
-.admin-table-wrap {
+.empty-wrap {
   flex: 1;
-  min-height: 0;
-  overflow-x: auto;
-  overflow-y: auto;
+  display: grid;
+  place-items: center;
+  min-height: 300px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pagination-wrap {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
 }
 
 @media (max-width: 1200px) {
-  .admin-list-toolbar {
-    flex-wrap: wrap;
+  .filter-group {
+    flex: 1 1 100%;
   }
-
-  .admin-list-toolbar__actions {
-    width: 100%;
+  .action-group {
+    flex: 1 1 100%;
     justify-content: flex-end;
   }
 }
-
-.admin-review-preview {
-  max-width: 30rem;
-  color: var(--text-strong);
-  line-height: 1.65;
-}
-
 </style>

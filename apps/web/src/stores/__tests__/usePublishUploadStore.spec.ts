@@ -5,11 +5,21 @@ import { usePublishUploadStore } from '../usePublishUploadStore'
 import { useFlashStore } from '../useFlashStore'
 import { useTrailFeedRefreshStore } from '../useTrailFeedRefreshStore'
 
-const createTrailMock = vi.fn()
-const updateTrailMock = vi.fn()
-const uploadPublishImageMock = vi.fn()
-const uploadPublishTrackMock = vi.fn()
-const mediaIdOfMock = vi.fn((payload: { mediaId: string } | null | undefined) => payload?.mediaId ?? null)
+const {
+  createTrailMock,
+  updateTrailMock,
+  uploadPublishImageMock,
+  uploadPublishTrackMock,
+  mediaIdOfMock,
+} = vi.hoisted(() => ({
+  createTrailMock: vi.fn(),
+  updateTrailMock: vi.fn(),
+  uploadPublishImageMock: vi.fn(),
+  uploadPublishTrackMock: vi.fn(),
+  mediaIdOfMock: vi.fn(
+    (payload: { mediaId: string } | null | undefined) => payload?.mediaId ?? null,
+  ),
+}))
 
 vi.mock('../../api/trails', () => ({
   createTrail: createTrailMock,
@@ -20,12 +30,9 @@ vi.mock('../../utils/publishUploadExecutor', () => ({
   uploadPublishImage: uploadPublishImageMock,
   uploadPublishTrack: uploadPublishTrackMock,
   mediaIdOf: mediaIdOfMock,
-  resolveUploadErrorMessage: (error: unknown) => error instanceof Error ? error.message : '上传失败',
+  resolveUploadErrorMessage: (error: unknown) =>
+    error instanceof Error ? error.message : '上传失败',
 }))
-
-function flushBackgroundTasks() {
-  return new Promise((resolve) => setTimeout(resolve, 0))
-}
 
 describe('usePublishUploadStore', () => {
   beforeEach(() => {
@@ -55,20 +62,22 @@ describe('usePublishUploadStore', () => {
       district: '芦溪',
       source: 'track_reverse',
     }
-    draft.coverItems = [{
-      id: 'cover-1',
-      source: 'local',
-      bizType: 'trail_cover',
-      file: new File(['cover'], 'cover.png', { type: 'image/png' }),
-      fileName: 'cover.png',
-      mimeType: 'image/png',
-      localUrl: 'blob:cover',
-      remoteUrl: '',
-      mediaId: null,
-      progress: 0,
-      status: 'pending',
-      errorMessage: '',
-    }]
+    draft.coverItems = [
+      {
+        id: 'cover-1',
+        source: 'local',
+        bizType: 'trail_cover',
+        file: new File(['cover'], 'cover.png', { type: 'image/png' }),
+        fileName: 'cover.png',
+        mimeType: 'image/png',
+        localUrl: 'blob:cover',
+        remoteUrl: '',
+        mediaId: null,
+        progress: 0,
+        status: 'pending',
+        errorMessage: '',
+      },
+    ]
     draft.trackItem = {
       id: 'track-1',
       source: 'local',
@@ -84,34 +93,42 @@ describe('usePublishUploadStore', () => {
       errorMessage: '',
     }
 
-    uploadPublishImageMock.mockResolvedValue({ mediaId: 'cover-media-1', url: 'https://img.example.com/cover.png' })
-    uploadPublishTrackMock.mockResolvedValue({ mediaId: 'track-media-1', url: 'https://cdn.example.com/sample.kml' })
+    uploadPublishImageMock.mockResolvedValue({
+      mediaId: 'cover-media-1',
+      url: 'https://img.example.com/cover.png',
+    })
+    uploadPublishTrackMock.mockResolvedValue({
+      mediaId: 'track-media-1',
+      url: 'https://cdn.example.com/sample.kml',
+    })
     createTrailMock.mockResolvedValue({ id: 'trail-1001' })
 
     await store.submitDraft('create')
-    await flushBackgroundTasks()
-    await flushBackgroundTasks()
 
-    expect(createTrailMock).toHaveBeenCalledTimes(1)
-    expect(createTrailMock).toHaveBeenCalledWith(expect.objectContaining({
-      name: '武功山反穿',
-      location: '萍乡 芦溪',
-      geoCountry: '中国',
-      geoProvince: '江西',
-      geoCity: '萍乡',
-      geoDistrict: '芦溪',
-      geoSource: 'track_reverse',
-      coverMediaId: 'cover-media-1',
-      trackMediaId: 'track-media-1',
-      tags: ['云海', '单日'],
-    }))
-    expect(draft.fields.name).toBe('')
-    expect(draft.fields.location).toBe('')
-    expect(draft.coverItems).toHaveLength(0)
-    expect(draft.trackItem).toBeNull()
-    expect(draft.geo.city).toBe('')
-    expect(feedRefreshStore.version).toBe(1)
-    expect(flashStore.message?.message).toBe('路线已提交审核，请耐心等待')
+    await vi.waitFor(() => {
+      expect(createTrailMock).toHaveBeenCalledTimes(1)
+      expect(createTrailMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: '武功山反穿',
+          location: '萍乡 芦溪',
+          geoCountry: '中国',
+          geoProvince: '江西',
+          geoCity: '萍乡',
+          geoDistrict: '芦溪',
+          geoSource: 'track_reverse',
+          coverMediaId: 'cover-media-1',
+          trackMediaId: 'track-media-1',
+          tags: ['云海', '单日'],
+        }),
+      )
+      expect(draft.fields.name).toBe('')
+      expect(draft.fields.location).toBe('')
+      expect(draft.coverItems).toHaveLength(0)
+      expect(draft.trackItem).toBeNull()
+      expect(draft.geo.city).toBe('')
+      expect(feedRefreshStore.version).toBe(1)
+      expect(flashStore.message?.message).toBe('路线已提交审核，请耐心等待')
+    })
   })
 
   it('should preserve existing geo fields when submit falls back to manual location', async () => {
@@ -119,20 +136,22 @@ describe('usePublishUploadStore', () => {
     const draft = store.ensureDraft('create', 'create', null)
     draft.fields.name = '明月山徒步'
     draft.fields.location = '宜春 袁州'
-    draft.coverItems = [{
-      id: 'cover-2',
-      source: 'local',
-      bizType: 'trail_cover',
-      file: new File(['cover'], 'cover.png', { type: 'image/png' }),
-      fileName: 'cover.png',
-      mimeType: 'image/png',
-      localUrl: 'blob:cover2',
-      remoteUrl: '',
-      mediaId: null,
-      progress: 0,
-      status: 'pending',
-      errorMessage: '',
-    }]
+    draft.coverItems = [
+      {
+        id: 'cover-2',
+        source: 'local',
+        bizType: 'trail_cover',
+        file: new File(['cover'], 'cover.png', { type: 'image/png' }),
+        fileName: 'cover.png',
+        mimeType: 'image/png',
+        localUrl: 'blob:cover2',
+        remoteUrl: '',
+        mediaId: null,
+        progress: 0,
+        status: 'pending',
+        errorMessage: '',
+      },
+    ]
     draft.geo = {
       country: '中国',
       province: '江西',
@@ -141,20 +160,25 @@ describe('usePublishUploadStore', () => {
       source: 'location_lookup',
     }
 
-    uploadPublishImageMock.mockResolvedValue({ mediaId: 'cover-media-2', url: 'https://img.example.com/cover2.png' })
+    uploadPublishImageMock.mockResolvedValue({
+      mediaId: 'cover-media-2',
+      url: 'https://img.example.com/cover2.png',
+    })
     createTrailMock.mockResolvedValue({ id: 'trail-1002' })
 
     await store.submitDraft('create')
-    await flushBackgroundTasks()
-    await flushBackgroundTasks()
 
-    expect(createTrailMock).toHaveBeenCalledWith(expect.objectContaining({
-      geoCountry: '中国',
-      geoProvince: '江西',
-      geoCity: '宜春',
-      geoDistrict: '袁州',
-      geoSource: 'location_lookup',
-      trackMediaId: null,
-    }))
+    await vi.waitFor(() => {
+      expect(createTrailMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          geoCountry: '中国',
+          geoProvince: '江西',
+          geoCity: '宜春',
+          geoDistrict: '袁州',
+          geoSource: 'location_lookup',
+          trackMediaId: null,
+        }),
+      )
+    })
   })
 })

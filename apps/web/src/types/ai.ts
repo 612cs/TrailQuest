@@ -62,5 +62,16 @@ export type AiStreamEvent =
   | { event: 'delta'; data: { content: string } }
   | { event: 'trail_cards'; data: AiTrailCard[] }
   | { event: 'follow_ups'; data: AiFollowUp[] }
-  | { event: 'done'; data: { conversationId: EntityId; intent: string; finishedAt: string; hasTrailCards: boolean; modelFirstTokenMs?: number; modelTotalMs?: number; intentParseMs?: number } }
+  | {
+      event: 'done'
+      data: {
+        conversationId: EntityId
+        intent: string
+        finishedAt: string
+        hasTrailCards: boolean
+        modelFirstTokenMs?: number
+        modelTotalMs?: number
+        intentParseMs?: number
+      }
+    }
   | { event: 'error'; data: { code: string; message: string } }

@@ -16,15 +16,23 @@ function loadImageSize(file: File) {
     const objectUrl = URL.createObjectURL(file)
     const image = new Image()
 
-    image.onload = () => {
-      resolve({ width: image.width, height: image.height })
-      URL.revokeObjectURL(objectUrl)
-    }
+    image.addEventListener(
+      'load',
+      () => {
+        resolve({ width: image.width, height: image.height })
+        URL.revokeObjectURL(objectUrl)
+      },
+      { once: true },
+    )
 
-    image.onerror = () => {
-      URL.revokeObjectURL(objectUrl)
-      reject(new Error('无法读取图片尺寸'))
-    }
+    image.addEventListener(
+      'error',
+      () => {
+        URL.revokeObjectURL(objectUrl)
+        reject(new Error('无法读取图片尺寸'))
+      },
+      { once: true },
+    )
 
     image.src = objectUrl
   })

@@ -2,13 +2,16 @@
 import { computed } from 'vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
-const props = withDefaults(defineProps<{
-  current: number
-  total: number
-  maxVisible?: number
-}>(), {
-  maxVisible: 5,
-})
+const props = withDefaults(
+  defineProps<{
+    current: number
+    total: number
+    maxVisible?: number
+  }>(),
+  {
+    maxVisible: 5,
+  },
+)
 
 const emit = defineEmits<{
   (e: 'update:current', page: number): void
@@ -60,12 +63,7 @@ function setPage(page: number) {
       <ChevronLeft :size="16" :stroke-width="2" />
     </button>
 
-    <button
-      v-if="showFirstPage"
-      class="shared-pagination__page"
-      type="button"
-      @click="setPage(1)"
-    >
+    <button v-if="showFirstPage" class="shared-pagination__page" type="button" @click="setPage(1)">
       1
     </button>
     <span v-if="showLeadingEllipsis" class="shared-pagination__ellipsis">...</span>
@@ -119,7 +117,8 @@ function setPage(page: number) {
   align-items: center;
   justify-content: center;
   border-radius: 0.5rem;
-  border: 1px solid var(--pagination-border, var(--border-default, var(--border, rgba(0, 0, 0, 0.08))));
+  border: 1px solid
+    var(--pagination-border, var(--border-default, var(--border, rgba(0, 0, 0, 0.08))));
   background: var(--pagination-bg, var(--bg-card, var(--bg-surface, #fff)));
   color: var(--pagination-text, var(--text-secondary, var(--text-muted, #667085)));
   font-size: 0.875rem;

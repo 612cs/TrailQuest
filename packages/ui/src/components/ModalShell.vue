@@ -2,24 +2,27 @@
 import { onMounted, onUnmounted } from 'vue'
 import type { StyleValue } from 'vue'
 
-const props = withDefaults(defineProps<{
-  show: boolean
-  ariaLabel?: string
-  closeOnBackdrop?: boolean
-  closeOnEscape?: boolean
-  wrapperStyle?: StyleValue
-  overlayStyle?: StyleValue
-  panelStyle?: StyleValue
-  headerStyle?: StyleValue
-  bodyStyle?: StyleValue
-  footerStyle?: StyleValue
-  transitionName?: string
-}>(), {
-  ariaLabel: '对话框',
-  closeOnBackdrop: true,
-  closeOnEscape: true,
-  transitionName: 'shared-modal',
-})
+const props = withDefaults(
+  defineProps<{
+    show: boolean
+    ariaLabel?: string
+    closeOnBackdrop?: boolean
+    closeOnEscape?: boolean
+    wrapperStyle?: StyleValue
+    overlayStyle?: StyleValue
+    panelStyle?: StyleValue
+    headerStyle?: StyleValue
+    bodyStyle?: StyleValue
+    footerStyle?: StyleValue
+    transitionName?: string
+  }>(),
+  {
+    ariaLabel: '对话框',
+    closeOnBackdrop: true,
+    closeOnEscape: true,
+    transitionName: 'shared-modal',
+  },
+)
 
 const emit = defineEmits<{
   (e: 'update:show', value: boolean): void
@@ -62,7 +65,11 @@ onUnmounted(() => {
   <Teleport to="body">
     <Transition :name="props.transitionName">
       <div v-if="props.show" class="shared-modal" :style="props.wrapperStyle">
-        <div class="shared-modal__backdrop" :style="props.overlayStyle" @click="handleBackdropClick" />
+        <div
+          class="shared-modal__backdrop"
+          :style="props.overlayStyle"
+          @click="handleBackdropClick"
+        />
         <section
           class="shared-modal__panel"
           role="dialog"
@@ -112,7 +119,10 @@ onUnmounted(() => {
   border-radius: 24px;
   background: var(--modal-bg, var(--bg-card, var(--bg-surface, #fff)));
   border: 1px solid var(--modal-border, var(--border-default, var(--border, rgba(0, 0, 0, 0.08))));
-  box-shadow: var(--modal-shadow, var(--shadow-card, var(--shadow, 0 20px 50px rgba(0, 0, 0, 0.15))));
+  box-shadow: var(
+    --modal-shadow,
+    var(--shadow-card, var(--shadow, 0 20px 50px rgba(0, 0, 0, 0.15)))
+  );
 }
 
 .shared-modal__body {
@@ -126,7 +136,9 @@ onUnmounted(() => {
 
 .shared-modal-enter-active .shared-modal__panel,
 .shared-modal-leave-active .shared-modal__panel {
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .shared-modal-enter-from,

@@ -30,38 +30,45 @@ const handleSearch = () => {
 </script>
 
 <template>
-  <section class="relative h-screen min-h-[100vh] flex items-end overflow-hidden">
+  <section class="relative flex h-screen min-h-[100vh] items-end overflow-hidden">
     <!-- Background Image -->
     <div class="absolute inset-0">
-      <img :src="activeHeroImage" alt="壮丽山景" class="w-full h-full object-cover" />
+      <img :src="activeHeroImage" alt="壮丽山景" class="h-full w-full object-cover" />
       <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10"></div>
     </div>
 
     <!-- Content Overlay -->
-    <div class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pb-12 sm:pb-20 pt-24 sm:pt-28">
+    <div
+      class="relative z-10 mx-auto w-full max-w-7xl px-4 pt-24 pb-12 sm:px-6 sm:pt-28 sm:pb-20 lg:px-10"
+    >
       <div class="max-w-2xl space-y-5 sm:space-y-6">
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight animate-fade-in-up" style="text-shadow: 0 2px 16px rgba(0,0,0,0.3);">
+        <h1
+          class="animate-fade-in-up text-4xl leading-tight font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+          style="text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3)"
+        >
           冒险在召唤。
         </h1>
-        <p class="text-base sm:text-lg text-white/80 max-w-lg animate-fade-in-up stagger-1">
+        <p class="animate-fade-in-up stagger-1 max-w-lg text-base text-white/80 sm:text-lg">
           通过经过验证的地图和社区评论，发现成千上万条步道。
         </p>
 
         <!-- Search Bar -->
-        <div class="flex items-stretch gap-2 sm:gap-3 animate-fade-in-up stagger-2">
-          <div class="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border border-white/20 bg-white/10 backdrop-blur-md">
-            <BaseIcon name="Search" class="text-white/60 shrink-0" :size="20" />
+        <div class="animate-fade-in-up stagger-2 flex items-stretch gap-2 sm:gap-3">
+          <div
+            class="flex flex-1 items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-4 py-3 backdrop-blur-md"
+          >
+            <BaseIcon name="Search" class="shrink-0 text-white/60" :size="20" />
             <input
               v-model="searchQuery"
               @keydown.enter="handleSearch"
               type="text"
               placeholder="按城市、公园或步道搜索"
-              class="w-full bg-transparent text-white placeholder-white/50 text-sm focus:outline-none"
+              class="w-full bg-transparent text-sm text-white placeholder-white/50 focus:outline-none"
             />
           </div>
           <button
             @click="handleSearch"
-            class="flex items-center gap-2 px-5 sm:px-6 py-3 rounded-xl bg-primary-500 hover:bg-primary-600 text-white font-semibold text-sm transition-all duration-200 shrink-0 hover:shadow-lg"
+            class="bg-primary-500 hover:bg-primary-600 flex shrink-0 items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:shadow-lg sm:px-6"
           >
             <BaseIcon name="Compass" :size="16" />
             寻找步道
