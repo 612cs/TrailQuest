@@ -16,10 +16,9 @@ const previewVisible = ref(false)
 const previewIndex = ref(0)
 
 const previewImages = computed(() => {
-  const candidates = [
-    props.detail.image,
-    ...props.detail.gallery.map((item) => item.url),
-  ].filter((value): value is string => Boolean(value))
+  const candidates = [props.detail.image, ...props.detail.gallery.map((item) => item.url)].filter(
+    (value): value is string => Boolean(value),
+  )
 
   return Array.from(new Set(candidates))
 })
@@ -58,9 +57,17 @@ function openPreviewByUrl(url: string) {
         </div>
 
         <div class="admin-detail-meta">
-          <span><MapPinned :size="16" :stroke-width="2" /> {{ detail.geoProvince || '未识别省份' }}</span>
-          <span><Mountain :size="16" :stroke-width="2" /> {{ detail.difficultyLabel || detail.difficulty || '--' }}</span>
-          <span><Clock3 :size="16" :stroke-width="2" /> {{ formatDateTime(detail.createdAt) }}</span>
+          <span
+            ><MapPinned :size="16" :stroke-width="2" />
+            {{ detail.geoProvince || '未识别省份' }}</span
+          >
+          <span
+            ><Mountain :size="16" :stroke-width="2" />
+            {{ detail.difficultyLabel || detail.difficulty || '--' }}</span
+          >
+          <span
+            ><Clock3 :size="16" :stroke-width="2" /> {{ formatDateTime(detail.createdAt) }}</span
+          >
         </div>
 
         <div v-if="detail.tags.length" class="admin-detail-tags">
@@ -76,22 +83,58 @@ function openPreviewByUrl(url: string) {
       <section class="settings-card admin-detail-card">
         <h3>基本信息</h3>
         <dl>
-          <div><dt>作者</dt><dd>{{ detail.author.username }}</dd></div>
-          <div><dt>浏览/收藏</dt><dd>{{ detail.likes }} / {{ detail.favorites }}</dd></div>
-          <div><dt>评论数</dt><dd>{{ detail.reviewCount }}</dd></div>
-          <div><dt>轨迹来源</dt><dd>{{ detail.track.hasTrack ? detail.track.originalFileName || detail.track.sourceFormat || '已上传' : '未上传' }}</dd></div>
+          <div>
+            <dt>作者</dt>
+            <dd>{{ detail.author.username }}</dd>
+          </div>
+          <div>
+            <dt>浏览/收藏</dt>
+            <dd>{{ detail.likes }} / {{ detail.favorites }}</dd>
+          </div>
+          <div>
+            <dt>评论数</dt>
+            <dd>{{ detail.reviewCount }}</dd>
+          </div>
+          <div>
+            <dt>轨迹来源</dt>
+            <dd>
+              {{
+                detail.track.hasTrack
+                  ? detail.track.originalFileName || detail.track.sourceFormat || '已上传'
+                  : '未上传'
+              }}
+            </dd>
+          </div>
         </dl>
       </section>
 
       <section class="settings-card admin-detail-card">
         <h3>结构化地点</h3>
         <dl>
-          <div><dt>国家</dt><dd>{{ detail.geoCountry || '--' }}</dd></div>
-          <div><dt>省份</dt><dd>{{ detail.geoProvince || '--' }}</dd></div>
-          <div><dt>城市</dt><dd>{{ detail.geoCity || '--' }}</dd></div>
-          <div><dt>区县</dt><dd>{{ detail.geoDistrict || '--' }}</dd></div>
-          <div><dt>来源</dt><dd>{{ detail.geoSource || '--' }}</dd></div>
-          <div><dt>审核备注</dt><dd>{{ detail.reviewRemark || '--' }}</dd></div>
+          <div>
+            <dt>国家</dt>
+            <dd>{{ detail.geoCountry || '--' }}</dd>
+          </div>
+          <div>
+            <dt>省份</dt>
+            <dd>{{ detail.geoProvince || '--' }}</dd>
+          </div>
+          <div>
+            <dt>城市</dt>
+            <dd>{{ detail.geoCity || '--' }}</dd>
+          </div>
+          <div>
+            <dt>区县</dt>
+            <dd>{{ detail.geoDistrict || '--' }}</dd>
+          </div>
+          <div>
+            <dt>来源</dt>
+            <dd>{{ detail.geoSource || '--' }}</dd>
+          </div>
+          <div>
+            <dt>审核备注</dt>
+            <dd>{{ detail.reviewRemark || '--' }}</dd>
+          </div>
         </dl>
       </section>
     </div>

@@ -89,23 +89,58 @@ onMounted(() => {
       <div class="list-toolbar">
         <div class="filter-group filter-group--large">
           <select v-model="moduleCode" class="styled-select" aria-label="模块" @change="load(1)">
-            <option v-for="item in moduleOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+            <option v-for="item in moduleOptions" :key="item.value" :value="item.value">
+              {{ item.label }}
+            </option>
           </select>
           <select v-model="actionCode" class="styled-select" aria-label="动作" @change="load(1)">
-            <option v-for="item in actionOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+            <option v-for="item in actionOptions" :key="item.value" :value="item.value">
+              {{ item.label }}
+            </option>
           </select>
-          <input v-model="operatorKeyword" class="styled-input" placeholder="操作人" aria-label="操作人" @keyup.enter="load(1)" />
-          <select v-model="targetType" class="styled-select" aria-label="对象类型" @change="load(1)">
-            <option v-for="item in targetTypeOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+          <input
+            v-model="operatorKeyword"
+            class="styled-input"
+            placeholder="操作人"
+            aria-label="操作人"
+            @keyup.enter="load(1)"
+          />
+          <select
+            v-model="targetType"
+            class="styled-select"
+            aria-label="对象类型"
+            @change="load(1)"
+          >
+            <option v-for="item in targetTypeOptions" :key="item.value" :value="item.value">
+              {{ item.label }}
+            </option>
           </select>
-          <input v-model="targetId" class="styled-input" placeholder="对象 ID" aria-label="对象 ID" @keyup.enter="load(1)" />
+          <input
+            v-model="targetId"
+            class="styled-input"
+            placeholder="对象 ID"
+            aria-label="对象 ID"
+            @keyup.enter="load(1)"
+          />
           <div class="date-range">
-            <input v-model="dateFrom" class="styled-input" type="date" aria-label="开始日期" @change="load(1)" />
+            <input
+              v-model="dateFrom"
+              class="styled-input"
+              type="date"
+              aria-label="开始日期"
+              @change="load(1)"
+            />
             <span class="date-sep">-</span>
-            <input v-model="dateTo" class="styled-input" type="date" aria-label="结束日期" @change="load(1)" />
+            <input
+              v-model="dateTo"
+              class="styled-input"
+              type="date"
+              aria-label="结束日期"
+              @change="load(1)"
+            />
           </div>
         </div>
-        
+
         <div class="action-group">
           <button class="btn btn--primary" type="button" @click="load(1)">
             <Search :size="16" :stroke-width="2" /> 搜索
@@ -171,7 +206,6 @@ onMounted(() => {
   padding: 0;
 }
 
-
 .settings-card {
   background: white;
   border-radius: 20px;
@@ -220,7 +254,8 @@ onMounted(() => {
   color: var(--text-muted);
 }
 
-.styled-input, .styled-select {
+.styled-input,
+.styled-select {
   background: var(--bg-soft);
   border: 1px solid transparent;
   border-radius: 12px;
@@ -232,7 +267,8 @@ onMounted(() => {
   transition: all 0.2s;
 }
 
-.styled-input:focus, .styled-select:focus {
+.styled-input:focus,
+.styled-select:focus {
   outline: none;
   background: white;
   border-color: var(--primary);

@@ -29,7 +29,9 @@ const emit = defineEmits<{
       <div class="review-detail__header">
         <div>
           <h3>评论详情</h3>
-          <p v-if="props.detail" class="review-detail__subtitle">路线：{{ props.detail.trailName }}</p>
+          <p v-if="props.detail" class="review-detail__subtitle">
+            路线：{{ props.detail.trailName }}
+          </p>
         </div>
         <StatusBadge v-if="props.detail" :status="props.detail.status" />
       </div>
@@ -41,12 +43,32 @@ const emit = defineEmits<{
       <section class="review-detail__card">
         <h4>基础信息</h4>
         <dl class="review-detail__grid">
-          <div><dt>评论 ID</dt><dd>{{ props.detail.id }}</dd></div>
-          <div><dt>作者</dt><dd>{{ props.detail.authorUsername }}</dd></div>
-          <div><dt>路线</dt><dd>{{ props.detail.trailName }}</dd></div>
-          <div><dt>评分</dt><dd>{{ props.detail.rating ?? '--' }}</dd></div>
-          <div><dt>创建时间</dt><dd>{{ formatDateTime(props.detail.createdAt) }}</dd></div>
-          <div><dt>最近治理</dt><dd>{{ props.detail.moderatedAt ? formatDateTime(props.detail.moderatedAt) : '--' }}</dd></div>
+          <div>
+            <dt>评论 ID</dt>
+            <dd>{{ props.detail.id }}</dd>
+          </div>
+          <div>
+            <dt>作者</dt>
+            <dd>{{ props.detail.authorUsername }}</dd>
+          </div>
+          <div>
+            <dt>路线</dt>
+            <dd>{{ props.detail.trailName }}</dd>
+          </div>
+          <div>
+            <dt>评分</dt>
+            <dd>{{ props.detail.rating ?? '--' }}</dd>
+          </div>
+          <div>
+            <dt>创建时间</dt>
+            <dd>{{ formatDateTime(props.detail.createdAt) }}</dd>
+          </div>
+          <div>
+            <dt>最近治理</dt>
+            <dd>
+              {{ props.detail.moderatedAt ? formatDateTime(props.detail.moderatedAt) : '--' }}
+            </dd>
+          </div>
         </dl>
       </section>
 
@@ -72,7 +94,11 @@ const emit = defineEmits<{
       <section class="review-detail__card">
         <h4>直接回复</h4>
         <div v-if="props.detail.replies.length" class="review-detail__reply-list">
-          <article v-for="reply in props.detail.replies" :key="reply.id" class="review-detail__reply-item">
+          <article
+            v-for="reply in props.detail.replies"
+            :key="reply.id"
+            class="review-detail__reply-item"
+          >
             <div class="review-detail__reply-top">
               <strong>{{ reply.authorUsername }}</strong>
               <StatusBadge :status="reply.status" />

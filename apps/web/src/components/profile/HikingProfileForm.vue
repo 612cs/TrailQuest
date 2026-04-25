@@ -5,12 +5,15 @@ import BaseIcon from '../common/BaseIcon.vue'
 import { useOptionConfigStore } from '../../stores/useOptionConfigStore'
 import type { HikingProfileFormValue } from '../../types/hikingProfile'
 
-const props = withDefaults(defineProps<{
-  modelValue: HikingProfileFormValue
-  showLocation?: boolean
-}>(), {
-  showLocation: true,
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: HikingProfileFormValue
+    showLocation?: boolean
+  }>(),
+  {
+    showLocation: true,
+  },
+)
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: HikingProfileFormValue): void
@@ -36,11 +39,20 @@ const DEFAULT_PACK_PREFERENCE_OPTIONS = [
 
 const optionConfigStore = useOptionConfigStore()
 
-const experienceOptions = computed(() => resolveOptions('hiking_experience_level', DEFAULT_EXPERIENCE_OPTIONS))
-const trailStyleOptions = computed(() => resolveOptions('hiking_trail_style', DEFAULT_TRAIL_STYLE_OPTIONS))
-const packPreferenceOptions = computed(() => resolveOptions('hiking_pack_preference', DEFAULT_PACK_PREFERENCE_OPTIONS))
+const experienceOptions = computed(() =>
+  resolveOptions('hiking_experience_level', DEFAULT_EXPERIENCE_OPTIONS),
+)
+const trailStyleOptions = computed(() =>
+  resolveOptions('hiking_trail_style', DEFAULT_TRAIL_STYLE_OPTIONS),
+)
+const packPreferenceOptions = computed(() =>
+  resolveOptions('hiking_pack_preference', DEFAULT_PACK_PREFERENCE_OPTIONS),
+)
 
-function patchValue<K extends keyof HikingProfileFormValue>(key: K, value: HikingProfileFormValue[K]) {
+function patchValue<K extends keyof HikingProfileFormValue>(
+  key: K,
+  value: HikingProfileFormValue[K],
+) {
   emit('update:modelValue', {
     ...props.modelValue,
     [key]: value,
@@ -51,18 +63,23 @@ function resolveOptions(
   groupCode: string,
   fallback: ReadonlyArray<{ value: string; label: string; icon: string }>,
 ) {
-  return optionConfigStore.getGroup(groupCode, fallback.map((item, index) => ({
-    code: item.value,
-    label: item.label,
-    icon: item.icon,
-    sort: index + 1,
-    enabled: true,
-    extra: {},
-  }))).map((item) => ({
-    value: item.code,
-    label: item.label,
-    icon: item.icon || 'Footprints',
-  }))
+  return optionConfigStore
+    .getGroup(
+      groupCode,
+      fallback.map((item, index) => ({
+        code: item.value,
+        label: item.label,
+        icon: item.icon,
+        sort: index + 1,
+        enabled: true,
+        extra: {},
+      })),
+    )
+    .map((item) => ({
+      value: item.code,
+      label: item.label,
+      icon: item.icon || 'Footprints',
+    }))
 }
 
 onMounted(() => {
@@ -79,7 +96,7 @@ onMounted(() => {
     <div class="space-y-2">
       <div class="flex items-center gap-2">
         <BaseIcon name="Footprints" :size="16" class="text-primary-500" />
-        <p class="text-sm font-semibold" style="color: var(--text-primary);">你的徒步经验</p>
+        <p class="text-sm font-semibold" style="color: var(--text-primary)">你的徒步经验</p>
       </div>
       <div class="grid grid-cols-3 gap-2">
         <button
@@ -87,10 +104,14 @@ onMounted(() => {
           :key="option.value"
           type="button"
           class="rounded-2xl border px-3 py-3 text-sm font-medium transition-colors"
-          :style="modelValue.experienceLevel === option.value
-            ? 'border-color: var(--color-primary-500); background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--color-primary-500);'
-            : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-secondary);'"
-          @click="patchValue('experienceLevel', option.value as HikingProfileFormValue['experienceLevel'])"
+          :style="
+            modelValue.experienceLevel === option.value
+              ? 'border-color: var(--color-primary-500); background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--color-primary-500);'
+              : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-secondary);'
+          "
+          @click="
+            patchValue('experienceLevel', option.value as HikingProfileFormValue['experienceLevel'])
+          "
         >
           <BaseIcon :name="option.icon" :size="16" class="mb-2" />
           <span class="block">{{ option.label }}</span>
@@ -101,7 +122,7 @@ onMounted(() => {
     <div class="space-y-2">
       <div class="flex items-center gap-2">
         <BaseIcon name="MapPinned" :size="16" class="text-primary-500" />
-        <p class="text-sm font-semibold" style="color: var(--text-primary);">平常更常走哪类路线</p>
+        <p class="text-sm font-semibold" style="color: var(--text-primary)">平常更常走哪类路线</p>
       </div>
       <div class="grid grid-cols-3 gap-2">
         <button
@@ -109,9 +130,11 @@ onMounted(() => {
           :key="option.value"
           type="button"
           class="rounded-2xl border px-3 py-3 text-sm font-medium transition-colors"
-          :style="modelValue.trailStyle === option.value
-            ? 'border-color: var(--color-primary-500); background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--color-primary-500);'
-            : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-secondary);'"
+          :style="
+            modelValue.trailStyle === option.value
+              ? 'border-color: var(--color-primary-500); background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--color-primary-500);'
+              : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-secondary);'
+          "
           @click="patchValue('trailStyle', option.value as HikingProfileFormValue['trailStyle'])"
         >
           <BaseIcon :name="option.icon" :size="16" class="mb-2" />
@@ -123,7 +146,7 @@ onMounted(() => {
     <div class="space-y-2">
       <div class="flex items-center gap-2">
         <BaseIcon name="Package" :size="16" class="text-primary-500" />
-        <p class="text-sm font-semibold" style="color: var(--text-primary);">你更偏好哪种出行方式</p>
+        <p class="text-sm font-semibold" style="color: var(--text-primary)">你更偏好哪种出行方式</p>
       </div>
       <div class="grid grid-cols-3 gap-2">
         <button
@@ -131,10 +154,14 @@ onMounted(() => {
           :key="option.value"
           type="button"
           class="rounded-2xl border px-3 py-3 text-sm font-medium transition-colors"
-          :style="modelValue.packPreference === option.value
-            ? 'border-color: var(--color-primary-500); background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--color-primary-500);'
-            : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-secondary);'"
-          @click="patchValue('packPreference', option.value as HikingProfileFormValue['packPreference'])"
+          :style="
+            modelValue.packPreference === option.value
+              ? 'border-color: var(--color-primary-500); background-color: color-mix(in srgb, var(--primary-500) 10%, transparent); color: var(--color-primary-500);'
+              : 'border-color: var(--border-default); background-color: var(--bg-card); color: var(--text-secondary);'
+          "
+          @click="
+            patchValue('packPreference', option.value as HikingProfileFormValue['packPreference'])
+          "
         >
           <BaseIcon :name="option.icon" :size="16" class="mb-2" />
           <span class="block">{{ option.label }}</span>
@@ -143,12 +170,12 @@ onMounted(() => {
     </div>
 
     <div v-if="showLocation" class="space-y-1.5">
-      <label class="block text-sm font-medium" style="color: var(--text-secondary);">所在地区</label>
+      <label class="block text-sm font-medium" style="color: var(--text-secondary)">所在地区</label>
       <input
         :value="modelValue.location"
         type="text"
-        class="w-full rounded-xl border bg-transparent px-4 py-2.5 text-sm transition-colors focus:border-primary-500 focus:outline-none"
-        style="border-color: var(--border-default); color: var(--text-primary);"
+        class="focus:border-primary-500 w-full rounded-xl border bg-transparent px-4 py-2.5 text-sm transition-colors focus:outline-none"
+        style="border-color: var(--border-default); color: var(--text-primary)"
         placeholder="例如：中国，上海"
         @input="patchValue('location', ($event.target as HTMLInputElement).value)"
       />

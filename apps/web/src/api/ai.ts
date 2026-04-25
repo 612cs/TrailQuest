@@ -1,7 +1,12 @@
 import { API_BASE_URL, AUTH_TOKEN_STORAGE_KEY } from './constants'
 import { http } from './http'
 import { ApiError } from '../types/api'
-import type { AiChatStreamPayload, AiConversationSummary, AiMessage, AiStreamEvent } from '../types/ai'
+import type {
+  AiChatStreamPayload,
+  AiConversationSummary,
+  AiMessage,
+  AiStreamEvent,
+} from '../types/ai'
 
 export function fetchAiConversations() {
   return http.get<AiConversationSummary[]>('/api/ai/conversations')
@@ -67,8 +72,12 @@ export async function streamAiChat(
   if (!response.ok) {
     const text = await response.text()
     try {
-      const payload = JSON.parse(text) as { message?: string; code?: string }
-      throw new ApiError(payload.message || 'AI 请求失败', payload.code || 'AI_REQUEST_FAILED', response.status)
+      const errorPayload = JSON.parse(text) as { message?: string; code?: string }
+      throw new ApiError(
+        errorPayload.message || 'AI 请求失败',
+        errorPayload.code || 'AI_REQUEST_FAILED',
+        response.status,
+      )
     } catch {
       throw new ApiError(text || 'AI 请求失败', 'AI_REQUEST_FAILED', response.status)
     }

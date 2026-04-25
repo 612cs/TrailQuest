@@ -22,6 +22,10 @@ declare module 'ali-oss' {
 
   export default class OSS {
     constructor(options: OSSClientOptions)
-    multipartUpload(name: string, file: Blob | File, options?: MultipartUploadOptions): Promise<UploadResult>
+    multipartUpload(
+      name: string,
+      file: Blob | File,
+      options?: MultipartUploadOptions,
+    ): Promise<UploadResult>
   }
 }

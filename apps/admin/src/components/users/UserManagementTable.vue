@@ -35,7 +35,12 @@ const emit = defineEmits<{
         <tr v-for="item in props.items" :key="item.id">
           <td>
             <div class="admin-user-cell">
-              <div class="admin-user-cell__avatar" :style="item.avatarMediaUrl ? '' : `background:${item.avatarBg || 'var(--bg-soft)'}`">
+              <div
+                class="admin-user-cell__avatar"
+                :style="
+                  item.avatarMediaUrl ? '' : `background:${item.avatarBg || 'var(--bg-soft)'}`
+                "
+              >
                 <img v-if="item.avatarMediaUrl" :src="item.avatarMediaUrl" :alt="item.username" />
                 <span v-else>{{ item.avatar || item.username.slice(0, 2).toUpperCase() }}</span>
               </div>
@@ -47,7 +52,10 @@ const emit = defineEmits<{
           </td>
           <td>{{ item.email }}</td>
           <td>
-            <span class="admin-badge" :class="item.role === 'ADMIN' ? 'admin-badge-approved' : 'admin-badge-neutral'">
+            <span
+              class="admin-badge"
+              :class="item.role === 'ADMIN' ? 'admin-badge-approved' : 'admin-badge-neutral'"
+            >
               <ShieldCheck v-if="item.role === 'ADMIN'" :size="14" :stroke-width="2" />
               {{ item.role === 'ADMIN' ? '管理员' : '普通用户' }}
             </span>

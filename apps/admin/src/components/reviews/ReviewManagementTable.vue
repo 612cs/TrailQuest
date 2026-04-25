@@ -45,16 +45,17 @@ function isSelected(id: string | number) {
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-for="item in props.items"
-          :key="item.id"
-          class="review-table__row"
-        >
+        <tr v-for="item in props.items" :key="item.id" class="review-table__row">
           <td class="review-table__checkbox-cell" @click.stop>
             <input
               type="checkbox"
               :checked="isSelected(item.id)"
-              @change="emit('toggle-select', { id: String(item.id), checked: ($event.target as HTMLInputElement).checked })"
+              @change="
+                emit('toggle-select', {
+                  id: String(item.id),
+                  checked: ($event.target as HTMLInputElement).checked,
+                })
+              "
             />
           </td>
           <td class="review-table__content-cell" @click="emit('detail', item)">
@@ -71,9 +72,20 @@ function isSelected(id: string | number) {
           </td>
           <td @click="emit('detail', item)">
             <div class="review-table__author">
-              <div class="review-table__avatar-mini" :style="item.avatarMediaUrl ? '' : `background:${item.avatarBg || 'var(--bg-soft)'}`">
-                <img v-if="item.avatarMediaUrl" :src="item.avatarMediaUrl" :alt="item.authorUsername" />
-                <span v-else>{{ item.avatar || item.authorUsername.slice(0, 1).toUpperCase() }}</span>
+              <div
+                class="review-table__avatar-mini"
+                :style="
+                  item.avatarMediaUrl ? '' : `background:${item.avatarBg || 'var(--bg-soft)'}`
+                "
+              >
+                <img
+                  v-if="item.avatarMediaUrl"
+                  :src="item.avatarMediaUrl"
+                  :alt="item.authorUsername"
+                />
+                <span v-else>{{
+                  item.avatar || item.authorUsername.slice(0, 1).toUpperCase()
+                }}</span>
               </div>
               <span>{{ item.authorUsername }}</span>
             </div>
@@ -85,10 +97,15 @@ function isSelected(id: string | number) {
             </div>
           </td>
           <td class="review-table__actions" @click.stop>
-            <button class="action-icon info" type="button" title="详情" @click="emit('detail', item)">
+            <button
+              class="action-icon info"
+              type="button"
+              title="详情"
+              @click="emit('detail', item)"
+            >
               <Info :size="18" />
             </button>
-            
+
             <button
               v-if="item.status === 'active'"
               class="action-icon hide"
@@ -107,11 +124,11 @@ function isSelected(id: string | number) {
             >
               <RotateCcw :size="18" />
             </button>
-            
-            <button 
-              class="action-icon delete" 
-              type="button" 
-              title="删除" 
+
+            <button
+              class="action-icon delete"
+              type="button"
+              title="删除"
               @click="emit('delete', item)"
             >
               <Trash2 :size="18" />
@@ -174,7 +191,6 @@ function isSelected(id: string | number) {
   min-height: 2.5rem;
 }
 
-
 .review-table__author {
   display: flex;
   align-items: center;
@@ -233,10 +249,18 @@ function isSelected(id: string | number) {
   justify-content: center;
 }
 
-.action-icon.info { color: #6e8e6b; }
-.action-icon.hide { color: #8a8a8a; }
-.action-icon.restore { color: #5a9e70; }
-.action-icon.delete { color: #d67a7a; }
+.action-icon.info {
+  color: #6e8e6b;
+}
+.action-icon.hide {
+  color: #8a8a8a;
+}
+.action-icon.restore {
+  color: #5a9e70;
+}
+.action-icon.delete {
+  color: #d67a7a;
+}
 
 .action-icon:hover {
   background: var(--bg-soft);

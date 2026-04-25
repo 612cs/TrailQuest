@@ -53,7 +53,6 @@ onMounted(() => {
 })
 </script>
 
-
 <template>
   <div class="list-page-container">
     <section class="settings-card list-view-card">
@@ -91,7 +90,7 @@ onMounted(() => {
             <option value="deleted">已删除</option>
           </select>
         </div>
-        
+
         <div class="action-group">
           <button class="btn btn--primary" type="button" @click="load(1)">
             <Search :size="16" :stroke-width="2" /> 搜索
@@ -163,11 +162,7 @@ onMounted(() => {
       @confirm="submitConfirm"
     />
 
-    <AdminNoticeDialog
-      v-model:show="noticeVisible"
-      :title="noticeTitle"
-      :message="noticeMessage"
-    />
+    <AdminNoticeDialog v-model:show="noticeVisible" :title="noticeTitle" :message="noticeMessage" />
   </div>
 </template>
 
@@ -179,7 +174,6 @@ onMounted(() => {
   height: 100%;
   padding: 0;
 }
-
 
 .settings-card {
   background: white;
@@ -238,7 +232,8 @@ onMounted(() => {
   min-width: 160px !important;
 }
 
-.styled-input, .styled-select {
+.styled-input,
+.styled-select {
   min-width: 250px;
   background: var(--bg-soft);
   border: 1px solid var(--border);
@@ -253,7 +248,8 @@ onMounted(() => {
   flex: 1;
 }
 
-.styled-input:focus, .styled-select:focus {
+.styled-input:focus,
+.styled-select:focus {
   outline: none;
   background: white;
   border-color: var(--primary);

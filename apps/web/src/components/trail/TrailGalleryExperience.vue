@@ -9,7 +9,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'active-change', index: number): void
-  (event: 'camera-move', payload: { x: number, max: number }): void
+  (event: 'camera-move', payload: { x: number; max: number }): void
   (event: 'preview', index: number): void
 }>()
 
@@ -28,7 +28,9 @@ const MOBILE_BREAKPOINT = 768
 
 let tickerFn: (() => void) | null = null
 
-const isMobileLayout = computed(() => viewportWidth.value > 0 && viewportWidth.value <= MOBILE_BREAKPOINT)
+const isMobileLayout = computed(
+  () => viewportWidth.value > 0 && viewportWidth.value <= MOBILE_BREAKPOINT,
+)
 
 const cardWidth = computed(() => {
   if (viewportWidth.value <= 0) return 560
@@ -69,15 +71,23 @@ const wrappedImages = computed(() => {
   return arr
 })
 
-const statusText = computed(() => props.images.length
-  ? (isMobileLayout.value ? '向上或向下滑动浏览整组图片' : '使用滚轮、触控板或方向键横向穿梭图片空间')
-  : '当前路线暂无可展示图片')
+const statusText = computed(() =>
+  props.images.length
+    ? isMobileLayout.value
+      ? '向上或向下滑动浏览整组图片'
+      : '使用滚轮、触控板或方向键横向穿梭图片空间'
+    : '当前路线暂无可展示图片',
+)
 
-watch(() => props.images, () => {
-  scrollProxy.x = 0
-  activeIndex.value = 0
-  autoPanResumeAt.value = 0
-}, { immediate: true })
+watch(
+  () => props.images,
+  () => {
+    scrollProxy.x = 0
+    activeIndex.value = 0
+    autoPanResumeAt.value = 0
+  },
+  { immediate: true },
+)
 
 watch(isMobileLayout, (mobile) => {
   if (!mobile) return
@@ -92,7 +102,7 @@ onMounted(() => {
   measureViewport()
   window.addEventListener('resize', measureViewport)
   window.addEventListener('keydown', handleKeydown)
-  
+
   const gsap = getGsap()
   if (gsap) {
     tickerFn = () => tick()
@@ -103,7 +113,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', measureViewport)
   window.removeEventListener('keydown', handleKeydown)
-  
+
   const gsap = getGsap()
   if (gsap && tickerFn) {
     gsap.ticker.remove(tickerFn)
@@ -119,13 +129,12 @@ function pauseAutoPan(delay = AUTO_PAN_RESUME_DELAY) {
   autoPanResumeAt.value = performance.now() + delay
 }
 
-
 function handleWheel(event: WheelEvent) {
   if (isMobileLayout.value) return
   if (!props.images.length) return
   event.preventDefault()
   pauseAutoPan()
-  
+
   const gsap = getGsap()
   gsap?.killTweensOf(scrollProxy)
   const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
@@ -148,22 +157,21 @@ function jumpToOffset(offset: number) {
   pauseAutoPan()
   const gsap = getGsap()
   if (!gsap) return
-  
+
   const width = cardWidth.value + cardGap.value
   const targetX = scrollProxy.x + offset * width
   gsap.to(scrollProxy, {
     x: targetX,
     duration: 0.8,
     ease: 'power3.out',
-    overwrite: true
+    overwrite: true,
   })
 }
-
 
 function tick() {
   const gsap = getGsap()
   if (!gsap || !cardRefs.value?.length || viewportWidth.value === 0) return
-  
+
   const originalCount = props.images.length
   if (originalCount === 0) return
 
@@ -172,7 +180,7 @@ function tick() {
     activeIndex.value = 0
     return
   }
-  
+
   if (performance.now() >= autoPanResumeAt.value) {
     if (!gsap.isTweening(scrollProxy)) {
       scrollProxy.x += AUTO_PAN_SPEED
@@ -195,32 +203,32 @@ function tick() {
     if (!el) return
     const cardData = wrappedImages.value[index]
     if (!cardData) return
-    
+
     const localIndex = cardData.originalIndex
     const baseX = index * (width + gap)
-    
+
     const unadjustedX = baseX - scrollProxy.x
     // GSAP wrap makes it loop infinitely!
     const screenX = gsap.utils.wrap(-totalW / 2, totalW / 2, unadjustedX)
-    
+
     // distance is based on center screen Anchor
     const distance = screenX
     const normalized = distance / viewportWidth.value
     const distanceFactor = Math.min(Math.abs(normalized), 1.2)
     const focusStrength = Math.max(0, 1 - distanceFactor / 1.2)
-    
+
     const rowOffsetBase = viewportWidth.value < 768 ? 58 : 96
     const rowOffset = localIndex % 2 === 0 ? -rowOffsetBase : rowOffsetBase
     const focusLift = -focusStrength * (viewportWidth.value < 768 ? 12 : 18)
     const driftOffset = distanceFactor * (viewportWidth.value < 768 ? 6 : 10)
-    
+
     const scale = 0.94 + focusStrength * 0.08
     const rotateY = gsap.utils.clamp(-12, 12, normalized * -12)
     const translateY = rowOffset + focusLift + driftOffset
-    
+
     // Position exactly at screenX and translateY, then let GSAP center the anchor with xPercent/yPercent.
     const transformX = screenX
-    
+
     // Only render cards that are generally close to screen limits (optional optimization)
     // But setting invisible ones is essentially free in CSS3D
     gsap.set(el, {
@@ -231,7 +239,7 @@ function tick() {
       scale: scale,
       rotationY: rotateY,
       zIndex: 300 - Math.round(distanceFactor * 100),
-      opacity: 1 // can dynamically hide cards far off screen if needed
+      opacity: 1, // can dynamically hide cards far off screen if needed
     })
 
     if (Math.abs(distance) < minDistance) {
@@ -243,14 +251,14 @@ function tick() {
     if (frame) {
       const glowStr = String(Math.max(0, 1 - Math.abs(normalized) * 2.8))
       if (frame.dataset.glow !== glowStr) {
-         frame.style.setProperty('--glow-opacity', glowStr)
-         frame.dataset.glow = glowStr
+        frame.style.setProperty('--glow-opacity', glowStr)
+        frame.dataset.glow = glowStr
       }
-      
+
       if (cardData.originalIndex === activeIndex.value) {
-         if (!frame.classList.contains('active-glow')) frame.classList.add('active-glow')
+        if (!frame.classList.contains('active-glow')) frame.classList.add('active-glow')
       } else {
-         if (frame.classList.contains('active-glow')) frame.classList.remove('active-glow')
+        if (frame.classList.contains('active-glow')) frame.classList.remove('active-glow')
       }
     }
   })
@@ -280,7 +288,9 @@ function tick() {
     <div class="gallery-copy">
       <p class="gallery-kicker">Trail Image Voyage</p>
       <h1 class="gallery-title">{{ props.title }}</h1>
-      <p class="gallery-subtitle">把整条路线的影像展开成一条横向长廊。你不是在翻页，而是在穿过它。</p>
+      <p class="gallery-subtitle">
+        把整条路线的影像展开成一条横向长廊。你不是在翻页，而是在穿过它。
+      </p>
     </div>
 
     <div class="gallery-viewport" :class="{ 'gallery-viewport-mobile': isMobileLayout }">
@@ -295,7 +305,10 @@ function tick() {
           :style="{ width: `${cardWidth}px` }"
         >
           <div class="gallery-card-frame">
-            <div class="gallery-card-image-shell group cursor-pointer" @click="emit('preview', card.originalIndex)">
+            <div
+              class="gallery-card-image-shell group cursor-pointer"
+              @click="emit('preview', card.originalIndex)"
+            >
               <img
                 :src="card.image"
                 :alt="`${props.title} 图片 ${card.originalIndex + 1}`"
@@ -306,7 +319,9 @@ function tick() {
             </div>
 
             <div class="gallery-card-caption">
-              <span class="gallery-card-index">{{ String(card.originalIndex + 1).padStart(2, '0') }}</span>
+              <span class="gallery-card-index">{{
+                String(card.originalIndex + 1).padStart(2, '0')
+              }}</span>
             </div>
           </div>
         </article>
@@ -511,7 +526,9 @@ function tick() {
 }
 
 .gallery-card-frame.active-glow {
-  box-shadow: 0 28px 90px rgba(4, 10, 24, 0.34), 0 0 48px rgba(45, 89, 39, 0.18);
+  box-shadow:
+    0 28px 90px rgba(4, 10, 24, 0.34),
+    0 0 48px rgba(45, 89, 39, 0.18);
 }
 
 .gallery-card-image-shell {
@@ -612,7 +629,11 @@ function tick() {
 .gallery-progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--color-primary-300), color-mix(in srgb, var(--color-primary-500) 58%, #9ce5ff 42%));
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-300),
+    color-mix(in srgb, var(--color-primary-500) 58%, #9ce5ff 42%)
+  );
   transition: width 0.3s ease-out;
 }
 

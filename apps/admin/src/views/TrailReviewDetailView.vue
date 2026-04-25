@@ -87,15 +87,22 @@ onMounted(() => {
   void loadDetail()
 })
 
-watch(() => route.params.id, () => {
-  void loadDetail()
-})
+watch(
+  () => route.params.id,
+  () => {
+    void loadDetail()
+  },
+)
 </script>
 
 <template>
   <div class="detail-page-container">
     <div class="detail-header">
-      <button class="btn btn--secondary" type="button" @click="router.push({ name: 'trail-review-list' })">
+      <button
+        class="btn btn--secondary"
+        type="button"
+        @click="router.push({ name: 'trail-review-list' })"
+      >
         <ArrowLeft :size="16" :stroke-width="2" /> 返回列表
       </button>
       <button class="btn btn--secondary" type="button" @click="loadDetail">
@@ -114,10 +121,20 @@ watch(() => route.params.id, () => {
           <p class="admin-subtitle">通过或驳回该路线。驳回时必须填写审核原因。</p>
         </div>
         <div class="action-card__buttons">
-          <button class="btn btn--primary" type="button" :disabled="actionLoading" @click="handleApprove">
+          <button
+            class="btn btn--primary"
+            type="button"
+            :disabled="actionLoading"
+            @click="handleApprove"
+          >
             <CheckCircle2 :size="16" :stroke-width="2" /> 通过审核
           </button>
-          <button class="btn btn--danger" type="button" :disabled="actionLoading" @click="rejectDialogVisible = true">
+          <button
+            class="btn btn--danger"
+            type="button"
+            :disabled="actionLoading"
+            @click="rejectDialogVisible = true"
+          >
             <XCircle :size="16" :stroke-width="2" /> 驳回
           </button>
         </div>

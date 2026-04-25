@@ -26,25 +26,26 @@ interface ResolveWeatherOptions {
 
 const amapKey = import.meta.env.VITE_AMAP_WEATHER_KEY as string | undefined
 
+function getNextDay(dateString: string): string {
+  const d = new Date(dateString)
+  d.setDate(d.getDate() + 1)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getNextWeek(week: string): string {
+  const w = Number.parseInt(week, 10)
+  return String(w === 7 ? 1 : w + 1)
+}
+
 export function useTrailWeather() {
   const weather = shallowRef<TrailWeather | null>(null)
   const forecast = shallowRef<TrailWeatherForecastDay[]>([])
   const isLoading = shallowRef(false)
   const error = shallowRef<string | null>(null)
 
-  function getNextDay(dateString: string): string {
-    const d = new Date(dateString)
-    d.setDate(d.getDate() + 1)
-    const year = d.getFullYear()
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-
-  function getNextWeek(week: string): string {
-    const w = parseInt(week, 10)
-    return String(w === 7 ? 1 : w + 1)
-  }
   async function resolve(options: ResolveWeatherOptions) {
     isLoading.value = true
     error.value = null
@@ -91,7 +92,7 @@ export function useTrailWeather() {
 
       const [resBase, resAll] = await Promise.all([
         fetch(urlBase, { signal: options.signal }),
-        fetch(urlAll, { signal: options.signal })
+        fetch(urlAll, { signal: options.signal }),
       ])
 
       const dataBase = await resBase.json()

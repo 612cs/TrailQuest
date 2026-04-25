@@ -98,21 +98,35 @@ function getSubtitle(item: UserTrailListItem) {
 
 <template>
   <div class="h-[460px] overflow-y-auto sm:h-[560px]" ref="scrollContainer" @scroll="handleScroll">
-    <div v-if="isInitialLoading" class="flex h-full items-center justify-center text-sm" style="color: var(--text-secondary);">
+    <div
+      v-if="isInitialLoading"
+      class="flex h-full items-center justify-center text-sm"
+      style="color: var(--text-secondary)"
+    >
       正在加载路线...
     </div>
 
-    <div v-else-if="errorMessage && items.length === 0" class="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-      <BaseIcon name="AlertCircle" :size="28" style="color: var(--color-hard);" />
-      <p class="text-sm" style="color: var(--color-hard);">{{ errorMessage }}</p>
+    <div
+      v-else-if="errorMessage && items.length === 0"
+      class="flex h-full flex-col items-center justify-center gap-3 px-6 text-center"
+    >
+      <BaseIcon name="AlertCircle" :size="28" style="color: var(--color-hard)" />
+      <p class="text-sm" style="color: var(--color-hard)">{{ errorMessage }}</p>
     </div>
 
-    <div v-else-if="isEmpty" class="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-      <BaseIcon :name="tab === 'posts' ? 'FileText' : 'Bookmark'" :size="28" style="color: var(--text-tertiary);" />
-      <p class="text-sm font-medium" style="color: var(--text-primary);">
+    <div
+      v-else-if="isEmpty"
+      class="flex h-full flex-col items-center justify-center gap-3 px-6 text-center"
+    >
+      <BaseIcon
+        :name="tab === 'posts' ? 'FileText' : 'Bookmark'"
+        :size="28"
+        style="color: var(--text-tertiary)"
+      />
+      <p class="text-sm font-medium" style="color: var(--text-primary)">
         {{ tab === 'posts' ? '还没有发布路线' : '还没有收藏路线' }}
       </p>
-      <p class="text-sm" style="color: var(--text-secondary);">
+      <p class="text-sm" style="color: var(--text-secondary)">
         {{ tab === 'posts' ? '发布后的路线会出现在这里。' : '去社区或详情页收藏喜欢的路线吧。' }}
       </p>
     </div>
@@ -121,22 +135,28 @@ function getSubtitle(item: UserTrailListItem) {
       <div
         v-for="{ item, top } in virtualItems"
         :key="item.id"
-        class="absolute left-0 right-0 flex items-center gap-4 border-b px-4 text-left transition-colors hover:bg-primary-500/5"
-        :style="{ top: `${top}px`, height: `${ROW_HEIGHT}px`, borderColor: 'var(--border-default)' }"
+        class="hover:bg-primary-500/5 absolute right-0 left-0 flex items-center gap-4 border-b px-4 text-left transition-colors"
+        :style="{
+          top: `${top}px`,
+          height: `${ROW_HEIGHT}px`,
+          borderColor: 'var(--border-default)',
+        }"
         @click="$emit('open-trail', item)"
       >
         <div class="h-14 w-14 shrink-0 overflow-hidden rounded-lg">
           <img :src="item.image" :alt="item.name" class="h-full w-full object-cover" />
         </div>
         <div class="min-w-0 flex-1">
-          <h3 class="truncate text-sm font-medium" style="color: var(--text-primary);">{{ item.name }}</h3>
-          <p class="mt-1 text-xs" style="color: var(--text-secondary);">{{ getSubtitle(item) }}</p>
+          <h3 class="truncate text-sm font-medium" style="color: var(--text-primary)">
+            {{ item.name }}
+          </h3>
+          <p class="mt-1 text-xs" style="color: var(--text-secondary)">{{ getSubtitle(item) }}</p>
         </div>
         <button
           v-if="tab === 'saved'"
           type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-primary-500/10"
-          style="color: var(--primary-500);"
+          class="hover:bg-primary-500/10 flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+          style="color: var(--primary-500)"
           @click.stop="$emit('toggle-favorite', item)"
         >
           <BaseIcon name="Bookmark" :size="18" class="fill-current" />
@@ -145,8 +165,8 @@ function getSubtitle(item: UserTrailListItem) {
           <button
             v-if="item.editableByCurrentUser"
             type="button"
-            class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-primary-500/10"
-            style="color: var(--primary-500);"
+            class="hover:bg-primary-500/10 flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+            style="color: var(--primary-500)"
             @click.stop="$emit('edit-trail', item)"
           >
             <BaseIcon name="Pencil" :size="16" />
@@ -154,18 +174,22 @@ function getSubtitle(item: UserTrailListItem) {
           <button
             type="button"
             class="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-red-500/10"
-            style="color: var(--color-hard);"
+            style="color: var(--color-hard)"
             @click.stop="$emit('delete-trail', item)"
           >
             <BaseIcon name="Trash2" :size="16" />
           </button>
-          <BaseIcon name="ChevronRight" :size="16" style="color: var(--text-tertiary);" />
+          <BaseIcon name="ChevronRight" :size="16" style="color: var(--text-tertiary)" />
         </div>
       </div>
 
       <div
-        class="absolute left-0 right-0 flex items-center justify-center px-4 text-sm"
-        :style="{ top: `${totalHeight}px`, height: `${STATUS_HEIGHT}px`, color: 'var(--text-secondary)' }"
+        class="absolute right-0 left-0 flex items-center justify-center px-4 text-sm"
+        :style="{
+          top: `${totalHeight}px`,
+          height: `${STATUS_HEIGHT}px`,
+          color: 'var(--text-secondary)',
+        }"
       >
         <span v-if="isLoading">正在加载更多...</span>
         <span v-else-if="errorMessage">{{ errorMessage }}</span>

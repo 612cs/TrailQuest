@@ -15,7 +15,13 @@ import { presetTags } from '../mock/mockData'
 import { useFlashStore } from '../stores/useFlashStore'
 import { usePublishUploadStore } from '../stores/usePublishUploadStore'
 import type { EntityId } from '../types/id'
-import type { PublishAssetStatus, PublishDraftState, PublishImageAsset, PublishTaskStage, PublishTrackAsset } from '../types/publishUpload'
+import type {
+  PublishAssetStatus,
+  PublishDraftState,
+  PublishImageAsset,
+  PublishTaskStage,
+  PublishTrackAsset,
+} from '../types/publishUpload'
 import { createTrackViewerData } from '../utils/trailTrackViewerAdapter'
 import { mapWeatherToTrackScene } from '../utils/trackWeatherScene'
 
@@ -72,7 +78,9 @@ const editTrailId = computed<EntityId | null>(() => {
   return rawEdit ?? null
 })
 const isEditMode = computed(() => !!editTrailId.value)
-const currentScopeKey = computed(() => (isEditMode.value ? `edit:${String(editTrailId.value)}` : 'create'))
+const currentScopeKey = computed(() =>
+  isEditMode.value ? `edit:${String(editTrailId.value)}` : 'create',
+)
 
 const currentDraft = shallowRef<PublishDraftState | null>(null)
 
@@ -80,9 +88,9 @@ const coverItems = computed(() => currentDraft.value?.coverItems ?? [])
 const galleryItems = computed(() => currentDraft.value?.galleryItems ?? [])
 const trackItem = computed(() => currentDraft.value?.trackItem ?? null)
 const taskState = computed(() => currentDraft.value?.task ?? null)
-const isSubmissionRunning = computed(() => (
-  taskState.value ? publishUploadStore.isTaskRunning(taskState.value.stage) : false
-))
+const isSubmissionRunning = computed(() =>
+  taskState.value ? publishUploadStore.isTaskRunning(taskState.value.stage) : false,
+)
 const canRetrySubmission = computed(() => taskState.value?.stage === 'error')
 const canAddGalleryMore = computed(() => galleryItems.value.length < 9)
 const taskStatusMessage = computed(() => describeTaskStage(taskState.value?.stage ?? 'idle'))
@@ -95,17 +103,21 @@ const submitButtonLabel = computed(() => {
   }
   return isEditMode.value ? '保存修改并后台上传' : '发布路线并后台上传'
 })
-const publishTrackViewerData = computed(() => createTrackViewerData({
-  title: currentDraft.value?.fields.name.trim() || currentDraft.value?.fields.location.trim() || '未命名路线',
-  fileName: trackItem.value?.fileName ?? null,
-  distanceMeters: parseDistanceToMeters(currentDraft.value?.fields.distance ?? ''),
-  elevationGainMeters: parseElevationGainToMeters(currentDraft.value?.fields.elevation ?? ''),
-  geoJson: currentDraft.value?.geoJsonData,
-}))
-const publishWeatherScene = computed(() => mapWeatherToTrackScene(
-  publishWeather.value?.weather,
-  publishWeather.value?.windPower,
-))
+const publishTrackViewerData = computed(() =>
+  createTrackViewerData({
+    title:
+      currentDraft.value?.fields.name.trim() ||
+      currentDraft.value?.fields.location.trim() ||
+      '未命名路线',
+    fileName: trackItem.value?.fileName ?? null,
+    distanceMeters: parseDistanceToMeters(currentDraft.value?.fields.distance ?? ''),
+    elevationGainMeters: parseElevationGainToMeters(currentDraft.value?.fields.elevation ?? ''),
+    geoJson: currentDraft.value?.geoJsonData,
+  }),
+)
+const publishWeatherScene = computed(() =>
+  mapWeatherToTrackScene(publishWeather.value?.weather, publishWeather.value?.windPower),
+)
 const missingRequiredFields = computed(() => {
   const draft = currentDraft.value
   if (!draft) {
@@ -308,7 +320,11 @@ async function renderMapWithGeoJSON() {
 
   const AMap = await useAmapLoader().load()
   if (!AMap) {
-    publishUploadStore.setTrackPreview(currentScopeKey.value, currentDraft.value.geoJsonData, '获取高德地图服务失败')
+    publishUploadStore.setTrackPreview(
+      currentScopeKey.value,
+      currentDraft.value.geoJsonData,
+      '获取高德地图服务失败',
+    )
     return
   }
 
@@ -379,9 +395,9 @@ function buildTrackAsset(file: File): PublishTrackAsset {
     localUrl: URL.createObjectURL(file),
     remoteUrl: '',
     mediaId: null,
-    mimeType: file.type || (extension === 'kml'
-      ? 'application/vnd.google-earth.kml+xml'
-      : 'application/gpx+xml'),
+    mimeType:
+      file.type ||
+      (extension === 'kml' ? 'application/vnd.google-earth.kml+xml' : 'application/gpx+xml'),
     extension,
     progress: 0,
     status: 'pending',
@@ -423,7 +439,10 @@ async function handleGalleryChange(event: Event) {
 
   const available = Math.max(9 - draft.galleryItems.length, 0)
   const nextFiles = Array.from(files).slice(0, available)
-  draft.galleryItems = [...draft.galleryItems, ...nextFiles.map((file) => buildImageAsset(file, 'trail_gallery'))]
+  draft.galleryItems = [
+    ...draft.galleryItems,
+    ...nextFiles.map((file) => buildImageAsset(file, 'trail_gallery')),
+  ]
   ;(event.target as HTMLInputElement).value = ''
 }
 
@@ -457,7 +476,11 @@ async function parseTrackPreview(file: File) {
   } catch (error) {
     console.error(error)
     trackLocationHint.value = ''
-    publishUploadStore.setTrackPreview(currentScopeKey.value, null, '解析轨迹文件失败，请检查 GPX/KML 格式。')
+    publishUploadStore.setTrackPreview(
+      currentScopeKey.value,
+      null,
+      '解析轨迹文件失败，请检查 GPX/KML 格式。',
+    )
     clearMapRender()
   } finally {
     mapLoading.value = false
@@ -536,9 +559,10 @@ async function autofillTrackLocation(coordinates: TrackCoordinate[]) {
     if (reverseGeoRequestId.value !== requestId) {
       return
     }
-    trackLocationHint.value = error instanceof Error
-      ? `轨迹位置识别失败，请手动填写地点：${error.message}`
-      : '轨迹位置识别失败，请手动填写地点'
+    trackLocationHint.value =
+      error instanceof Error
+        ? `轨迹位置识别失败，请手动填写地点：${error.message}`
+        : '轨迹位置识别失败，请手动填写地点'
   }
 }
 
@@ -546,7 +570,9 @@ function extractCoordinates(geoJson: { features?: unknown[] }): TrackCoordinate[
   const coordinates: TrackCoordinate[] = []
   const features = Array.isArray(geoJson?.features) ? geoJson.features : []
 
-  for (const feature of features as Array<{ geometry?: { type?: string; coordinates?: unknown } }>) {
+  for (const feature of features as Array<{
+    geometry?: { type?: string; coordinates?: unknown }
+  }>) {
     const geometry = feature?.geometry
     if (!geometry) continue
 
@@ -574,20 +600,21 @@ function extractCoordinates(geoJson: { features?: unknown[] }): TrackCoordinate[
 }
 
 function isTrackCoordinate(value: unknown): value is TrackCoordinate {
-  return Array.isArray(value)
-    && typeof value[0] === 'number'
-    && typeof value[1] === 'number'
+  return Array.isArray(value) && typeof value[0] === 'number' && typeof value[1] === 'number'
+}
+
+function toRadians(value: number) {
+  return (value * Math.PI) / 180
 }
 
 function haversine(start: TrackCoordinate, end: TrackCoordinate) {
-  const toRad = (value: number) => (value * Math.PI) / 180
-  const lat1 = toRad(start[1])
-  const lat2 = toRad(end[1])
+  const lat1 = toRadians(start[1])
+  const lat2 = toRadians(end[1])
   const deltaLat = lat2 - lat1
-  const deltaLon = toRad(end[0] - start[0])
+  const deltaLon = toRadians(end[0] - start[0])
 
-  const a = Math.sin(deltaLat / 2) ** 2
-    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2
+  const a =
+    Math.sin(deltaLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLon / 2) ** 2
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return 6371000 * c
 }
@@ -679,7 +706,10 @@ function describeTaskStage(stage: PublishTaskStage) {
   }
 }
 
-function assetStatusText(status: PublishAssetStatus, item?: { progress: number; errorMessage: string } | null) {
+function assetStatusText(
+  status: PublishAssetStatus,
+  item?: { progress: number; errorMessage: string } | null,
+) {
   switch (status) {
     case 'existing':
       return '已保留原有文件'
@@ -728,27 +758,32 @@ async function handleSubmit() {
     <div class="glass-header sticky top-14 z-40 px-4 py-3 sm:top-16">
       <div class="mx-auto flex max-w-3xl items-center justify-between">
         <button
-          class="flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary-500"
-          style="color: var(--text-secondary);"
+          class="hover:text-primary-500 flex items-center gap-1 text-sm font-medium transition-colors"
+          style="color: var(--text-secondary)"
           @click="router.back()"
         >
           <BaseIcon name="ChevronLeft" :size="20" />
           返回
         </button>
-        <h2 class="text-sm font-semibold" style="color: var(--text-primary);">{{ isEditMode ? '编辑路线' : '发布路线' }}</h2>
+        <h2 class="text-sm font-semibold" style="color: var(--text-primary)">
+          {{ isEditMode ? '编辑路线' : '发布路线' }}
+        </h2>
         <div class="w-12" />
       </div>
     </div>
 
     <div class="mx-auto max-w-3xl space-y-5 px-4 py-6 sm:px-6">
       <section v-if="isLoadingDraft" class="card flex items-center gap-3 p-4 sm:p-5">
-        <BaseIcon name="Loader2" :size="18" class="animate-spin text-primary-500" />
-        <p class="text-sm" style="color: var(--text-secondary);">正在加载路线信息...</p>
+        <BaseIcon name="Loader2" :size="18" class="text-primary-500 animate-spin" />
+        <p class="text-sm" style="color: var(--text-secondary)">正在加载路线信息...</p>
       </section>
 
       <template v-if="currentDraft">
         <section class="card animate-fade-in-up p-4 sm:p-5">
-          <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
+          <h3
+            class="mb-3 flex items-center gap-2 text-sm font-semibold"
+            style="color: var(--text-primary)"
+          >
             <BaseIcon name="Image" :size="16" class="text-primary-500" />
             封面图片
           </h3>
@@ -758,21 +793,35 @@ async function handleSubmit() {
                 v-for="(item, index) in coverItems"
                 :key="item.id"
                 class="group relative aspect-[4/3] overflow-hidden rounded-xl border"
-                style="border-color: var(--border-default);"
+                style="border-color: var(--border-default)"
               >
-                <img :src="item.remoteUrl || item.localUrl" :alt="item.id" class="h-full w-full object-cover" @click="openPreview(getImageSources(coverItems), index)" />
-                <div v-if="item.status === 'uploading'" class="absolute inset-0 flex items-center justify-center bg-black/40 text-sm font-medium text-white">
+                <img
+                  :src="item.remoteUrl || item.localUrl"
+                  :alt="item.id"
+                  class="h-full w-full object-cover"
+                  @click="openPreview(getImageSources(coverItems), index)"
+                />
+                <div
+                  v-if="item.status === 'uploading'"
+                  class="absolute inset-0 flex items-center justify-center bg-black/40 text-sm font-medium text-white"
+                >
                   {{ item.progress }}%
                 </div>
-                <div v-else-if="item.status === 'error' || item.status === 'missing'" class="absolute inset-0 flex items-center justify-center bg-black/55 px-3 text-center text-xs text-white">
+                <div
+                  v-else-if="item.status === 'error' || item.status === 'missing'"
+                  class="absolute inset-0 flex items-center justify-center bg-black/55 px-3 text-center text-xs text-white"
+                >
                   {{ item.errorMessage }}
                 </div>
-                <div v-else class="absolute inset-x-2 bottom-2 rounded-full bg-black/55 px-2 py-1 text-center text-[11px] text-white/90">
+                <div
+                  v-else
+                  class="absolute inset-x-2 bottom-2 rounded-full bg-black/55 px-2 py-1 text-center text-[11px] text-white/90"
+                >
                   {{ assetStatusText(item.status, item) }}
                 </div>
                 <button
                   type="button"
-                  class="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+                  class="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40"
                   :disabled="isSubmissionRunning"
                   @click="removeCover(item.id)"
                 >
@@ -783,14 +832,28 @@ async function handleSubmit() {
 
             <label
               v-if="!coverItems.length"
-              class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 transition-colors hover:border-primary-500 hover:bg-primary-500/5"
-              :style="hasFieldError('cover') ? 'border-color: var(--color-hard); background-color: color-mix(in srgb, var(--color-hard) 8%, transparent);' : 'border-color: var(--border-default);'"
+              class="hover:border-primary-500 hover:bg-primary-500/5 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 transition-colors"
+              :style="
+                hasFieldError('cover')
+                  ? 'border-color: var(--color-hard); background-color: color-mix(in srgb, var(--color-hard) 8%, transparent);'
+                  : 'border-color: var(--border-default);'
+              "
             >
-              <div class="flex h-10 w-10 items-center justify-center rounded-full" style="background-color: var(--bg-tag);">
+              <div
+                class="flex h-10 w-10 items-center justify-center rounded-full"
+                style="background-color: var(--bg-tag)"
+              >
                 <BaseIcon name="ImagePlus" :size="20" class="text-primary-500" />
               </div>
-              <p class="text-sm font-medium" style="color: var(--text-secondary);">上传路线封面</p>
-              <input data-testid="publish-cover-input" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" :disabled="isSubmissionRunning" @change="handleCoverChange" />
+              <p class="text-sm font-medium" style="color: var(--text-secondary)">上传路线封面</p>
+              <input
+                data-testid="publish-cover-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                class="hidden"
+                :disabled="isSubmissionRunning"
+                @change="handleCoverChange"
+              />
             </label>
             <p v-if="hasFieldError('cover')" class="text-xs text-red-500">请先上传封面图片</p>
           </div>
@@ -798,52 +861,117 @@ async function handleSubmit() {
 
         <section class="card animate-fade-in-up space-y-4 p-4 sm:p-5">
           <div class="flex items-center justify-between">
-            <h3 class="flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
+            <h3
+              class="flex items-center gap-2 text-sm font-semibold"
+              style="color: var(--text-primary)"
+            >
               <BaseIcon name="Map" :size="16" class="text-primary-500" />
               路线轨迹 (GPX / KML)
             </h3>
-            <label class="cursor-pointer rounded-lg bg-primary-500/10 px-3 py-1.5 text-xs font-medium text-primary-500 transition-colors hover:bg-primary-500/20" :class="isSubmissionRunning ? 'pointer-events-none opacity-40' : ''">
+            <label
+              class="bg-primary-500/10 text-primary-500 hover:bg-primary-500/20 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+              :class="isSubmissionRunning ? 'pointer-events-none opacity-40' : ''"
+            >
               {{ trackItem ? '重新上传' : '上传轨迹' }}
-              <input data-testid="publish-track-input" type="file" accept=".gpx,.kml,application/gpx+xml,application/vnd.google-earth.kml+xml,text/xml,application/xml" class="hidden" :disabled="isSubmissionRunning" @change="handleTrackChange" />
+              <input
+                data-testid="publish-track-input"
+                type="file"
+                accept=".gpx,.kml,application/gpx+xml,application/vnd.google-earth.kml+xml,text/xml,application/xml"
+                class="hidden"
+                :disabled="isSubmissionRunning"
+                @change="handleTrackChange"
+              />
             </label>
           </div>
 
-          <p class="text-xs" style="color: var(--text-secondary);">
+          <p class="text-xs" style="color: var(--text-secondary)">
             轨迹文件为可选项。点击发布后才会真正上传，上传前会继续保留本地预览和解析结果。
           </p>
 
-          <div v-if="trackItem" class="rounded-xl border p-3 text-sm" style="border-color: var(--border-default); background-color: var(--bg-tag);">
+          <div
+            v-if="trackItem"
+            class="rounded-xl border p-3 text-sm"
+            style="border-color: var(--border-default); background-color: var(--bg-tag)"
+          >
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-                <p class="truncate font-medium" style="color: var(--text-primary);">{{ trackItem.fileName }}</p>
-                <p class="mt-1 text-xs" :class="trackItem.status === 'error' || trackItem.status === 'missing' ? 'text-red-500' : ''" style="color: var(--text-secondary);">
+                <p class="truncate font-medium" style="color: var(--text-primary)">
+                  {{ trackItem.fileName }}
+                </p>
+                <p
+                  class="mt-1 text-xs"
+                  :class="
+                    trackItem.status === 'error' || trackItem.status === 'missing'
+                      ? 'text-red-500'
+                      : ''
+                  "
+                  style="color: var(--text-secondary)"
+                >
                   {{ assetStatusText(trackItem.status, trackItem) }}
                 </p>
               </div>
-              <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-primary-500/10 disabled:cursor-not-allowed disabled:opacity-40" :disabled="isSubmissionRunning" @click="clearTrack">
-                <BaseIcon name="X" :size="16" style="color: var(--text-secondary);" />
+              <button
+                type="button"
+                class="hover:bg-primary-500/10 flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                :disabled="isSubmissionRunning"
+                @click="clearTrack"
+              >
+                <BaseIcon name="X" :size="16" style="color: var(--text-secondary)" />
               </button>
             </div>
           </div>
 
           <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <div class="relative overflow-hidden rounded-xl shadow-inner" style="height: 320px; background-color: var(--bg-input); border: 1px solid var(--border-default);">
-              <div ref="mapContainer" class="h-full w-full" :style="{ display: currentDraft.geoJsonData ? 'block' : 'none' }"></div>
-              <div v-if="mapLoading" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5 backdrop-blur-sm">
-                <BaseIcon name="Loader2" :size="20" class="animate-spin text-primary-500" />
-                <span class="text-xs font-medium" style="color: var(--text-secondary);">解析轨迹中...</span>
+            <div
+              class="relative overflow-hidden rounded-xl shadow-inner"
+              style="
+                height: 320px;
+                background-color: var(--bg-input);
+                border: 1px solid var(--border-default);
+              "
+            >
+              <div
+                ref="mapContainer"
+                class="h-full w-full"
+                :style="{ display: currentDraft.geoJsonData ? 'block' : 'none' }"
+              ></div>
+              <div
+                v-if="mapLoading"
+                class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5 backdrop-blur-sm"
+              >
+                <BaseIcon name="Loader2" :size="20" class="text-primary-500 animate-spin" />
+                <span class="text-xs font-medium" style="color: var(--text-secondary)"
+                  >解析轨迹中...</span
+                >
               </div>
-              <div v-else-if="currentDraft.trackPreviewError" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5">
+              <div
+                v-else-if="currentDraft.trackPreviewError"
+                class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5"
+              >
                 <BaseIcon name="AlertCircle" :size="20" class="text-red-500" />
-                <span class="px-4 text-center text-xs font-medium text-red-500">{{ currentDraft.trackPreviewError }}</span>
+                <span class="px-4 text-center text-xs font-medium text-red-500">{{
+                  currentDraft.trackPreviewError
+                }}</span>
               </div>
-              <div v-else-if="!currentDraft.geoJsonData" class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5">
-                <BaseIcon name="Route" :size="24" style="color: var(--text-tertiary);" />
-                <span class="text-xs font-medium" style="color: var(--text-tertiary);">请上传 GPX / KML 轨迹文件以在地图中预览</span>
+              <div
+                v-else-if="!currentDraft.geoJsonData"
+                class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-black/5"
+              >
+                <BaseIcon name="Route" :size="24" style="color: var(--text-tertiary)" />
+                <span class="text-xs font-medium" style="color: var(--text-tertiary)"
+                  >请上传 GPX / KML 轨迹文件以在地图中预览</span
+                >
               </div>
             </div>
 
-            <div class="overflow-hidden rounded-xl" style="height: 320px; border: 1px solid var(--border-default); background-color: var(--bg-input);">
+            <div
+              class="overflow-hidden rounded-xl"
+              style="
+                height: 320px;
+                border: 1px solid var(--border-default);
+                background-color: var(--bg-input);
+              "
+            >
               <TrailTrackViewer
                 v-if="publishTrackViewerData"
                 :data="publishTrackViewerData"
@@ -853,40 +981,73 @@ async function handleSubmit() {
                 @request-fullscreen="showTrackFullscreen = true"
               />
               <div v-else class="flex h-full flex-col items-center justify-center gap-2 bg-black/5">
-                <BaseIcon name="Box" :size="24" style="color: var(--text-tertiary);" />
-                <span class="text-xs font-medium" style="color: var(--text-tertiary);">上传轨迹后可在这里查看路线建模</span>
+                <BaseIcon name="Box" :size="24" style="color: var(--text-tertiary)" />
+                <span class="text-xs font-medium" style="color: var(--text-tertiary)"
+                  >上传轨迹后可在这里查看路线建模</span
+                >
               </div>
             </div>
           </div>
         </section>
 
         <section class="card animate-fade-in-up space-y-4 p-4 sm:p-5">
-          <h3 class="flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
+          <h3
+            class="flex items-center gap-2 text-sm font-semibold"
+            style="color: var(--text-primary)"
+          >
             <BaseIcon name="FileText" :size="16" class="text-primary-500" />
             基本信息
           </h3>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线名称</label>
-            <input data-testid="publish-name-input" v-model="currentDraft.fields.name" type="text" placeholder="例如：龙脊梯田精华线" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :class="{ 'publish-input-error': hasFieldError('name') }" :disabled="isSubmissionRunning" />
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary)"
+              >路线名称</label
+            >
+            <input
+              data-testid="publish-name-input"
+              v-model="currentDraft.fields.name"
+              type="text"
+              placeholder="例如：龙脊梯田精华线"
+              class="publish-input w-full rounded-lg px-3 py-2.5 text-sm"
+              :class="{ 'publish-input-error': hasFieldError('name') }"
+              :disabled="isSubmissionRunning"
+            />
             <p v-if="hasFieldError('name')" class="mt-1.5 text-xs text-red-500">请填写路线名称</p>
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">所在位置</label>
-            <input data-testid="publish-location-input" v-model="currentDraft.fields.location" type="text" placeholder="例如：广西 桂林 龙胜" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :class="{ 'publish-input-error': hasFieldError('location') }" :disabled="isSubmissionRunning" />
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary)"
+              >所在位置</label
+            >
+            <input
+              data-testid="publish-location-input"
+              v-model="currentDraft.fields.location"
+              type="text"
+              placeholder="例如：广西 桂林 龙胜"
+              class="publish-input w-full rounded-lg px-3 py-2.5 text-sm"
+              :class="{ 'publish-input-error': hasFieldError('location') }"
+              :disabled="isSubmissionRunning"
+            />
             <p
               v-if="trackLocationHint"
               class="mt-1.5 text-xs"
-              :style="trackLocationHint.includes('失败') ? 'color: var(--color-hard);' : 'color: var(--text-tertiary);'"
+              :style="
+                trackLocationHint.includes('失败')
+                  ? 'color: var(--color-hard);'
+                  : 'color: var(--text-tertiary);'
+              "
             >
               {{ trackLocationHint }}
             </p>
-            <p v-if="hasFieldError('location')" class="mt-1.5 text-xs text-red-500">请填写所在位置</p>
+            <p v-if="hasFieldError('location')" class="mt-1.5 text-xs text-red-500">
+              请填写所在位置
+            </p>
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">难度等级</label>
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary)"
+              >难度等级</label
+            >
             <div class="flex gap-2">
               <button
                 v-for="opt in difficultyOptions"
@@ -894,8 +1055,23 @@ async function handleSubmit() {
                 type="button"
                 class="flex-1 rounded-lg border-2 py-2 text-sm font-medium transition-all duration-200"
                 :disabled="isSubmissionRunning"
-                :class="currentDraft.fields.difficulty === opt.value ? 'scale-[1.02]' : 'opacity-70 hover:opacity-90'"
-                :style="{ borderColor: currentDraft.fields.difficulty === opt.value ? opt.color : 'var(--border-default)', backgroundColor: currentDraft.fields.difficulty === opt.value ? `${opt.color}15` : 'transparent', color: currentDraft.fields.difficulty === opt.value ? opt.color : 'var(--text-secondary)' }"
+                :class="
+                  currentDraft.fields.difficulty === opt.value
+                    ? 'scale-[1.02]'
+                    : 'opacity-70 hover:opacity-90'
+                "
+                :style="{
+                  borderColor:
+                    currentDraft.fields.difficulty === opt.value
+                      ? opt.color
+                      : 'var(--border-default)',
+                  backgroundColor:
+                    currentDraft.fields.difficulty === opt.value ? `${opt.color}15` : 'transparent',
+                  color:
+                    currentDraft.fields.difficulty === opt.value
+                      ? opt.color
+                      : 'var(--text-secondary)',
+                }"
                 @click="updateDifficulty(opt.value)"
               >
                 {{ opt.label }}
@@ -905,7 +1081,9 @@ async function handleSubmit() {
 
           <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <div>
-              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">负重类型</label>
+              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary)"
+                >负重类型</label
+              >
               <div class="flex gap-2">
                 <button
                   v-for="opt in packOptions"
@@ -913,8 +1091,16 @@ async function handleSubmit() {
                   type="button"
                   class="flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors"
                   :disabled="isSubmissionRunning"
-                  :class="currentDraft.fields.packType === opt.value ? 'border-primary-500 bg-primary-500/10 text-primary-500' : ''"
-                  :style="currentDraft.fields.packType !== opt.value ? 'border-color: var(--border-default); color: var(--text-secondary);' : ''"
+                  :class="
+                    currentDraft.fields.packType === opt.value
+                      ? 'border-primary-500 bg-primary-500/10 text-primary-500'
+                      : ''
+                  "
+                  :style="
+                    currentDraft.fields.packType !== opt.value
+                      ? 'border-color: var(--border-default); color: var(--text-secondary);'
+                      : ''
+                  "
                   @click="updatePackType(opt.value)"
                 >
                   {{ opt.label }}
@@ -922,7 +1108,9 @@ async function handleSubmit() {
               </div>
             </div>
             <div>
-              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">行程类型</label>
+              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary)"
+                >行程类型</label
+              >
               <div class="flex gap-2">
                 <button
                   v-for="opt in durationOptions"
@@ -930,8 +1118,16 @@ async function handleSubmit() {
                   type="button"
                   class="flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition-colors"
                   :disabled="isSubmissionRunning"
-                  :class="currentDraft.fields.durationType === opt.value ? 'border-primary-500 bg-primary-500/10 text-primary-500' : ''"
-                  :style="currentDraft.fields.durationType !== opt.value ? 'border-color: var(--border-default); color: var(--text-secondary);' : ''"
+                  :class="
+                    currentDraft.fields.durationType === opt.value
+                      ? 'border-primary-500 bg-primary-500/10 text-primary-500'
+                      : ''
+                  "
+                  :style="
+                    currentDraft.fields.durationType !== opt.value
+                      ? 'border-color: var(--border-default); color: var(--text-secondary);'
+                      : ''
+                  "
                   @click="updateDurationType(opt.value)"
                 >
                   {{ opt.label }}
@@ -942,27 +1138,63 @@ async function handleSubmit() {
 
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
-              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">距离</label>
-              <input v-model="currentDraft.fields.distance" type="text" placeholder="12.5 km" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
+              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary)"
+                >距离</label
+              >
+              <input
+                v-model="currentDraft.fields.distance"
+                type="text"
+                placeholder="12.5 km"
+                class="publish-input w-full rounded-lg px-3 py-2.5 text-sm"
+                :disabled="isSubmissionRunning"
+              />
             </div>
             <div>
-              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">海拔</label>
-              <input v-model="currentDraft.fields.elevation" type="text" placeholder="+450 m" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
+              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary)"
+                >海拔</label
+              >
+              <input
+                v-model="currentDraft.fields.elevation"
+                type="text"
+                placeholder="+450 m"
+                class="publish-input w-full rounded-lg px-3 py-2.5 text-sm"
+                :disabled="isSubmissionRunning"
+              />
             </div>
             <div>
-              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">时长</label>
-              <input v-model="currentDraft.fields.duration" type="text" placeholder="4h 30m" class="publish-input w-full rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
+              <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary)"
+                >时长</label
+              >
+              <input
+                v-model="currentDraft.fields.duration"
+                type="text"
+                placeholder="4h 30m"
+                class="publish-input w-full rounded-lg px-3 py-2.5 text-sm"
+                :disabled="isSubmissionRunning"
+              />
             </div>
           </div>
 
           <div>
-            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary);">路线描述</label>
-            <textarea data-testid="publish-description-input" v-model="currentDraft.fields.description" rows="5" placeholder="描述这条路线的特色、注意事项、推荐理由..." class="publish-input w-full resize-none rounded-lg px-3 py-2.5 text-sm" :disabled="isSubmissionRunning" />
+            <label class="mb-1.5 block text-xs font-medium" style="color: var(--text-secondary)"
+              >路线描述</label
+            >
+            <textarea
+              data-testid="publish-description-input"
+              v-model="currentDraft.fields.description"
+              rows="5"
+              placeholder="描述这条路线的特色、注意事项、推荐理由..."
+              class="publish-input w-full resize-none rounded-lg px-3 py-2.5 text-sm"
+              :disabled="isSubmissionRunning"
+            />
           </div>
         </section>
 
         <section class="card animate-fade-in-up p-4 sm:p-5">
-          <h3 class="mb-3 flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
+          <h3
+            class="mb-3 flex items-center gap-2 text-sm font-semibold"
+            style="color: var(--text-primary)"
+          >
             <BaseIcon name="Camera" :size="16" class="text-primary-500" />
             路线照片
           </h3>
@@ -973,50 +1205,89 @@ async function handleSubmit() {
                 :key="item.id"
                 class="group relative aspect-square overflow-hidden rounded-lg"
               >
-                <img :src="item.remoteUrl || item.localUrl" :alt="item.id" class="h-full w-full object-cover" @click="openPreview(getImageSources(galleryItems), index)" />
-                <div v-if="item.status === 'uploading'" class="absolute inset-0 flex items-center justify-center bg-black/40 text-xs font-medium text-white">
+                <img
+                  :src="item.remoteUrl || item.localUrl"
+                  :alt="item.id"
+                  class="h-full w-full object-cover"
+                  @click="openPreview(getImageSources(galleryItems), index)"
+                />
+                <div
+                  v-if="item.status === 'uploading'"
+                  class="absolute inset-0 flex items-center justify-center bg-black/40 text-xs font-medium text-white"
+                >
                   {{ item.progress }}%
                 </div>
-                <div v-else-if="item.status === 'error' || item.status === 'missing'" class="absolute inset-0 flex items-center justify-center bg-black/55 px-2 text-center text-[11px] text-white">
+                <div
+                  v-else-if="item.status === 'error' || item.status === 'missing'"
+                  class="absolute inset-0 flex items-center justify-center bg-black/55 px-2 text-center text-[11px] text-white"
+                >
                   {{ item.errorMessage }}
                 </div>
-                <div v-else class="absolute inset-x-1 bottom-1 rounded-full bg-black/55 px-2 py-1 text-center text-[10px] text-white/90">
+                <div
+                  v-else
+                  class="absolute inset-x-1 bottom-1 rounded-full bg-black/55 px-2 py-1 text-center text-[10px] text-white/90"
+                >
                   {{ assetStatusText(item.status, item) }}
                 </div>
-                <button type="button" class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40" :disabled="isSubmissionRunning" @click="removeGalleryItem(item.id)">
+                <button
+                  type="button"
+                  class="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+                  :disabled="isSubmissionRunning"
+                  @click="removeGalleryItem(item.id)"
+                >
                   <BaseIcon name="X" :size="14" />
                 </button>
               </div>
 
               <label
                 v-if="canAddGalleryMore"
-                class="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors hover:border-primary-500 hover:bg-primary-500/5"
+                class="hover:border-primary-500 hover:bg-primary-500/5 flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors"
                 :class="isSubmissionRunning ? 'pointer-events-none opacity-40' : ''"
-                style="border-color: var(--border-default); color: var(--text-tertiary);"
+                style="border-color: var(--border-default); color: var(--text-tertiary)"
               >
                 <BaseIcon name="Plus" :size="20" />
                 <span class="text-xs">{{ 9 - galleryItems.length }}/9</span>
-                <input type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden" :disabled="isSubmissionRunning" @change="handleGalleryChange" />
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  class="hidden"
+                  :disabled="isSubmissionRunning"
+                  @change="handleGalleryChange"
+                />
               </label>
             </div>
 
             <label
               v-else
-              class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 transition-colors hover:border-primary-500 hover:bg-primary-500/5"
+              class="hover:border-primary-500 hover:bg-primary-500/5 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 transition-colors"
               :class="isSubmissionRunning ? 'pointer-events-none opacity-40' : ''"
-              style="border-color: var(--border-default);"
+              style="border-color: var(--border-default)"
             >
-              <div class="flex h-10 w-10 items-center justify-center rounded-full" style="background-color: var(--bg-tag);">
+              <div
+                class="flex h-10 w-10 items-center justify-center rounded-full"
+                style="background-color: var(--bg-tag)"
+              >
                 <BaseIcon name="ImagePlus" :size="20" class="text-primary-500" />
               </div>
-              <p class="text-sm font-medium" style="color: var(--text-secondary);">上传路线照片</p>
-              <input type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden" :disabled="isSubmissionRunning" @change="handleGalleryChange" />
+              <p class="text-sm font-medium" style="color: var(--text-secondary)">上传路线照片</p>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                class="hidden"
+                :disabled="isSubmissionRunning"
+                @change="handleGalleryChange"
+              />
             </label>
           </div>
         </section>
 
         <section class="card animate-fade-in-up space-y-3 p-4 sm:p-5">
-          <h3 class="flex items-center gap-2 text-sm font-semibold" style="color: var(--text-primary);">
+          <h3
+            class="flex items-center gap-2 text-sm font-semibold"
+            style="color: var(--text-primary)"
+          >
             <BaseIcon name="Tag" :size="16" class="text-primary-500" />
             路线标签
           </h3>
@@ -1027,8 +1298,16 @@ async function handleSubmit() {
               type="button"
               class="rounded-full border px-3 py-1.5 text-xs font-medium transition-all duration-200"
               :disabled="isSubmissionRunning"
-              :class="currentDraft.fields.selectedTags.includes(tag) ? 'border-primary-500 bg-primary-500 text-white' : 'hover:border-primary-400'"
-              :style="!currentDraft.fields.selectedTags.includes(tag) ? 'color: var(--text-secondary); border-color: var(--border-default); background-color: var(--bg-tag);' : ''"
+              :class="
+                currentDraft.fields.selectedTags.includes(tag)
+                  ? 'border-primary-500 bg-primary-500 text-white'
+                  : 'hover:border-primary-400'
+              "
+              :style="
+                !currentDraft.fields.selectedTags.includes(tag)
+                  ? 'color: var(--text-secondary); border-color: var(--border-default); background-color: var(--bg-tag);'
+                  : ''
+              "
               @click="toggleTag(tag)"
             >
               {{ tag }}
@@ -1039,7 +1318,7 @@ async function handleSubmit() {
               v-for="tag in selectedCustomTags"
               :key="`custom-${tag}`"
               type="button"
-              class="inline-flex items-center gap-1 rounded-full border border-primary-500/30 bg-primary-500/10 px-3 py-1.5 text-xs font-medium text-primary-600 transition-colors hover:bg-primary-500/15 disabled:cursor-not-allowed disabled:opacity-40"
+              class="border-primary-500/30 bg-primary-500/10 text-primary-600 hover:bg-primary-500/15 inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40"
               :disabled="isSubmissionRunning"
               @click="toggleTag(tag)"
             >
@@ -1048,8 +1327,19 @@ async function handleSubmit() {
             </button>
           </div>
           <div class="flex gap-2">
-            <input v-model="currentDraft.fields.customTag" type="text" placeholder="自定义标签..." class="publish-input flex-1 rounded-lg px-3 py-2 text-sm" :disabled="isSubmissionRunning" @keyup.enter="addCustomTag" />
-            <button class="rounded-lg border border-primary-500/30 px-3 py-2 text-sm font-medium text-primary-500 transition-colors hover:bg-primary-500/10 disabled:cursor-not-allowed disabled:opacity-40" :disabled="!currentDraft.fields.customTag.trim() || isSubmissionRunning" @click="addCustomTag">
+            <input
+              v-model="currentDraft.fields.customTag"
+              type="text"
+              placeholder="自定义标签..."
+              class="publish-input flex-1 rounded-lg px-3 py-2 text-sm"
+              :disabled="isSubmissionRunning"
+              @keyup.enter="addCustomTag"
+            />
+            <button
+              class="border-primary-500/30 text-primary-500 hover:bg-primary-500/10 rounded-lg border px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+              :disabled="!currentDraft.fields.customTag.trim() || isSubmissionRunning"
+              @click="addCustomTag"
+            >
               添加
             </button>
           </div>
@@ -1059,7 +1349,11 @@ async function handleSubmit() {
           <button
             data-testid="publish-submit-button"
             class="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-medium text-white transition-all disabled:cursor-not-allowed disabled:opacity-40"
-            :class="canSubmitDraft ? 'bg-primary-500 hover:bg-primary-600 hover:shadow-md active:scale-[0.98]' : 'bg-gray-400'"
+            :class="
+              canSubmitDraft
+                ? 'bg-primary-500 hover:bg-primary-600 hover:shadow-md active:scale-[0.98]'
+                : 'bg-gray-400'
+            "
             :disabled="!canSubmitDraft"
             @click="handleSubmit"
           >
@@ -1067,7 +1361,7 @@ async function handleSubmit() {
             <BaseIcon v-else name="Send" :size="16" />
             {{ submitButtonLabel }}
           </button>
-          <p class="mt-3 text-center text-xs" style="color: var(--text-secondary);">
+          <p class="mt-3 text-center text-xs" style="color: var(--text-secondary)">
             可以先自由填写，点击按钮后我们会提示还缺少哪些关键信息。
           </p>
         </div>
@@ -1083,7 +1377,10 @@ async function handleSubmit() {
 
     <Teleport to="body">
       <Transition name="fade">
-        <div v-if="showTrackFullscreen && publishTrackViewerData" class="fixed inset-0 z-[70] bg-black/55 backdrop-blur-sm">
+        <div
+          v-if="showTrackFullscreen && publishTrackViewerData"
+          class="fixed inset-0 z-[70] bg-black/55 backdrop-blur-sm"
+        >
           <div class="flex h-full w-full flex-col p-3 sm:p-5">
             <div class="mb-3 flex items-center justify-between">
               <p class="text-sm font-semibold text-white/90">轨迹全屏浏览</p>
@@ -1113,7 +1410,10 @@ async function handleSubmit() {
   background-color: transparent;
   color: var(--text-primary);
   border: 1px solid var(--border-default);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .publish-input::placeholder {

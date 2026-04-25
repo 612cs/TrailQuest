@@ -47,7 +47,7 @@ async function handleSubmit() {
   <div class="login-view">
     <div class="login-background"></div>
     <div class="login-overlay"></div>
-    
+
     <main class="login-bento-container">
       <div class="login-bento-card">
         <!-- Brand/Hero Section -->
@@ -56,10 +56,9 @@ async function handleSubmit() {
             <div class="brand-eyebrow">TrailQuest Digital Ecosystem</div>
             <h1 class="hero-title">内容治理后台</h1>
             <p class="hero-desc">
-              步道管理、数据洞察与用户服务的数字指挥仓。
-              体验新一代的极简管理界面设计。
+              步道管理、数据洞察与用户服务的数字指挥仓。 体验新一代的极简管理界面设计。
             </p>
-            
+
             <div class="feature-badges">
               <span class="badge"><ShieldCheck :size="14" /> 权限校验</span>
               <span class="badge"><Sparkles :size="14" /> 沉浸式主题</span>
@@ -82,23 +81,23 @@ async function handleSubmit() {
           <form class="auth-form" @submit.prevent="handleSubmit">
             <div class="input-group">
               <label class="input-label">邮箱</label>
-              <input 
-                v-model="email" 
-                class="styled-input" 
-                type="email" 
-                placeholder="admin@example.com" 
-                autocomplete="email" 
+              <input
+                v-model="email"
+                class="styled-input"
+                type="email"
+                placeholder="admin@example.com"
+                autocomplete="email"
               />
             </div>
 
             <div class="input-group">
               <label class="input-label">密码</label>
-              <input 
-                v-model="password" 
-                class="styled-input" 
-                type="password" 
-                placeholder="请输入密码" 
-                autocomplete="current-password" 
+              <input
+                v-model="password"
+                class="styled-input"
+                type="password"
+                placeholder="请输入密码"
+                autocomplete="current-password"
               />
             </div>
 
@@ -106,7 +105,7 @@ async function handleSubmit() {
               {{ loading ? '身份验证中...' : '进入控制台' }}
             </button>
           </form>
-          
+
           <div class="form-footer">
             <p>未授权访问将被严格记录并审计。© 2026 TrailQuest</p>
           </div>
@@ -140,7 +139,11 @@ async function handleSubmit() {
 .login-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(var(--bg-body-rgb), 0.7) 0%, rgba(var(--bg-body-rgb), 0.95) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--bg-body-rgb), 0.7) 0%,
+    rgba(var(--bg-body-rgb), 0.95) 100%
+  );
   z-index: 0;
 }
 
@@ -161,7 +164,7 @@ async function handleSubmit() {
   -webkit-backdrop-filter: blur(24px);
   border-radius: 32px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
+  box-shadow:
     0 24px 48px rgba(0, 0, 0, 0.08),
     inset 0 1px 1px rgba(255, 255, 255, 0.4);
   overflow: hidden;
@@ -171,7 +174,11 @@ async function handleSubmit() {
 .login-hero {
   position: relative;
   padding: 4rem;
-  background: linear-gradient(145deg, rgba(var(--primary-rgb), 0.9), rgba(var(--primary-rgb), 0.95));
+  background: linear-gradient(
+    145deg,
+    rgba(var(--primary-rgb), 0.9),
+    rgba(var(--primary-rgb), 0.95)
+  );
   color: white;
   overflow: hidden;
   display: flex;
@@ -361,11 +368,11 @@ async function handleSubmit() {
   .login-bento-card {
     grid-template-columns: 1fr;
   }
-  
+
   .login-hero {
     padding: 3rem;
   }
-  
+
   .login-form-section {
     padding: 3rem;
   }
@@ -375,11 +382,11 @@ async function handleSubmit() {
   .login-hero {
     padding: 2.5rem 1.5rem;
   }
-  
+
   .hero-title {
     font-size: 2.25rem;
   }
-  
+
   .login-form-section {
     padding: 2.5rem 1.5rem;
   }

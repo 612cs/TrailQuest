@@ -53,9 +53,10 @@ async function handleConfirm() {
       successDialog.value = {
         show: true,
         title: '路线已恢复',
-        message: detail.value.reviewStatus === 'approved'
-          ? '路线已恢复为公开可见状态。'
-          : '路线已恢复记录存在状态，但当前审核状态仍不允许公开展示。',
+        message:
+          detail.value.reviewStatus === 'approved'
+            ? '路线已恢复为公开可见状态。'
+            : '路线已恢复记录存在状态，但当前审核状态仍不允许公开展示。',
       }
     } else {
       await offlineTrail(trailId.value)
@@ -78,15 +79,22 @@ onMounted(() => {
   void loadDetail()
 })
 
-watch(() => route.params.id, () => {
-  void loadDetail()
-})
+watch(
+  () => route.params.id,
+  () => {
+    void loadDetail()
+  },
+)
 </script>
 
 <template>
   <div class="detail-page-container">
     <div class="detail-header">
-      <button class="btn btn--secondary" type="button" @click="router.push({ name: 'trail-manage-list' })">
+      <button
+        class="btn btn--secondary"
+        type="button"
+        @click="router.push({ name: 'trail-manage-list' })"
+      >
         <ArrowLeft :size="16" :stroke-width="2" /> 返回列表
       </button>
       <button class="btn btn--secondary" type="button" @click="loadDetail">
@@ -121,11 +129,7 @@ watch(() => route.params.id, () => {
     </template>
 
     <div v-else-if="!loading" class="empty-wrap settings-card">
-      <EmptyState
-        title="路线不存在"
-        description="当前路线管理记录不存在。"
-        :icon="ImageIcon"
-      />
+      <EmptyState title="路线不存在" description="当前路线管理记录不存在。" :icon="ImageIcon" />
     </div>
 
     <div v-else class="loading-state">
@@ -136,9 +140,11 @@ watch(() => route.params.id, () => {
     <AdminConfirmDialog
       v-model:show="confirmDialogVisible"
       :title="isOffline ? '确认恢复路线' : '确认下架路线'"
-      :message="isOffline
-        ? '恢复后若该路线审核状态仍为已通过，将重新在前台公开展示。'
-        : '下架后该路线不会出现在前台公开列表与搜索结果中，但后台仍可恢复。'"
+      :message="
+        isOffline
+          ? '恢复后若该路线审核状态仍为已通过，将重新在前台公开展示。'
+          : '下架后该路线不会出现在前台公开列表与搜索结果中，但后台仍可恢复。'
+      "
       :confirm-text="isOffline ? '确认恢复' : '确认下架'"
       :loading="actionLoading"
       @confirm="handleConfirm"

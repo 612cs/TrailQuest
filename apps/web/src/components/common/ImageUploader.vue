@@ -2,14 +2,17 @@
 import { ref, computed } from 'vue'
 import BaseIcon from './BaseIcon.vue'
 
-const props = withDefaults(defineProps<{
-  modelValue: string[]
-  max?: number
-  multiple?: boolean
-}>(), {
-  max: 9,
-  multiple: true,
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: string[]
+    max?: number
+    multiple?: boolean
+  }>(),
+  {
+    max: 9,
+    multiple: true,
+  },
+)
 
 const emit = defineEmits<{
   'update:modelValue': [value: string[]]
@@ -58,18 +61,18 @@ function removeImage(index: number) {
 <template>
   <div class="space-y-3">
     <!-- Image Grid -->
-    <div v-if="modelValue.length > 0" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+    <div v-if="modelValue.length > 0" class="grid grid-cols-3 gap-2 sm:grid-cols-4">
       <div
         v-for="(src, index) in modelValue"
         :key="index"
-        class="relative group aspect-square rounded-lg overflow-hidden cursor-pointer"
+        class="group relative aspect-square cursor-pointer overflow-hidden rounded-lg"
         @click="emit('preview', index)"
       >
-        <img :src="src" alt="" class="w-full h-full object-cover" />
-        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors" />
+        <img :src="src" alt="" class="h-full w-full object-cover" />
+        <div class="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/30" />
         <button
           @click.stop="removeImage(index)"
-          class="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+          class="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-500"
         >
           <BaseIcon name="X" :size="14" />
         </button>
@@ -79,8 +82,8 @@ function removeImage(index: number) {
       <button
         v-if="canAdd"
         @click="triggerUpload"
-        class="aspect-square rounded-lg border-2 border-dashed flex flex-col items-center justify-center gap-1 transition-colors hover:border-primary-500 hover:bg-primary-500/5"
-        style="border-color: var(--border-default); color: var(--text-tertiary);"
+        class="hover:border-primary-500 hover:bg-primary-500/5 flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed transition-colors"
+        style="border-color: var(--border-default); color: var(--text-tertiary)"
       >
         <BaseIcon name="Plus" :size="20" />
         <span class="text-xs">{{ remaining }}/{{ max }}</span>
@@ -94,17 +97,22 @@ function removeImage(index: number) {
       @dragover.prevent="isDragging = true"
       @dragleave.prevent="isDragging = false"
       @drop.prevent="onDrop"
-      class="border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-200"
-      :class="isDragging ? 'border-primary-500 bg-primary-500/5' : 'hover:border-primary-400 hover:bg-primary-500/5'"
+      class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 transition-all duration-200"
+      :class="
+        isDragging
+          ? 'border-primary-500 bg-primary-500/5'
+          : 'hover:border-primary-400 hover:bg-primary-500/5'
+      "
       :style="!isDragging ? 'border-color: var(--border-default);' : ''"
     >
-      <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--bg-tag);">
+      <div
+        class="flex h-10 w-10 items-center justify-center rounded-full"
+        style="background-color: var(--bg-tag)"
+      >
         <BaseIcon name="ImagePlus" :size="20" class="text-primary-500" />
       </div>
-      <p class="text-sm font-medium" style="color: var(--text-secondary);">
-        点击或拖拽上传图片
-      </p>
-      <p class="text-xs" style="color: var(--text-tertiary);">
+      <p class="text-sm font-medium" style="color: var(--text-secondary)">点击或拖拽上传图片</p>
+      <p class="text-xs" style="color: var(--text-tertiary)">
         最多 {{ max }} 张，支持 JPG、PNG 格式
       </p>
     </div>

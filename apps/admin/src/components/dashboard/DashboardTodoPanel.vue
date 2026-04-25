@@ -11,7 +11,7 @@ const iconMap: Record<string, any> = {
   'pending-trails': FileCheck,
   'pending-reports': ShieldAlert,
   'hidden-reviews': MessageSquare,
-  'offline-trails': AlertCircle
+  'offline-trails': AlertCircle,
 }
 </script>
 
@@ -23,12 +23,7 @@ const iconMap: Record<string, any> = {
     </div>
 
     <div class="todo-list">
-      <RouterLink 
-        v-for="item in items" 
-        :key="item.key" 
-        class="todo-item"
-        :to="item.to"
-      >
+      <RouterLink v-for="item in items" :key="item.key" class="todo-item" :to="item.to">
         <div class="todo-item__icon" :class="`todo-item__icon--${item.key}`">
           <component :is="iconMap[item.key] || FileCheck" :size="20" />
         </div>
@@ -104,10 +99,22 @@ const iconMap: Record<string, any> = {
   flex-shrink: 0;
 }
 
-.todo-item__icon--pending-trails { color: #2f6a3a; background: rgba(47, 106, 58, 0.08); }
-.todo-item__icon--pending-reports { color: #b54444; background: rgba(181, 68, 68, 0.08); }
-.todo-item__icon--hidden-reviews { color: #6b7668; background: rgba(107, 118, 104, 0.08); }
-.todo-item__icon--offline-trails { color: #b57a21; background: rgba(181, 122, 33, 0.08); }
+.todo-item__icon--pending-trails {
+  color: #2f6a3a;
+  background: rgba(47, 106, 58, 0.08);
+}
+.todo-item__icon--pending-reports {
+  color: #b54444;
+  background: rgba(181, 68, 68, 0.08);
+}
+.todo-item__icon--hidden-reviews {
+  color: #6b7668;
+  background: rgba(107, 118, 104, 0.08);
+}
+.todo-item__icon--offline-trails {
+  color: #b57a21;
+  background: rgba(181, 122, 33, 0.08);
+}
 
 .todo-item__content {
   flex: 1;
@@ -146,4 +153,3 @@ const iconMap: Record<string, any> = {
   color: color-mix(in srgb, var(--text-muted) 40%, transparent);
 }
 </style>
-

@@ -41,10 +41,10 @@ function barHeight(value: number) {
       <div class="chart-area">
         <div v-for="item in items" :key="item.date" class="chart-column">
           <div class="bars-wrapper">
-            <div 
-              v-for="s in series" 
-              :key="s.key" 
-              class="bar" 
+            <div
+              v-for="s in series"
+              :key="s.key"
+              class="bar"
               :style="{ height: barHeight((item as any)[s.key]), backgroundColor: s.color }"
               :title="`${s.label}: ${(item as any)[s.key]}`"
             ></div>
@@ -148,4 +148,3 @@ function barHeight(value: number) {
   color: var(--text-muted);
 }
 </style>
-

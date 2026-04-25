@@ -80,6 +80,58 @@ function resetDraftAfterCreateSuccess(draft: PublishDraftState) {
   draft.hydratedFromServer = false
 }
 
+function revokeImageUrl(item: PublishImageAsset) {
+  if (item.source === 'local' && item.localUrl.startsWith('blob:')) {
+    URL.revokeObjectURL(item.localUrl)
+  }
+}
+
+function revokeTrackUrl(item: PublishTrackAsset | null) {
+  if (item?.source === 'local' && item.localUrl.startsWith('blob:')) {
+    URL.revokeObjectURL(item.localUrl)
+  }
+}
+
+function normalizeFailedAssets(draft: PublishDraftState) {
+  draft.coverItems.forEach((item) => {
+    if (item.status === 'error' || item.status === 'missing') {
+      item.status = item.file ? 'pending' : 'missing'
+      item.errorMessage = item.file ? '' : '本地文件已失效，请重新选择'
+      item.progress = item.file ? 0 : item.progress
+    }
+  })
+  draft.galleryItems.forEach((item) => {
+    if (item.status === 'error' || item.status === 'missing') {
+      item.status = item.file ? 'pending' : 'missing'
+      item.errorMessage = item.file ? '' : '本地文件已失效，请重新选择'
+      item.progress = item.file ? 0 : item.progress
+    }
+  })
+  if (
+    draft.trackItem &&
+    (draft.trackItem.status === 'error' || draft.trackItem.status === 'missing')
+  ) {
+    draft.trackItem.status = draft.trackItem.file ? 'pending' : 'missing'
+    draft.trackItem.errorMessage = draft.trackItem.file ? '' : '本地文件已失效，请重新选择'
+    if (draft.trackItem.file) {
+      draft.trackItem.progress = 0
+    }
+  }
+}
+
+function updateStage(draft: PublishDraftState, stage: PublishTaskStage) {
+  draft.task.stage = stage
+  draft.task.updatedAt = Date.now()
+}
+
+function isTaskRunning(stage: PublishTaskStage) {
+  return !['idle', 'error', 'success'].includes(stage)
+}
+
+function resolveDifficultyLabel(difficulty: PublishDraftFields['difficulty']) {
+  return difficulty === 'easy' ? '简单' : difficulty === 'hard' ? '困难' : '适中'
+}
+
 function serializeImageAsset(item: PublishImageAsset) {
   return {
     id: item.id,
@@ -93,7 +145,11 @@ function serializeImageAsset(item: PublishImageAsset) {
     mediaId: item.mediaId,
     progress: item.progress,
     status: item.file || item.mediaId ? item.status : 'missing',
-    errorMessage: item.file ? item.errorMessage : (item.mediaId ? item.errorMessage : '本地文件已失效，请重新选择'),
+    errorMessage: item.file
+      ? item.errorMessage
+      : item.mediaId
+        ? item.errorMessage
+        : '本地文件已失效，请重新选择',
   }
 }
 
@@ -113,7 +169,11 @@ function serializeTrackAsset(item: PublishTrackAsset | null) {
     extension: item.extension,
     progress: item.progress,
     status: item.file || item.mediaId ? item.status : 'missing',
-    errorMessage: item.file ? item.errorMessage : (item.mediaId ? item.errorMessage : '本地文件已失效，请重新选择'),
+    errorMessage: item.file
+      ? item.errorMessage
+      : item.mediaId
+        ? item.errorMessage
+        : '本地文件已失效，请重新选择',
   }
 }
 
@@ -134,7 +194,11 @@ function serializeDraft(draft: PublishDraftState) {
   }
 }
 
-function createDraft(scopeKey: string, mode: PublishDraftMode, trailId: EntityId | null): PublishDraftState {
+function createDraft(
+  scopeKey: string,
+  mode: PublishDraftMode,
+  trailId: EntityId | null,
+): PublishDraftState {
   return {
     scopeKey,
     mode,
@@ -173,15 +237,18 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
           {
             ...draft,
             geo: draft.geo ?? createEmptyGeo(),
-            task: draft.task.stage === 'success'
-              ? draft.task
-              : {
-                ...draft.task,
-                stage: draft.task.stage === 'idle' ? 'idle' : 'error',
-                errorMessage: draft.task.stage === 'idle'
-                  ? draft.task.errorMessage
-                  : (draft.task.errorMessage || '页面刷新后后台上传已中断，请重新选择未完成文件后重试'),
-              },
+            task:
+              draft.task.stage === 'success'
+                ? draft.task
+                : {
+                    ...draft.task,
+                    stage: draft.task.stage === 'idle' ? 'idle' : 'error',
+                    errorMessage:
+                      draft.task.stage === 'idle'
+                        ? draft.task.errorMessage
+                        : draft.task.errorMessage ||
+                          '页面刷新后后台上传已中断，请重新选择未完成文件后重试',
+                  },
           },
         ]),
       )
@@ -196,7 +263,10 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
       STORAGE_KEY,
       JSON.stringify(
         Object.fromEntries(
-          Object.entries(drafts.value).map(([scopeKey, draft]) => [scopeKey, serializeDraft(draft)]),
+          Object.entries(drafts.value).map(([scopeKey, draft]) => [
+            scopeKey,
+            serializeDraft(draft),
+          ]),
         ),
       ),
     )
@@ -229,20 +299,22 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
       customTag: '',
     }
     draft.coverItems = trail.coverMediaId
-      ? [{
-        id: buildId(),
-        source: 'existing',
-        bizType: 'trail_cover',
-        file: null,
-        fileName: trail.name || 'cover',
-        mimeType: 'image/*',
-        localUrl: trail.image,
-        remoteUrl: trail.image,
-        mediaId: trail.coverMediaId == null ? null : String(trail.coverMediaId),
-        progress: 100,
-        status: 'existing',
-        errorMessage: '',
-      }]
+      ? [
+          {
+            id: buildId(),
+            source: 'existing',
+            bizType: 'trail_cover',
+            file: null,
+            fileName: trail.name || 'cover',
+            mimeType: 'image/*',
+            localUrl: trail.image,
+            remoteUrl: trail.image,
+            mediaId: trail.coverMediaId == null ? null : String(trail.coverMediaId),
+            progress: 100,
+            status: 'existing',
+            errorMessage: '',
+          },
+        ]
       : []
     draft.galleryItems = (trail.gallery ?? []).map((item) => ({
       id: buildId(),
@@ -260,21 +332,22 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
     }))
     draft.trackItem = trail.track?.hasTrack
       ? {
-        id: buildId(),
-        source: 'existing',
-        file: null,
-        fileName: trail.track.originalFileName ?? 'track.gpx',
-        localUrl: trail.track.downloadUrl ?? '',
-        remoteUrl: trail.track.downloadUrl ?? '',
-        mediaId: trail.track.mediaFileId == null ? null : String(trail.track.mediaFileId),
-        mimeType: trail.track.sourceFormat === 'kml'
-          ? 'application/vnd.google-earth.kml+xml'
-          : 'application/gpx+xml',
-        extension: trail.track.sourceFormat === 'kml' ? 'kml' : 'gpx',
-        progress: 100,
-        status: 'existing',
-        errorMessage: '',
-      }
+          id: buildId(),
+          source: 'existing',
+          file: null,
+          fileName: trail.track.originalFileName ?? 'track.gpx',
+          localUrl: trail.track.downloadUrl ?? '',
+          remoteUrl: trail.track.downloadUrl ?? '',
+          mediaId: trail.track.mediaFileId == null ? null : String(trail.track.mediaFileId),
+          mimeType:
+            trail.track.sourceFormat === 'kml'
+              ? 'application/vnd.google-earth.kml+xml'
+              : 'application/gpx+xml',
+          extension: trail.track.sourceFormat === 'kml' ? 'kml' : 'gpx',
+          progress: 100,
+          status: 'existing',
+          errorMessage: '',
+        }
       : null
     draft.geoJsonData = trail.track?.geoJson ?? null
     draft.trackPreviewError = ''
@@ -314,18 +387,6 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
     revokeTrackUrl(draft.trackItem)
   }
 
-  function revokeImageUrl(item: PublishImageAsset) {
-    if (item.source === 'local' && item.localUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(item.localUrl)
-    }
-  }
-
-  function revokeTrackUrl(item: PublishTrackAsset | null) {
-    if (item?.source === 'local' && item.localUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(item.localUrl)
-    }
-  }
-
   async function submitDraft(scopeKey: string) {
     const draft = drafts.value[scopeKey]
     if (!draft) {
@@ -363,30 +424,6 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
     normalizeFailedAssets(draft)
     flashStore.showSuccess('已重新加入后台上传队列，上传完成后路线会重新进入审核。', 2800)
     void runDraft(scopeKey, taskId)
-  }
-
-  function normalizeFailedAssets(draft: PublishDraftState) {
-    draft.coverItems.forEach((item) => {
-      if (item.status === 'error' || item.status === 'missing') {
-        item.status = item.file ? 'pending' : 'missing'
-        item.errorMessage = item.file ? '' : '本地文件已失效，请重新选择'
-        item.progress = item.file ? 0 : item.progress
-      }
-    })
-    draft.galleryItems.forEach((item) => {
-      if (item.status === 'error' || item.status === 'missing') {
-        item.status = item.file ? 'pending' : 'missing'
-        item.errorMessage = item.file ? '' : '本地文件已失效，请重新选择'
-        item.progress = item.file ? 0 : item.progress
-      }
-    })
-    if (draft.trackItem && (draft.trackItem.status === 'error' || draft.trackItem.status === 'missing')) {
-      draft.trackItem.status = draft.trackItem.file ? 'pending' : 'missing'
-      draft.trackItem.errorMessage = draft.trackItem.file ? '' : '本地文件已失效，请重新选择'
-      if (draft.trackItem.file) {
-        draft.trackItem.progress = 0
-      }
-    }
   }
 
   async function runDraft(scopeKey: string, taskId: string) {
@@ -430,9 +467,10 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
         tags: draft.fields.selectedTags,
       }
 
-      const result = draft.mode === 'edit' && draft.trailId
-        ? await updateTrail(draft.trailId, payload)
-        : await createTrail(payload)
+      const result =
+        draft.mode === 'edit' && draft.trailId
+          ? await updateTrail(draft.trailId, payload)
+          : await createTrail(payload)
 
       draft.task = {
         id: taskId,
@@ -443,9 +481,7 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
       }
       trailFeedRefreshStore.bump()
       flashStore.showSuccess(
-        draft.mode === 'edit'
-          ? '路线更新已提交审核，请耐心等待'
-          : '路线已提交审核，请耐心等待',
+        draft.mode === 'edit' ? '路线更新已提交审核，请耐心等待' : '路线已提交审核，请耐心等待',
         2600,
       )
 
@@ -506,7 +542,9 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
   }
 
   async function uploadGallery(draft: PublishDraftState, taskId: string) {
-    const pendingItems = draft.galleryItems.filter((item) => !item.mediaId && item.status !== 'missing')
+    const pendingItems = draft.galleryItems.filter(
+      (item) => !item.mediaId && item.status !== 'missing',
+    )
     if (!pendingItems.length) {
       return
     }
@@ -515,34 +553,36 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
 
     for (let index = 0; index < pendingItems.length; index += GALLERY_CONCURRENCY) {
       const batch = pendingItems.slice(index, index + GALLERY_CONCURRENCY)
-      await Promise.all(batch.map(async (item) => {
-        if (draft.task.id !== taskId) {
-          return
-        }
-        if (!item.file) {
-          item.status = 'missing'
-          item.errorMessage = '本地图片文件已失效，请重新选择'
-          throw new Error(item.errorMessage)
-        }
+      await Promise.all(
+        batch.map(async (item) => {
+          if (draft.task.id !== taskId) {
+            return
+          }
+          if (!item.file) {
+            item.status = 'missing'
+            item.errorMessage = '本地图片文件已失效，请重新选择'
+            throw new Error(item.errorMessage)
+          }
 
-        item.status = 'uploading'
-        item.errorMessage = ''
-        item.progress = 0
+          item.status = 'uploading'
+          item.errorMessage = ''
+          item.progress = 0
 
-        try {
-          const remote = await uploadPublishImage(item.file, 'trail_gallery', (progress) => {
-            item.progress = progress
-          })
-          item.mediaId = mediaIdOf(remote)
-          item.remoteUrl = remote.url
-          item.status = 'uploaded'
-          item.progress = 100
-        } catch (error) {
-          item.status = 'error'
-          item.errorMessage = resolveUploadErrorMessage(error)
-          throw error
-        }
-      }))
+          try {
+            const remote = await uploadPublishImage(item.file, 'trail_gallery', (progress) => {
+              item.progress = progress
+            })
+            item.mediaId = mediaIdOf(remote)
+            item.remoteUrl = remote.url
+            item.status = 'uploaded'
+            item.progress = 100
+          } catch (error) {
+            item.status = 'error'
+            item.errorMessage = resolveUploadErrorMessage(error)
+            throw error
+          }
+        }),
+      )
     }
   }
 
@@ -581,19 +621,6 @@ export const usePublishUploadStore = defineStore('publishUpload', () => {
       track.errorMessage = resolveUploadErrorMessage(error)
       throw error
     }
-  }
-
-  function updateStage(draft: PublishDraftState, stage: PublishTaskStage) {
-    draft.task.stage = stage
-    draft.task.updatedAt = Date.now()
-  }
-
-  function isTaskRunning(stage: PublishTaskStage) {
-    return !['idle', 'error', 'success'].includes(stage)
-  }
-
-  function resolveDifficultyLabel(difficulty: PublishDraftFields['difficulty']) {
-    return difficulty === 'easy' ? '简单' : difficulty === 'hard' ? '困难' : '适中'
   }
 
   return {

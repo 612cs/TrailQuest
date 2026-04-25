@@ -84,7 +84,12 @@ onMounted(load)
                 <td>{{ item.reason }}</td>
                 <td class="time-col">{{ formatDateTime(item.createdAt) }}</td>
                 <td>
-                  <button class="btn btn--secondary action-btn" type="button" :disabled="actionLoading" @click="handleResolve(item.id)">
+                  <button
+                    class="btn btn--secondary action-btn"
+                    type="button"
+                    :disabled="actionLoading"
+                    @click="handleResolve(item.id)"
+                  >
                     <CheckCheck :size="16" :stroke-width="2" /> 处理
                   </button>
                 </td>
@@ -121,7 +126,6 @@ onMounted(load)
   height: 100%;
   padding: 0;
 }
-
 
 .settings-card {
   background: white;

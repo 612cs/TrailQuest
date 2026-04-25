@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { FlagTriangleRight, LayoutDashboard, MessageSquareMore, Mountain, ScrollText, Settings2, ShieldCheck, SlidersHorizontal, UsersRound } from 'lucide-vue-next'
+import {
+  FlagTriangleRight,
+  LayoutDashboard,
+  MessageSquareMore,
+  Mountain,
+  ScrollText,
+  Settings2,
+  ShieldCheck,
+  SlidersHorizontal,
+  UsersRound,
+} from 'lucide-vue-next'
 
 const props = defineProps<{
   collapsed: boolean
@@ -92,7 +102,11 @@ function navigate(path: string) {
   height: 2.2rem;
   border-radius: 12px;
   color: #fff;
-  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 72%, black));
+  background: linear-gradient(
+    135deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 72%, black)
+  );
   box-shadow: 0 12px 24px rgba(47, 94, 37, 0.15);
 }
 

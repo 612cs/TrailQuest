@@ -37,16 +37,33 @@ onMounted(() => {
     <section class="settings-card list-view-card">
       <div class="list-toolbar">
         <div class="filter-group">
-          <select v-model="reviewStatus" class="styled-select" aria-label="审核状态" @change="load(1)">
+          <select
+            v-model="reviewStatus"
+            class="styled-select"
+            aria-label="审核状态"
+            @change="load(1)"
+          >
             <option value="">全部状态</option>
             <option value="pending">待审核</option>
             <option value="approved">已通过</option>
             <option value="rejected">已驳回</option>
           </select>
-          <input v-model="keyword" class="styled-input" placeholder="输入路线名称 / 地理位置" aria-label="关键词" @keyup.enter="load(1)" />
-          <input v-model="authorKeyword" class="styled-input" placeholder="输入作者昵称" aria-label="作者" @keyup.enter="load(1)" />
+          <input
+            v-model="keyword"
+            class="styled-input"
+            placeholder="输入路线名称 / 地理位置"
+            aria-label="关键词"
+            @keyup.enter="load(1)"
+          />
+          <input
+            v-model="authorKeyword"
+            class="styled-input"
+            placeholder="输入作者昵称"
+            aria-label="作者"
+            @keyup.enter="load(1)"
+          />
         </div>
-        
+
         <div class="action-group">
           <button class="btn btn--primary" type="button" @click="load(1)">
             <Search :size="16" :stroke-width="2" /> 搜索
@@ -96,7 +113,6 @@ onMounted(() => {
   padding: 0;
 }
 
-
 .settings-card {
   background: white;
   border-radius: 20px;
@@ -129,7 +145,8 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-.styled-input, .styled-select {
+.styled-input,
+.styled-select {
   background: var(--bg-soft);
   border: 1px solid transparent;
   border-radius: 12px;
@@ -140,7 +157,8 @@ onMounted(() => {
   transition: all 0.2s;
 }
 
-.styled-input:focus, .styled-select:focus {
+.styled-input:focus,
+.styled-select:focus {
   outline: none;
   background: white;
   border-color: var(--primary);

@@ -1,10 +1,24 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 import BaseIcon from '../common/BaseIcon.vue'
-import type { TrackViewerData, TrackViewerMode, TrackViewerPoint, TrackWeatherScene } from '../../types/trackViewer'
+import type {
+  TrackViewerData,
+  TrackViewerMode,
+  TrackViewerPoint,
+  TrackWeatherScene,
+} from '../../types/trackViewer'
 
 interface WorldPathData {
   name?: string
@@ -71,18 +85,21 @@ interface WeatherPreset {
   precipitation: 'rain' | 'snow' | null
 }
 
-const props = withDefaults(defineProps<{
-  data: TrackViewerData | null
-  mode?: TrackViewerMode
-  weatherScene?: TrackWeatherScene
-  showFullscreenButton?: boolean
-  showScrollToContentButton?: boolean
-}>(), {
-  mode: 'embedded',
-  weatherScene: 'partly_cloudy',
-  showFullscreenButton: false,
-  showScrollToContentButton: false,
-})
+const props = withDefaults(
+  defineProps<{
+    data: TrackViewerData | null
+    mode?: TrackViewerMode
+    weatherScene?: TrackWeatherScene
+    showFullscreenButton?: boolean
+    showScrollToContentButton?: boolean
+  }>(),
+  {
+    mode: 'embedded',
+    weatherScene: 'partly_cloudy',
+    showFullscreenButton: false,
+    showScrollToContentButton: false,
+  },
+)
 
 const emit = defineEmits<{
   (event: 'requestFullscreen'): void
@@ -127,23 +144,25 @@ const tooltip = ref<TooltipState>({
   top: 0,
 })
 
-const prefersHover = typeof window !== 'undefined'
-  ? window.matchMedia('(hover: hover) and (pointer: fine)')
-  : null
+const prefersHover =
+  typeof window !== 'undefined' ? window.matchMedia('(hover: hover) and (pointer: fine)') : null
 const containerClass = computed(() => {
   if (props.mode === 'fullscreen') return 'viewer-shell viewer-shell-fullscreen'
   if (props.mode === 'detail') return 'viewer-shell viewer-shell-detail'
   return 'viewer-shell viewer-shell-embedded'
 })
 
-watch(() => props.mode, (newMode) => {
-  if (newMode === 'fullscreen') {
-    // Wait for the container to be ready in the new DOM location
-    setTimeout(() => {
-      setOverviewView()
-    }, 100)
-  }
-})
+watch(
+  () => props.mode,
+  (newMode) => {
+    if (newMode === 'fullscreen') {
+      // Wait for the container to be ready in the new DOM location
+      setTimeout(() => {
+        setOverviewView()
+      }, 100)
+    }
+  },
+)
 
 onMounted(() => {
   if (props.mode === 'fullscreen') {
@@ -313,14 +332,17 @@ function disposeScene() {
   tooltip.value = { visible: false, title: '', detail: '', left: 0, top: 0 }
 }
 
+function toRadians(value: number) {
+  return (value * Math.PI) / 180
+}
+
 function haversine(start: TrackViewerPoint, end: TrackViewerPoint) {
-  const toRad = (value: number) => (value * Math.PI) / 180
-  const lat1 = toRad(start.lat)
-  const lat2 = toRad(end.lat)
+  const lat1 = toRadians(start.lat)
+  const lat2 = toRadians(end.lat)
   const deltaLat = lat2 - lat1
-  const deltaLng = toRad(end.lng - start.lng)
-  const a = Math.sin(deltaLat / 2) ** 2
-    + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) ** 2
+  const deltaLng = toRadians(end.lng - start.lng)
+  const a =
+    Math.sin(deltaLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(deltaLng / 2) ** 2
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return 6371000 * c
 }
@@ -349,11 +371,12 @@ function toLocalWorld(paths: TrackViewerData['paths']) {
   const centerLng = (minLng + maxLng) / 2
   const eleRange = maxEle - minEle || 1
 
-  const convertPoint = (point: TrackViewerPoint) => new THREE.Vector3(
-    (point.lng - centerLng) * scale,
-    (((point.ele ?? 0) - minEle) / eleRange) * 12 + 0.5,
-    -(point.lat - centerLat) * scale,
-  )
+  const convertPoint = (point: TrackViewerPoint) =>
+    new THREE.Vector3(
+      (point.lng - centerLng) * scale,
+      (((point.ele ?? 0) - minEle) / eleRange) * 12 + 0.5,
+      -(point.lat - centerLat) * scale,
+    )
 
   const worldPaths: WorldPathData[] = paths.map((path) => ({
     ...path,
@@ -383,9 +406,8 @@ function createPrecipitation(scene: THREE.Scene, mapSize: number, preset: Weathe
     positions[index * 3] = (Math.random() - 0.5) * mapSize * 5
     positions[index * 3 + 1] = Math.random() * (upperBound - lowerBound) + lowerBound
     positions[index * 3 + 2] = (Math.random() - 0.5) * mapSize * 5
-    velocities[index] = preset.precipitation === 'rain'
-      ? 16 + Math.random() * 10
-      : 3 + Math.random() * 2
+    velocities[index] =
+      preset.precipitation === 'rain' ? 16 + Math.random() * 10 : 3 + Math.random() * 2
   }
 
   const geometry = new THREE.BufferGeometry()
@@ -444,7 +466,8 @@ function buildEnvironment(scene: THREE.Scene, mapSize: number, preset: WeatherPr
 
     const radius = 48 + Math.random() * 46
     const angle = Math.random() * Math.PI * 2
-    const cloudHeight = preset.cloudHeight[0] + Math.random() * (preset.cloudHeight[1] - preset.cloudHeight[0])
+    const cloudHeight =
+      preset.cloudHeight[0] + Math.random() * (preset.cloudHeight[1] - preset.cloudHeight[0])
     cloud.position.set(Math.cos(angle) * radius, cloudHeight, Math.sin(angle) * radius)
     scene.add(cloud)
     clouds.push({
@@ -473,7 +496,10 @@ function getTerrainHeight(x: number, z: number, referencePoints: THREE.Vector3[]
   }
 
   const distanceToTrack = Math.sqrt(minDistanceSquared)
-  let height = (numerator / Math.max(denominator, 0.0001)) - (distanceToTrack * 0.3 + Math.pow(distanceToTrack / 6, 2.5)) - 0.15
+  let height =
+    numerator / Math.max(denominator, 0.0001) -
+    (distanceToTrack * 0.3 + Math.pow(distanceToTrack / 6, 2.5)) -
+    0.15
   if (distanceToTrack > 15) {
     height -= (distanceToTrack - 15) * 5
   }
@@ -481,7 +507,12 @@ function getTerrainHeight(x: number, z: number, referencePoints: THREE.Vector3[]
   return { height, distanceToTrack }
 }
 
-function generateTerrain(scene: THREE.Scene, referencePoints: THREE.Vector3[], mapSize: number, weatherScene: TrackWeatherScene) {
+function generateTerrain(
+  scene: THREE.Scene,
+  referencePoints: THREE.Vector3[],
+  mapSize: number,
+  weatherScene: TrackWeatherScene,
+) {
   if (!referencePoints.length) return
 
   const segments = 120
@@ -530,15 +561,16 @@ function generateTerrain(scene: THREE.Scene, referencePoints: THREE.Vector3[], m
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
   geometry.computeVertexNormals()
 
-  const terrain = new THREE.Mesh(
-    geometry,
-    new THREE.MeshToonMaterial({ vertexColors: true }),
-  )
+  const terrain = new THREE.Mesh(geometry, new THREE.MeshToonMaterial({ vertexColors: true }))
   terrain.receiveShadow = true
   scene.add(terrain)
 }
 
-function generateDecorations(scene: THREE.Scene, referencePoints: THREE.Vector3[], mapSize: number) {
+function generateDecorations(
+  scene: THREE.Scene,
+  referencePoints: THREE.Vector3[],
+  mapSize: number,
+) {
   if (!referencePoints.length) return
 
   const treeLeafMaterial = new THREE.MeshToonMaterial({ color: '#5eb376' })
@@ -809,7 +841,10 @@ function createBirdMesh() {
   wingRight.position.set(0.18, 0.02, 0)
   wingRight.rotation.z = -Math.PI / 5
 
-  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 6), new THREE.MeshToonMaterial({ color: '#f39c12' }))
+  const beak = new THREE.Mesh(
+    new THREE.ConeGeometry(0.05, 0.14, 6),
+    new THREE.MeshToonMaterial({ color: '#f39c12' }),
+  )
   beak.position.set(0.26, -0.01, 0)
   beak.rotation.z = -Math.PI / 2
 
@@ -817,7 +852,12 @@ function createBirdMesh() {
   return bird
 }
 
-function createBirdFlocks(scene: THREE.Scene, mapSize: number, elevationGainMeters: number, weatherScene: TrackWeatherScene) {
+function createBirdFlocks(
+  scene: THREE.Scene,
+  mapSize: number,
+  elevationGainMeters: number,
+  weatherScene: TrackWeatherScene,
+) {
   const groupCount = Math.min(8, Math.max(0, Math.floor(elevationGainMeters / 200)))
   if (!groupCount) {
     birdFlocksRef.value = []
@@ -997,8 +1037,14 @@ function updateTooltipPlacement() {
   const margin = 18
   const maxLeft = surface.clientWidth - 160
   const maxTop = surface.clientHeight - 72
-  tooltip.value.left = Math.min(Math.max(pointerLocalRef.value.x, margin), Math.max(maxLeft, margin))
-  tooltip.value.top = Math.min(Math.max(pointerLocalRef.value.y - 18, margin), Math.max(maxTop, margin))
+  tooltip.value.left = Math.min(
+    Math.max(pointerLocalRef.value.x, margin),
+    Math.max(maxLeft, margin),
+  )
+  tooltip.value.top = Math.min(
+    Math.max(pointerLocalRef.value.y - 18, margin),
+    Math.max(maxTop, margin),
+  )
 }
 
 function showTooltipForTarget(target: MarkerDatum) {
@@ -1026,7 +1072,10 @@ function resolveHoveredTarget() {
   if (!camera || !interactionTargetsRef.value.length) return null
   const raycaster = new THREE.Raycaster()
   raycaster.setFromCamera(pointerVectorRef.value, camera)
-  const intersects = raycaster.intersectObjects(interactionTargetsRef.value.map((target) => target.hitMesh), false)
+  const intersects = raycaster.intersectObjects(
+    interactionTargetsRef.value.map((target) => target.hitMesh),
+    false,
+  )
   if (!intersects.length) return null
   const hitObject = intersects[0]?.object
   return interactionTargetsRef.value.find((target) => target.hitMesh === hitObject) ?? null
@@ -1147,7 +1196,10 @@ async function initScene() {
 
   scene.add(new THREE.AmbientLight(preset.ambientColor, preset.ambientIntensity))
 
-  const directionalLight = new THREE.DirectionalLight(preset.directionalColor, preset.directionalIntensity)
+  const directionalLight = new THREE.DirectionalLight(
+    preset.directionalColor,
+    preset.directionalIntensity,
+  )
   directionalLight.position.set(30, 60, 40)
   directionalLight.castShadow = true
   directionalLight.shadow.mapSize.width = 2048
@@ -1166,7 +1218,9 @@ async function initScene() {
   interactionTargetsRef.value = []
 
   const { mapSize, worldPaths, referencePoints } = toLocalWorld(props.data.paths)
-  const terrainReferences = referencePoints.filter((_, index) => index % Math.max(Math.ceil(referencePoints.length / 800), 1) === 0)
+  const terrainReferences = referencePoints.filter(
+    (_, index) => index % Math.max(Math.ceil(referencePoints.length / 800), 1) === 0,
+  )
   buildEnvironment(scene, mapSize, preset)
   generateTerrain(scene, terrainReferences, mapSize, props.weatherScene)
   generateDecorations(scene, terrainReferences, mapSize)
@@ -1218,10 +1272,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="track-viewer-frame animate-fade-in-up">
-    <div
-      v-if="showFullscreenButton || mode === 'fullscreen'"
-      class="track-viewer-controls"
-    >
+    <div v-if="showFullscreenButton || mode === 'fullscreen'" class="track-viewer-controls">
       <button
         v-if="showFullscreenButton && mode !== 'fullscreen'"
         type="button"
@@ -1251,8 +1302,6 @@ onBeforeUnmount(() => {
       @pointerdown="handlePointerDown"
     >
       <div ref="container" class="viewer-canvas-host"></div>
-
-
 
       <div
         v-if="tooltip.visible"
@@ -1330,7 +1379,11 @@ onBeforeUnmount(() => {
   min-height: 0;
   border: 1px solid color-mix(in srgb, var(--primary-500) 18%, transparent);
   background:
-    radial-gradient(circle at top, color-mix(in srgb, var(--primary-500) 18%, transparent), transparent 34%),
+    radial-gradient(
+      circle at top,
+      color-mix(in srgb, var(--primary-500) 18%, transparent),
+      transparent 34%
+    ),
     linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.18));
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
 }
@@ -1411,7 +1464,10 @@ onBeforeUnmount(() => {
   border: none;
   cursor: pointer;
   font-weight: 700;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .overview-button,

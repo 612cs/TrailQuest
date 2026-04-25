@@ -3,20 +3,26 @@ import { computed } from 'vue'
 
 import SharedPagination from '@trailquest/ui/components/Pagination.vue'
 
-const props = withDefaults(defineProps<{
-  current: number
-  totalPages: number
-  totalItems: number
-  itemLabel?: string
-}>(), {
-  itemLabel: '条',
-})
+const props = withDefaults(
+  defineProps<{
+    current: number
+    totalPages: number
+    totalItems: number
+    itemLabel?: string
+  }>(),
+  {
+    itemLabel: '条',
+  },
+)
 
 const emit = defineEmits<{
   (e: 'update:current', page: number): void
 }>()
 
-const summary = computed(() => `第 ${props.current} 页 / 共 ${props.totalPages} 页，共 ${props.totalItems} ${props.itemLabel}`)
+const summary = computed(
+  () =>
+    `第 ${props.current} 页 / 共 ${props.totalPages} 页，共 ${props.totalItems} ${props.itemLabel}`,
+)
 </script>
 
 <template>

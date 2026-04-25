@@ -36,16 +36,21 @@ export function useReviewManagement() {
 
   const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
   const selectedSet = computed(() => new Set(selectedIds.value))
-  const selectedReviews = computed(() => list.value.filter((item) => selectedSet.value.has(String(item.id))))
-  const selectedActiveIds = computed(() => selectedReviews.value
-    .filter((item) => item.status === 'active')
-    .map((item) => String(item.id)))
-  const selectedRestorableIds = computed(() => selectedReviews.value
-    .filter((item) => item.status !== 'active')
-    .map((item) => String(item.id)))
+  const selectedReviews = computed(() =>
+    list.value.filter((item) => selectedSet.value.has(String(item.id))),
+  )
+  const selectedActiveIds = computed(() =>
+    selectedReviews.value.filter((item) => item.status === 'active').map((item) => String(item.id)),
+  )
+  const selectedRestorableIds = computed(() =>
+    selectedReviews.value.filter((item) => item.status !== 'active').map((item) => String(item.id)),
+  )
   const currentPageIds = computed(() => list.value.map((item) => String(item.id)))
-  const allCurrentSelected = computed(() => currentPageIds.value.length > 0
-    && currentPageIds.value.every((id) => selectedSet.value.has(id)))
+  const allCurrentSelected = computed(
+    () =>
+      currentPageIds.value.length > 0 &&
+      currentPageIds.value.every((id) => selectedSet.value.has(id)),
+  )
 
   async function load(page = pageNum.value) {
     loading.value = true
@@ -199,7 +204,9 @@ export function useReviewManagement() {
       case 'hide':
         return {
           title: '确认隐藏评论',
-          message: targetReview.value ? `隐藏后，评论“${targetReview.value.text.slice(0, 24)}”不会在前台展示。` : '隐藏后该评论不会在前台展示。',
+          message: targetReview.value
+            ? `隐藏后，评论“${targetReview.value.text.slice(0, 24)}”不会在前台展示。`
+            : '隐藏后该评论不会在前台展示。',
           confirmText: '确认隐藏',
           requireReason: true,
           reasonLabel: '处理原因',
@@ -208,7 +215,9 @@ export function useReviewManagement() {
       case 'restore':
         return {
           title: '确认恢复评论',
-          message: targetReview.value ? `恢复后，评论“${targetReview.value.text.slice(0, 24)}”会重新在前台展示。` : '恢复后该评论会重新在前台展示。',
+          message: targetReview.value
+            ? `恢复后，评论“${targetReview.value.text.slice(0, 24)}”会重新在前台展示。`
+            : '恢复后该评论会重新在前台展示。',
           confirmText: '确认恢复',
           requireReason: false,
           reasonLabel: '处理原因',
@@ -217,7 +226,9 @@ export function useReviewManagement() {
       case 'delete':
         return {
           title: '确认删除评论',
-          message: targetReview.value ? `删除后，评论“${targetReview.value.text.slice(0, 24)}”会被标记为删除状态。` : '删除后该评论会被标记为删除状态。',
+          message: targetReview.value
+            ? `删除后，评论“${targetReview.value.text.slice(0, 24)}”会被标记为删除状态。`
+            : '删除后该评论会被标记为删除状态。',
           confirmText: '确认删除',
           requireReason: true,
           reasonLabel: '删除原因',

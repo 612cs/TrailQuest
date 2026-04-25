@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import ModalShell from '@trailquest/ui/components/ModalShell.vue'
 
-const props = withDefaults(defineProps<{
-  show: boolean
-  title?: string
-  message: string
-  buttonText?: string
-}>(), {
-  title: '提示',
-  buttonText: '知道了',
-})
+const props = withDefaults(
+  defineProps<{
+    show: boolean
+    title?: string
+    message: string
+    buttonText?: string
+  }>(),
+  {
+    title: '提示',
+    buttonText: '知道了',
+  },
+)
 
 const emit = defineEmits<{
   (e: 'update:show', value: boolean): void

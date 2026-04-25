@@ -40,7 +40,9 @@ function priorityLabel(priority: string) {
       <div v-for="item in normalizedItems" :key="item.createdAt" class="risk-card">
         <div class="risk-card__header">
           <span class="risk-card__time">{{ formatDateTime(item.createdAt) }}</span>
-          <span class="risk-badge" :data-priority="item.priority">{{ priorityLabel(item.priority) }}</span>
+          <span class="risk-badge" :data-priority="item.priority">{{
+            priorityLabel(item.priority)
+          }}</span>
         </div>
         <h3 class="risk-card__title">{{ item.title }}</h3>
         <p class="risk-card__desc">{{ item.description }}</p>
@@ -108,9 +110,18 @@ function priorityLabel(priority: string) {
   border-radius: 6px;
 }
 
-.risk-badge[data-priority='high'] { color: #b54444; background: rgba(181, 68, 68, 0.08); }
-.risk-badge[data-priority='medium'] { color: #b57a21; background: rgba(181, 122, 33, 0.08); }
-.risk-badge[data-priority='low'] { color: #6b7668; background: rgba(107, 118, 104, 0.08); }
+.risk-badge[data-priority='high'] {
+  color: #b54444;
+  background: rgba(181, 68, 68, 0.08);
+}
+.risk-badge[data-priority='medium'] {
+  color: #b57a21;
+  background: rgba(181, 122, 33, 0.08);
+}
+.risk-badge[data-priority='low'] {
+  color: #6b7668;
+  background: rgba(107, 118, 104, 0.08);
+}
 
 .risk-card__title {
   font-size: 1rem;
@@ -139,4 +150,3 @@ function priorityLabel(priority: string) {
   color: var(--text-muted);
 }
 </style>
-

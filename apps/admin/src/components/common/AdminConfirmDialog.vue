@@ -3,26 +3,29 @@ import { computed, ref, watch } from 'vue'
 
 import ModalShell from '@trailquest/ui/components/ModalShell.vue'
 
-const props = withDefaults(defineProps<{
-  show: boolean
-  title: string
-  message: string
-  confirmText?: string
-  cancelText?: string
-  loading?: boolean
-  requireReason?: boolean
-  reasonLabel?: string
-  reasonPlaceholder?: string
-  initialReason?: string
-}>(), {
-  confirmText: '确认',
-  cancelText: '取消',
-  loading: false,
-  requireReason: false,
-  reasonLabel: '原因',
-  reasonPlaceholder: '请输入原因',
-  initialReason: '',
-})
+const props = withDefaults(
+  defineProps<{
+    show: boolean
+    title: string
+    message: string
+    confirmText?: string
+    cancelText?: string
+    loading?: boolean
+    requireReason?: boolean
+    reasonLabel?: string
+    reasonPlaceholder?: string
+    initialReason?: string
+  }>(),
+  {
+    confirmText: '确认',
+    cancelText: '取消',
+    loading: false,
+    requireReason: false,
+    reasonLabel: '原因',
+    reasonPlaceholder: '请输入原因',
+    initialReason: '',
+  },
+)
 
 const emit = defineEmits<{
   (e: 'update:show', value: boolean): void
@@ -31,18 +34,26 @@ const emit = defineEmits<{
 
 const reason = ref(props.initialReason)
 const localError = ref('')
-const confirmDisabled = computed(() => props.loading || (props.requireReason && !reason.value.trim()))
+const confirmDisabled = computed(
+  () => props.loading || (props.requireReason && !reason.value.trim()),
+)
 
-watch(() => props.show, (show) => {
-  if (show) {
-    reason.value = props.initialReason
-    localError.value = ''
-  }
-})
+watch(
+  () => props.show,
+  (show) => {
+    if (show) {
+      reason.value = props.initialReason
+      localError.value = ''
+    }
+  },
+)
 
-watch(() => props.initialReason, (value) => {
-  reason.value = value
-})
+watch(
+  () => props.initialReason,
+  (value) => {
+    reason.value = value
+  },
+)
 
 function close() {
   if (props.loading) {
@@ -98,7 +109,12 @@ function handleConfirm() {
         <button class="btn btn--secondary" type="button" :disabled="props.loading" @click="close">
           {{ props.cancelText }}
         </button>
-        <button class="btn btn--primary" type="button" :disabled="confirmDisabled" @click="handleConfirm">
+        <button
+          class="btn btn--primary"
+          type="button"
+          :disabled="confirmDisabled"
+          @click="handleConfirm"
+        >
           {{ props.loading ? '处理中...' : props.confirmText }}
         </button>
       </div>

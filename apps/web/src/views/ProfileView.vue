@@ -123,9 +123,10 @@ async function loadFeed(tab: ProfileTab, reset = false) {
   const targetPage = reset ? 1 : feed.pageNum
 
   try {
-    const response = tab === 'posts'
-      ? await authApi.fetchMyPublishedTrails(targetPage, PAGE_SIZE)
-      : await authApi.fetchMyFavoriteTrails(targetPage, PAGE_SIZE)
+    const response =
+      tab === 'posts'
+        ? await authApi.fetchMyPublishedTrails(targetPage, PAGE_SIZE)
+        : await authApi.fetchMyFavoriteTrails(targetPage, PAGE_SIZE)
 
     trailInteractionStore.hydrateTrails(response.list)
 
@@ -257,10 +258,15 @@ function syncTabQuery(tab: ProfileTab) {
       <AccountSettingsModal v-model:show="showSettingsModal" />
 
       <div class="card overflow-hidden">
-        <div class="flex items-center border-b" style="border-color: var(--border-default); background-color: var(--bg-tag);">
+        <div
+          class="flex items-center border-b"
+          style="border-color: var(--border-default); background-color: var(--bg-tag)"
+        >
           <button
             class="flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium transition-colors"
-            :class="activeTab === 'posts' ? 'border-primary-500 text-primary-500' : 'border-transparent'"
+            :class="
+              activeTab === 'posts' ? 'border-primary-500 text-primary-500' : 'border-transparent'
+            "
             :style="activeTab !== 'posts' ? 'color: var(--text-secondary)' : ''"
             @click="setActiveTab('posts')"
           >
@@ -269,7 +275,9 @@ function syncTabQuery(tab: ProfileTab) {
           </button>
           <button
             class="flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-medium transition-colors"
-            :class="activeTab === 'saved' ? 'border-primary-500 text-primary-500' : 'border-transparent'"
+            :class="
+              activeTab === 'saved' ? 'border-primary-500 text-primary-500' : 'border-transparent'
+            "
             :style="activeTab !== 'saved' ? 'color: var(--text-secondary)' : ''"
             @click="setActiveTab('saved')"
           >
@@ -300,23 +308,37 @@ function syncTabQuery(tab: ProfileTab) {
         cancel-text="暂不删除"
         tone="danger"
         :confirm-loading="isDeletingTrail"
-        @update:show="(value) => { if (!value) closeDeleteTrailDialog() }"
+        @update:show="
+          (value) => {
+            if (!value) closeDeleteTrailDialog()
+          }
+        "
         @cancel="closeDeleteTrailDialog"
         @confirm="confirmDeleteTrail"
       />
     </template>
 
     <template v-else>
-      <div class="card flex min-h-[50vh] flex-col items-center justify-center rounded-2xl p-8 text-center sm:p-12">
-        <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full" style="background-color: var(--bg-tag); color: var(--color-primary-500);">
+      <div
+        class="card flex min-h-[50vh] flex-col items-center justify-center rounded-2xl p-8 text-center sm:p-12"
+      >
+        <div
+          class="mb-6 flex h-20 w-20 items-center justify-center rounded-full"
+          style="background-color: var(--bg-tag); color: var(--color-primary-500)"
+        >
           <BaseIcon name="User" :size="36" />
         </div>
-        <h2 class="mb-3 text-2xl font-bold" style="color: var(--text-primary);">欢迎来到 TrailQuest</h2>
-        <p class="mx-auto mb-8 max-w-sm text-sm leading-relaxed sm:text-base" style="color: var(--text-secondary);">
+        <h2 class="mb-3 text-2xl font-bold" style="color: var(--text-primary)">
+          欢迎来到 TrailQuest
+        </h2>
+        <p
+          class="mx-auto mb-8 max-w-sm text-sm leading-relaxed sm:text-base"
+          style="color: var(--text-secondary)"
+        >
           登录以查看您的个人资料、回味走过的路线以及管理您的收藏内容。
         </p>
         <button
-          class="rounded-xl bg-primary-500 px-8 py-3 font-bold text-white shadow-lg shadow-primary-500/30 transition-all hover:bg-primary-600 hover:shadow-xl active:scale-[0.98]"
+          class="bg-primary-500 shadow-primary-500/30 hover:bg-primary-600 rounded-xl px-8 py-3 font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-[0.98]"
           @click="userStore.showAuthModal = true"
         >
           立即登录 / 注册

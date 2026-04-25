@@ -75,7 +75,9 @@ const newItem = ref<ItemDraft>({
   builtin: false,
 })
 
-const selectedGroup = computed(() => groups.value.find((group) => group.groupCode === selectedGroupCode.value) ?? null)
+const selectedGroup = computed(
+  () => groups.value.find((group) => group.groupCode === selectedGroupCode.value) ?? null,
+)
 const groupCategories = computed<GroupCategory[]>(() => {
   const allGroups = groups.value
   return [
@@ -83,11 +85,11 @@ const groupCategories = computed<GroupCategory[]>(() => {
       key: 'hiking-profile',
       title: '徒步画像',
       description: '管理用户画像中的经验、路线偏好和负重偏好展示项。',
-      groups: allGroups.filter((group) => [
-        'hiking_experience_level',
-        'hiking_trail_style',
-        'hiking_pack_preference',
-      ].includes(group.groupCode)),
+      groups: allGroups.filter((group) =>
+        ['hiking_experience_level', 'hiking_trail_style', 'hiking_pack_preference'].includes(
+          group.groupCode,
+        ),
+      ),
     },
     {
       key: 'home-activity',
@@ -99,12 +101,14 @@ const groupCategories = computed<GroupCategory[]>(() => {
       key: 'search-config',
       title: '搜索配置',
       description: '管理搜索页的难度、长度、装备和耗时筛选展示项。',
-      groups: allGroups.filter((group) => [
-        'search_difficulty',
-        'search_distance',
-        'search_pack_type',
-        'search_duration_type',
-      ].includes(group.groupCode)),
+      groups: allGroups.filter((group) =>
+        [
+          'search_difficulty',
+          'search_distance',
+          'search_pack_type',
+          'search_duration_type',
+        ].includes(group.groupCode),
+      ),
     },
   ].filter((category) => category.groups.length > 0)
 })
@@ -249,7 +253,7 @@ onMounted(() => {
       <div class="bento-column bento-column--left">
         <aside class="settings-card sidebar-card">
           <h2 class="card-title">分类导航</h2>
-          
+
           <div v-if="loadingGroups" class="loading-state">
             <RefreshCcw class="animate-spin" :size="24" />
             <p>正在加载分组...</p>
@@ -291,7 +295,10 @@ onMounted(() => {
               <h2 class="card-title">{{ selectedGroup.groupName }}</h2>
               <p class="card-desc">{{ selectedGroup.description || '当前分组暂无补充说明。' }}</p>
             </div>
-            <div class="status-badge" :class="selectedGroup.status === 'active' ? 'is-active' : 'is-inactive'">
+            <div
+              class="status-badge"
+              :class="selectedGroup.status === 'active' ? 'is-active' : 'is-inactive'"
+            >
               {{ selectedGroup.status === 'active' ? '启用中' : '未启用' }}
             </div>
           </section>
@@ -307,10 +314,18 @@ onMounted(() => {
 
           <div v-else class="items-container">
             <!-- Create Item Form -->
-            <section v-if="selectedGroup.allowCreate" class="settings-card item-card create-item-card">
+            <section
+              v-if="selectedGroup.allowCreate"
+              class="settings-card item-card create-item-card"
+            >
               <div class="item-header">
                 <h3 class="item-title">新增配置项</h3>
-                <button class="btn btn--primary" type="button" :disabled="creating" @click="createItem">
+                <button
+                  class="btn btn--primary"
+                  type="button"
+                  :disabled="creating"
+                  @click="createItem"
+                >
                   <Plus :size="16" :stroke-width="2" />
                   {{ creating ? '创建中...' : '新增' }}
                 </button>
@@ -319,25 +334,50 @@ onMounted(() => {
               <div class="controls-grid">
                 <div class="input-group">
                   <label class="input-label">编码</label>
-                  <input v-model="newItem.code" class="styled-input" type="text" placeholder="例如 hiking" />
+                  <input
+                    v-model="newItem.code"
+                    class="styled-input"
+                    type="text"
+                    placeholder="例如 hiking"
+                  />
                 </div>
                 <div class="input-group">
                   <label class="input-label">名称</label>
-                  <input v-model="newItem.itemLabel" class="styled-input" type="text" placeholder="例如 徒步" />
+                  <input
+                    v-model="newItem.itemLabel"
+                    class="styled-input"
+                    type="text"
+                    placeholder="例如 徒步"
+                  />
                 </div>
                 <div class="input-group">
                   <label class="input-label">图标</label>
                   <select v-model="newItem.iconName" class="styled-select">
-                    <option v-for="icon in ICON_OPTIONS" :key="icon" :value="icon">{{ icon }}</option>
+                    <option v-for="icon in ICON_OPTIONS" :key="icon" :value="icon">
+                      {{ icon }}
+                    </option>
                   </select>
                 </div>
                 <div class="input-group">
                   <label class="input-label">排序</label>
-                  <input v-model.number="newItem.sortOrder" class="styled-input" type="number" min="1" />
+                  <input
+                    v-model.number="newItem.sortOrder"
+                    class="styled-input"
+                    type="number"
+                    min="1"
+                  />
                 </div>
-                <div class="input-group input-group--full" v-if="selectedGroup.groupCode === 'home_activity'">
+                <div
+                  class="input-group input-group--full"
+                  v-if="selectedGroup.groupCode === 'home_activity'"
+                >
                   <label class="input-label">搜索预设词</label>
-                  <input v-model="newItem.query" class="styled-input" type="text" placeholder="用于首页活动入口点击后的搜索词" />
+                  <input
+                    v-model="newItem.query"
+                    class="styled-input"
+                    type="text"
+                    placeholder="用于首页活动入口点击后的搜索词"
+                  />
                 </div>
               </div>
             </section>
@@ -374,12 +414,19 @@ onMounted(() => {
                     <label class="input-label">图标</label>
                     <select v-model="draft.iconName" class="styled-select">
                       <option value="">无图标</option>
-                      <option v-for="icon in ICON_OPTIONS" :key="icon" :value="icon">{{ icon }}</option>
+                      <option v-for="icon in ICON_OPTIONS" :key="icon" :value="icon">
+                        {{ icon }}
+                      </option>
                     </select>
                   </div>
                   <div class="input-group">
                     <label class="input-label">排序</label>
-                    <input v-model.number="draft.sortOrder" class="styled-input" type="number" min="1" />
+                    <input
+                      v-model.number="draft.sortOrder"
+                      class="styled-input"
+                      type="number"
+                      min="1"
+                    />
                   </div>
                   <div class="input-group">
                     <label class="input-label">启用状态</label>
@@ -390,13 +437,22 @@ onMounted(() => {
                   </div>
                   <div class="input-group">
                     <label class="input-label">是否内建</label>
-                    <input class="styled-input is-readonly" type="text" :value="draft.builtin ? '是' : '否'" readonly disabled />
+                    <input
+                      class="styled-input is-readonly"
+                      type="text"
+                      :value="draft.builtin ? '是' : '否'"
+                      readonly
+                      disabled
+                    />
                   </div>
                   <div class="input-group input-group--full">
                     <label class="input-label">说明</label>
                     <input v-model="draft.description" class="styled-input" type="text" />
                   </div>
-                  <div class="input-group input-group--full" v-if="selectedGroup.groupCode === 'home_activity'">
+                  <div
+                    class="input-group input-group--full"
+                    v-if="selectedGroup.groupCode === 'home_activity'"
+                  >
                     <label class="input-label">搜索预设词</label>
                     <input v-model="draft.query" class="styled-input" type="text" />
                   </div>
@@ -424,7 +480,6 @@ onMounted(() => {
   height: 100%;
 }
 
-
 /* Bento Grid */
 .bento-grid {
   display: grid;
@@ -441,11 +496,11 @@ onMounted(() => {
   min-height: 0;
 }
 
-.bento-column--left { 
-  grid-column: span 4; 
+.bento-column--left {
+  grid-column: span 4;
 }
-.bento-column--right { 
-  grid-column: span 8; 
+.bento-column--right {
+  grid-column: span 8;
   overflow-y: auto;
   padding-right: 0.5rem; /* Add some padding for scrollbar */
 }
@@ -666,7 +721,8 @@ onMounted(() => {
   color: var(--text-muted);
 }
 
-.styled-input, .styled-select {
+.styled-input,
+.styled-select {
   background: var(--bg-soft);
   border: 1px solid transparent;
   border-radius: 10px;
@@ -676,12 +732,13 @@ onMounted(() => {
   transition: all 0.2s;
   width: 100%;
 }
-.create-item-card .styled-input, 
+.create-item-card .styled-input,
 .create-item-card .styled-select {
   background: white;
 }
 
-.styled-input:focus, .styled-select:focus {
+.styled-input:focus,
+.styled-select:focus {
   outline: none;
   background: white;
   border-color: var(--primary);
@@ -730,7 +787,8 @@ onMounted(() => {
   border: 1px solid rgba(181, 68, 68, 0.16);
 }
 
-.empty-wrap, .loading-state {
+.empty-wrap,
+.loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -745,7 +803,8 @@ onMounted(() => {
     grid-template-columns: 1fr;
     overflow-y: auto;
   }
-  .bento-column--left, .bento-column--right {
+  .bento-column--left,
+  .bento-column--right {
     grid-column: span 12;
     overflow-y: visible;
   }

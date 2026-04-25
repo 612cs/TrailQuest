@@ -49,6 +49,30 @@ interface SaveHikingProfilePayload {
   hikingProfile: HikingProfile
 }
 
+function buildProfile(user: CurrentUser): UserProfile {
+  return {
+    id: user.id,
+    username: user.username,
+    avatar: user.avatar,
+    avatarBg: user.avatarBg,
+    avatarMediaId: user.avatarMediaId,
+    avatarMediaUrl: user.avatarMediaUrl,
+    email: user.email,
+    role: user.role === 'ADMIN' ? '管理员' : '徒步爱好者',
+    joinDate: '2026年3月',
+    postCount: user.postCount ?? 0,
+    savedCount: user.savedCount ?? 0,
+    bio: user.bio?.trim() || '',
+    location: user.location?.trim() || '',
+    hikingProfile: user.hikingProfile ?? null,
+  }
+}
+
+function normalizeOptional(value?: string | null) {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : null
+}
+
 export const useUserStore = defineStore('user', () => {
   const profile = ref<UserProfile | null>(null)
   const token = ref('')
@@ -192,30 +216,6 @@ export const useUserStore = defineStore('user', () => {
   function applyAuthPayload(accessToken: string, currentUser: CurrentUser) {
     token.value = accessToken
     profile.value = buildProfile(currentUser)
-  }
-
-  function buildProfile(user: CurrentUser): UserProfile {
-    return {
-      id: user.id,
-      username: user.username,
-      avatar: user.avatar,
-      avatarBg: user.avatarBg,
-      avatarMediaId: user.avatarMediaId,
-      avatarMediaUrl: user.avatarMediaUrl,
-      email: user.email,
-      role: user.role === 'ADMIN' ? '管理员' : '徒步爱好者',
-      joinDate: '2026年3月',
-      postCount: user.postCount ?? 0,
-      savedCount: user.savedCount ?? 0,
-      bio: user.bio?.trim() || '',
-      location: user.location?.trim() || '',
-      hikingProfile: user.hikingProfile ?? null,
-    }
-  }
-
-  function normalizeOptional(value?: string | null) {
-    const trimmed = value?.trim()
-    return trimmed ? trimmed : null
   }
 
   function getErrorMessage(error: unknown) {

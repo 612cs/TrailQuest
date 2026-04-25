@@ -3,21 +3,24 @@ import { defineConfig, mergeConfig } from 'vitest/config'
 
 import viteConfig from './vite.config'
 
-export default mergeConfig(viteConfig, defineConfig({
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./test-utils/setupTests.ts'],
-    css: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['e2e/**'],
-    coverage: {
-      reporter: ['text', 'html'],
+export default mergeConfig(
+  viteConfig,
+  defineConfig({
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      setupFiles: ['./test-utils/setupTests.ts'],
+      css: true,
+      include: ['src/**/*.{test,spec}.{ts,tsx}'],
+      exclude: ['e2e/**'],
+      coverage: {
+        reporter: ['text', 'html'],
+      },
     },
-  },
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
     },
-  },
-}))
+  }),
+)

@@ -31,7 +31,9 @@ type QueryValue = string | number | boolean | null | undefined
 
 function cleanQuery(query: Record<string, QueryValue>) {
   return Object.fromEntries(
-    Object.entries(query).filter(([, value]) => value !== undefined && value !== null && value !== ''),
+    Object.entries(query).filter(
+      ([, value]) => value !== undefined && value !== null && value !== '',
+    ),
   ) as Record<string, string | number | boolean>
 }
 
@@ -159,6 +161,10 @@ export function createAdminOptionItem(groupCode: string, payload: AdminCreateOpt
   return http.post<AdminOptionItem>(`/api/admin/config/groups/${groupCode}/items`, payload)
 }
 
-export function updateAdminOptionItem(groupCode: string, itemId: string | number, payload: AdminUpdateOptionItemRequest) {
+export function updateAdminOptionItem(
+  groupCode: string,
+  itemId: string | number,
+  payload: AdminUpdateOptionItemRequest,
+) {
   return http.put<AdminOptionItem>(`/api/admin/config/groups/${groupCode}/items/${itemId}`, payload)
 }
