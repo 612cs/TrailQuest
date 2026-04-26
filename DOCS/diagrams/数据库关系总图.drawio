@@ -1,0 +1,208 @@
+<mxfile host="Electron">
+  <diagram name="database-relations" id="0">
+    <mxGraphModel dx="816" dy="711" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="users" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1" value="users&#xa;用户表" vertex="1">
+          <mxGeometry height="60" width="120" x="100" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="trails" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1" value="trails&#xa;路线表" vertex="1">
+          <mxGeometry height="60" width="120" x="428" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="reviews" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1" value="reviews&#xa;评论表" vertex="1">
+          <mxGeometry height="60" width="120" x="700" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="media_files" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1" value="media_files&#xa;媒体文件表" vertex="1">
+          <mxGeometry height="60" width="140" x="460" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="ai_conversations" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1" value="ai_conversations&#xa;AI会话表" vertex="1">
+          <mxGeometry height="60" width="150" x="100" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="ai_messages" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1" value="ai_messages&#xa;AI消息表" vertex="1">
+          <mxGeometry height="60" width="140" x="400" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="tags" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1" value="tags&#xa;标签表" vertex="1">
+          <mxGeometry height="60" width="120" x="700" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="trail_tags" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1" value="trail_tags&#xa;路线标签关联" vertex="1">
+          <mxGeometry height="60" width="130" x="546" y="403" as="geometry" />
+        </mxCell>
+        <mxCell id="trail_images" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1" value="trail_images&#xa;路线图片表" vertex="1">
+          <mxGeometry height="60" width="120" x="197" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="trail_favorites" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1" value="trail_favorites&#xa;路线收藏表" vertex="1">
+          <mxGeometry height="60" width="130" x="230" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="trail_likes" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1" value="trail_likes&#xa;路线点赞表" vertex="1">
+          <mxGeometry height="60" width="120" x="250" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="trail_tracks" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1" value="trail_tracks&#xa;路线轨迹表" vertex="1">
+          <mxGeometry height="60" width="130" x="640" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="review_images" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1" value="review_images&#xa;评论图片表" vertex="1">
+          <mxGeometry height="60" width="130" x="700" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="user_profiles" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1" value="user_hiking_profiles&#xa;用户徒步画像" vertex="1">
+          <mxGeometry height="60" width="150" x="47" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="admin_logs" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1" value="admin_operation_logs&#xa;后台操作日志" vertex="1">
+          <mxGeometry height="60" width="160" x="100" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_publish" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="发布" vertex="1">
+          <mxGeometry height="45" width="58" x="349" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="e_users_publish" edge="1" parent="1" source="users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_publish" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_publish_trails" edge="1" parent="1" source="rel_publish" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="trails" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_review" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="发表" vertex="1">
+          <mxGeometry height="50" width="80" x="349" y="436" as="geometry" />
+        </mxCell>
+        <mxCell id="e_users_review" edge="1" parent="1" source="users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_review" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_review_reviews" edge="1" parent="1" source="rel_review" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="reviews" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_commented" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="被评论" vertex="1">
+          <mxGeometry height="50" width="80" x="578" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="e_trails_commented" edge="1" parent="1" source="trails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_commented" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_commented_reviews" edge="1" parent="1" source="rel_commented" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="reviews" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_profile" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="画像" vertex="1">
+          <mxGeometry height="50" width="80" x="120" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="e_users_profile" edge="1" parent="1" source="users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_profile" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_profile_profiles" edge="1" parent="1" source="rel_profile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="user_profiles" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_conv" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" value="创建会话" vertex="1">
+          <mxGeometry height="50" width="80" x="130" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="e_users_conv" edge="1" parent="1" source="users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_conv" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_conv_conversations" edge="1" parent="1" source="rel_conv" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="ai_conversations" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_msg" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="消息" vertex="1">
+          <mxGeometry height="50" width="80" x="280" y="705" as="geometry" />
+        </mxCell>
+        <mxCell id="e_conv_msg" edge="1" parent="1" source="ai_conversations" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_msg" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_msg_messages" edge="1" parent="1" source="rel_msg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="ai_messages" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_upload" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="上传" vertex="1">
+          <mxGeometry height="50" width="80" x="272" y="605" as="geometry" />
+        </mxCell>
+        <mxCell id="e_users_upload" edge="1" parent="1" source="users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_upload" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_upload_media" edge="1" parent="1" source="rel_upload" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="media_files" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_ti" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="图片" vertex="1">
+          <mxGeometry height="40" width="60" x="340" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="e_trails_ti" edge="1" parent="1" source="trails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="rel_ti" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ti_images" edge="1" parent="1" source="rel_ti" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="trail_images" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_tt" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" value="标签关联" vertex="1">
+          <mxGeometry height="50" width="80" x="548" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="e_trails_tt" edge="1" parent="1" source="trails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_tt" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_tt_trail_tags" edge="1" parent="1" source="rel_tt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="trail_tags" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_tag" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="标记" vertex="1">
+          <mxGeometry height="40" width="60" x="731" y="441" as="geometry" />
+        </mxCell>
+        <mxCell id="e_tags_tag" edge="1" parent="1" source="tags" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="rel_tag" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_tag_trail_tags" edge="1" parent="1" source="rel_tag" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="trail_tags" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_fav" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" value="被收藏" vertex="1">
+          <mxGeometry height="50" width="80" x="380" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="e_trails_fav" edge="1" parent="1" source="trails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_fav" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_fav_favorites" edge="1" parent="1" source="rel_fav" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="trail_favorites" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_like" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" value="被点赞" vertex="1">
+          <mxGeometry height="50" width="80" x="403" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="e_trails_like" edge="1" parent="1" source="trails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_like" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_like_likes" edge="1" parent="1" source="rel_like" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="trail_likes" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_track" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="轨迹" vertex="1">
+          <mxGeometry height="40" width="60" x="510" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="e_trails_track" edge="1" parent="1" source="trails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="rel_track" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_track_tracks" edge="1" parent="1" source="rel_track" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="trail_tracks" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_ri" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="图片" vertex="1">
+          <mxGeometry height="40" width="60" x="640" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="e_reviews_ri" edge="1" parent="1" source="reviews" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="rel_ri" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ri_images" edge="1" parent="1" source="rel_ri" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="review_images" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_reply" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="回复" vertex="1">
+          <mxGeometry height="40" width="60" x="846" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="e_reviews_reply" edge="1" parent="1" source="reviews" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="rel_reply" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_reply_reviews" edge="1" parent="1" source="rel_reply" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=10;fontColor=#b85450" target="reviews" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_admin" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="操作" vertex="1">
+          <mxGeometry height="50" width="80" x="130" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="e_users_admin" edge="1" parent="1" source="users" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_admin" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_admin_logs" edge="1" parent="1" source="rel_admin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="admin_logs" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_mf_track" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" value="轨迹文件" vertex="1">
+          <mxGeometry height="50" width="80" x="578" y="705" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mf_track" edge="1" parent="1" source="media_files" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="rel_mf_track" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_track_tracks2" edge="1" parent="1" source="rel_mf_track" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=none;endFill=0;fontSize=11;fontColor=#b85450" target="trail_tracks" value="n">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
