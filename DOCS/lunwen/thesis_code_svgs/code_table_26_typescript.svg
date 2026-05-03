@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="439" height="574" viewBox="0 0 439 574">
+<rect x="0" y="0" width="439" height="574" fill="white"/>
+<g font-family="monospace" font-size="14px">
+<text x="0" y="14" xml:space="preserve"><tspan>const</tspan>&#160;pageSize&#160;=&#160;2</text>
+<text x="0" y="33" xml:space="preserve"><tspan>const</tspan>&#160;currentPage&#160;=&#160;ref(1)</text>
+<text x="0" y="52" xml:space="preserve"><tspan>const</tspan>&#160;allPosts&#160;=&#160;ref&lt;TrailListItem[]&gt;([])</text>
+<text x="0" y="71" xml:space="preserve"></text>
+<text x="0" y="90" xml:space="preserve"><tspan>const</tspan>&#160;currentPosts&#160;=&#160;computed(()&#160;=&gt;&#160;{</text>
+<text x="0" y="109" xml:space="preserve">&#160;&#160;<tspan>return</tspan>&#160;allPosts.value</text>
+<text x="0" y="128" xml:space="preserve">&#160;&#160;&#160;&#160;.map((trail)&#160;=&gt;&#160;trailInteractionStore.applyToTrail(trail))</text>
+<text x="0" y="147" xml:space="preserve">&#160;&#160;&#160;&#160;.map(toCommunityPost)</text>
+<text x="0" y="166" xml:space="preserve">})</text>
+<text x="0" y="185" xml:space="preserve"><tspan>async</tspan>&#160;<tspan>function</tspan>&#160;loadPosts()&#160;{</text>
+<text x="0" y="204" xml:space="preserve">&#160;&#160;<tspan>const</tspan>&#160;data&#160;=&#160;<tspan>await</tspan>&#160;fetchTrails({</text>
+<text x="0" y="223" xml:space="preserve">&#160;&#160;&#160;&#160;sort:&#160;<tspan>&#39;latest&#39;</tspan>,</text>
+<text x="0" y="242" xml:space="preserve">&#160;&#160;&#160;&#160;pageNum:&#160;currentPage.value,</text>
+<text x="0" y="261" xml:space="preserve">&#160;&#160;&#160;&#160;pageSize,</text>
+<text x="0" y="280" xml:space="preserve">&#160;&#160;})</text>
+<text x="0" y="299" xml:space="preserve">&#160;&#160;allPosts.value&#160;=&#160;data.list</text>
+<text x="0" y="318" xml:space="preserve">&#160;&#160;trailInteractionStore.hydrateTrails(data.list)</text>
+<text x="0" y="337" xml:space="preserve">&#160;&#160;totalPages.value&#160;=&#160;data.totalPages&#160;||&#160;1</text>
+<text x="0" y="356" xml:space="preserve">}</text>
+<text x="0" y="375" xml:space="preserve"></text>
+<text x="0" y="394" xml:space="preserve"><tspan>async</tspan>&#160;<tspan>function</tspan>&#160;handleShare(post:&#160;TrailListItem)&#160;{</text>
+<text x="0" y="413" xml:space="preserve">&#160;&#160;<tspan>await</tspan>&#160;shareTrail({</text>
+<text x="0" y="432" xml:space="preserve">&#160;&#160;&#160;&#160;id:&#160;post.id,</text>
+<text x="0" y="451" xml:space="preserve">&#160;&#160;&#160;&#160;name:&#160;post.name,</text>
+<text x="0" y="470" xml:space="preserve">&#160;&#160;&#160;&#160;location:&#160;post.location,</text>
+<text x="0" y="489" xml:space="preserve">&#160;&#160;})</text>
+<text x="0" y="508" xml:space="preserve">}</text>
+<text x="0" y="527" xml:space="preserve"></text></g></svg>

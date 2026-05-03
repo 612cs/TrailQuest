@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1000" viewBox="0 0 1800 1000">
+<line x1="380" y1="240.0" x2="470" y2="240.0" stroke="#000000" stroke-width="4"/>
+<polygon points="470,240.0 456,232.0 456,248.0" fill="#000000"/>
+<rect x="345.0" y="210.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="425.0" y="234.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">请求</text>
+<line x1="760" y1="240.0" x2="850" y2="140.0" stroke="#000000" stroke-width="4"/>
+<polygon points="850,140.0 836,132.0 836,148.0" fill="#000000"/>
+<rect x="725.0" y="160.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="805.0" y="184.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">意图解析</text>
+<line x1="760" y1="240.0" x2="850" y2="320.0" stroke="#000000" stroke-width="4"/>
+<polygon points="850,320.0 836,312.0 836,328.0" fill="#000000"/>
+<rect x="725.0" y="250.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="805.0" y="274.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">候选检索</text>
+<line x1="760" y1="240.0" x2="1210" y2="140.0" stroke="#000000" stroke-width="4"/>
+<polygon points="1210,140.0 1196,132.0 1196,148.0" fill="#000000"/>
+<rect x="905.0" y="160.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="985.0" y="184.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">外部数据</text>
+<line x1="760" y1="240.0" x2="1210" y2="320.0" stroke="#000000" stroke-width="4"/>
+<polygon points="1210,320.0 1196,312.0 1196,328.0" fill="#000000"/>
+<rect x="905.0" y="250.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="985.0" y="274.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">特征预测</text>
+<line x1="1350.0" y1="380" x2="800.0" y2="470" stroke="#000000" stroke-width="4"/>
+<polygon points="800.0,470 792.0,456 808.0,456" fill="#000000"/>
+<rect x="995.0" y="395.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="1075.0" y="419.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">环境结果</text>
+<line x1="985.0" y1="380" x2="800.0" y2="470" stroke="#000000" stroke-width="4"/>
+<polygon points="800.0,470 792.0,456 808.0,456" fill="#000000"/>
+<rect x="812.5" y="395.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="892.5" y="419.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">路线数据</text>
+<rect x="120" y="180" width="260" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="250.0" y="222.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">Vue 前端</text>
+<text x="250.0" y="258.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">聊天页/路线详情页</text>
+<rect x="470" y="180" width="290" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="615.0" y="222.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">Spring Boot</text>
+<text x="615.0" y="258.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">业务编排层</text>
+<rect x="850" y="80" width="270" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="985.0" y="122.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">DeepSeek</text>
+<text x="985.0" y="158.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">语义理解</text>
+<rect x="850" y="260" width="270" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="985.0" y="302.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">MySQL / Redis</text>
+<text x="985.0" y="338.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">路线与缓存</text>
+<rect x="1210" y="80" width="280" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="1350.0" y="140.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">地图/天气 API</text>
+<rect x="1210" y="260" width="280" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="1350.0" y="302.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">Flask +</text>
+<text x="1350.0" y="338.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">随机森林预测</text>
+<rect x="560" y="470" width="480" height="130" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="800.0" y="535.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">文本回复 + 路线卡片 + 景观概率</text>
+</svg>

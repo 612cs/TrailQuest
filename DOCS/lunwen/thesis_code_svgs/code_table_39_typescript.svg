@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="591" height="282" viewBox="0 0 591 282">
+<rect x="0" y="0" width="591" height="282" fill="white"/>
+<g font-family="monospace" font-size="14px">
+<text x="0" y="14" xml:space="preserve"><tspan>const</tspan>&#160;list&#160;=&#160;ref&lt;AdminReportListItem[]&gt;([])</text>
+<text x="0" y="33" xml:space="preserve"><tspan>const</tspan>&#160;pageNum&#160;=&#160;ref(1)</text>
+<text x="0" y="52" xml:space="preserve"></text>
+<text x="0" y="71" xml:space="preserve"><tspan>async</tspan>&#160;<tspan>function</tspan>&#160;load(page&#160;=&#160;pageNum.value)&#160;{</text>
+<text x="0" y="90" xml:space="preserve">&#160;&#160;<tspan>const</tspan>&#160;result&#160;=&#160;<tspan>await</tspan>&#160;fetchAdminReports({&#160;pageNum:&#160;page,&#160;pageSize:&#160;pageSize.value&#160;})</text>
+<text x="0" y="109" xml:space="preserve">&#160;&#160;list.value&#160;=&#160;result.list</text>
+<text x="0" y="128" xml:space="preserve">&#160;&#160;total.value&#160;=&#160;result.total</text>
+<text x="0" y="147" xml:space="preserve">}</text>
+<text x="0" y="166" xml:space="preserve"></text>
+<text x="0" y="185" xml:space="preserve"><tspan>async</tspan>&#160;<tspan>function</tspan>&#160;handleResolve(id:&#160;string&#160;|&#160;number)&#160;{</text>
+<text x="0" y="204" xml:space="preserve">&#160;&#160;<tspan>await</tspan>&#160;resolveReport(id)</text>
+<text x="0" y="223" xml:space="preserve">&#160;&#160;<tspan>await</tspan>&#160;load(pageNum.value)</text>
+<text x="0" y="242" xml:space="preserve">}</text>
+<text x="0" y="261" xml:space="preserve"></text></g></svg>
