@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="565" height="324" viewBox="0 0 565 324">
+<rect x="0" y="0" width="565" height="324" fill="white"/>
+<g font-family="monospace" font-size="14px">
+<text x="0" y="14" xml:space="preserve"><tspan>const</tspan>&#160;{&#160;list,&#160;reviewStatus,&#160;keyword,&#160;authorKeyword,&#160;load&#160;}&#160;=&#160;useTrailReviewList()</text>
+<text x="0" y="33" xml:space="preserve"></text>
+<text x="0" y="52" xml:space="preserve"><tspan>function</tspan>&#160;openDetail(id:&#160;string)&#160;{</text>
+<text x="0" y="71" xml:space="preserve">&#160;&#160;router.push({&#160;name:&#160;<tspan>&#39;trail-review-detail&#39;</tspan>,&#160;params:&#160;{&#160;id&#160;}&#160;})</text>
+<text x="0" y="90" xml:space="preserve">}</text>
+<text x="0" y="109" xml:space="preserve"></text>
+<text x="0" y="128" xml:space="preserve"><tspan>async</tspan>&#160;<tspan>function</tspan>&#160;handleApprove()&#160;{</text>
+<text x="0" y="147" xml:space="preserve">&#160;&#160;<tspan>await</tspan>&#160;approveTrail(trailId.value)</text>
+<text x="0" y="166" xml:space="preserve">&#160;&#160;<tspan>await</tspan>&#160;loadDetail()</text>
+<text x="0" y="185" xml:space="preserve">}</text>
+<text x="0" y="204" xml:space="preserve"></text>
+<text x="0" y="223" xml:space="preserve"><tspan>async</tspan>&#160;<tspan>function</tspan>&#160;handleReject(reason:&#160;string)&#160;{</text>
+<text x="0" y="242" xml:space="preserve">&#160;&#160;<tspan>await</tspan>&#160;rejectTrail(trailId.value,&#160;{&#160;remark:&#160;reason&#160;})</text>
+<text x="0" y="261" xml:space="preserve">&#160;&#160;<tspan>await</tspan>&#160;loadDetail()</text>
+<text x="0" y="280" xml:space="preserve">}</text>
+<text x="0" y="299" xml:space="preserve"></text></g></svg>

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="710" height="449" viewBox="0 0 710 449">
+<rect x="0" y="0" width="710" height="449" fill="white"/>
+<g font-family="monospace" font-size="14px">
+<text x="0" y="14" xml:space="preserve">@RestController</text>
+<text x="0" y="33" xml:space="preserve">@RequestMapping(<tspan>&quot;</tspan><tspan>/api</tspan><tspan>&quot;</tspan>)</text>
+<text x="0" y="52" xml:space="preserve">@RequiredArgsConstructor</text>
+<text x="0" y="71" xml:space="preserve"><tspan>public</tspan>&#160;<tspan>class</tspan>&#160;<tspan>ReviewController</tspan>&#160;{</text>
+<text x="0" y="90" xml:space="preserve"></text>
+<text x="0" y="109" xml:space="preserve">&#160;&#160;&#160;&#160;<tspan>private</tspan>&#160;<tspan>final</tspan>&#160;ReviewService&#160;reviewService;</text>
+<text x="0" y="128" xml:space="preserve"></text>
+<text x="0" y="147" xml:space="preserve">&#160;&#160;&#160;&#160;@GetMapping(<tspan>&quot;</tspan><tspan>/trails/{trailId}/reviews</tspan><tspan>&quot;</tspan>)</text>
+<text x="0" y="166" xml:space="preserve">&#160;&#160;&#160;&#160;<tspan>public</tspan>&#160;ApiResponse&lt;ReviewPageVo&gt;&#160;listByTrailId(@PathVariable&#160;Long&#160;trailId,</text>
+<text x="0" y="185" xml:space="preserve">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;@RequestParam(required&#160;=&#160;<tspan>false</tspan>)&#160;Long&#160;cursor,</text>
+<text x="0" y="204" xml:space="preserve">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;@RequestParam(required&#160;=&#160;<tspan>false</tspan>)&#160;Integer&#160;limit)&#160;{</text>
+<text x="0" y="223" xml:space="preserve">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan>return</tspan>&#160;ApiResponse.success(reviewService.listByTrailId(trailId,&#160;cursor,&#160;limit));</text>
+<text x="0" y="242" xml:space="preserve">&#160;&#160;&#160;&#160;}</text>
+<text x="0" y="261" xml:space="preserve"></text>
+<text x="0" y="280" xml:space="preserve">&#160;&#160;&#160;&#160;@PostMapping(<tspan>&quot;</tspan><tspan>/reviews</tspan><tspan>&quot;</tspan>)</text>
+<text x="0" y="299" xml:space="preserve">&#160;&#160;&#160;&#160;<tspan>public</tspan>&#160;ApiResponse&lt;CreateReviewResponse&gt;&#160;createReview(</text>
+<text x="0" y="318" xml:space="preserve">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;@AuthenticationPrincipal&#160;CustomUserDetails&#160;userDetails,</text>
+<text x="0" y="337" xml:space="preserve">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;@Valid&#160;@RequestBody&#160;CreateReviewRequest&#160;request)&#160;{</text>
+<text x="0" y="356" xml:space="preserve">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan>return</tspan>&#160;ApiResponse.success(<tspan>&quot;</tspan><tspan>评论发布成功</tspan><tspan>&quot;</tspan>,&#160;reviewService.createReview(userDetails.getId(),&#160;request));</text>
+<text x="0" y="375" xml:space="preserve">&#160;&#160;&#160;&#160;}</text>
+<text x="0" y="394" xml:space="preserve">}</text>
+<text x="0" y="413" xml:space="preserve"></text></g></svg>

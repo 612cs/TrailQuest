@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1000" viewBox="0 0 1800 1000">
+<line x1="350" y1="280.0" x2="410" y2="280.0" stroke="#000000" stroke-width="4"/>
+<polygon points="410,280.0 396,272.0 396,288.0" fill="#000000"/>
+<rect x="300.0" y="250.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="380.0" y="274.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">定位</text>
+<line x1="690" y1="280.0" x2="750" y2="280.0" stroke="#000000" stroke-width="4"/>
+<polygon points="750,280.0 736,272.0 736,288.0" fill="#000000"/>
+<rect x="640.0" y="250.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="720.0" y="274.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">多源数据</text>
+<line x1="1030" y1="280.0" x2="1090" y2="280.0" stroke="#000000" stroke-width="4"/>
+<polygon points="1090,280.0 1076,272.0 1076,288.0" fill="#000000"/>
+<rect x="980.0" y="250.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="1060.0" y="274.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">特征向量</text>
+<line x1="1360" y1="280.0" x2="1420" y2="280.0" stroke="#000000" stroke-width="4"/>
+<polygon points="1420,280.0 1406,272.0 1406,288.0" fill="#000000"/>
+<rect x="1310.0" y="250.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="1390.0" y="274.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">调用模型</text>
+<line x1="1555.0" y1="340" x2="1225.0" y2="470" stroke="#000000" stroke-width="4"/>
+<polygon points="1225.0,470 1217.0,456 1233.0,456" fill="#000000"/>
+<rect x="1310.0" y="375.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="1390.0" y="399.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">概率值</text>
+<line x1="1360" y1="530.0" x2="750" y2="530.0" stroke="#000000" stroke-width="4"/>
+<polygon points="750,530.0 736,522.0 736,538.0" fill="#000000"/>
+<rect x="975.0" y="500.0" width="160" height="34" rx="8" fill="#ffffff" stroke="#000000"/>
+<text x="1055.0" y="524.0" text-anchor="middle" font-size="18" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">结构化结果</text>
+<rect x="90" y="220" width="260" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="220.0" y="280.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">路线坐标与时间窗口</text>
+<rect x="410" y="220" width="280" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="550.0" y="280.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">天气/天文/污染物数据</text>
+<rect x="750" y="220" width="280" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="890.0" y="280.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">特征清洗与构造</text>
+<rect x="1090" y="220" width="270" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="1225.0" y="280.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">Flask 预测服务</text>
+<rect x="1420" y="220" width="270" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="1555.0" y="280.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">随机森林推理</text>
+<rect x="1090" y="470" width="270" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="1225.0" y="530.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">景观概率结果</text>
+<rect x="750" y="470" width="280" height="120" rx="18" fill="#ffffff" stroke="#000000" stroke-width="3"/>
+<text x="890.0" y="530.0" text-anchor="middle" font-size="24" font-family="PingFang SC, Microsoft YaHei, sans-serif" fill="#000000">路线详情页卡片展示</text>
+</svg>

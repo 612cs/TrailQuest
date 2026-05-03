@@ -39,3 +39,8 @@ hiking/
 - **流程**：不自动提交代码，由用户手动触发。
 - **提交信息**：遵循 Conventional Commits，使用中文（`feat:`, `fix:`, `docs:` 等）。
 - **工具优先**：优先使用 GitHub MCP 提交。
+
+## 相关文档
+
+- [DOCS/TOOLCHAIN.md](./DOCS/TOOLCHAIN.md) - 代码质量工具链配置（oxlint、oxfmt、Oxc）
+- [DOCS/INTERNSHIP_OBJECTIVES.md](./DOCS/INTERNSHIP_OBJECTIVES.md) - 实习目的与目标

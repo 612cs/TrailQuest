@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="697" height="386" viewBox="0 0 697 386">
+<rect x="0" y="0" width="697" height="386" fill="white"/>
+<g font-family="monospace" font-size="14px">
+<text x="0" y="14" xml:space="preserve"><tspan>const</tspan>&#160;galleryImages&#160;=&#160;computed(()&#160;=&gt;&#160;{</text>
+<text x="0" y="33" xml:space="preserve">&#160;&#160;<tspan>const</tspan>&#160;urls&#160;=&#160;[trailData.value?.image,&#160;...(trailData.value?.gallery?.map((item)&#160;=&gt;&#160;item.url)&#160;??&#160;[])]</text>
+<text x="0" y="52" xml:space="preserve">&#160;&#160;&#160;&#160;.filter((item):&#160;item&#160;is&#160;string&#160;=&gt;&#160;!!item)</text>
+<text x="0" y="71" xml:space="preserve">&#160;&#160;<tspan>return</tspan>&#160;urls.filter((url,&#160;index)&#160;=&gt;&#160;urls.indexOf(url)&#160;===&#160;index)</text>
+<text x="0" y="90" xml:space="preserve">})</text>
+<text x="0" y="109" xml:space="preserve"></text>
+<text x="0" y="128" xml:space="preserve"><tspan>async</tspan>&#160;<tspan>function</tspan>&#160;loadTrailDetail(id:&#160;string)&#160;{</text>
+<text x="0" y="147" xml:space="preserve">&#160;&#160;trailData.value&#160;=&#160;<tspan>await</tspan>&#160;fetchTrailDetail(id)</text>
+<text x="0" y="166" xml:space="preserve">}</text>
+<text x="0" y="185" xml:space="preserve"></text>
+<text x="0" y="204" xml:space="preserve"><tspan>function</tspan>&#160;handlePreview(index:&#160;number)&#160;{</text>
+<text x="0" y="223" xml:space="preserve">&#160;&#160;previewIndex.value&#160;=&#160;index</text>
+<text x="0" y="242" xml:space="preserve">&#160;&#160;showPreview.value&#160;=&#160;<tspan>true</tspan></text>
+<text x="0" y="261" xml:space="preserve">}</text>
+<text x="0" y="280" xml:space="preserve"></text>
+<text x="0" y="299" xml:space="preserve"><tspan>function</tspan>&#160;handleBack()&#160;{</text>
+<text x="0" y="318" xml:space="preserve">&#160;&#160;<tspan>void</tspan>&#160;router.push(<tspan>`</tspan><tspan>/trail/</tspan><tspan>${</tspan>trailId.value<tspan>}</tspan><tspan>`</tspan>)</text>
+<text x="0" y="337" xml:space="preserve">}</text>
+<text x="0" y="356" xml:space="preserve"></text></g></svg>

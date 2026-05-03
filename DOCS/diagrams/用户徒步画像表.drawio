@@ -1,0 +1,80 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="user-hiking-profiles-table">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- 用户徒步画像表 -->
+        <mxCell id="uhp_table" value="用户徒步画像表&#xa;user_hiking_profiles" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="380" y="300" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 字段 -->
+        <mxCell id="uhp_id" value="画像ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="180" y="150" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_uhp_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uhp_id" target="uhp_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uhp_user_id" value="用户ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+          <mxGeometry x="330" y="80" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_uhp_user_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uhp_user_id" target="uhp_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uhp_level" value="徒步等级" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="480" y="80" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_uhp_level" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uhp_level" target="uhp_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uhp_total_distance" value="总徒步距离" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="630" y="150" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_uhp_total_distance" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uhp_total_distance" target="uhp_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uhp_total_trails" value="完成路线数" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="700" y="260" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_uhp_total_trails" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uhp_total_trails" target="uhp_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uhp_total_elevation" value="总爬升海拔" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="680" y="380" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_uhp_total_elevation" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uhp_total_elevation" target="uhp_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uhp_total_duration" value="总徒步时长" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="480" y="450" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_uhp_total_duration" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uhp_total_duration" target="uhp_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uhp_updated_at" value="更新时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="300" y="450" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_uhp_updated_at" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uhp_updated_at" target="uhp_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 关系 -->
+        <mxCell id="rel_users" value="1:1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="180" y="290" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_rel_users" value="画像" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="rel_users" target="uhp_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
