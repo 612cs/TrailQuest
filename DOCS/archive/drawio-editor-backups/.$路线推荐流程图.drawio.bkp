@@ -1,0 +1,67 @@
+<mxfile host="Electron">
+  <diagram name="路线推荐流程图" id="路线推荐流程图">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="路线推荐流程图" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=22;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="30" width="500" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="start" value="开始" style="ellipse;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=#f5f5f5;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="90" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" value="用户进入推荐页&#xa;设置地区 / 难度 / 行程偏好" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="620" y="180" width="280" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="系统读取用户画像&#xa;与历史行为数据" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="620" y="290" width="280" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="筛选候选路线&#xa;匹配地理位置与基础条件" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="620" y="400" width="280" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="融合推荐特征&#xa;偏好匹配度 / 热度 / 评分 / 景观信息" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="620" y="510" width="280" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="生成推荐结果并排序" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="620" y="630" width="280" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" value="用户是否继续查看？" style="rhombus;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=#ffffff;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="670" y="740" width="180" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" value="展示路线详情&#xa;支持收藏、点赞、评论、查看轨迹" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=14;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="980" y="750" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="end" value="结束" style="ellipse;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=#f5f5f5;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="700" y="910" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" target="n1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=12;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="n1" target="n2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=12;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="n2" target="n3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=12;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="n3" target="n4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=12;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="n4" target="n5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=12;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="n5" target="d1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=12;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="d1" target="n6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=12;" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="d1" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=12;" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="n6" target="end" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=12;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

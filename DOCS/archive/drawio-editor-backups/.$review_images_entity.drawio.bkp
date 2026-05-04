@@ -1,0 +1,17 @@
+<mxfile host="Electron">
+  <diagram name="review_images-entity" id="0">
+    <mxGraphModel dx="1262" dy="1091" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;strokeWidth=2;" value="评论图片" vertex="1"><mxGeometry height="80" width="200" x="700" y="555" as="geometry" /></mxCell>
+        <mxCell id="3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;strokeWidth=2;" value="评论图片ID" vertex="1"><mxGeometry height="58" width="160" x="720" y="146" as="geometry" /></mxCell>
+        <mxCell id="4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;strokeWidth=2;" value="评论ID" vertex="1"><mxGeometry height="56" width="140" x="1180" y="777" as="geometry" /></mxCell>
+        <mxCell id="5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;strokeWidth=2;" value="图片地址" vertex="1"><mxGeometry height="58" width="150" x="275" y="776" as="geometry" /></mxCell>
+        <mxCell id="6" edge="1" parent="1" source="2" style="endArrow=none;html=1;rounded=0;strokeColor=#000000;strokeWidth=2;" target="3" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="7" edge="1" parent="1" source="2" style="endArrow=none;html=1;rounded=0;strokeColor=#000000;strokeWidth=2;" target="4" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="8" edge="1" parent="1" source="2" style="endArrow=none;html=1;rounded=0;strokeColor=#000000;strokeWidth=2;" target="5" value=""><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
