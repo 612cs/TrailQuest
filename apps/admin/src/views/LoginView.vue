@@ -123,17 +123,34 @@ async function handleSubmit() {
   min-height: 100vh;
   padding: 1.5rem;
   overflow: hidden;
-  background-color: var(--bg-body);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(var(--primary-rgb), 0.16), transparent 26%),
+    radial-gradient(circle at 82% 20%, rgba(74, 144, 108, 0.16), transparent 24%),
+    radial-gradient(circle at 50% 78%, rgba(20, 83, 45, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(var(--bg-body-rgb), 0.96) 0%, rgba(var(--bg-body-rgb), 0.9) 48%, rgba(var(--bg-body-rgb), 0.96) 100%);
 }
 
 .login-background {
   position: absolute;
-  inset: -10%;
-  background-image: url('https://images.unsplash.com/photo-1542382156909-9ae37b3f56fd?q=80&w=2000&auto=format&fit=crop');
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(var(--primary-rgb), 0.18), transparent 0 18%, transparent 19%),
+    radial-gradient(circle at 78% 24%, rgba(72, 122, 92, 0.18), transparent 0 16%, transparent 17%),
+    radial-gradient(circle at 50% 52%, rgba(15, 23, 42, 0.06), transparent 0 20%, transparent 21%),
+    linear-gradient(135deg, rgba(var(--bg-surface-rgb), 0.94), rgba(var(--bg-body-rgb), 0.9));
   background-size: cover;
-  background-position: center;
-  filter: blur(20px);
+  filter: saturate(0.95);
   z-index: 0;
+}
+
+.login-background::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(transparent 0 73%, rgba(32, 78, 50, 0.12) 73% 78%, transparent 78% 100%),
+    linear-gradient(115deg, transparent 0 34%, rgba(255, 255, 255, 0.12) 34% 36%, transparent 36% 64%, rgba(255, 255, 255, 0.08) 64% 66%, transparent 66% 100%);
+  opacity: 0.65;
 }
 
 .login-overlay {
@@ -141,8 +158,9 @@ async function handleSubmit() {
   inset: 0;
   background: linear-gradient(
     135deg,
-    rgba(var(--bg-body-rgb), 0.7) 0%,
-    rgba(var(--bg-body-rgb), 0.95) 100%
+    rgba(var(--bg-body-rgb), 0.22) 0%,
+    rgba(var(--bg-body-rgb), 0.54) 48%,
+    rgba(var(--bg-body-rgb), 0.86) 100%
   );
   z-index: 0;
 }
@@ -159,14 +177,14 @@ async function handleSubmit() {
 .login-bento-card {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  background: rgba(var(--bg-surface-rgb), 0.6);
+  background: rgba(var(--bg-surface-rgb), 0.86);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow:
-    0 24px 48px rgba(0, 0, 0, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    0 24px 48px rgba(0, 0, 0, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
   overflow: hidden;
 }
 
@@ -176,10 +194,10 @@ async function handleSubmit() {
   padding: 4rem;
   background: linear-gradient(
     145deg,
-    rgba(var(--primary-rgb), 0.9),
-    rgba(var(--primary-rgb), 0.95)
+    rgba(236, 253, 245, 0.96),
+    rgba(187, 247, 208, 0.92)
   );
-  color: white;
+  color: #111827;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -195,7 +213,7 @@ async function handleSubmit() {
   font-weight: 800;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+  color: #1f2937;
   margin-bottom: 1.5rem;
 }
 
@@ -210,7 +228,7 @@ async function handleSubmit() {
 .hero-desc {
   font-size: 1.0625rem;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.85);
+  color: #374151;
   margin-bottom: 3rem;
   max-width: 90%;
 }
@@ -226,19 +244,19 @@ async function handleSubmit() {
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.56);
   backdrop-filter: blur(8px);
   border-radius: 99px;
   font-size: 0.8125rem;
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(22, 101, 52, 0.16);
 }
 
 .hero-icon-bg {
   position: absolute;
   right: -40px;
   bottom: -40px;
-  color: rgba(255, 255, 255, 0.1);
+  color: rgba(21, 128, 61, 0.14);
   transform: rotate(-15deg);
   z-index: 1;
 }
@@ -249,7 +267,7 @@ async function handleSubmit() {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: rgba(var(--bg-surface-rgb), 0.8);
+  background: rgba(var(--bg-surface-rgb), 0.94);
 }
 
 .form-header {

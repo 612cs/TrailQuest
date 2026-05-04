@@ -5,12 +5,10 @@ import { useRouter, useRoute } from 'vue-router'
 import BaseIcon from '../components/common/BaseIcon.vue'
 import ConfirmDialog from '../components/common/ConfirmDialog.vue'
 import DetailHero from '../components/trail/DetailHero.vue'
-import LandscapePrediction from '../components/trail/LandscapePrediction.vue'
 import ReviewList from '../components/trail/ReviewList.vue'
-import TrailMapSection from '../components/trail/TrailMapSection.vue'
+import TrailEnvironmentSection from '../components/trail/TrailEnvironmentSection.vue'
 import TrailTrackViewer from '../components/trail/TrailTrackViewer.vue'
-import WeatherSection from '../components/trail/WeatherSection.vue'
-import WeatherForecast from '../components/trail/WeatherForecast.vue'
+import TrailVisualizationSection from '../components/trail/TrailVisualizationSection.vue'
 import { fetchTrailLandscapePrediction } from '../api/landscape'
 import { fetchTrailWeather } from '../api/weather'
 import { createReview, deleteReview, fetchTrailReviews, fetchUserCard } from '../api/reviews'
@@ -59,6 +57,7 @@ const userCardErrorMessage = ref('')
 const pendingDeleteTrail = ref(false)
 const isDeletingTrail = ref(false)
 const isViewerFullscreen = ref(false)
+const activeVisualization = ref<'map' | 'model'>('map')
 const trailWeather = ref<TrailWeatherResponse | null>(null)
 const weatherLoading = ref(false)
 const weatherErrorMessage = ref('')
@@ -255,6 +254,12 @@ const detailWeatherScene = computed(() =>
 )
 const canManageTrail = computed(() => !!displayTrail.value?.ownedByCurrentUser)
 const canEditTrail = computed(() => !!displayTrail.value?.editableByCurrentUser)
+
+watch(detailTrackViewerData, (value) => {
+  if (!value && activeVisualization.value === 'model') {
+    activeVisualization.value = 'map'
+  }
+})
 
 async function handleCreateReview(payload: { rating?: number; text: string; images: string[] }) {
   if (!trailData.value || isSubmittingReview.value) return
@@ -647,72 +652,28 @@ function removeReviewNode(items: ReviewItem[], reviewId: EntityId): ReviewItem[]
         </p>
       </div>
 
-      <!-- Map Section -->
-      <TrailMapSection
+      <TrailVisualizationSection
+        v-model="activeVisualization"
         :center="mapCenter"
         :label="displayTrail?.name ?? trailData.name"
         :city="locationCity"
         :track-geo-json="trailData.track?.geoJson"
         :track-download-url="trailData.track?.downloadUrl"
+        :track-viewer-data="detailTrackViewerData"
+        :weather-scene="detailWeatherScene"
+        @request-fullscreen="isViewerFullscreen = true"
       />
 
-      <!-- Conditions & 3D Viewer Section (Side-by-Side on Desktop) -->
-      <div
-        :class="[
-          'grid grid-cols-1 items-stretch gap-6',
-          detailTrackViewerData ? 'lg:grid-cols-2' : '',
-        ]"
-      >
-        <!-- Left: Weather Dashboard -->
-        <div class="card flex h-full flex-col p-6">
-          <div class="mb-6 flex items-center justify-between">
-            <h3
-              class="flex items-center gap-2 text-lg font-bold"
-              style="color: var(--text-primary)"
-            >
-              <BaseIcon name="CloudSun" :size="22" class="text-primary-500" />
-              路线环境与天气
-            </h3>
-          </div>
-
-          <div class="flex-1 space-y-6">
-            <!-- Current Weather -->
-            <WeatherSection
-              :day="weatherOverview"
-              :is-loading="weatherLoading"
-              :fallback-city="locationCity"
-              :error-message="weatherErrorMessage"
-            />
-
-            <!-- Landscape Predictions -->
-            <LandscapePrediction
-              :prediction="landscapePrediction"
-              :is-loading="landscapeLoading"
-              :error-message="landscapeErrorMessage"
-            />
-
-            <!-- Forecast List -->
-            <div class="mt-6 border-t border-white/5">
-              <h4 class="mb-4 text-sm font-medium" style="color: var(--text-secondary)">
-                未来七天预报
-              </h4>
-              <WeatherForecast :forecast="forecast" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: 3D Track Viewer -->
-        <div v-if="detailTrackViewerData" class="h-[500px] min-h-[500px] lg:h-auto">
-          <TrailTrackViewer
-            class="h-full overflow-hidden rounded-2xl border border-white/5 shadow-2xl"
-            :data="detailTrackViewerData"
-            :weather-scene="detailWeatherScene"
-            mode="detail"
-            :show-scroll-to-content-button="false"
-            @request-fullscreen="isViewerFullscreen = true"
-          />
-        </div>
-      </div>
+      <TrailEnvironmentSection
+        :day="weatherOverview"
+        :forecast="forecast"
+        :is-weather-loading="weatherLoading"
+        :weather-error-message="weatherErrorMessage"
+        :fallback-city="locationCity"
+        :landscape-prediction="landscapePrediction"
+        :is-landscape-loading="landscapeLoading"
+        :landscape-error-message="landscapeErrorMessage"
+      />
 
       <!-- Reviews Section (Full Width) -->
       <div class="border-t border-white/5 pt-8">

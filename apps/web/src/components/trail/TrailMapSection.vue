@@ -9,6 +9,8 @@ const props = defineProps<{
   city: string
   trackGeoJson?: unknown
   trackDownloadUrl?: string | null
+  hideHeader?: boolean
+  active?: boolean
 }>()
 
 const mapRef = useTemplateRef<HTMLDivElement>('map')
@@ -121,6 +123,22 @@ watch(
   },
 )
 
+watch(
+  () => props.active,
+  async (active) => {
+    if (!active || !mapInstance.value) return
+
+    await nextTick()
+    mapInstance.value.resize?.()
+
+    if (props.trackGeoJson) {
+      mapInstance.value.setFitView?.()
+    } else if (props.center) {
+      mapInstance.value.setCenter?.(props.center)
+    }
+  },
+)
+
 onUnmounted(() => {
   if (mapInstance.value?.destroy) {
     mapInstance.value.destroy()
@@ -132,7 +150,7 @@ onUnmounted(() => {
 
 <template>
   <section class="animate-fade-in-up stagger-1">
-    <SectionHeader title="路线地图" />
+    <SectionHeader v-if="!hideHeader" title="路线地图" />
     <div class="card space-y-4 p-4">
       <div class="map-shell" :class="{ 'is-empty': (!hasCenter && !hasTrack) || !mapReady }">
         <!-- 始终挂载 DOM，如果还没有准备好通过 z-index 置于下层或隐藏视觉内容 -->

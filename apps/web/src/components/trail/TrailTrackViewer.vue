@@ -92,12 +92,14 @@ const props = withDefaults(
     weatherScene?: TrackWeatherScene
     showFullscreenButton?: boolean
     showScrollToContentButton?: boolean
+    active?: boolean
   }>(),
   {
     mode: 'embedded',
     weatherScene: 'partly_cloudy',
     showFullscreenButton: false,
     showScrollToContentButton: false,
+    active: true,
   },
 )
 
@@ -1257,6 +1259,16 @@ watch(
     void initScene()
   },
   { immediate: true, deep: true },
+)
+
+watch(
+  () => props.active,
+  async (active) => {
+    if (!active) return
+
+    await nextTick()
+    handleResize()
+  },
 )
 
 onMounted(() => {
