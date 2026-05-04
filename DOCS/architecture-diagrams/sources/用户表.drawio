@@ -1,0 +1,110 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="users-table">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- 用户表 -->
+        <mxCell id="users_table" value="用户表&#xa;users" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="400" y="300" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 字段 - 上方 -->
+        <mxCell id="f_id" value="主键ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="180" y="130" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_id" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_username" value="用户名" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="310" y="70" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_username" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_username" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_email" value="邮箱" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="450" y="70" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_email" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_email" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_password" value="密码哈希" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="590" y="70" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_password" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_password" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 字段 - 右侧 -->
+        <mxCell id="f_role" value="角色" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="700" y="200" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_role" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_role" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_status" value="状态" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="700" y="310" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_status" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_status" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_avatar" value="头像" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="700" y="420" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_avatar" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_avatar" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 字段 - 下方 -->
+        <mxCell id="f_bio" value="个人简介" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="540" y="530" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_bio" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_bio" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_location" value="所在地" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="400" y="530" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_location" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_location" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_created_at" value="创建时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="260" y="530" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_created_at" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_created_at" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_updated_at" value="更新时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="180" y="420" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_updated_at" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_updated_at" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 字段 - 左侧（封禁相关） -->
+        <mxCell id="f_banned_reason" value="封禁原因" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+          <mxGeometry x="180" y="340" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_banned_reason" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_banned_reason" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f_banned_until" value="封禁截止" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+          <mxGeometry x="180" y="230" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_f_banned_until" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="f_banned_until" target="users_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

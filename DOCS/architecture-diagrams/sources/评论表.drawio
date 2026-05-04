@@ -1,0 +1,110 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="reviews-table">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- 评论表 -->
+        <mxCell id="reviews_table" value="评论表&#xa;reviews" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="400" y="300" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 字段 - 上方 -->
+        <mxCell id="r_id" value="主键ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="180" y="130" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_id" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r_trail_id" value="所属路线ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+          <mxGeometry x="310" y="70" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_trail_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_trail_id" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r_user_id" value="评论者ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+          <mxGeometry x="450" y="70" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_user_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_user_id" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r_parent_id" value="父评论ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+          <mxGeometry x="600" y="70" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_parent_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_parent_id" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 字段 - 右侧 -->
+        <mxCell id="r_content" value="内容" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="700" y="200" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_content" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_content" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r_rating" value="评分" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="700" y="310" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_rating" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_rating" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r_status" value="状态" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="700" y="420" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_status" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_status" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 字段 - 下方 -->
+        <mxCell id="r_governance_status" value="审裁状态" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+          <mxGeometry x="540" y="530" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_governance_status" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_governance_status" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r_governance_note" value="审裁备注" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
+          <mxGeometry x="380" y="530" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_governance_note" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_governance_note" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r_created_at" value="创建时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="220" y="530" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_created_at" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_created_at" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r_updated_at" value="更新时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
+          <mxGeometry x="180" y="420" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e_r_updated_at" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="r_updated_at" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 关系 -->
+        <mxCell id="rel_trails" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="180" y="290" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_rel_trails" value="被评论" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=11" edge="1" parent="1" source="rel_trails" target="reviews_table">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel_self" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="740" y="130" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_rel_self" value="回复" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;fontSize=11" edge="1" parent="1" source="r_parent_id" target="rel_self">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
