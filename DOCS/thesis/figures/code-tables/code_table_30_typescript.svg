@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="449" viewBox="0 0 380 449">
+<rect x="0" y="0" width="380" height="449" fill="white"/>
+<g font-family="monospace" font-size="14px">
+<text x="0" y="14" xml:space="preserve"><tspan>const</tspan>&#160;suggestions&#160;=&#160;[</text>
+<text x="0" y="33" xml:space="preserve">&#160;&#160;{&#160;icon:&#160;<tspan>&#39;Compass&#39;</tspan>,&#160;text:&#160;<tspan>&#39;推荐杭州周边适合周末单日徒步的路线&#39;</tspan>&#160;},</text>
+<text x="0" y="52" xml:space="preserve">&#160;&#160;{&#160;icon:&#160;<tspan>&#39;Trees&#39;</tspan>,&#160;text:&#160;<tspan>&#39;想找一条适合新手、风景好的森林路线&#39;</tspan>&#160;},</text>
+<text x="0" y="71" xml:space="preserve">]</text>
+<text x="0" y="90" xml:space="preserve"></text>
+<text x="0" y="109" xml:space="preserve"><tspan>async</tspan>&#160;<tspan>function</tspan>&#160;handleSend(text:&#160;string)&#160;{</text>
+<text x="0" y="128" xml:space="preserve">&#160;&#160;<tspan>if</tspan>&#160;(!userStore.isLoggedIn)&#160;{</text>
+<text x="0" y="147" xml:space="preserve">&#160;&#160;&#160;&#160;userStore.showAuthModal&#160;=&#160;<tspan>true</tspan></text>
+<text x="0" y="166" xml:space="preserve">&#160;&#160;&#160;&#160;<tspan>return</tspan></text>
+<text x="0" y="185" xml:space="preserve">&#160;&#160;}</text>
+<text x="0" y="204" xml:space="preserve"></text>
+<text x="0" y="223" xml:space="preserve">&#160;&#160;<tspan>await</tspan>&#160;chatStore.sendMessage(text,&#160;{</text>
+<text x="0" y="242" xml:space="preserve">&#160;&#160;&#160;&#160;currentCity:&#160;userStore.profile?.location&#160;||&#160;<tspan>null</tspan>,</text>
+<text x="0" y="261" xml:space="preserve">&#160;&#160;})</text>
+<text x="0" y="280" xml:space="preserve">&#160;&#160;scrollToBottom()</text>
+<text x="0" y="299" xml:space="preserve">}</text>
+<text x="0" y="318" xml:space="preserve"></text>
+<text x="0" y="337" xml:space="preserve">watch(</text>
+<text x="0" y="356" xml:space="preserve">&#160;&#160;()&#160;=&gt;&#160;chatStore.messages.length,</text>
+<text x="0" y="375" xml:space="preserve">&#160;&#160;()&#160;=&gt;&#160;scrollToBottom(),</text>
+<text x="0" y="394" xml:space="preserve">)</text>
+<text x="0" y="413" xml:space="preserve"></text></g></svg>

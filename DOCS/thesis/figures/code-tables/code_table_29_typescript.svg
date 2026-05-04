@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="617" height="386" viewBox="0 0 617 386">
+<rect x="0" y="0" width="617" height="386" fill="white"/>
+<g font-family="monospace" font-size="14px">
+<text x="0" y="14" xml:space="preserve"><tspan>const</tspan>&#160;editTrailId&#160;=&#160;computed&lt;EntityId&#160;|&#160;<tspan>null</tspan>&gt;(()&#160;=&gt;&#160;{</text>
+<text x="0" y="33" xml:space="preserve">&#160;&#160;<tspan>const</tspan>&#160;rawEdit&#160;=&#160;route.query.edit</text>
+<text x="0" y="52" xml:space="preserve">&#160;&#160;<tspan>return</tspan>&#160;Array.isArray(rawEdit)&#160;?&#160;rawEdit[0]&#160;??&#160;null&#160;:&#160;rawEdit&#160;??&#160;<tspan>null</tspan></text>
+<text x="0" y="71" xml:space="preserve">})</text>
+<text x="0" y="90" xml:space="preserve"></text>
+<text x="0" y="109" xml:space="preserve"><tspan>async</tspan>&#160;<tspan>function</tspan>&#160;prepareDraft()&#160;{</text>
+<text x="0" y="128" xml:space="preserve">&#160;&#160;<tspan>const</tspan>&#160;scopeKey&#160;=&#160;currentScopeKey.value</text>
+<text x="0" y="147" xml:space="preserve">&#160;&#160;<tspan>const</tspan>&#160;mode&#160;=&#160;isEditMode.value&#160;?&#160;<tspan>&#39;edit&#39;</tspan>&#160;:&#160;<tspan>&#39;create&#39;</tspan></text>
+<text x="0" y="166" xml:space="preserve">&#160;&#160;currentDraft.value&#160;=&#160;publishUploadStore.ensureDraft(scopeKey,&#160;mode,&#160;editTrailId.value)</text>
+<text x="0" y="185" xml:space="preserve"></text>
+<text x="0" y="204" xml:space="preserve">&#160;&#160;<tspan>if</tspan>&#160;(!isEditMode.value&#160;||&#160;!editTrailId.value&#160;||&#160;currentDraft.value.hydratedFromServer)&#160;{</text>
+<text x="0" y="223" xml:space="preserve">&#160;&#160;&#160;&#160;<tspan>return</tspan></text>
+<text x="0" y="242" xml:space="preserve">&#160;&#160;}</text>
+<text x="0" y="261" xml:space="preserve"></text>
+<text x="0" y="280" xml:space="preserve">&#160;&#160;<tspan>const</tspan>&#160;detail&#160;=&#160;<tspan>await</tspan>&#160;fetchTrailDetail(editTrailId.value)</text>
+<text x="0" y="299" xml:space="preserve">&#160;&#160;currentDraft.value&#160;=&#160;publishUploadStore.hydrateDraftFromTrail(scopeKey,&#160;detail)</text>
+<text x="0" y="318" xml:space="preserve">&#160;&#160;<tspan>await</tspan>&#160;renderMapWithGeoJSON()</text>
+<text x="0" y="337" xml:space="preserve">}</text>
+<text x="0" y="356" xml:space="preserve"></text></g></svg>

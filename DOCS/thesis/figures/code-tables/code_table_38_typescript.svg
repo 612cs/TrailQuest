@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="195" height="324" viewBox="0 0 195 324">
+<rect x="0" y="0" width="195" height="324" fill="white"/>
+<g font-family="monospace" font-size="14px">
+<text x="0" y="14" xml:space="preserve"><tspan>const</tspan>&#160;{</text>
+<text x="0" y="33" xml:space="preserve">&#160;&#160;list,</text>
+<text x="0" y="52" xml:space="preserve">&#160;&#160;selectedIds,</text>
+<text x="0" y="71" xml:space="preserve">&#160;&#160;load,</text>
+<text x="0" y="90" xml:space="preserve">&#160;&#160;openDetail,</text>
+<text x="0" y="109" xml:space="preserve">&#160;&#160;requestHide,</text>
+<text x="0" y="128" xml:space="preserve">&#160;&#160;requestRestore,</text>
+<text x="0" y="147" xml:space="preserve">&#160;&#160;requestDelete,</text>
+<text x="0" y="166" xml:space="preserve">&#160;&#160;requestBatchHide,</text>
+<text x="0" y="185" xml:space="preserve">&#160;&#160;requestBatchRestore,</text>
+<text x="0" y="204" xml:space="preserve">}&#160;=&#160;useReviewManagement()</text>
+<text x="0" y="223" xml:space="preserve"></text>
+<text x="0" y="242" xml:space="preserve">onMounted(()&#160;=&gt;&#160;{</text>
+<text x="0" y="261" xml:space="preserve">&#160;&#160;<tspan>void</tspan>&#160;load()</text>
+<text x="0" y="280" xml:space="preserve">})</text>
+<text x="0" y="299" xml:space="preserve"></text></g></svg>

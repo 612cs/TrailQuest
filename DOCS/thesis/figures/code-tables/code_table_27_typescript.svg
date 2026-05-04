@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="485" height="428" viewBox="0 0 485 428">
+<rect x="0" y="0" width="485" height="428" fill="white"/>
+<g font-family="monospace" font-size="14px">
+<text x="0" y="14" xml:space="preserve">watch(trailData,&#160;<tspan>async</tspan>&#160;(trail,&#160;_prev,&#160;onCleanup)&#160;=&gt;&#160;{</text>
+<text x="0" y="33" xml:space="preserve">&#160;&#160;<tspan>if</tspan>&#160;(!trail)&#160;<tspan>return</tspan></text>
+<text x="0" y="52" xml:space="preserve">&#160;&#160;<tspan>const</tspan>&#160;controller&#160;=&#160;<tspan>new</tspan>&#160;AbortController()</text>
+<text x="0" y="71" xml:space="preserve">&#160;&#160;onCleanup(()&#160;=&gt;&#160;controller.abort())</text>
+<text x="0" y="90" xml:space="preserve">&#160;&#160;<tspan>void</tspan>&#160;resolveGeo({</text>
+<text x="0" y="109" xml:space="preserve">&#160;&#160;&#160;&#160;ip:&#160;trail.ip,</text>
+<text x="0" y="128" xml:space="preserve">&#160;&#160;&#160;&#160;locationLabel:&#160;<tspan>`</tspan><tspan>${</tspan>trail.location<tspan>}</tspan><tspan>&#160;</tspan><tspan>${</tspan>trail.name<tspan>}</tspan><tspan>`</tspan>,</text>
+<text x="0" y="147" xml:space="preserve">&#160;&#160;&#160;&#160;signal:&#160;controller.signal,</text>
+<text x="0" y="166" xml:space="preserve">&#160;&#160;})</text>
+<text x="0" y="185" xml:space="preserve">&#160;&#160;<tspan>const</tspan>&#160;[weatherResult,&#160;landscapeResult]&#160;=&#160;<tspan>await</tspan>&#160;Promise.allSettled([</text>
+<text x="0" y="204" xml:space="preserve">&#160;&#160;&#160;&#160;fetchTrailWeather(trail.id,&#160;controller.signal),</text>
+<text x="0" y="223" xml:space="preserve">&#160;&#160;&#160;&#160;fetchTrailLandscapePrediction(trail.id,&#160;7,&#160;controller.signal),</text>
+<text x="0" y="242" xml:space="preserve">&#160;&#160;])</text>
+<text x="0" y="261" xml:space="preserve">&#160;&#160;<tspan>if</tspan>&#160;(weatherResult.status&#160;===&#160;<tspan>&#39;fulfilled&#39;</tspan>)&#160;{</text>
+<text x="0" y="280" xml:space="preserve">&#160;&#160;&#160;&#160;trailWeather.value&#160;=&#160;weatherResult.value</text>
+<text x="0" y="299" xml:space="preserve">&#160;&#160;}</text>
+<text x="0" y="318" xml:space="preserve">&#160;&#160;<tspan>if</tspan>&#160;(landscapeResult.status&#160;===&#160;<tspan>&#39;fulfilled&#39;</tspan>)&#160;{</text>
+<text x="0" y="337" xml:space="preserve">&#160;&#160;&#160;&#160;landscapePrediction.value&#160;=&#160;landscapeResult.value</text>
+<text x="0" y="356" xml:space="preserve">&#160;&#160;}</text>
+<text x="0" y="375" xml:space="preserve">},&#160;{&#160;immediate:&#160;true&#160;})</text>
+<text x="0" y="394" xml:space="preserve"></text></g></svg>
