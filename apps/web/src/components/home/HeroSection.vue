@@ -2,14 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseIcon from '../common/BaseIcon.vue'
-import homeHeroImage from '../../assets/shouye.jpg'
 import { fetchHomeHeroSetting } from '../../api/site'
 
 const router = useRouter()
 const searchQuery = ref('')
 const remoteHeroImage = ref('')
 
-const activeHeroImage = computed(() => remoteHeroImage.value || homeHeroImage)
+const activeHeroImage = computed(() => remoteHeroImage.value || '')
 
 onMounted(async () => {
   try {

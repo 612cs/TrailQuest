@@ -18,7 +18,7 @@ end_port=$((START_PORT + MAX_OFFSET))
 while [ "$port" -le "$end_port" ]; do
   if ! is_port_in_use "$port"; then
     echo "$port" > "$ROOT_DIR/.api-port"
-    echo "[dev:api] 使用端口: $port（已写入 .api-port）"
+    echo "[dev:api] 使用端口: $port (已写入 .api-port)"
     exec "$API_DIR/mvnw" -f "$API_DIR/pom.xml" spring-boot:run \
       -Dspring-boot.run.profiles=local \
       -Dspring-boot.run.arguments="--server.port=$port"

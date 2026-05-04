@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { FlagTriangleRight, MessageSquareMore, Mountain, Route, UsersRound, TriangleAlert } from 'lucide-vue-next'
+import {
+  FlagTriangleRight,
+  MessageSquareMore,
+  Mountain,
+  Route,
+  UsersRound,
+  TriangleAlert,
+} from 'lucide-vue-next'
 import type { AdminDashboardSummary } from '../../types/admin'
 
 defineProps<{
@@ -14,7 +21,7 @@ const primaryCards = [
     description: '待处理 42',
     icon: Mountain,
     to: { path: '/trails/review', query: { reviewStatus: 'pending' } },
-    color: 'green'
+    color: 'green',
   },
   {
     key: 'pendingReportCount',
@@ -22,7 +29,7 @@ const primaryCards = [
     description: '18 条紧急处理',
     icon: FlagTriangleRight,
     to: { path: '/reports' },
-    color: 'red'
+    color: 'red',
   },
   {
     key: 'hiddenReviewCount',
@@ -30,7 +37,7 @@ const primaryCards = [
     description: '盘点已违规标记',
     icon: MessageSquareMore,
     to: { path: '/reviews', query: { status: 'hidden' } },
-    color: 'neutral'
+    color: 'neutral',
   },
 ] as const
 
@@ -39,19 +46,19 @@ const secondaryCards = [
     key: 'todayNewUserCount',
     title: '今日新增粉丝',
     icon: UsersRound,
-    color: 'green'
+    color: 'green',
   },
   {
     key: 'todayNewTrailCount',
     title: '今日新增路线',
     icon: Route,
-    color: 'cyan'
+    color: 'cyan',
   },
   {
     key: 'todayNewReviewCount',
     title: '今日新增评价',
     icon: MessageSquareMore,
-    color: 'blue'
+    color: 'blue',
   },
 ] as const
 
@@ -96,7 +103,9 @@ function valueOf(summary: AdminDashboardSummary | null, key: string) {
         </div>
         <div class="secondary-card__content">
           <p class="secondary-card__label">{{ item.title }}</p>
-          <p class="secondary-card__value">{{ loading ? '...' : valueOf(summary, item.key).toLocaleString() }}</p>
+          <p class="secondary-card__value">
+            {{ loading ? '...' : valueOf(summary, item.key).toLocaleString() }}
+          </p>
         </div>
       </div>
     </div>
@@ -142,15 +151,15 @@ function valueOf(summary: AdminDashboardSummary | null, key: string) {
   border-radius: 12px;
 }
 
-.primary-card[data-color="green"] .primary-card__icon {
+.primary-card[data-color='green'] .primary-card__icon {
   background: rgba(47, 106, 58, 0.08);
   color: #2f6a3a;
 }
-.primary-card[data-color="red"] .primary-card__icon {
+.primary-card[data-color='red'] .primary-card__icon {
   background: rgba(181, 68, 68, 0.08);
   color: #b54444;
 }
-.primary-card[data-color="neutral"] .primary-card__icon {
+.primary-card[data-color='neutral'] .primary-card__icon {
   background: rgba(107, 118, 104, 0.08);
   color: #6b7668;
 }
@@ -175,7 +184,7 @@ function valueOf(summary: AdminDashboardSummary | null, key: string) {
   margin: 0;
 }
 
-.primary-card[data-color="red"] .primary-card__desc {
+.primary-card[data-color='red'] .primary-card__desc {
   color: #b54444;
   font-weight: 600;
 }
@@ -202,9 +211,15 @@ function valueOf(summary: AdminDashboardSummary | null, key: string) {
   width: 4px;
 }
 
-.secondary-card[data-color="green"]::before { background: #2f6a3a; }
-.secondary-card[data-color="cyan"]::before { background: #00838f; }
-.secondary-card[data-color="blue"]::before { background: #1565c0; }
+.secondary-card[data-color='green']::before {
+  background: #2f6a3a;
+}
+.secondary-card[data-color='cyan']::before {
+  background: #00838f;
+}
+.secondary-card[data-color='blue']::before {
+  background: #1565c0;
+}
 
 .secondary-card__icon {
   width: 2.5rem;

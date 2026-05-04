@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
-import { 
-  LoaderCircle, 
-  MoonStar, 
-  RefreshCcw, 
-  SunMedium, 
+import {
+  LoaderCircle,
+  MoonStar,
+  RefreshCcw,
+  SunMedium,
   Palette,
   Trees,
   UserPen,
@@ -13,7 +13,7 @@ import {
   History,
   Save,
   RotateCcw,
-  CloudUpload
+  CloudUpload,
 } from 'lucide-vue-next'
 
 import { fetchAdminHomeHeroSetting, updateAdminHomeHeroSetting } from '../api/admin'
@@ -127,7 +127,12 @@ onMounted(() => {
         <!-- Account Card -->
         <section class="settings-card account-card text-center" v-if="user">
           <div class="avatar-wrapper">
-            <img v-if="user.avatarMediaUrl" :src="user.avatarMediaUrl" :alt="user.username" class="user-avatar" />
+            <img
+              v-if="user.avatarMediaUrl"
+              :src="user.avatarMediaUrl"
+              :alt="user.username"
+              class="user-avatar"
+            />
             <div v-else class="user-avatar-placeholder">{{ user.username.slice(0, 1) }}</div>
             <button class="edit-badge"><UserPen :size="14" /></button>
           </div>
@@ -145,8 +150,8 @@ onMounted(() => {
               <MoonStar v-else :size="20" class="theme-icon" />
               <span class="theme-label">{{ themeStore.isDark ? '深色模式' : '浅色模式' }}</span>
             </div>
-            <button 
-              class="theme-toggle" 
+            <button
+              class="theme-toggle"
               :class="{ 'is-active': themeStore.isDark }"
               @click="themeStore.toggle"
             >
@@ -161,7 +166,8 @@ onMounted(() => {
           <div class="statement-content">
             <h3 class="statement-title">系统定位</h3>
             <p class="statement-text">
-              TrailQuest Admin 是专为户外步道设计的数字化管理核心。通过实时数据流，我们旨在为管理者提供“数字巡林”的一站式决策支持。
+              TrailQuest Admin
+              是专为户外步道设计的数字化管理核心。通过实时数据流，我们旨在为管理者提供“数字巡林”的一站式决策支持。
             </p>
           </div>
           <Trees :size="120" class="statement-icon" />
@@ -177,7 +183,9 @@ onMounted(() => {
               <p class="card-desc">管理移动端及网页端首页的视觉引导区域</p>
             </div>
             <div class="header-tools">
-              <button class="tool-btn" @click="loadHeroSetting" :disabled="heroLoading"><RefreshCcw :size="18" /></button>
+              <button class="tool-btn" @click="loadHeroSetting" :disabled="heroLoading">
+                <RefreshCcw :size="18" />
+              </button>
               <button class="tool-btn"><History :size="18" /></button>
             </div>
           </div>
@@ -205,10 +213,10 @@ onMounted(() => {
             <div class="input-group">
               <label class="input-label">资源 URL</label>
               <div class="input-wrapper">
-                <input 
-                  type="text" 
-                  class="styled-input" 
-                  readonly 
+                <input
+                  type="text"
+                  class="styled-input"
+                  readonly
                   :value="heroImageUrl || '等待上传成功...'"
                   placeholder="https://oss.trailquest.com/..."
                 />
@@ -221,14 +229,22 @@ onMounted(() => {
               <div class="status-panel">
                 <div class="status-info">
                   <span class="status-badge" :class="{ 'is-uploaded': heroImageUrl }">
-                    {{ heroUploading ? '上传中' : (heroImageUrl ? '上传成功' : '待上传') }}
+                    {{ heroUploading ? '上传中' : heroImageUrl ? '上传成功' : '待上传' }}
                   </span>
-                  <span class="status-percent">{{ heroUploading ? `${heroUploadProgress}%` : (heroImageUrl ? '100%' : '0%') }}</span>
+                  <span class="status-percent">{{
+                    heroUploading ? `${heroUploadProgress}%` : heroImageUrl ? '100%' : '0%'
+                  }}</span>
                 </div>
                 <div class="progress-bar">
-                  <div 
-                    class="progress-fill" 
-                    :style="{ width: heroUploading ? `${heroUploadProgress}%` : (heroImageUrl ? '100%' : '0%') }"
+                  <div
+                    class="progress-fill"
+                    :style="{
+                      width: heroUploading
+                        ? `${heroUploadProgress}%`
+                        : heroImageUrl
+                          ? '100%'
+                          : '0%',
+                    }"
                   ></div>
                 </div>
               </div>
@@ -237,11 +253,11 @@ onMounted(() => {
 
           <!-- Upload Area -->
           <div class="upload-zone" @click="openHeroFilePicker">
-            <input 
-              ref="heroFileInput" 
-              type="file" 
-              class="hidden" 
-              accept="image/*" 
+            <input
+              ref="heroFileInput"
+              type="file"
+              class="hidden"
+              accept="image/*"
               @change="handleHeroFileChange"
             />
             <div class="upload-icon">
@@ -260,7 +276,9 @@ onMounted(() => {
               <RotateCcw :size="14" /> 恢复出厂默认值
             </button>
             <div class="action-buttons">
-              <button class="btn btn--secondary" @click="router.push({ name: 'config-center' })">进入配置中心</button>
+              <button class="btn btn--secondary" @click="router.push({ name: 'config-center' })">
+                进入配置中心
+              </button>
               <button class="btn btn--primary" @click="saveHeroSetting" :disabled="heroSaving">
                 <Save :size="18" /> 保存全局配置
               </button>
@@ -327,8 +345,12 @@ onMounted(() => {
   gap: 1.5rem;
 }
 
-.bento-column--left { grid-column: span 4; }
-.bento-column--right { grid-column: span 8; }
+.bento-column--left {
+  grid-column: span 4;
+}
+.bento-column--right {
+  grid-column: span 8;
+}
 
 .settings-card {
   background: white;
@@ -351,7 +373,8 @@ onMounted(() => {
   margin-bottom: 1.25rem;
 }
 
-.user-avatar, .user-avatar-placeholder {
+.user-avatar,
+.user-avatar-placeholder {
   width: 100px;
   height: 100px;
   border-radius: 50%;
@@ -436,8 +459,13 @@ onMounted(() => {
   gap: 0.75rem;
 }
 
-.theme-icon { color: var(--primary); }
-.theme-label { font-weight: 600; font-size: 0.9375rem; }
+.theme-icon {
+  color: var(--primary);
+}
+.theme-label {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
 
 .theme-toggle {
   width: 48px;
@@ -450,7 +478,9 @@ onMounted(() => {
   border: none;
 }
 
-.theme-toggle.is-active { background: var(--primary); }
+.theme-toggle.is-active {
+  background: var(--primary);
+}
 
 .toggle-thumb {
   position: absolute;
@@ -463,7 +493,9 @@ onMounted(() => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.is-active .toggle-thumb { transform: translateX(24px); }
+.is-active .toggle-thumb {
+  transform: translateX(24px);
+}
 
 .card-hint {
   font-size: 0.8125rem;
@@ -481,9 +513,20 @@ onMounted(() => {
   height: 200px;
 }
 
-.statement-content { position: relative; z-index: 2; }
-.statement-title { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem; }
-.statement-text { font-size: 0.875rem; line-height: 1.6; opacity: 0.9; }
+.statement-content {
+  position: relative;
+  z-index: 2;
+}
+.statement-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+.statement-text {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  opacity: 0.9;
+}
 
 .statement-icon {
   position: absolute;
@@ -508,10 +551,22 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
-.card-title { font-size: 1.5rem; font-weight: 700; color: var(--text-strong); margin: 0; }
-.card-desc { font-size: 0.9375rem; color: var(--text-muted); margin: 0.25rem 0 0; }
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0;
+}
+.card-desc {
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  margin: 0.25rem 0 0;
+}
 
-.header-tools { display: flex; gap: 0.5rem; }
+.header-tools {
+  display: flex;
+  gap: 0.5rem;
+}
 .tool-btn {
   width: 40px;
   height: 40px;
@@ -524,7 +579,11 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.2s;
 }
-.tool-btn:hover { background: white; color: var(--primary); border-color: var(--primary-soft); }
+.tool-btn:hover {
+  background: white;
+  color: var(--primary);
+  border-color: var(--primary-soft);
+}
 
 /* Preview Stage */
 .preview-stage {
@@ -537,8 +596,15 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
-.preview-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
-.preview-stage:hover .preview-img { transform: scale(1.05); }
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+.preview-stage:hover .preview-img {
+  transform: scale(1.05);
+}
 
 .preview-empty {
   width: 100%;
@@ -554,7 +620,7 @@ onMounted(() => {
 .preview-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 60%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -563,7 +629,7 @@ onMounted(() => {
 }
 
 .preview-tag {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
   padding: 0.2rem 0.6rem;
   border-radius: 4px;
@@ -573,13 +639,17 @@ onMounted(() => {
   letter-spacing: 0.1em;
 }
 
-.preview-headline { font-size: 1.25rem; font-weight: 700; margin-top: 0.5rem; }
+.preview-headline {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
 
 .oss-status {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   color: var(--primary);
   font-size: 0.625rem;
   font-weight: 800;
@@ -632,11 +702,22 @@ onMounted(() => {
   place-items: center;
   color: var(--text-muted);
 }
-.copy-btn:hover { background: var(--border); color: var(--text-strong); }
+.copy-btn:hover {
+  background: var(--border);
+  color: var(--text-strong);
+}
 
 /* Progress Panel */
-.status-panel { display: flex; flex-direction: column; gap: 0.5rem; }
-.status-info { display: flex; justify-content: space-between; align-items: center; }
+.status-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.status-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
 .status-badge {
   font-size: 0.6875rem;
@@ -646,9 +727,16 @@ onMounted(() => {
   background: var(--bg-soft);
   color: var(--text-muted);
 }
-.status-badge.is-uploaded { background: rgba(47, 106, 58, 0.12); color: #2f6a3a; }
+.status-badge.is-uploaded {
+  background: rgba(47, 106, 58, 0.12);
+  color: #2f6a3a;
+}
 
-.status-percent { font-size: 0.75rem; font-weight: 700; color: var(--text-strong); }
+.status-percent {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-strong);
+}
 
 .progress-bar {
   height: 6px;
@@ -689,11 +777,19 @@ onMounted(() => {
   display: grid;
   place-items: center;
   color: var(--primary);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.upload-text .primary-text { font-weight: 700; font-size: 0.9375rem; margin: 0; }
-.upload-text .secondary-text { font-size: 0.75rem; color: var(--text-muted); margin: 0.25rem 0 0; }
+.upload-text .primary-text {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  margin: 0;
+}
+.upload-text .secondary-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0.25rem 0 0;
+}
 
 /* Action Footer */
 .action-footer {
@@ -716,9 +812,14 @@ onMounted(() => {
   gap: 0.4rem;
   cursor: pointer;
 }
-.reset-link:hover { text-decoration: underline; }
+.reset-link:hover {
+  text-decoration: underline;
+}
 
-.action-buttons { display: flex; gap: 1rem; }
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+}
 
 .btn {
   padding: 0.75rem 1.75rem;
@@ -738,10 +839,18 @@ onMounted(() => {
   color: white;
   box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.2);
 }
-.btn--primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.3); }
+.btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.3);
+}
 
-.btn--secondary { background: var(--bg-soft); color: var(--text-strong); }
-.btn--secondary:hover { background: var(--border); }
+.btn--secondary {
+  background: var(--bg-soft);
+  color: var(--text-strong);
+}
+.btn--secondary:hover {
+  background: var(--border);
+}
 
 /* Footer */
 .settings-footer {
@@ -757,19 +866,45 @@ onMounted(() => {
   letter-spacing: 0.1em;
 }
 
-.footer-links { display: flex; gap: 1.5rem; align-items: center; }
-.footer-links a:hover { color: var(--primary); }
+.footer-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+.footer-links a:hover {
+  color: var(--primary);
+}
 
-.system-status { display: flex; align-items: center; gap: 0.4rem; }
-.status-dot { width: 6px; height: 6px; background: #2f6a3a; border-radius: 50%; }
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background: #2f6a3a;
+  border-radius: 50%;
+}
 
 @media (max-width: 1024px) {
-  .bento-grid { grid-template-columns: 1fr; }
-  .bento-column--left, .bento-column--right { grid-column: span 12; }
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+  .bento-column--left,
+  .bento-column--right {
+    grid-column: span 12;
+  }
 }
 
 @media (max-width: 640px) {
-  .controls-grid { grid-template-columns: 1fr; }
-  .action-footer { flex-direction: column; gap: 1.5rem; align-items: flex-start; }
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+  .action-footer {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
 }
 </style>
