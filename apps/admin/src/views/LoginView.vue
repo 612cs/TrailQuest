@@ -127,14 +127,24 @@ async function handleSubmit() {
     radial-gradient(circle at 18% 18%, rgba(var(--primary-rgb), 0.16), transparent 26%),
     radial-gradient(circle at 82% 20%, rgba(74, 144, 108, 0.16), transparent 24%),
     radial-gradient(circle at 50% 78%, rgba(20, 83, 45, 0.12), transparent 30%),
-    linear-gradient(180deg, rgba(var(--bg-body-rgb), 0.96) 0%, rgba(var(--bg-body-rgb), 0.9) 48%, rgba(var(--bg-body-rgb), 0.96) 100%);
+    linear-gradient(
+      180deg,
+      rgba(var(--bg-body-rgb), 0.96) 0%,
+      rgba(var(--bg-body-rgb), 0.9) 48%,
+      rgba(var(--bg-body-rgb), 0.96) 100%
+    );
 }
 
 .login-background {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 20% 18%, rgba(var(--primary-rgb), 0.18), transparent 0 18%, transparent 19%),
+    radial-gradient(
+      circle at 20% 18%,
+      rgba(var(--primary-rgb), 0.18),
+      transparent 0 18%,
+      transparent 19%
+    ),
     radial-gradient(circle at 78% 24%, rgba(72, 122, 92, 0.18), transparent 0 16%, transparent 17%),
     radial-gradient(circle at 50% 52%, rgba(15, 23, 42, 0.06), transparent 0 20%, transparent 21%),
     linear-gradient(135deg, rgba(var(--bg-surface-rgb), 0.94), rgba(var(--bg-body-rgb), 0.9));
@@ -149,7 +159,14 @@ async function handleSubmit() {
   inset: 0;
   background:
     linear-gradient(transparent 0 73%, rgba(32, 78, 50, 0.12) 73% 78%, transparent 78% 100%),
-    linear-gradient(115deg, transparent 0 34%, rgba(255, 255, 255, 0.12) 34% 36%, transparent 36% 64%, rgba(255, 255, 255, 0.08) 64% 66%, transparent 66% 100%);
+    linear-gradient(
+      115deg,
+      transparent 0 34%,
+      rgba(255, 255, 255, 0.12) 34% 36%,
+      transparent 36% 64%,
+      rgba(255, 255, 255, 0.08) 64% 66%,
+      transparent 66% 100%
+    );
   opacity: 0.65;
 }
 
@@ -192,11 +209,7 @@ async function handleSubmit() {
 .login-hero {
   position: relative;
   padding: 4rem;
-  background: linear-gradient(
-    145deg,
-    rgba(236, 253, 245, 0.96),
-    rgba(187, 247, 208, 0.92)
-  );
+  background: linear-gradient(145deg, rgba(236, 253, 245, 0.96), rgba(187, 247, 208, 0.92));
   color: #111827;
   overflow: hidden;
   display: flex;
