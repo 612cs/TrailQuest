@@ -1,0 +1,103 @@
+<mxfile host="Electron" agent="Codex">
+  <diagram id="diagram" name="第 1 页">
+    <mxGraphModel dx="1735" dy="1500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1780" pageHeight="920" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="input_side" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" value="路线与环境输入&#xa;路线坐标&#xa;轨迹海拔&#xa;目标日期&#xa;用户偏好" vertex="1">
+          <mxGeometry height="610" width="220" x="30" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="output_side" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" value="协同应用输出&#xa;路线详情页&#xa;AI 推荐排序&#xa;风险提示&#xa;出行建议" vertex="1">
+          <mxGeometry height="610" width="220" x="1530" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="core" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;" value="" vertex="1">
+          <mxGeometry height="430" width="1210" x="285" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="core_title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" value="景观预测与推荐链路协同核心" vertex="1">
+          <mxGeometry height="34" width="340" x="730" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="context" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="景观上下文构造&#xa;路线 / 轨迹 / 时间" vertex="1">
+          <mxGeometry height="80" width="190" x="340" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="weather" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="天气与天文数据&#xa;温度 / 湿度 / 云量" vertex="1">
+          <mxGeometry height="80" width="190" x="590" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="feature" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="景观特征工程&#xa;海拔 / 风速 / 露点差" vertex="1">
+          <mxGeometry height="80" width="190" x="840" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="forest" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="随机森林预测&#xa;云海 / 雾凇 / 冰挂" vertex="1">
+          <mxGeometry height="80" width="190" x="1090" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="prob" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="概率等级与说明&#xa;高 / 中 / 低" vertex="1">
+          <mxGeometry height="70" width="190" x="1240" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="详情页环境展示&#xa;天气与景观卡片" vertex="1">
+          <mxGeometry height="70" width="210" x="420" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="rank" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="推荐链路重排&#xa;环境特征加权" vertex="1">
+          <mxGeometry height="70" width="210" x="720" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="reason" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="推荐解释生成&#xa;出行窗口与风险" vertex="1">
+          <mxGeometry height="70" width="210" x="1020" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="storage" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;" value="" vertex="1">
+          <mxGeometry height="150" width="1210" x="285" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="storage_title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;" value="数据记录与反馈" vertex="1">
+          <mxGeometry height="34" width="340" x="720" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="obs" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="人工观测标签&#xa;landscape_observation_labels" vertex="1">
+          <mxGeometry height="45" width="220" x="360" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="snap" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="特征快照&#xa;landscape_feature_snapshots" vertex="1">
+          <mxGeometry height="45" width="220" x="650" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="trail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="路线与轨迹数据&#xa;trails / trail_tracks" vertex="1">
+          <mxGeometry height="45" width="220" x="940" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="log" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffffff;fontSize=14;align=center;verticalAlign=middle;" value="推荐反馈记录&#xa;点击 / 收藏 / 评论" vertex="1">
+          <mxGeometry height="45" width="220" x="1230" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="input_side" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;endArrow=block;endFill=1;fontSize=12;" target="context" value="路线信息">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="context" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;endArrow=block;endFill=1;fontSize=12;" target="weather" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="weather" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;endArrow=block;endFill=1;fontSize=12;" target="feature" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="feature" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;endArrow=block;endFill=1;fontSize=12;" target="forest" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="forest" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;endArrow=block;endFill=1;fontSize=12;" target="prob" value="预测概率">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="prob" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;endArrow=block;endFill=1;fontSize=12;" target="detail" value="展示">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="prob" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;endArrow=block;endFill=1;fontSize=12;" target="rank" value="排序特征">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="rank" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;endArrow=block;endFill=1;fontSize=12;" target="reason" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="reason" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;endArrow=block;endFill=1;fontSize=12;" target="output_side" value="解释与建议">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="trail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;dashed=1;endArrow=block;endFill=1;fontSize=12;" target="context" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="obs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;dashed=1;endArrow=block;endFill=1;fontSize=12;" target="forest" value="训练校验">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="snap" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;dashed=1;endArrow=block;endFill=1;fontSize=12;" target="feature" value="调试回溯">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="log" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000000;dashed=1;endArrow=block;endFill=1;fontSize=12;" target="rank" value="反馈优化">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

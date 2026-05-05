@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="463" viewBox="0 0 860 463">
+<rect x="0" y="0" width="860" height="463" fill="white"/>
+<g font-family="Menlo, Monaco, Consolas, Courier New, monospace" font-size="14px">
+<text x="10" y="28" xml:space="preserve">// UserController：当前用户发布和收藏路线查询</text>
+<text x="10" y="47" xml:space="preserve">@GetMapping(&quot;/me/trails&quot;)</text>
+<text x="10" y="66" xml:space="preserve">public ApiResponse&lt;PageResponse&lt;UserTrailListItemVo&gt;&gt; getCurrentUserPublishedTrails(</text>
+<text x="10" y="85" xml:space="preserve">        @AuthenticationPrincipal CustomUserDetails userDetails,</text>
+<text x="10" y="104" xml:space="preserve">        @Valid PageRequest request) {</text>
+<text x="10" y="123" xml:space="preserve">    return ApiResponse.success(</text>
+<text x="10" y="142" xml:space="preserve">            userService.getCurrentUserPublishedTrails(userDetails.getId(), request));</text>
+<text x="10" y="161" xml:space="preserve">}</text>
+<text x="10" y="180" xml:space="preserve"></text>
+<text x="10" y="199" xml:space="preserve">@GetMapping(&quot;/me/favorites&quot;)</text>
+<text x="10" y="218" xml:space="preserve">public ApiResponse&lt;PageResponse&lt;UserTrailListItemVo&gt;&gt; getCurrentUserFavoriteTrails(</text>
+<text x="10" y="237" xml:space="preserve">        @AuthenticationPrincipal CustomUserDetails userDetails,</text>
+<text x="10" y="256" xml:space="preserve">        @Valid PageRequest request) {</text>
+<text x="10" y="275" xml:space="preserve">    return ApiResponse.success(</text>
+<text x="10" y="294" xml:space="preserve">            userService.getCurrentUserFavoriteTrails(userDetails.getId(), request));</text>
+<text x="10" y="313" xml:space="preserve">}</text>
+<text x="10" y="332" xml:space="preserve"></text>
+<text x="10" y="351" xml:space="preserve">// UserServiceImpl：聚合用户资料、发布路线与收藏路线</text>
+<text x="10" y="370" xml:space="preserve">public UserProfileVo getCurrentUserProfile(Long userId) {</text>
+<text x="10" y="389" xml:space="preserve">    User user = userMapper.selectById(userId);</text>
+<text x="10" y="408" xml:space="preserve">    UserHikingProfile profile = hikingProfileMapper.selectByUserId(userId);</text>
+<text x="10" y="427" xml:space="preserve">    return UserProfileVo.of(user, profile);</text>
+<text x="10" y="446" xml:space="preserve">}</text>
+</g>
+</svg>

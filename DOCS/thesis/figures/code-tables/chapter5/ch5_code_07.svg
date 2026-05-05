@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="672" viewBox="0 0 860 672">
+<rect x="0" y="0" width="860" height="672" fill="white"/>
+<g font-family="Menlo, Monaco, Consolas, Courier New, monospace" font-size="14px">
+<text x="10" y="28" xml:space="preserve">// AiWebSocketHandler：接收前端对话消息并推送流式结果</text>
+<text x="10" y="47" xml:space="preserve">public void handleTextMessage(WebSocketSession session, TextMessage message) {</text>
+<text x="10" y="66" xml:space="preserve">    Long userId = resolveUserId(session);</text>
+<text x="10" y="85" xml:space="preserve">    aiRouteRecommendationService.streamRecommendation(</text>
+<text x="10" y="104" xml:space="preserve">            userId, message.getPayload(),</text>
+<text x="10" y="123" xml:space="preserve">            chunk -&gt; session.sendMessage(new TextMessage(chunk)));</text>
+<text x="10" y="142" xml:space="preserve">}</text>
+<text x="10" y="161" xml:space="preserve"></text>
+<text x="10" y="180" xml:space="preserve">// AiRouteRecommendationServiceImpl：规划推荐候选并排序</text>
+<text x="10" y="199" xml:space="preserve">public AiRecommendationResult planRecommendation(Long userId, String message) {</text>
+<text x="10" y="218" xml:space="preserve">    UserHikingProfile profile = userHikingProfileMapper.selectByUserId(userId);</text>
+<text x="10" y="237" xml:space="preserve">    AiParsedQuery parsedQuery = parseQuery(message, buildPreferenceSummary(profile));</text>
+<text x="10" y="256" xml:space="preserve">    if (parsedQuery.intent() != AiIntent.TRAIL_RECOMMENDATION) {</text>
+<text x="10" y="275" xml:space="preserve">        return AiRecommendationResult.generalQa(parsedQuery);</text>
+<text x="10" y="294" xml:space="preserve">    }</text>
+<text x="10" y="313" xml:space="preserve">    TrailPageRequest request = buildTrailPageRequest(parsedQuery, message);</text>
+<text x="10" y="332" xml:space="preserve">    List&lt;TrailDetailVo&gt; candidates = trailService.pageTrails(request, userId).getList();</text>
+<text x="10" y="351" xml:space="preserve">    List&lt;TrailDetailVo&gt; ranked = candidates.stream()</text>
+<text x="10" y="370" xml:space="preserve">            .sorted(Comparator.comparingDouble(</text>
+<text x="10" y="389" xml:space="preserve">                    trail -&gt; scoreTrail(trail, parsedQuery, profile, message)).reversed())</text>
+<text x="10" y="408" xml:space="preserve">            .limit(3)</text>
+<text x="10" y="427" xml:space="preserve">            .toList();</text>
+<text x="10" y="446" xml:space="preserve">    return buildRecommendationResult(ranked, parsedQuery, profile, message);</text>
+<text x="10" y="465" xml:space="preserve">}</text>
+<text x="10" y="484" xml:space="preserve"></text>
+<text x="10" y="503" xml:space="preserve">private double scoreTrail(TrailDetailVo trail, AiParsedQuery query,</text>
+<text x="10" y="522" xml:space="preserve">                          UserHikingProfile profile, String rawMessage) {</text>
+<text x="10" y="541" xml:space="preserve">    double score = trail.getRating().doubleValue() * 20;</text>
+<text x="10" y="560" xml:space="preserve">    score += matchDifficulty(trail, query) ? 18 : 0;</text>
+<text x="10" y="579" xml:space="preserve">    score += matchPackPreference(trail, profile) ? 12 : 0;</text>
+<text x="10" y="598" xml:space="preserve">    score += matchLocation(trail, query, rawMessage) ? 20 : 0;</text>
+<text x="10" y="617" xml:space="preserve">    score += Math.log1p(trail.getLikes() + trail.getFavorites());</text>
+<text x="10" y="636" xml:space="preserve">    return score;</text>
+<text x="10" y="655" xml:space="preserve">}</text>
+</g>
+</svg>

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="330" viewBox="0 0 860 330">
+<rect x="0" y="0" width="860" height="330" fill="white"/>
+<g font-family="Menlo, Monaco, Consolas, Courier New, monospace" font-size="14px">
+<text x="10" y="28" xml:space="preserve">Input: 用户请求 q，用户画像 u，会话上下文 c</text>
+<text x="10" y="47" xml:space="preserve">Output: 推荐路线集合 R，推荐理由 E，追问建议 F</text>
+<text x="10" y="66" xml:space="preserve">1. prompt &lt;- buildPrompt(q, u, c)</text>
+<text x="10" y="85" xml:space="preserve">2. parsed &lt;- DeepSeek.parse(prompt, function_call_schema)</text>
+<text x="10" y="104" xml:space="preserve">3. if parsed.intent != trail_recommendation then return generalAnswer(q)</text>
+<text x="10" y="123" xml:space="preserve">4. query &lt;- mapToTrailQuery(parsed.location, parsed.difficulty, parsed.tags)</text>
+<text x="10" y="142" xml:space="preserve">5. candidates &lt;- trailService.pageTrails(query, userId)</text>
+<text x="10" y="161" xml:space="preserve">6. if candidates is empty then candidates &lt;- fallbackSearch(parsed.location)</text>
+<text x="10" y="180" xml:space="preserve">7. for each trail in candidates do</text>
+<text x="10" y="199" xml:space="preserve">8.     score &lt;- geoScore + attributeScore + profileScore + popularityScore</text>
+<text x="10" y="218" xml:space="preserve">9.     reason &lt;- buildReason(trail, parsed, u)</text>
+<text x="10" y="237" xml:space="preserve">10. end for</text>
+<text x="10" y="256" xml:space="preserve">11. R &lt;- topK(sortByScore(candidates), 3)</text>
+<text x="10" y="275" xml:space="preserve">12. E &lt;- buildRouteFacts(R)</text>
+<text x="10" y="294" xml:space="preserve">13. F &lt;- buildFollowUps(parsed, R)</text>
+<text x="10" y="313" xml:space="preserve">14. return R, E, F</text>
+</g>
+</svg>

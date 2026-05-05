@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="159" viewBox="0 0 860 159">
+<rect x="0" y="0" width="860" height="159" fill="white"/>
+<g font-family="Menlo, Monaco, Consolas, Courier New, monospace" font-size="14px">
+<text x="10" y="28" xml:space="preserve">@GetMapping</text>
+<text x="10" y="47" xml:space="preserve">public ApiResponse&lt;PageResponse&lt;TrailDetailVo&gt;&gt; page(</text>
+<text x="10" y="66" xml:space="preserve">        @AuthenticationPrincipal CustomUserDetails userDetails,</text>
+<text x="10" y="85" xml:space="preserve">        @Valid TrailPageRequest request) {</text>
+<text x="10" y="104" xml:space="preserve">    Long userId = userDetails == null ? null : userDetails.getId();</text>
+<text x="10" y="123" xml:space="preserve">    return ApiResponse.success(trailService.pageTrails(request, userId));</text>
+<text x="10" y="142" xml:space="preserve">}</text>
+</g>
+</svg>

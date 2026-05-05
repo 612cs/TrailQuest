@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="311" viewBox="0 0 860 311">
+<rect x="0" y="0" width="860" height="311" fill="white"/>
+<g font-family="Menlo, Monaco, Consolas, Courier New, monospace" font-size="14px">
+<text x="10" y="28" xml:space="preserve">Input: 路线 ID trailId，预测天数 days</text>
+<text x="10" y="47" xml:space="preserve">Output: 景观预测结果 P</text>
+<text x="10" y="66" xml:space="preserve">1. days &lt;- clamp(days, 1, 7)</text>
+<text x="10" y="85" xml:space="preserve">2. trail &lt;- queryTrail(trailId)</text>
+<text x="10" y="104" xml:space="preserve">3. location &lt;- resolveStartCoordinate(trail)</text>
+<text x="10" y="123" xml:space="preserve">4. track &lt;- queryTrailTrack(trailId)</text>
+<text x="10" y="142" xml:space="preserve">5. weather &lt;- fetchCurrentAndHourlyWeather(location)</text>
+<text x="10" y="161" xml:space="preserve">6. astronomy &lt;- fetchSunMoonData(location, days)</text>
+<text x="10" y="180" xml:space="preserve">7. light &lt;- fetchLightPollution(location)</text>
+<text x="10" y="199" xml:space="preserve">8. features &lt;- engineerFeatures(weather, astronomy, light, track)</text>
+<text x="10" y="218" xml:space="preserve">9. cloudSea &lt;- randomForestCloudSea.predict(features)</text>
+<text x="10" y="237" xml:space="preserve">10. rime &lt;- randomForestRime.predict(features)</text>
+<text x="10" y="256" xml:space="preserve">11. icicle &lt;- randomForestIcicle.predict(features)</text>
+<text x="10" y="275" xml:space="preserve">12. P &lt;- buildPredictionCards(cloudSea, rime, icicle)</text>
+<text x="10" y="294" xml:space="preserve">13. return P</text>
+</g>
+</svg>
