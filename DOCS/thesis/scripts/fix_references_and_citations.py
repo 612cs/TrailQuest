@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import re
 from copy import deepcopy
 from pathlib import Path
@@ -14,10 +15,10 @@ from docx.text.paragraph import Paragraph
 
 
 BASE = Path(__file__).resolve().parents[3]
-DOCX_PATH = BASE / "DOCS/thesis/manuscripts/陈胜论文.docx"
+DEFAULT_DOCX_PATH = BASE / "DOCS/thesis/manuscripts/陈胜论文.docx"
 
 FINAL_REFS = [
-    "Siriaraya P, Wang Y, Zhang Y, et al. Beyond the Shortest Route: A Survey on Quality-Aware Route Navigation for Pedestrians[J]. IEEE Access, 2020, 8: 171848-171883.",
+    "Siriaraya P, Wang Y, Zhang Y, et al. Beyond the Shortest Route: A Survey on Quality-Aware Route Navigation for Pedestrians[J]. IEEE Access, 2020, 8: 135569-135590.",
     "Zhang L. Intelligent tourism route recommendation method based on big data[J]. International Journal of Autonomous and Adaptive Communications Systems, 2020, 13(4): 329-341.",
     "Liu X. Design of personalized tourism route recommendation system based on knowledge graph[C]//2022 International Conference on Intelligent Transportation, Big Data & Smart City. IEEE, 2022: 102-106.",
     "Wang C. Personalised leisure tourism route recommendation method based on knowledge map[J]. International Journal of Reasoning-based Intelligent Systems, 2024, 16(1): 37-42.",
@@ -28,7 +29,7 @@ FINAL_REFS = [
     "Qin S, Zhu Y, Mu L, et al. Meta-Tool: Unleash Open-World Function Calling Capabilities of General-Purpose Large Language Models[C]//Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics. ACL, 2025: 30653-30677.",
     "Kim B Y, Cha J W, Chang K H, et al. Visibility Prediction over South Korea Based on Random Forest[J]. Atmosphere, 2021, 12(5): 552.",
     "Lakra K, Avishek K. A review on factors influencing fog formation, classification, forecasting, detection and impacts[J]. Rendiconti Lincei, 2022, 33(2): 319-353.",
-    "王娜, 何文静, 孙倬. 行随“算”迁或逆“算”而行: 大学生智能推荐算法应对行为研究[J/OL]. 情报理论与实践, 2025(01): 1-14.",
+    "王娜, 何文静, 孙倬. 行随“算”迁或逆“算”而行: 大学生智能推荐算法应对行为研究[J]. 情报理论与实践, 2025, 48(12): 127-136.",
     "黄镓升, 邓舒婷. 基于Spring Boot的南宁旅游APP的设计与实现[A]. 全国高等学校计算机教育研究会. 第32届计算机新科技与教育学术会议论文集[C]. 南宁: 南宁学院信息工程学院, 2025: 187-191.",
     "周景兰. 互联网时代智慧旅游网络平台服务模式构建策略[J]. 太原城市职业技术学院学报, 2025(08): 27-29.",
     "马玉彬, 刘仕友, 曹丹平. 基于贝叶斯优化的随机森林在储层预测的应用[J]. 地球物理学报, 2025, 68(08): 3247-3257.",
@@ -62,8 +63,8 @@ DOMESTIC_PARAGRAPHS = [
 
 SUMMARY_PARAGRAPHS = [
     "综合国内外研究现状可以看出，路线规划、智慧旅游、AI 推荐和环境预测技术已经具备较为坚实的理论与工程基础。国外研究更强调质量感知路线导航、旅游推荐算法、大语言模型工具调用和气象预测模型[1-4,8-11,17,19-21]，国内研究则在智慧文旅平台建设、前后端分离实现、地图服务接入、社区互动、路线推荐和用户体验优化方面形成了较多实践成果[5-7,12-18,22-24]。",
-    "然而，现有研究与应用仍然存在三个方面的不足。其一，许多系统的核心设计仍偏重城市道路、标准景区或普通旅游场景，面对高山、峡谷、森林等自然户外环境时，对复杂地形、轨迹解析、动态天气、景观窗口和安全风险等关键因素支持不够充分。其二，部分平台虽然引入了智能推荐思想，但仍主要依赖标签匹配、热度排序或静态条件筛选，对用户自然语言需求、体力偏好、负重方式和出行目的之间的关联理解不足。其三，AI 对话、GIS 地图、天气服务、机器学习预测和社区内容治理往往分散在不同系统或不同研究主题中，缺少面向户外出行决策全过程的协同设计。",
-    "因此，围绕户外路线推荐这一具体场景，研究一套融合前端交互、后端业务、地图能力、大语言模型和景观预测的综合平台，既能够回应现实中的使用痛点，也能够推动相关技术在垂直领域中的落地应用。本课题正是在上述研究基础上展开，目标是设计并实现一套更贴近户外出行决策过程的智能路线推荐平台，使用户能够在同一系统中完成路线浏览、条件筛选、AI 咨询、天气查看、景观判断、路线发布和社区互动等操作。",
+    "然而，将这些研究成果直接应用到中文户外徒步场景时，仍会遇到若干限制。许多系统以城市道路、标准景区或普通旅游服务为主要对象，对高山、峡谷、森林等自然环境下的轨迹解析、动态天气、景观窗口和安全风险支持不足。部分平台虽然引入了智能推荐思想，但推荐逻辑仍以标签匹配、热度排序或静态条件筛选为主，对用户自然语言需求、体力偏好、负重方式和出行目的之间的关联理解不够充分。同时，AI 对话、GIS 地图、天气服务、景观预测和社区内容治理通常分散在不同系统或研究主题中，尚未形成面向户外出行决策全过程的协同实现。",
+    "基于上述分析，本文将研究范围收束到户外路线推荐这一具体应用场景，重点关注路线数据组织、地图轨迹展示、自然语言推荐、天气与景观辅助判断以及社区互动治理之间的衔接关系。系统目标不是单独实现某一种算法，而是在一个可运行的平台中验证多类技术如何共同服务于用户的路线选择与出行准备。",
 ]
 
 TEXT_REPLACEMENTS = {
@@ -205,7 +206,12 @@ def replace_reference_list(document: Document) -> None:
 
 
 def main() -> None:
-    document = Document(DOCX_PATH)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--docx", type=Path, default=DEFAULT_DOCX_PATH)
+    args = parser.parse_args()
+    docx_path = args.docx
+
+    document = Document(docx_path)
 
     replace_section(
         find_paragraph(document, "1.3.1 国外研究现状"),
@@ -240,8 +246,8 @@ def main() -> None:
     for paragraph in document.paragraphs[:ref_heading_index]:
         convert_paragraph_citations(paragraph)
 
-    document.save(DOCX_PATH)
-    print(DOCX_PATH)
+    document.save(docx_path)
+    print(docx_path)
 
 
 if __name__ == "__main__":
