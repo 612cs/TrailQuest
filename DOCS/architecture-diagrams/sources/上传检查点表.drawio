@@ -1,56 +1,46 @@
 <mxfile host="app.diagrams.net">
   <diagram name="upload-checkpoints-table">
-    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" background="none">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-
-        <!-- 上传检查点表 -->
-        <mxCell id="uc_table" value="上传检查点表&#xa;upload_checkpoints" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="380" y="300" width="200" height="60" as="geometry" />
+        <mxCell id="uc_table" value="上传检查点表&#10;upload_checkpoints" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontSize=20;fontStyle=1;gradientColor=none;fontColor=#000000;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="227.24" y="280.59" width="360" height="102" as="geometry" />
         </mxCell>
-
-        <!-- 字段 -->
-        <mxCell id="uc_id" value="检查点ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="180" y="130" width="100" height="40" as="geometry" />
+        <mxCell id="uc_id" value="检查点ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="40.00" y="300.59" width="160" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_uc_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uc_id" target="uc_table">
+        <mxCell id="e_uc_id" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="uc_id" target="uc_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="uc_file_id" value="文件ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
-          <mxGeometry x="330" y="70" width="100" height="40" as="geometry" />
+        <mxCell id="uc_file_id" value="文件ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="110.57" y="139.54" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_uc_file_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uc_file_id" target="uc_table">
+        <mxCell id="e_uc_file_id" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="uc_file_id" target="uc_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="uc_chunk_index" value="分片序号" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="490" y="70" width="100" height="40" as="geometry" />
+        <mxCell id="uc_chunk_index" value="分片序号" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="247.57" y="40.00" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_uc_chunk_index" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uc_chunk_index" target="uc_table">
+        <mxCell id="e_uc_chunk_index" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="uc_chunk_index" target="uc_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="uc_status" value="上传状态" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="640" y="130" width="100" height="40" as="geometry" />
+        <mxCell id="uc_status" value="上传状态" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="416.91" y="40.00" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_uc_status" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uc_status" target="uc_table">
+        <mxCell id="e_uc_status" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="uc_status" target="uc_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="uc_created_at" value="创建时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="600" y="400" width="100" height="40" as="geometry" />
+        <mxCell id="uc_created_at" value="创建时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="553.91" y="139.54" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_uc_created_at" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="uc_created_at" target="uc_table">
+        <mxCell id="e_uc_created_at" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="uc_created_at" target="uc_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- 关系 -->
-        <mxCell id="rel_media" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
-          <mxGeometry x="180" y="290" width="60" height="60" as="geometry" />
+        <mxCell id="rel_media" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontSize=20;gradientColor=none;fontColor=#000000;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="606.24" y="300.59" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_rel_media" value="分片" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="rel_media" target="uc_table">
+        <mxCell id="e_rel_media" value="分片" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;fontSize=20;fontColor=#000000;fontFamily=Arial;labelBackgroundColor=none;fillColor=none;gradientColor=none;shadow=0;" edge="1" parent="1" source="rel_media" target="uc_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>

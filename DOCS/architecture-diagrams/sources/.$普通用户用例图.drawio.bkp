@@ -1,0 +1,93 @@
+<mxfile host="Electron">
+  <diagram name="normal-user-usecase" id="normal-user-usecase">
+    <mxGraphModel dx="1115" dy="904" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="actor_user" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fontSize=20;fillColor=none;" value="普通用户" vertex="1">
+          <mxGeometry height="140" width="70" x="70" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_register" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="注册 / 登录" vertex="1">
+          <mxGeometry height="70" width="170" x="340" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_profile" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="维护个人资料" vertex="1">
+          <mxGeometry height="70" width="170" x="340" y="283" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_browse" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="浏览路线" vertex="1">
+          <mxGeometry height="70" width="170" x="340" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_detail" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="查看路线详情" vertex="1">
+          <mxGeometry height="70" width="170" x="340" y="527" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_publish" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="发布路线" vertex="1">
+          <mxGeometry height="70" width="170" x="340" y="162" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_upload_track" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="上传轨迹文件" vertex="1">
+          <mxGeometry height="70" width="190" x="650" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_upload_media" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="上传路线图片" vertex="1">
+          <mxGeometry height="70" width="190" x="650" y="217" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_comment" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="发表评论 / 回复" vertex="1">
+          <mxGeometry height="70" width="190" x="655" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_like" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="点赞路线" vertex="1">
+          <mxGeometry height="70" width="180" x="660" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_favorite" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="收藏路线" vertex="1">
+          <mxGeometry height="70" width="170" x="665" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_ai" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="发起 AI 问答" vertex="1">
+          <mxGeometry height="70" width="190" x="330" y="648" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_observe" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="提交景观观测标注" vertex="1">
+          <mxGeometry height="70" width="210" x="320" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_register">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_profile">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_browse">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_detail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_publish">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_like">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_favorite">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_ai">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_observe">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" edge="1" parent="1" source="uc_publish" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_upload_track" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" edge="1" parent="1" source="uc_publish" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_upload_media" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc3" edge="1" parent="1" source="uc_detail" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_comment" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" x="0.0019" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="inc4" edge="1" parent="1" source="uc_detail" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_like" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc5" edge="1" parent="1" source="uc_detail" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_favorite" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

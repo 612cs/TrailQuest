@@ -1,56 +1,46 @@
 <mxfile host="app.diagrams.net">
   <diagram name="trail-likes-table">
-    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" background="none">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-
-        <!-- 路线点赞表 -->
-        <mxCell id="trail_likes_table" value="路线点赞表 trail_likes" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="400" y="300" width="180" height="60" as="geometry" />
+        <mxCell id="trail_likes_table" value="路线点赞表 trail_likes" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontSize=20;fontStyle=1;gradientColor=none;fontColor=#000000;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="209.00" y="289.59" width="360" height="84" as="geometry" />
         </mxCell>
-
-        <!-- 字段 -->
-        <mxCell id="tl_id" value="点赞ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="200" y="150" width="100" height="40" as="geometry" />
+        <mxCell id="tl_id" value="点赞ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="40.00" y="300.59" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_tl_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="tl_id" target="trail_likes_table">
+        <mxCell id="e_tl_id" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="tl_id" target="trail_likes_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="tl_trail_id" value="路线ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
-          <mxGeometry x="350" y="80" width="100" height="40" as="geometry" />
+        <mxCell id="tl_trail_id" value="路线ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="92.33" y="139.54" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_tl_trail_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="tl_trail_id" target="trail_likes_table">
+        <mxCell id="e_tl_trail_id" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="tl_trail_id" target="trail_likes_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="tl_user_id" value="用户ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
-          <mxGeometry x="500" y="80" width="100" height="40" as="geometry" />
+        <mxCell id="tl_user_id" value="用户ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="229.33" y="40.00" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_tl_user_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="tl_user_id" target="trail_likes_table">
+        <mxCell id="e_tl_user_id" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="tl_user_id" target="trail_likes_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="tl_created_at" value="创建时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="650" y="150" width="100" height="40" as="geometry" />
+        <mxCell id="tl_created_at" value="创建时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="398.67" y="40.00" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_tl_created_at" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="tl_created_at" target="trail_likes_table">
+        <mxCell id="e_tl_created_at" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="tl_created_at" target="trail_likes_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- 关系 -->
-        <mxCell id="rel_trails" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
-          <mxGeometry x="200" y="290" width="60" height="60" as="geometry" />
+        <mxCell id="rel_trails" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontSize=20;gradientColor=none;fontColor=#000000;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="535.67" y="139.54" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_rel_trails" value="被点赞" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="rel_trails" target="trail_likes_table">
+        <mxCell id="e_rel_trails" value="被点赞" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;fontSize=20;fontColor=#000000;fontFamily=Arial;labelBackgroundColor=none;fillColor=none;gradientColor=none;shadow=0;" edge="1" parent="1" source="rel_trails" target="trail_likes_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="rel_users" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
-          <mxGeometry x="650" y="290" width="60" height="60" as="geometry" />
+        <mxCell id="rel_users" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontSize=20;gradientColor=none;fontColor=#000000;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="588.00" y="300.59" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_rel_users" value="点赞" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="trail_likes_table" target="rel_users">
+        <mxCell id="e_rel_users" value="点赞" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;fontSize=20;fontColor=#000000;fontFamily=Arial;labelBackgroundColor=none;fillColor=none;gradientColor=none;shadow=0;" edge="1" parent="1" source="trail_likes_table" target="rel_users">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>

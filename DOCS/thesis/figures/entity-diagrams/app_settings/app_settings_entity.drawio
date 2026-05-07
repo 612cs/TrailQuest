@@ -4,26 +4,26 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;strokeWidth=2;" value="应用配置" vertex="1">
-          <mxGeometry height="80" width="200" x="730" y="555" as="geometry" />
+        <mxCell id="2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="应用配置" vertex="1">
+          <mxGeometry height="84" width="210" x="272.50" y="278.65" as="geometry" />
         </mxCell>
-        <mxCell id="3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;strokeWidth=2;" value="配置ID" vertex="1">
-          <mxGeometry height="58" width="150" x="670" y="320" as="geometry" />
+        <mxCell id="3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="配置ID" vertex="1">
+          <mxGeometry height="62" width="150.0" x="40.00" y="289.65" as="geometry" />
         </mxCell>
-        <mxCell id="4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;strokeWidth=2;" value="配置键" vertex="1">
-          <mxGeometry height="58" width="150" x="850" y="320" as="geometry" />
+        <mxCell id="4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="配置键" vertex="1">
+          <mxGeometry height="62" width="150.0" x="90.13" y="135.36" as="geometry" />
         </mxCell>
-        <mxCell id="5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;strokeWidth=2;" value="配置值" vertex="1">
-          <mxGeometry height="58" width="150" x="980" y="370" as="geometry" />
+        <mxCell id="5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="配置值" vertex="1">
+          <mxGeometry height="62" width="150.0" x="221.38" y="40.00" as="geometry" />
         </mxCell>
-        <mxCell id="6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;strokeWidth=2;" value="配置说明" vertex="1">
-          <mxGeometry height="58" width="150" x="1080" y="428" as="geometry" />
+        <mxCell id="6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="配置说明" vertex="1">
+          <mxGeometry height="62" width="150.0" x="383.62" y="40.00" as="geometry" />
         </mxCell>
-        <mxCell id="7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;strokeWidth=2;" value="最后更新人ID" vertex="1">
-          <mxGeometry height="58" width="170" x="390" y="410" as="geometry" />
+        <mxCell id="7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="最后更新人ID" vertex="1">
+          <mxGeometry height="62" width="196" x="541.21" y="99.51" as="geometry" />
         </mxCell>
-        <mxCell id="8" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;strokeWidth=2;" value="更新时间" vertex="1">
-          <mxGeometry height="58" width="150" x="520" y="352" as="geometry" />
+        <mxCell id="8" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="更新时间" vertex="1">
+          <mxGeometry height="62" width="150.0" x="565.00" y="289.65" as="geometry" />
         </mxCell>
         <mxCell id="9" edge="1" parent="1" source="2" style="endArrow=none;html=1;rounded=0;strokeColor=#000000;strokeWidth=2;" target="3" value="">
           <mxGeometry relative="1" as="geometry" />

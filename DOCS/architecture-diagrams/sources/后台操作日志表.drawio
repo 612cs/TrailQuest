@@ -1,77 +1,64 @@
 <mxfile host="app.diagrams.net">
   <diagram name="admin-operation-logs-table">
-    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1434" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0" background="none">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-
-        <!-- 后台操作日志表 -->
-        <mxCell id="aol_table" value="后台操作日志表&#xa;admin_operation_logs" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1" vertex="1" parent="1">
-          <mxGeometry x="380" y="300" width="200" height="60" as="geometry" />
+        <mxCell id="aol_table" value="后台操作日志表&#10;admin_operation_logs" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontSize=20;fontStyle=1;gradientColor=none;fontColor=#000000;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="318.64" y="404.00" width="360" height="102" as="geometry" />
         </mxCell>
-
-        <!-- 字段 -->
-        <mxCell id="aol_id" value="日志ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="180" y="130" width="100" height="40" as="geometry" />
+        <mxCell id="aol_id" value="日志ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="41.74" y="464.14" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_aol_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="aol_id" target="aol_table">
+        <mxCell id="e_aol_id" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="aol_id" target="aol_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="aol_user_id" value="操作人ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656" vertex="1" parent="1">
-          <mxGeometry x="330" y="70" width="100" height="40" as="geometry" />
+        <mxCell id="aol_user_id" value="操作人ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="40.00" y="300.97" width="160" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_aol_user_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="aol_user_id" target="aol_table">
+        <mxCell id="e_aol_user_id" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="aol_user_id" target="aol_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="aol_action" value="操作类型" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="490" y="70" width="100" height="40" as="geometry" />
+        <mxCell id="aol_action" value="操作类型" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="138.27" y="167.05" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_aol_action" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="aol_action" target="aol_table">
+        <mxCell id="e_aol_action" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="aol_action" target="aol_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="aol_target_type" value="目标类型" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="640" y="130" width="100" height="40" as="geometry" />
+        <mxCell id="aol_target_type" value="目标类型" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="267.45" y="73.20" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_aol_target_type" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="aol_target_type" target="aol_table">
+        <mxCell id="e_aol_target_type" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="aol_target_type" target="aol_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="aol_target_id" value="目标ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="720" y="240" width="100" height="40" as="geometry" />
+        <mxCell id="aol_target_id" value="目标ID" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="423.64" y="40.00" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_aol_target_id" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="aol_target_id" target="aol_table">
+        <mxCell id="e_aol_target_id" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="aol_target_id" target="aol_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="aol_detail" value="操作详情" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="700" y="370" width="100" height="40" as="geometry" />
+        <mxCell id="aol_detail" value="操作详情" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="579.83" y="73.20" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_aol_detail" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="aol_detail" target="aol_table">
+        <mxCell id="e_aol_detail" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="aol_detail" target="aol_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="aol_ip" value="IP地址" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="530" y="450" width="100" height="40" as="geometry" />
+        <mxCell id="aol_ip" value="IP地址" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="709.01" y="167.05" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_aol_ip" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="aol_ip" target="aol_table">
+        <mxCell id="e_aol_ip" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="aol_ip" target="aol_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <mxCell id="aol_created_at" value="创建时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6" vertex="1" parent="1">
-          <mxGeometry x="350" y="450" width="100" height="40" as="geometry" />
+        <mxCell id="aol_created_at" value="创建时间" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;gradientColor=none;fontColor=#000000;fontSize=20;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="788.85" y="305.34" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_aol_created_at" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0" edge="1" parent="1" source="aol_created_at" target="aol_table">
+        <mxCell id="e_aol_created_at" value="" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;" edge="1" parent="1" source="aol_created_at" target="aol_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-
-        <!-- 关系 -->
-        <mxCell id="rel_users" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
-          <mxGeometry x="180" y="290" width="60" height="60" as="geometry" />
+        <mxCell id="rel_users" value="1:n" style="rhombus;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontSize=20;gradientColor=none;fontColor=#000000;strokeWidth=2;shadow=0;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="805.54" y="464.14" width="150" height="62" as="geometry" />
         </mxCell>
-        <mxCell id="e_rel_users" value="操作" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;" edge="1" parent="1" source="rel_users" target="aol_table">
+        <mxCell id="e_rel_users" value="操作" style="rounded=0;html=1;endArrow=none;endFill=0;strokeColor=#000000;strokeWidth=2;fontSize=20;fontColor=#000000;fontFamily=Arial;labelBackgroundColor=none;fillColor=none;gradientColor=none;shadow=0;" edge="1" parent="1" source="rel_users" target="aol_table">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
