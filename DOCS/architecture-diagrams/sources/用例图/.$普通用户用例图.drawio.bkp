@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="normal-user-usecase" id="normal-user-usecase">
-    <mxGraphModel dx="1115" dy="904" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+    <mxGraphModel dx="991" dy="803" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -70,22 +70,30 @@
         <mxCell id="e10" edge="1" parent="1" source="actor_user" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_observe">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="inc1" edge="1" parent="1" source="uc_publish" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_upload_track" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="inc1" edge="1" parent="1" source="uc_publish" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_upload_track" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/font&gt;">
+          <mxGeometry relative="1" x="0.0031" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="inc2" edge="1" parent="1" source="uc_publish" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_upload_media" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="inc2" edge="1" parent="1" source="uc_publish" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_upload_media" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/font&gt;">
+          <mxGeometry relative="1" x="0.0012" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="inc3" edge="1" parent="1" source="uc_detail" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_comment" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+        <mxCell id="inc3" edge="1" parent="1" source="uc_detail" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_comment" value="&lt;span&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/font&gt;&lt;/span&gt;">
           <mxGeometry relative="1" x="0.0019" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="inc4" edge="1" parent="1" source="uc_detail" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_like" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="inc4" edge="1" parent="1" source="uc_detail" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_like" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/font&gt;">
+          <mxGeometry relative="1" x="-0.0018" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
-        <mxCell id="inc5" edge="1" parent="1" source="uc_detail" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_favorite" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="inc5" edge="1" parent="1" source="uc_detail" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_favorite" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;&amp;lt;&amp;lt;include&amp;gt;&amp;gt;&lt;/font&gt;">
+          <mxGeometry relative="1" x="0.0021" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>

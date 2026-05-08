@@ -1,6 +1,6 @@
 <mxfile host="Electron">
   <diagram name="admin-user-usecase" id="admin-user-usecase">
-    <mxGraphModel dx="1622" dy="1315" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+    <mxGraphModel dx="1001" dy="803" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -29,7 +29,7 @@
           <mxGeometry height="70" width="190" x="305" y="357" as="geometry" />
         </mxCell>
         <mxCell id="uc_landscape" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="查看景观标注 / 快照" vertex="1">
-          <mxGeometry height="70" width="220" x="265" y="760" as="geometry" />
+          <mxGeometry height="70" width="220" x="290" y="730" as="geometry" />
         </mxCell>
         <mxCell id="uc_ban" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="封禁 / 删除用户" vertex="1">
           <mxGeometry height="70" width="210" x="670" y="549" as="geometry" />
@@ -40,28 +40,28 @@
         <mxCell id="uc_hide_review" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=20;fillColor=none;" value="隐藏评论并记录原因" vertex="1">
           <mxGeometry height="70" width="230" x="660" y="453" as="geometry" />
         </mxCell>
-        <mxCell id="e1" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_admin_login">
+        <mxCell id="e1" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="uc_admin_login">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e2" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_route_review">
+        <mxCell id="e2" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="uc_route_review">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e3" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_review_mgmt">
+        <mxCell id="e3" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="uc_review_mgmt">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e4" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_user_mgmt">
+        <mxCell id="e4" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="uc_user_mgmt">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e5" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_logs">
+        <mxCell id="e5" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="uc_logs">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e6" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_system_option">
+        <mxCell id="e6" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="uc_system_option">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e7" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_app_setting">
+        <mxCell id="e7" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="uc_app_setting">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e8" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;" target="uc_landscape">
+        <mxCell id="e8" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;rounded=0;fontSize=20;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="uc_landscape">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="inc1" edge="1" parent="1" source="uc_user_mgmt" style="dashed=1;endArrow=open;html=1;fontSize=20;" target="uc_ban" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
