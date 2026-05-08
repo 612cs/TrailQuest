@@ -1,0 +1,277 @@
+<mxfile host="Electron" agent="Codex">
+  <diagram name="核心实体总体ER图" id="core-entity-er">
+    <mxGraphModel dx="1124" dy="904" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1250" pageHeight="980" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="E_PROFILE" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=1;" value="用户徒步画像" vertex="1">
+          <mxGeometry height="60" width="150" x="130" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="E_USER" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=1;" value="用户" vertex="1">
+          <mxGeometry height="60" width="150" x="130" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="E_MEDIA" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=1;" value="媒体文件" vertex="1">
+          <mxGeometry height="60" width="170" x="120" y="675" as="geometry" />
+        </mxCell>
+        <mxCell id="E_TRAIL" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=1;" value="路线" vertex="1">
+          <mxGeometry height="60" width="150" x="610" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="E_TRACK" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=1;" value="路线轨迹" vertex="1">
+          <mxGeometry height="60" width="170" x="610" y="675" as="geometry" />
+        </mxCell>
+        <mxCell id="E_TAG" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=1;" value="标签" vertex="1">
+          <mxGeometry height="60" width="150" x="610" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="R_MAINTAIN" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.3;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="维护" vertex="1">
+          <mxGeometry height="50" width="90" x="160" y="258" as="geometry" />
+        </mxCell>
+        <mxCell id="R_UPLOAD" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.3;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="上传" vertex="1">
+          <mxGeometry height="50" width="90" x="160" y="538" as="geometry" />
+        </mxCell>
+        <mxCell id="R_PUBLISH" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.3;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="发布" vertex="1">
+          <mxGeometry height="50" width="90" x="403" y="387" as="geometry" />
+        </mxCell>
+        <mxCell id="R_USE" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.3;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="使用" vertex="1">
+          <mxGeometry height="50" width="90" x="410" y="523" as="geometry" />
+        </mxCell>
+        <mxCell id="R_SOURCE" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.3;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="关联" vertex="1">
+          <mxGeometry height="50" width="90" x="390" y="675" as="geometry" />
+        </mxCell>
+        <mxCell id="R_CONTAIN" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.3;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="包含" vertex="1">
+          <mxGeometry height="50" width="90" x="645" y="533" as="geometry" />
+        </mxCell>
+        <mxCell id="R_MARK" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeWidth=1.3;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="标记" vertex="1">
+          <mxGeometry height="50" width="90" x="640" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="L1" edge="1" parent="1" source="E_USER" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="R_MAINTAIN">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L1_1" connectable="0" parent="L1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.55" y="-5" as="geometry" />
+        </mxCell>
+        <mxCell id="L2" edge="1" parent="1" source="R_MAINTAIN" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_PROFILE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L2_1" connectable="0" parent="L2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="1" vertex="1">
+          <mxGeometry relative="1" x="0.55" y="-5" as="geometry" />
+        </mxCell>
+        <mxCell id="L3" edge="1" parent="1" source="E_USER" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="R_PUBLISH">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L3_1" connectable="0" parent="L3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.55" y="-5" as="geometry" />
+        </mxCell>
+        <mxCell id="L4" edge="1" parent="1" source="R_PUBLISH" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRAIL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L4_n" connectable="0" parent="L4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="n" vertex="1">
+          <mxGeometry relative="1" x="0.55" y="-5" as="geometry" />
+        </mxCell>
+        <mxCell id="L5" edge="1" parent="1" source="E_USER" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="R_UPLOAD">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L5_1" connectable="0" parent="L5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.55" y="-5" as="geometry">
+            <mxPoint y="11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L6" edge="1" parent="1" source="R_UPLOAD" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_MEDIA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L6_n" connectable="0" parent="L6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="n" vertex="1">
+          <mxGeometry relative="1" x="0.55" y="-5" as="geometry">
+            <mxPoint y="-22" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L7" edge="1" parent="1" source="E_TRAIL" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="R_USE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L7_1" connectable="0" parent="L7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.55" y="-5" as="geometry" />
+        </mxCell>
+        <mxCell id="L8" edge="1" parent="1" source="R_USE" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_MEDIA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L8_n" connectable="0" parent="L8" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="n" vertex="1">
+          <mxGeometry relative="1" x="0.55" y="-5" as="geometry" />
+        </mxCell>
+        <mxCell id="L9" edge="1" parent="1" source="E_MEDIA" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="R_SOURCE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L9_1" connectable="0" parent="L9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.55" y="-5" as="geometry" />
+        </mxCell>
+        <mxCell id="L10" edge="1" parent="1" source="R_SOURCE" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRACK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L10_1" connectable="0" parent="L10" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="1" vertex="1">
+          <mxGeometry relative="1" x="0.55" y="-5" as="geometry" />
+        </mxCell>
+        <mxCell id="L11" edge="1" parent="1" source="E_TRAIL" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="R_CONTAIN">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L11_1" connectable="0" parent="L11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="1" vertex="1">
+          <mxGeometry relative="1" x="-0.55" y="-5" as="geometry">
+            <mxPoint x="3" y="12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L12" edge="1" parent="1" source="R_CONTAIN" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRACK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="LBL_L12_1" connectable="0" parent="L12" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="1" vertex="1">
+          <mxGeometry relative="1" x="0.55" y="-5" as="geometry">
+            <mxPoint x="2" y="-35" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L13" edge="1" parent="1" source="E_TRAIL" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="R_MARK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f_b7XEaLQD7YB5GX-f33-2" connectable="0" parent="L13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="n" vertex="1">
+          <mxGeometry relative="1" x="-0.0627" y="-5" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L14" edge="1" parent="1" source="R_MARK" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TAG">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="f_b7XEaLQD7YB5GX-f33-3" connectable="0" parent="L14" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontStyle=0;fontSize=20;fillColor=none;" value="n" vertex="1">
+          <mxGeometry relative="1" x="0.3242" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="A_PROFILE_ID" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="画像ID" vertex="1">
+          <mxGeometry height="58" width="118" x="12" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_PROFILE_ID" edge="1" parent="1" source="A_PROFILE_ID" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_PROFILE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_PROFILE_LEVEL" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="经验等级" vertex="1">
+          <mxGeometry height="58" width="118" x="285" y="81" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_PROFILE_LEVEL" edge="1" parent="1" source="A_PROFILE_LEVEL" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_PROFILE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_PROFILE_STYLE" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="路线类型" vertex="1">
+          <mxGeometry height="58" width="118" x="12" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_PROFILE_STYLE" edge="1" parent="1" source="A_PROFILE_STYLE" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_PROFILE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_PROFILE_PACK" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="负重偏好" vertex="1">
+          <mxGeometry height="58" width="118" x="285" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_PROFILE_PACK" edge="1" parent="1" source="A_PROFILE_PACK" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_PROFILE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_USER_ID" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="用户ID" vertex="1">
+          <mxGeometry height="58" width="118" x="12" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_USER_ID" edge="1" parent="1" source="A_USER_ID" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_USER">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_USER_NAME" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="用户名" vertex="1">
+          <mxGeometry height="58" width="118" x="12" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_USER_NAME" edge="1" parent="1" source="A_USER_NAME" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_USER">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_USER_EMAIL" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="邮箱" vertex="1">
+          <mxGeometry height="58" width="118" x="285" y="477" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_USER_EMAIL" edge="1" parent="1" source="A_USER_EMAIL" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_USER">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_USER_ROLE" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="用户角色" vertex="1">
+          <mxGeometry height="58" width="118" x="285" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_USER_ROLE" edge="1" parent="1" source="A_USER_ROLE" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_USER">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_MEDIA_ID" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="媒体文件ID" vertex="1">
+          <mxGeometry height="58" width="118" x="12" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_MEDIA_ID" edge="1" parent="1" source="A_MEDIA_ID" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_MEDIA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_MEDIA_USER" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="用户ID" vertex="1">
+          <mxGeometry height="58" width="118" x="146" y="788.68" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_MEDIA_USER" edge="1" parent="1" source="A_MEDIA_USER" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_MEDIA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_MEDIA_KEY" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="对象Key" vertex="1">
+          <mxGeometry height="58" width="118" x="12" y="788.68" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_MEDIA_KEY" edge="1" parent="1" source="A_MEDIA_KEY" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_MEDIA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_MEDIA_URL" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="访问地址" vertex="1">
+          <mxGeometry height="58" width="118" x="314" y="788.68" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_MEDIA_URL" edge="1" parent="1" source="A_MEDIA_URL" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_MEDIA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TRAIL_ID" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="路线ID" vertex="1">
+          <mxGeometry height="58" width="118" x="790" y="383" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TRAIL_ID" edge="1" parent="1" source="A_TRAIL_ID" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRAIL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TRAIL_NAME" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="路线名称" vertex="1">
+          <mxGeometry height="58" width="118" x="780" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TRAIL_NAME" edge="1" parent="1" source="A_TRAIL_NAME" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRAIL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TRAIL_LOC" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="位置描述" vertex="1">
+          <mxGeometry height="58" width="118" x="507" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TRAIL_LOC" edge="1" parent="1" source="A_TRAIL_LOC" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRAIL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TRAIL_DIFF" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="难度" vertex="1">
+          <mxGeometry height="58" width="118" x="790" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TRAIL_DIFF" edge="1" parent="1" source="A_TRAIL_DIFF" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRAIL">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TRACK_ID" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="轨迹记录ID" vertex="1">
+          <mxGeometry height="58" width="118" x="535" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TRACK_ID" edge="1" parent="1" source="A_TRACK_ID" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRACK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TRACK_ROUTE" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="路线ID" vertex="1">
+          <mxGeometry height="58" width="118" x="790" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TRACK_ROUTE" edge="1" parent="1" source="A_TRACK_ROUTE" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRACK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TRACK_GEO" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="轨迹GeoJSON" vertex="1">
+          <mxGeometry height="65.37" width="133" x="527.5" y="781.31" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TRACK_GEO" edge="1" parent="1" source="A_TRACK_GEO" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRACK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TRACK_START" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="起终点坐标" vertex="1">
+          <mxGeometry height="58" width="118" x="790" y="788.68" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TRACK_START" edge="1" parent="1" source="A_TRACK_START" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TRACK">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TAG_ID" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="标签ID" vertex="1">
+          <mxGeometry height="58" width="118" x="507" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TAG_ID" edge="1" parent="1" source="A_TAG_ID" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TAG">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="A_TAG_NAME" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.2;fillColor=none;strokeColor=#000000;fontFamily=Noto Sans SC;fontSize=20;fontStyle=0;" value="标签名" vertex="1">
+          <mxGeometry height="58" width="118" x="770" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="EL_A_TAG_NAME" edge="1" parent="1" source="A_TAG_NAME" style="endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#000000;fontStyle=0;fontSize=20;edgeStyle=none;curved=0;orthogonalLoop=0;jettySize=0;" target="E_TAG">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
