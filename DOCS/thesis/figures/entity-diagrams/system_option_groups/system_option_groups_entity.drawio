@@ -1,32 +1,32 @@
 <mxfile host="Electron">
   <diagram name="system_option_groups-entity" id="0">
-    <mxGraphModel dx="1262" dy="1091" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="none" math="0" shadow="0">
+    <mxGraphModel dx="901" dy="723" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="系统选项组" vertex="1">
-          <mxGeometry height="84" width="230" x="328.86" y="339.24" as="geometry" />
+          <mxGeometry height="90" width="180" x="328.86" y="339.24" as="geometry" />
         </mxCell>
         <mxCell id="3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="选项组ID" vertex="1">
-          <mxGeometry height="62" width="160.0" x="40.00" y="350.24" as="geometry" />
+          <mxGeometry height="90" width="180" x="60" y="290" as="geometry" />
         </mxCell>
         <mxCell id="4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="组编码" vertex="1">
-          <mxGeometry height="62" width="150.0" x="100.19" y="195.12" as="geometry" />
+          <mxGeometry height="90" width="180" x="100" y="190" as="geometry" />
         </mxCell>
         <mxCell id="5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="组名称" vertex="1">
-          <mxGeometry height="62" width="150.0" x="213.74" y="81.56" as="geometry" />
+          <mxGeometry height="90" width="180" x="180" y="100" as="geometry" />
         </mxCell>
         <mxCell id="6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="描述" vertex="1">
-          <mxGeometry height="62" width="150" x="368.86" y="40.00" as="geometry" />
+          <mxGeometry height="90" width="180" x="343.98" y="50" as="geometry" />
         </mxCell>
         <mxCell id="7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="状态" vertex="1">
-          <mxGeometry height="62" width="150" x="523.98" y="81.56" as="geometry" />
+          <mxGeometry height="90" width="180" x="523.98" y="90" as="geometry" />
         </mxCell>
         <mxCell id="8" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="创建时间" vertex="1">
-          <mxGeometry height="62" width="150.0" x="637.54" y="195.12" as="geometry" />
+          <mxGeometry height="90" width="180" x="600" y="180" as="geometry" />
         </mxCell>
         <mxCell id="9" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="更新时间" vertex="1">
-          <mxGeometry height="62" width="150.0" x="679.10" y="350.24" as="geometry" />
+          <mxGeometry height="90" width="180" x="630" y="280" as="geometry" />
         </mxCell>
         <mxCell id="10" edge="1" parent="1" source="2" style="endArrow=none;html=1;rounded=0;strokeColor=#000000;strokeWidth=2;" target="3" value="">
           <mxGeometry relative="1" as="geometry" />

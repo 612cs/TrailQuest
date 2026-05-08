@@ -1,0 +1,75 @@
+<mxfile host="Electron">
+  <diagram name="路线发布流程图" id="路线发布流程图">
+    <mxGraphModel dx="1389" dy="1112" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=1;" value="开始" vertex="1">
+          <mxGeometry height="50" width="120" x="700" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="用户填写路线基本信息" vertex="1">
+          <mxGeometry height="80" width="340" x="590" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="上传封面图、路线图片与轨迹文件" vertex="1">
+          <mxGeometry height="70" width="340" x="590" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="系统解析轨迹文件" vertex="1">
+          <mxGeometry height="80" width="340" x="590" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=#ffffff;fontSize=20;" value="数据校验是否通过" vertex="1">
+          <mxGeometry height="120" width="200" x="661" y="512" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="保存媒体文件与轨迹信息" vertex="1">
+          <mxGeometry height="70" width="280" x="620" y="685" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="生成路线记录" vertex="1">
+          <mxGeometry height="80" width="280" x="620" y="794" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="提交审核 / 标记待发布状态" vertex="1">
+          <mxGeometry height="70" width="280" x="620" y="910" as="geometry" />
+        </mxCell>
+        <mxCell id="WNkEkLjwAfRjeX2wCEMY-1" edge="1" parent="1" source="n7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="n1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="210" />
+            </Array>
+            <mxPoint x="410" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="提示用户修改后重新提交" vertex="1">
+          <mxGeometry height="70" width="280" x="270" y="537" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=1;" value="结束" vertex="1">
+          <mxGeometry height="50" width="120" x="700" y="1030" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="n1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="n2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="n3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="d1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n4" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="n4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="n5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="n6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="d1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n7" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

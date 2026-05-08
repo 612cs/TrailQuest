@@ -1,0 +1,64 @@
+<mxfile host="Electron">
+  <diagram name="路线审核流程图" id="路线审核流程图">
+    <mxGraphModel dx="1204" dy="964" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=#f5f5f5;fontSize=20;fontStyle=1;" value="开始" vertex="1">
+          <mxGeometry height="50" width="120" x="700" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="管理员登录后台&#xa;进入路线审核模块" vertex="1">
+          <mxGeometry height="80" width="320" x="600" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="查看待审核路线列表" vertex="1">
+          <mxGeometry height="70" width="320" x="600" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="检查路线内容、图片、轨迹与描述信息" vertex="1">
+          <mxGeometry height="80" width="320" x="600" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=#ffffff;fontSize=20;" value="是否审核通过" vertex="1">
+          <mxGeometry height="90" width="180" x="670" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="更新为 approved&#xa;路线进入可见状态" vertex="1">
+          <mxGeometry height="80" width="280" x="780" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="更新为 rejected&#xa;填写审核备注" vertex="1">
+          <mxGeometry height="80" width="280" x="460" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=#ffffff;fontSize=20;fontStyle=0;" value="记录审核人、审核时间、审核结果" vertex="1">
+          <mxGeometry height="80" width="320" x="600" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=#f5f5f5;fontSize=20;fontStyle=1;" value="结束" vertex="1">
+          <mxGeometry height="50" width="120" x="700" y="970" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="n1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="n2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="n3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="d1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n4" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="d1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n5" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="n4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="n5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="n6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="n6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

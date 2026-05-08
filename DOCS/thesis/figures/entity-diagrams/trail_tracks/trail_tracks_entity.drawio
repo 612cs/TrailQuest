@@ -1,77 +1,77 @@
 <mxfile host="Electron">
   <diagram name="trail_tracks-entity" id="0">
-    <mxGraphModel dx="1262" dy="1091" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="none" math="0" shadow="0">
+    <mxGraphModel dx="1386" dy="1112" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="路线轨迹" vertex="1">
-          <mxGeometry height="84" width="210" x="786.11" y="760.54" as="geometry" />
+          <mxGeometry height="90" width="180" x="790" y="760" as="geometry" />
         </mxCell>
         <mxCell id="3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="轨迹记录ID" vertex="1">
-          <mxGeometry height="62" width="178" x="730.37" y="1454.08" as="geometry" />
+          <mxGeometry height="90" width="180" x="610" y="1100" as="geometry" />
         </mxCell>
         <mxCell id="4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="路线ID" vertex="1">
-          <mxGeometry height="62" width="150" x="552.68" y="1405.27" as="geometry" />
+          <mxGeometry height="90" width="180" x="470" y="1040" as="geometry" />
         </mxCell>
         <mxCell id="5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="媒体文件ID" vertex="1">
-          <mxGeometry height="62" width="178" x="368.87" y="1303.82" as="geometry" />
+          <mxGeometry height="90" width="180" x="350" y="970" as="geometry" />
         </mxCell>
         <mxCell id="6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="上传用户ID" vertex="1">
-          <mxGeometry height="62" width="178" x="235.06" y="1158.15" as="geometry" />
+          <mxGeometry height="90" width="180" x="270" y="880" as="geometry" />
         </mxCell>
         <mxCell id="7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="轨迹格式" vertex="1">
-          <mxGeometry height="62" width="150.0" x="162.34" y="980.36" as="geometry" />
+          <mxGeometry height="90" width="180" x="250" y="780" as="geometry" />
         </mxCell>
         <mxCell id="8" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="原始文件名" vertex="1">
-          <mxGeometry height="62" width="160.0" x="124.94" y="785.23" as="geometry" />
+          <mxGeometry height="90" width="180" x="240" y="680" as="geometry" />
         </mxCell>
         <mxCell id="9" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="轨迹GeoJSON" vertex="1">
-          <mxGeometry height="62" width="232" x="40.00" y="568.66" as="geometry" />
+          <mxGeometry height="90" width="180" x="260" y="580" as="geometry" />
         </mxCell>
         <mxCell id="10" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="轨迹点数量" vertex="1">
-          <mxGeometry height="62" width="160.0" x="229.09" y="407.85" as="geometry" />
+          <mxGeometry height="90" width="180" x="319" y="480" as="geometry" />
         </mxCell>
         <mxCell id="11" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="航点数量" vertex="1">
-          <mxGeometry height="62" width="150.0" x="361.99" y="256.96" as="geometry" />
+          <mxGeometry height="90" width="180" x="430" y="400" as="geometry" />
         </mxCell>
-        <mxCell id="12" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="起点坐标&#10;经度 / 纬度" vertex="1">
-          <mxGeometry height="90" width="196" x="488.30" y="99.61" as="geometry" />
+        <mxCell id="12" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="起点坐标" vertex="1">
+          <mxGeometry height="90" width="180" x="560" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="13" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="终点坐标&#10;经度 / 纬度" vertex="1">
-          <mxGeometry height="90" width="196" x="688.61" y="40.00" as="geometry" />
+        <mxCell id="13" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="终点坐标" vertex="1">
+          <mxGeometry height="90" width="180" x="740" y="300" as="geometry" />
         </mxCell>
-        <mxCell id="14" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="最小边界框&#10;经度 / 纬度" vertex="1">
-          <mxGeometry height="90" width="196" x="897.60" y="40.00" as="geometry" />
+        <mxCell id="14" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="最小边界框" vertex="1">
+          <mxGeometry height="90" width="180" x="920" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="15" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="最大边界框&#10;经度 / 纬度" vertex="1">
-          <mxGeometry height="90" width="196" x="1097.91" y="99.61" as="geometry" />
+        <mxCell id="15" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="最大边界框" vertex="1">
+          <mxGeometry height="90" width="180" x="1080" y="390" as="geometry" />
         </mxCell>
-        <mxCell id="16" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="总距离(米)" vertex="1">
-          <mxGeometry height="62" width="178" x="1256.22" y="256.96" as="geometry" />
+        <mxCell id="16" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="总距离" vertex="1">
+          <mxGeometry height="90" width="180" x="1190" y="470" as="geometry" />
         </mxCell>
-        <mxCell id="17" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="最低海拔(米)" vertex="1">
-          <mxGeometry height="62" width="196" x="1391.15" y="397.84" as="geometry" />
+        <mxCell id="17" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="最低海拔" vertex="1">
+          <mxGeometry height="90" width="180" x="1280" y="560" as="geometry" />
         </mxCell>
-        <mxCell id="18" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="最高海拔(米)" vertex="1">
-          <mxGeometry height="62" width="196" x="1472.89" y="583.93" as="geometry" />
+        <mxCell id="18" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="最高海拔" vertex="1">
+          <mxGeometry height="90" width="180" x="1340" y="660" as="geometry" />
         </mxCell>
-        <mxCell id="19" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="累计爬升(米)" vertex="1">
-          <mxGeometry height="62" width="196" x="1498.17" y="785.60" as="geometry" />
+        <mxCell id="19" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="累计爬升" vertex="1">
+          <mxGeometry height="90" width="180" x="1360" y="760" as="geometry" />
         </mxCell>
-        <mxCell id="20" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="累计下降(米)" vertex="1">
-          <mxGeometry height="62" width="196" x="1464.87" y="986.11" as="geometry" />
+        <mxCell id="20" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="累计下降" vertex="1">
+          <mxGeometry height="90" width="180" x="1320" y="860" as="geometry" />
         </mxCell>
-        <mxCell id="21" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="轨迹时长(秒)" vertex="1">
-          <mxGeometry height="62" width="196" x="1375.77" y="1168.79" as="geometry" />
+        <mxCell id="21" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="轨迹时长" vertex="1">
+          <mxGeometry height="90" width="180" x="1260" y="960" as="geometry" />
         </mxCell>
         <mxCell id="22" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="解析状态" vertex="1">
-          <mxGeometry height="62" width="150.0" x="1249.34" y="1303.82" as="geometry" />
+          <mxGeometry height="90" width="180" x="1140" y="1050" as="geometry" />
         </mxCell>
         <mxCell id="23" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="失败信息" vertex="1">
-          <mxGeometry height="62" width="150.0" x="1079.53" y="1405.27" as="geometry" />
+          <mxGeometry height="90" width="180" x="980" y="1110" as="geometry" />
         </mxCell>
-        <mxCell id="24" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="时间信息&#10;创建时间 / 更新时间" vertex="1">
-          <mxGeometry height="90" width="268" x="844.86" y="1592.50" as="geometry" />
+        <mxCell id="24" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="时间信息" vertex="1">
+          <mxGeometry height="90" width="180" x="790" y="1130" as="geometry" />
         </mxCell>
         <mxCell id="25" edge="1" parent="1" source="2" style="endArrow=none;html=1;rounded=0;strokeColor=#000000;strokeWidth=2;" target="3" value="">
           <mxGeometry relative="1" as="geometry" />

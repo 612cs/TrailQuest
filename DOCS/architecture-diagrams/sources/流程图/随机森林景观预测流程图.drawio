@@ -1,0 +1,78 @@
+<mxfile host="Electron">
+  <diagram name="随机森林景观预测流程图" id="随机森林景观预测流程图">
+    <mxGraphModel dx="1290" dy="1033" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=1;strokeWidth=2;" value="开始" vertex="1">
+          <mxGeometry height="50" width="120" x="700" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=0;strokeWidth=2;" value="采集输入数据" vertex="1">
+          <mxGeometry height="80" width="340" x="590" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=0;strokeWidth=2;" value="进行数据清洗与特征工程" vertex="1">
+          <mxGeometry height="80" width="340" x="590" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=0;strokeWidth=2;" value="加载随机森林模型" vertex="1">
+          <mxGeometry height="70" width="340" x="590" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=0;strokeWidth=2;" value="按路线与预测日期执行景观预测" vertex="1">
+          <mxGeometry height="70" width="340" x="590" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" parent="1" style="rhombus;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=none;fontSize=20;strokeWidth=2;" value="预测结果&lt;div&gt;是否达到&lt;/div&gt;&lt;div&gt;展示阈值？&lt;/div&gt;" vertex="1">
+          <mxGeometry height="140" width="200" x="660" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=0;strokeWidth=2;" value="生成景观概率结果&#10;并写入特征快照/预测结果" vertex="1">
+          <mxGeometry height="80" width="320" x="880" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="az0mLD_kjOccBehVW9iZ-1" edge="1" parent="1" source="n6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=20;strokeWidth=2;" target="n7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760" y="850" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=0;strokeWidth=2;" value="标记为低置信结果&#10;仅保留内部分析数据" vertex="1">
+          <mxGeometry height="80" width="300" x="350" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="az0mLD_kjOccBehVW9iZ-2" edge="1" parent="1" source="n7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;fontSize=20;" target="end" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=0;strokeWidth=2;" value="向前端展示景观预测信息" vertex="1">
+          <mxGeometry height="70" width="340" x="590" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;whiteSpace=wrap;html=1;strokeColor=#222222;fillColor=none;fontSize=20;fontStyle=1;strokeWidth=2;" value="结束" vertex="1">
+          <mxGeometry height="50" width="120" x="700" y="1070" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;strokeWidth=2;" target="n1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="n1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;strokeWidth=2;" target="n2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="n2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;strokeWidth=2;" target="n3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="n3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;strokeWidth=2;" target="n4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="n4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;strokeWidth=2;" target="d1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="d1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;strokeWidth=2;" target="n5" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="d1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;strokeWidth=2;" target="n6" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="n5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#222222;endArrow=block;endFill=1;fontSize=20;strokeWidth=2;" target="n7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760" y="850" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

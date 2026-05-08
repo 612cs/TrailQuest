@@ -1,23 +1,23 @@
 <mxfile host="Electron">
   <diagram name="trail_likes-entity" id="0">
-    <mxGraphModel dx="1262" dy="1091" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="none" math="0" shadow="0">
+    <mxGraphModel dx="2501" dy="723" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="none" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="路线点赞" vertex="1">
-          <mxGeometry height="84" width="210" x="206.50" y="199.17" as="geometry" />
+          <mxGeometry height="90" width="180" x="220" y="210" as="geometry" />
         </mxCell>
         <mxCell id="3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="点赞ID" vertex="1">
-          <mxGeometry height="62" width="150.0" x="40.00" y="210.17" as="geometry" />
+          <mxGeometry height="90" width="180" x="-10" y="140" as="geometry" />
         </mxCell>
         <mxCell id="4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="路线ID" vertex="1">
-          <mxGeometry height="62" width="150" x="138.25" y="40.00" as="geometry" />
+          <mxGeometry height="90" width="180" x="120" y="50" as="geometry" />
         </mxCell>
         <mxCell id="5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="用户ID" vertex="1">
-          <mxGeometry height="62" width="150" x="334.75" y="40.00" as="geometry" />
+          <mxGeometry height="90" width="180" x="330" y="50" as="geometry" />
         </mxCell>
         <mxCell id="6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;fontColor=#000000;fontFamily=Arial;fontSize=20;align=center;verticalAlign=middle;strokeWidth=2;gradientColor=none;shadow=0;glass=0;" value="创建时间" vertex="1">
-          <mxGeometry height="62" width="150.0" x="433.00" y="210.17" as="geometry" />
+          <mxGeometry height="90" width="180" x="440" y="140" as="geometry" />
         </mxCell>
         <mxCell id="7" edge="1" parent="1" source="2" style="endArrow=none;html=1;rounded=0;strokeColor=#000000;strokeWidth=2;" target="3" value="">
           <mxGeometry relative="1" as="geometry" />
