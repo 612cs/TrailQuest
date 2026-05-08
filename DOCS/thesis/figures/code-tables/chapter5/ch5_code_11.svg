@@ -1,45 +1,44 @@
 <?xml version="1.0"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="860" height="767" viewBox="0 0 860 767">
-<rect x="0" y="0" width="860" height="767" fill="white"/>
-<g font-family="Menlo, Monaco, Consolas, Courier New, monospace" font-size="14px">
-<text x="10" y="28" xml:space="preserve">@PostMapping(&quot;/trails/{id}/approve&quot;)</text>
-<text x="10" y="47" xml:space="preserve">public ApiResponse&lt;Void&gt; approveTrail(</text>
-<text x="10" y="66" xml:space="preserve">        @PathVariable Long id,</text>
-<text x="10" y="85" xml:space="preserve">        @AuthenticationPrincipal CustomUserDetails userDetails) {</text>
-<text x="10" y="104" xml:space="preserve">    adminService.approveTrail(id, userDetails.getId());</text>
-<text x="10" y="123" xml:space="preserve">    return ApiResponse.success(&quot;审核通过&quot;, null);</text>
-<text x="10" y="142" xml:space="preserve">}</text>
-<text x="10" y="161" xml:space="preserve"></text>
-<text x="10" y="180" xml:space="preserve">@PostMapping(&quot;/trails/{id}/reject&quot;)</text>
-<text x="10" y="199" xml:space="preserve">public ApiResponse&lt;Void&gt; rejectTrail(</text>
-<text x="10" y="218" xml:space="preserve">        @PathVariable Long id,</text>
-<text x="10" y="237" xml:space="preserve">        @AuthenticationPrincipal CustomUserDetails userDetails,</text>
-<text x="10" y="256" xml:space="preserve">        @Valid @RequestBody AdminRejectTrailRequest request) {</text>
-<text x="10" y="275" xml:space="preserve">    adminService.rejectTrail(id, userDetails.getId(), request);</text>
-<text x="10" y="294" xml:space="preserve">    return ApiResponse.success(&quot;已驳回路线&quot;, null);</text>
-<text x="10" y="313" xml:space="preserve">}</text>
-<text x="10" y="332" xml:space="preserve"></text>
-<text x="10" y="351" xml:space="preserve">// AdminServiceImpl：更新审核状态并委托日志服务记录动作</text>
-<text x="10" y="370" xml:space="preserve">public void approveTrail(Long trailId, Long adminId) {</text>
-<text x="10" y="389" xml:space="preserve">    Trail trail = requireTrail(trailId);</text>
-<text x="10" y="408" xml:space="preserve">    trail.setReviewStatus(ReviewStatus.APPROVED);</text>
-<text x="10" y="427" xml:space="preserve">    trail.setReviewedBy(adminId);</text>
-<text x="10" y="446" xml:space="preserve">    trail.setReviewedAt(LocalDateTime.now());</text>
-<text x="10" y="465" xml:space="preserve">    trailMapper.updateById(trail);</text>
-<text x="10" y="484" xml:space="preserve">    adminOperationLogService.recordTrailReview(adminId, trail, &quot;approve&quot;, null);</text>
-<text x="10" y="503" xml:space="preserve">}</text>
-<text x="10" y="522" xml:space="preserve"></text>
-<text x="10" y="541" xml:space="preserve">// AdminOperationLogServiceImpl：形成后台治理审计记录</text>
-<text x="10" y="560" xml:space="preserve">public void recordTrailReview(Long operatorId, Trail trail,</text>
-<text x="10" y="579" xml:space="preserve">                              String action, String reason) {</text>
-<text x="10" y="598" xml:space="preserve">    AdminOperationLog log = new AdminOperationLog();</text>
-<text x="10" y="617" xml:space="preserve">    log.setActionType(action);</text>
-<text x="10" y="636" xml:space="preserve">    log.setTargetType(&quot;trail&quot;);</text>
-<text x="10" y="655" xml:space="preserve">    log.setTargetId(trail.getId());</text>
-<text x="10" y="674" xml:space="preserve">    log.setTargetTitle(trail.getName());</text>
-<text x="10" y="693" xml:space="preserve">    log.setOperatorId(operatorId);</text>
-<text x="10" y="712" xml:space="preserve">    log.setReason(reason);</text>
-<text x="10" y="731" xml:space="preserve">    adminOperationLogMapper.insert(log);</text>
-<text x="10" y="750" xml:space="preserve">}</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="1274" viewBox="0 0 860 1274">
+<g font-family="Times New Roman" font-size="20pt">
+<text x="10" y="34" xml:space="preserve">@PostMapping(&quot;/trails/{id}/approve&quot;)</text>
+<text x="10" y="66" xml:space="preserve">public ApiResponse&lt;Void&gt; approveTrail(</text>
+<text x="10" y="98" xml:space="preserve">        @PathVariable Long id,</text>
+<text x="10" y="130" xml:space="preserve">        @AuthenticationPrincipal CustomUserDetails userDetails) {</text>
+<text x="10" y="162" xml:space="preserve">    adminService.approveTrail(id, userDetails.getId());</text>
+<text x="10" y="194" xml:space="preserve">    return ApiResponse.success(&quot;审核通过&quot;, null);</text>
+<text x="10" y="226" xml:space="preserve">}</text>
+<text x="10" y="258" xml:space="preserve"></text>
+<text x="10" y="290" xml:space="preserve">@PostMapping(&quot;/trails/{id}/reject&quot;)</text>
+<text x="10" y="322" xml:space="preserve">public ApiResponse&lt;Void&gt; rejectTrail(</text>
+<text x="10" y="354" xml:space="preserve">        @PathVariable Long id,</text>
+<text x="10" y="386" xml:space="preserve">        @AuthenticationPrincipal CustomUserDetails userDetails,</text>
+<text x="10" y="418" xml:space="preserve">        @Valid @RequestBody AdminRejectTrailRequest request) {</text>
+<text x="10" y="450" xml:space="preserve">    adminService.rejectTrail(id, userDetails.getId(), request);</text>
+<text x="10" y="482" xml:space="preserve">    return ApiResponse.success(&quot;已驳回路线&quot;, null);</text>
+<text x="10" y="514" xml:space="preserve">}</text>
+<text x="10" y="546" xml:space="preserve"></text>
+<text x="10" y="578" xml:space="preserve">// AdminServiceImpl：更新审核状态并委托日志服务记录动作</text>
+<text x="10" y="610" xml:space="preserve">public void approveTrail(Long trailId, Long adminId) {</text>
+<text x="10" y="642" xml:space="preserve">    Trail trail = requireTrail(trailId);</text>
+<text x="10" y="674" xml:space="preserve">    trail.setReviewStatus(ReviewStatus.APPROVED);</text>
+<text x="10" y="706" xml:space="preserve">    trail.setReviewedBy(adminId);</text>
+<text x="10" y="738" xml:space="preserve">    trail.setReviewedAt(LocalDateTime.now());</text>
+<text x="10" y="770" xml:space="preserve">    trailMapper.updateById(trail);</text>
+<text x="10" y="802" xml:space="preserve">    adminOperationLogService.recordTrailReview(adminId, trail, &quot;approve&quot;, null);</text>
+<text x="10" y="834" xml:space="preserve">}</text>
+<text x="10" y="866" xml:space="preserve"></text>
+<text x="10" y="898" xml:space="preserve">// AdminOperationLogServiceImpl：形成后台治理审计记录</text>
+<text x="10" y="930" xml:space="preserve">public void recordTrailReview(Long operatorId, Trail trail,</text>
+<text x="10" y="962" xml:space="preserve">                              String action, String reason) {</text>
+<text x="10" y="994" xml:space="preserve">    AdminOperationLog log = new AdminOperationLog();</text>
+<text x="10" y="1026" xml:space="preserve">    log.setActionType(action);</text>
+<text x="10" y="1058" xml:space="preserve">    log.setTargetType(&quot;trail&quot;);</text>
+<text x="10" y="1090" xml:space="preserve">    log.setTargetId(trail.getId());</text>
+<text x="10" y="1122" xml:space="preserve">    log.setTargetTitle(trail.getName());</text>
+<text x="10" y="1154" xml:space="preserve">    log.setOperatorId(operatorId);</text>
+<text x="10" y="1186" xml:space="preserve">    log.setReason(reason);</text>
+<text x="10" y="1218" xml:space="preserve">    adminOperationLogMapper.insert(log);</text>
+<text x="10" y="1250" xml:space="preserve">}</text>
 </g>
 </svg>
