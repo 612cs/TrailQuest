@@ -202,18 +202,18 @@
             width: 100%;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             position: relative;
             background: transparent;
         }
 
         /* Common frosted glass container for readability over background */
         .glass-panel {
-            background: var(--bg-overlay);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255,255,255,0.6);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            /* background: var(--bg-overlay); */
+            /* backdrop-filter: blur(4px); */
+            /* border-radius: 12px; */
+            /* padding: 30px; */
+            /* box-shadow: 0 8px 20px rgba(0,0,0,0.05); */
         }
 
         /* Typography */
@@ -240,6 +240,13 @@
 
         /* Slide 1 Cover Layout */
         #slide1 { justify-content: start; align-items: flex-start; margin-top: 100px; }
+        
+        /* Slide 3-16: Center content */
+        #slide3, #slide4, #slide5, #slide6, #slide7, #slide8, #slide9, #slide10, #slide11, #slide12, #slide13, #slide14, #slide15, #slide16 {
+            justify-content: center;
+            align-items: center;
+        }
+        
         .cover-content {
             background: transparent;
             padding: 0;
@@ -326,7 +333,7 @@
         .arch-layer { background: rgba(255,255,255,0.95); border: 2px solid var(--primary-blue); border-radius: 10px; padding: 15px 20px; margin-bottom: 15px; display: flex; align-items: center; position: relative; }
         .arch-layer::after { content: '\f063'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); color: var(--accent-gold); font-size: 16px; }
         .arch-layer:last-child::after { display: none; }
-        .arch-title { width: 150px; font-size: 27px; font-weight: bold; color: var(--primary-blue); border-right: 2px solid #e2e8f0; margin-right: 20px; }
+        .arch-title { width: 150px; font-size: 22px; font-weight: bold; color: var(--primary-blue); border-right: 2px solid #e2e8f0; margin-right: 20px; }
 
         /* Callout Box */
         .callout { background: rgba(230, 240, 255, 0.9); border-left: 5px solid var(--primary-blue); padding: 15px 20px; margin-top: 15px; border-radius: 4px; }
@@ -506,7 +513,7 @@
             <span class="slide-title">相关技术概述 (第2章)</span>
         </div>
         <div class="content-area">
-            <div class="grid-columns-3 glass-panel animate-item delay-1" style="height: 100%; padding: 40px;">
+            <div class="grid-columns-3 glass-panel animate-item delay-1" style="padding: 40px; display: flex;justify-content: center; align-items: center;">
                 <div style="border-right: 1px dashed #cbd5e1; padding-right: 20px;">
                     <div style="text-align:center; font-size:48px; color:var(--primary-blue); margin-bottom:15px;"><i class="fa-brands fa-vuejs"></i></div>
                     <h3 style="text-align:center; margin-bottom:20px; color:var(--text-dark);">前端展现层</h3>
@@ -581,7 +588,8 @@
             <span class="slide-number">04</span>
             <span class="slide-title">系统架构设计 (第4章)</span>
         </div>
-        <div class="content-area split-layout glass-panel animate-item delay-1">
+        <img style="width: 100%; height: 100%;" src="./assets/docx-images/系统架构图.drawio.svg" alt="Architecture Concept">
+        <!-- <div class="content-area split-layout glass-panel animate-item delay-1">
             <div style="display: flex; flex-direction: column; justify-content: center;">
                 <div class="arch-layer">
                     <div class="arch-title"><i class="fa-solid fa-desktop" style="margin-right:8px;"></i>前端展示层</div>
@@ -597,10 +605,9 @@
                 </div>
             </div>
             <div class="image-wrapper animate-item delay-2">
-                <!-- Fallback abstract tech image -->
-                <img src="https://images.stockcake.com/public/b/e/9/be901d84-a1e6-4229-87a3-cb2066c61f22_large/digital-network-connections-stockcake.jpg" alt="Architecture Concept">
+                <img src="./assets/docx-images/系统架构图.drawio.svg" alt="Architecture Concept">
             </div>
-        </div>
+        </div> -->
     </div>
 
     <div class="slide" id="slide8">
@@ -773,7 +780,7 @@
             <span class="slide-title">总结与展望 (第7章)</span>
         </div>
         <div class="content-area grid-columns-2 animate-item delay-1">
-            <div class="tile-box glass-panel">
+            <div class="tile-box glass-panel" style="height: fit-content;">
                 <h3><i class="fa-solid fa-flag-checkered" style="margin-right:10px;"></i>阶段工作总结</h3>
                 <ul class="styled-list" style="font-size:21px;">
                     <li>实现了一个聚焦于户外垂直场景的智能推荐平台。</li>
@@ -782,7 +789,7 @@
                     <li>核心架构稳健，满足毕设检验要求。</li>
                 </ul>
             </div>
-            <div class="tile-box glass-panel" style="border-top-color:var(--primary-blue);">
+            <div class="tile-box glass-panel" style="border-top-color:var(--primary-blue); height:fit-content">
                 <h3 style="color:var(--text-dark);"><i class="fa-solid fa-rocket" style="margin-right:10px; color:var(--primary-blue);"></i>未来改进方向</h3>
                 <ul class="styled-list" style="font-size:21px;">
                     <li style="margin-bottom: 20px;"><strong>多模态路线画像增强：</strong>尝试引入计算机视觉(CV)，从用户上传的实景图中自动提取地貌特征与实时路况信息。</li>
