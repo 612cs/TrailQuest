@@ -1,0 +1,853 @@
+<!-- ... existing code ... -->
+<!DOCTYPE html><html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基于Vue的户外路线智能推荐平台的设计与实现 - 毕业答辩</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;family=Poppins:wght@400;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: rgb(4,86,158); /* 主色：深蓝 */
+            --accent-gold: rgb(147,126,50); /* 次色：深黄（强调） */
+            --accent-gold-light: rgb(253,249,222); /* 次色：浅黄（背景/高亮） */
+            --text-dark: #1e293b;
+            --text-light: #475569;
+            --bg-overlay: rgba(255, 255, 255, 0.85); /* Semi-transparent white to make text readable over background */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #fff;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Noto Sans SC', sans-serif;
+            overflow: hidden;
+        }
+
+        /* The main presentation wrapper */
+        #presentation-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background-color: #fff;
+            overflow: hidden;
+            background-image: url('PPTback.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .presentation-brand {
+            position: absolute;
+            top: 24px;
+            left: 28px;
+            z-index: 120;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            pointer-events: none;
+        }
+
+        .presentation-brand img {
+            width: 86px;
+            height: 86px;
+            object-fit: contain;
+            flex: 0 0 auto;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+            transform: scaleX(1.1); /* 在 X 轴拉宽 */
+            transform-origin: left center; /* 从左侧向右拉伸 */
+            border-radius: 0; /* 确保不圆角 */
+        }
+
+        .presentation-brand__name {
+            font-size: 43px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            letter-spacing: 3px;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+            white-space: nowrap;
+            /* Prefer KaiTi or Songti for Chinese school name */
+            font-family: 'STKaiti', 'KaiTi', 'Songti SC', 'Songti', serif;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(50px); /* Slight slide effect */
+            pointer-events: none; /* Disable interaction when hidden */
+            display: flex;
+            flex-direction: column;
+            padding: 120px 80px 60px 80px; /* 减少顶部内边距，给内容更多空间 */
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        .slide.fade-out {
+            transform: translateX(-50px);
+        }
+
+        /* Navigation Controls Overlay */
+        .nav-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: rgba(255,255,255,0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--primary-blue);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .nav-btn:hover { color: var(--accent-gold); }
+        .nav-btn:disabled { color: #ccc; cursor: not-allowed; }
+        
+        #slide-counter {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: var(--primary-blue);
+            font-size: 13px;
+        }
+
+        /* Invisible click areas for left/right navigation */
+        .nav-area {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 15%;
+            z-index: 50;
+            cursor: pointer;
+        }
+        .nav-area-left { left: 0; }
+        .nav-area-right { right: 0; }
+
+        /* Move slide header into top area next to the school name */
+        .slide-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0;
+            border-bottom: 2px solid var(--accent-gold);
+            padding: 6px 18px;
+            width: max-content;
+            margin-left: 0;
+            border-radius: 8px 8px 0 0;
+            position: absolute; /* position relative to #presentation-wrapper */
+            top: 46px; /* align vertically with brand */
+            left: calc(324px + 42px); /* left + logo width (scaled) + gap */
+            z-index: 121;
+        }
+        .slide-number { 
+            font-family: "KaiTi", "楷体", "STKaiti", "华文楷体", sans-serif;
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-right: 15px;
+            line-height: 1;
+        }
+        .slide-title {
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            line-height: 1;
+        }
+        
+        .content-area {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Common frosted glass container for readability over background */
+        .glass-panel {
+            background: var(--bg-overlay);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+
+        /* Typography */
+        p, li {
+            font-size: 27px;
+            line-height: 1.7;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+        strong { color: var(--primary-blue); }
+
+        .styled-list { list-style: none; padding: 0; margin: 0; }
+        .styled-list li { position: relative; padding-left: 35px; margin-bottom: 18px; }
+        .styled-list li::before {
+            content: '\f0da'; /* Play arrow icon */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            color: var(--accent-gold);
+            font-size: 27px;
+        }
+
+        /* Slide 1 Cover Layout */
+        #slide1 { justify-content: center; align-items: center; padding: 0; }
+        .cover-content {
+            background: rgba(255, 255, 255, 0.92);
+            padding: 60px 80px;
+            border-radius: 16px;
+            border-top: 6px solid var(--primary-blue);
+            border-bottom: 6px solid var(--accent-gold);
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            transform: translateY(20px); /* Adjust position relative to background image */
+        }
+        .cover-content h1 {
+            font-size: 53px;
+            color: var(--primary-blue);
+            margin-bottom: 50px;
+            line-height: 1.4;
+            letter-spacing: 2px;
+        }
+        .thesis-info {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 15px 40px;
+            text-align: left;
+            margin: 0 auto;
+            width: fit-content;
+        }
+        .thesis-info p { font-size: 24px; margin: 0; color: #334155; }
+        .thesis-info strong { color: var(--primary-blue); letter-spacing: 4px; }
+
+        /* Slide 2 TOC Grid */
+        .toc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 40px;
+            width: 80%;
+            margin: 0 auto;
+        }
+        .toc-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 25px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary-blue);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        .toc-item:hover { transform: translateX(10px); }
+        .toc-number { font-size: 37px; font-family: 'Poppins'; font-weight: 700; color: var(--accent-gold); margin-right: 20px; width: 40px; }
+        .toc-text { font-size: 29px; font-weight: bold; color: var(--text-dark); }
+
+        /* Image + Text layout */
+        .split-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; height: 100%; align-items: center; }
+        .image-wrapper { width: 100%; height: 380px; border-radius: 12px; overflow: hidden; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Multi-column tiled layout */
+        .grid-columns-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .grid-columns-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        .tile-box { background: rgba(255,255,255,0.9); border-radius: 10px; padding: 25px; border-top: 4px solid var(--accent-gold); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .tile-box h3 { color: var(--primary-blue); border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; font-size: 29px; }
+        
+        /* Architecture/Flow elements */
+        .flow-container { display: flex; align-items: center; justify-content: space-between; width: 100%; background: rgba(255, 255, 255, 0.95); padding: 15px 20px; border-radius: 8px; border: 1px solid var(--accent-gold); margin-bottom: 20px; }
+        .flow-step { text-align: center; flex: 1; }
+        .flow-icon { font-size: 37px; color: var(--primary-blue); margin-bottom: 10px; }
+        .flow-text { font-size: 21px; font-weight: bold; color: var(--text-dark); }
+        .flow-arrow { color: var(--accent-gold); font-size: 27px; }
+
+        .arch-layer { background: rgba(255,255,255,0.95); border: 2px solid var(--primary-blue); border-radius: 10px; padding: 15px 20px; margin-bottom: 15px; display: flex; align-items: center; position: relative; }
+        .arch-layer::after { content: '\f063'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); color: var(--accent-gold); font-size: 16px; }
+        .arch-layer:last-child::after { display: none; }
+        .arch-title { width: 150px; font-size: 27px; font-weight: bold; color: var(--primary-blue); border-right: 2px solid #e2e8f0; margin-right: 20px; }
+
+        /* Callout Box */
+        .callout { background: rgba(230, 240, 255, 0.9); border-left: 5px solid var(--primary-blue); padding: 15px 20px; margin-top: 15px; border-radius: 4px; }
+        
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-item { opacity: 0; }
+        .active .animate-item { animation: fadeIn 0.6s forwards; }
+        .active .delay-1 { animation-delay: 0.2s; }
+        .active .delay-2 { animation-delay: 0.4s; }
+        .active .delay-3 { animation-delay: 0.6s; }
+
+    </style>
+<style>
+  :where(.slide-attributions) {
+    padding: 60px;
+  }
+  .attribution-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .attribution-list__item {
+    align-items: center;
+    border-bottom: 1px solid #757575;
+    display: grid;
+    gap: 25px;
+    grid-template-columns: 90px 1fr;
+    padding: 15px 0;
+    margin: 0 !important;
+  }
+  .attribution-list__item::before {
+    display: none;
+  }
+  .attribution-list__item::after {
+    display: none;
+  }
+  .attribution-list__item:last-child {
+    border-bottom: none;
+  }
+  .attribution-list__item .attribution__thumbnail {
+    height: 50px;
+    width: 90px;
+  }
+  .attribution__thumbnail .attribution__thumbnail__image {
+    border-radius: 8px;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+  .attribution__details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .attribution__details .attribution__raw-url {
+    color: inherit;
+    font-size: 13px;
+    margin: 0;
+    word-break: break-all;
+  }
+  .attribution__details .attribution__title {
+    color: inherit;
+    font-size: 21px;
+    margin: 0;
+  }
+  .attribution__details .attribution__title > .attribution__link {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+</style></head>
+<body>
+
+<div id="presentation-wrapper">
+
+    <div class="presentation-brand" aria-hidden="true">
+        <img src="logo.png" alt="湖南信息学院校徽">
+        <div class="presentation-brand__name">湖南信息学院</div>
+    </div>
+
+    <!-- Invisible Navigation Areas -->
+    <div class="nav-area nav-area-left" onclick="prevSlide()"></div>
+    <div class="nav-area nav-area-right" onclick="nextSlide()"></div>
+
+    <!-- Visible Controls -->
+    <div class="nav-controls">
+        <button class="nav-btn" id="btn-prev" onclick="prevSlide()"><i class="fa-solid fa-circle-chevron-left"></i></button>
+        <span id="slide-counter">1 / 16</span>
+        <button class="nav-btn" id="btn-next" onclick="nextSlide()"><i class="fa-solid fa-circle-chevron-right"></i></button>
+    </div>
+
+    <div class="slide active" id="slide1">
+        <div class="cover-content animate-item">
+            <h1>基于Vue的户外路线智能推荐平台<br>的设计与实现</h1>
+            <div class="thesis-info">
+                <p><strong>答辩人：</strong>陈胜</p>
+                <p><strong>指导教师：</strong>昌明权 刘妙兴</p>
+                <p><strong>学 号：</strong>202201150626</p>
+                <p><strong>学 院：</strong>计算机科学与工程学院</p>
+                <p><strong>专 业：</strong>软件工程</p>
+                <p><strong>学 校：</strong>湖南信息学院</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide2">
+        <div class="slide-header animate-item">
+            <span class="slide-number">00</span>
+            <span class="slide-title">答辩目录 / Contents</span>
+        </div>
+        <div class="content-area" style="justify-content: center;">
+            <div class="toc-grid">
+                <div class="toc-item animate-item delay-1"><span class="toc-number">01</span><span class="toc-text">绪论</span></div>
+                <div class="toc-item animate-item delay-1"><span class="toc-number">02</span><span class="toc-text">相关技术概述</span></div>
+                <div class="toc-item animate-item delay-2"><span class="toc-number">03</span><span class="toc-text">系统需求分析</span></div>
+                <div class="toc-item animate-item delay-2"><span class="toc-number">04</span><span class="toc-text">系统总体设计</span></div>
+                <div class="toc-item animate-item delay-3"><span class="toc-number">05</span><span class="toc-text">系统总体实现</span></div>
+                <div class="toc-item animate-item delay-3"><span class="toc-number">06</span><span class="toc-text">系统测试与优化</span></div>
+                <div class="toc-item animate-item delay-3" style="grid-column: span 2; width: 48%; margin: 0 auto;">
+                    <span class="toc-number">07</span><span class="toc-text">总结与展望</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide3">
+        <div class="slide-header animate-item">
+            <span class="slide-number">01</span>
+            <span class="slide-title">研究背景 (第1章)</span>
+        </div>
+        <div class="content-area split-layout glass-panel animate-item delay-1">
+            <div>
+                <ul class="styled-list">
+                    <li><strong>受众群体爆发：</strong>户外运动从少数专业玩家扩大到普通大众。</li>
+                    <li><strong>用户需求升级：</strong>不再满足简单图文，更关注路线适配度、气象窗口及独特自然景观。</li>
+                    <li><strong>现有工具三大痛点：</strong>
+                        <ol style="margin-left: 40px; margin-top: 10px; margin-bottom: 15px; color: var(--text-light); font-size: 21px;">
+                            <li>轨迹数据不完整，解析困难。</li>
+                            <li>局部气象信息更新滞后。</li>
+                            <li>推荐逻辑死板，多按热度排序，缺乏个性化。</li>
+                        </ol>
+                    </li>
+                </ul>
+                <div class="callout animate-item delay-2">
+                    <p style="margin:0; font-weight:bold; color:var(--primary-blue);">结论：迫切需要一个专门面向户外徒步场景的智能推荐平台。</p>
+                </div>
+            </div>
+            <div class="image-wrapper animate-item delay-2">
+                <img src="https://cdn.outsideonline.com/wp-content/uploads/2021/06/21/at-guide-lead_h.jpg" alt="Hiking Background">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide4">
+        <div class="slide-header animate-item">
+            <span class="slide-number">01</span>
+            <span class="slide-title">国内外研究现状 (第1章)</span>
+        </div>
+        <div class="content-area">
+            <div class="grid-columns-2" style="margin-bottom: 20px;">
+                <div class="tile-box glass-panel animate-item delay-1">
+                    <h3><i class="fa-solid fa-globe" style="margin-right:10px;"></i>国外研究现状</h3>
+                    <ul class="styled-list">
+                        <li>路线规划从最短路径转向<strong>质量感知与多目标优化</strong>。</li>
+                        <li>大模型工具调用架构(ToolFlow等)提供全新交互范式。</li>
+                        <li>随机森林等机器学习方法应用于微地形气象预测。</li>
+                    </ul>
+                </div>
+                <div class="tile-box glass-panel animate-item delay-2">
+                    <h3><i class="fa-solid fa-map-location-dot" style="margin-right:10px;"></i>国内研究现状</h3>
+                    <ul class="styled-list">
+                        <li>智慧文旅平台常采用 Spring Boot + Vue 架构。</li>
+                        <li>GIS地图API整合与前后端分离实践经验丰富。</li>
+                        <li>推荐算法应用开始重点关注透明性和真实行为反馈。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tile-box glass-panel animate-item delay-3" style="border-top-color: var(--primary-blue);">
+                <h3 style="color:var(--primary-blue); border:none; margin-bottom:5px;">核心论点 (现状综述)</h3>
+                <p style="margin:0;">现有研究多分散在独立领域。本项目旨在填补空白，打造一个将 <strong>GIS地图 + 天气数据 + 用户画像 + AI对话 + 景观预测</strong> 深度整合的中文专属系统。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide5">
+        <div class="slide-header animate-item">
+            <span class="slide-number">02</span>
+            <span class="slide-title">相关技术概述 (第2章)</span>
+        </div>
+        <div class="content-area">
+            <div class="grid-columns-3 glass-panel animate-item delay-1" style="height: 100%; padding: 40px;">
+                <div style="border-right: 1px dashed #cbd5e1; padding-right: 20px;">
+                    <div style="text-align:center; font-size:48px; color:var(--primary-blue); margin-bottom:15px;"><i class="fa-brands fa-vuejs"></i></div>
+                    <h3 style="text-align:center; margin-bottom:20px; color:var(--text-dark);">前端展现层</h3>
+                    <ul class="styled-list">
+                        <li><strong>Vue 3 (Composition API)</strong></li>
+                        <li><strong>TypeScript</strong></li>
+                        <li><strong>Tailwind CSS + DaisyUI</strong></li>
+                        <li><strong>Vite 7</strong></li>
+                    </ul>
+                </div>
+                <div style="border-right: 1px dashed #cbd5e1; padding: 0 20px;">
+                    <div style="text-align:center; font-size:40px; color:var(--primary-blue); margin-bottom:15px;"><i class="fa-solid fa-server"></i></div>
+                    <h3 style="text-align:center; margin-bottom:20px; color:var(--text-dark);">后端服务层</h3>
+                    <ul class="styled-list">
+                        <li><strong>Spring Boot 3</strong></li>
+                        <li><strong>MyBatis-Plus</strong></li>
+                        <li><strong>MySQL + Redis</strong></li>
+                        <li><strong>JWT + Spring Security</strong></li>
+                    </ul>
+                </div>
+                <div style="padding-left: 20px;">
+                    <div style="text-align:center; font-size:40px; color:var(--primary-blue); margin-bottom:15px;"><i class="fa-solid fa-brain"></i></div>
+                    <h3 style="text-align:center; margin-bottom:20px; color:var(--text-dark);">AI与GIS技术</h3>
+                    <ul class="styled-list">
+                        <li><strong>DeepSeek大模型</strong></li>
+                        <li><strong>Function Calling</strong></li>
+                        <li><strong>高德地图API</strong></li>
+                        <li><strong>随机森林 (Machine Learning)</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide6">
+        <div class="slide-header animate-item">
+            <span class="slide-number">03</span>
+            <span class="slide-title">系统功能需求分析 (第3章)</span>
+        </div>
+        <div class="content-area glass-panel animate-item delay-1" style="justify-content: center;">
+            <div class="grid-columns-2">
+                <div style="padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <i class="fa-solid fa-users" style="font-size: 40px; color: var(--primary-blue);"></i>
+                        <h3 style="margin-top: 10px; font-size: 24px;">普通用户端 (C端)</h3>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>核心业务：</strong> 路线浏览、搜索、详情与GIS地图查阅。</li>
+                        <li><strong>内容贡献：</strong> 户外路线发布、轨迹上传、社区互动。</li>
+                        <li><strong>个性服务：</strong> 注册登录、个人中心、体能画像设置。</li>
+                        <li><strong>智能赋能：</strong> AI自然语言对话推荐、气象景观预测。</li>
+                    </ul>
+                </div>
+                <div style="padding: 20px; border-left: 2px dashed #cbd5e1;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <i class="fa-solid fa-user-tie" style="font-size: 40px; color: var(--accent-gold);"></i>
+                        <h3 style="margin-top: 10px; font-size: 24px;">系统管理员端 (B端)</h3>
+                    </div>
+                    <ul class="styled-list">
+                        <li><strong>用户管理：</strong> 信息维护、角色分配与账号状态。</li>
+                        <li><strong>路线管理：</strong> 全生命周期管理、人工合规审核与驳回。</li>
+                        <li><strong>社区治理：</strong> 违规评论清理、精选优质路线发布。</li>
+                        <li><strong>系统运维：</strong> 全局参数配置、操作日志审计监控。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide7">
+        <div class="slide-header animate-item">
+            <span class="slide-number">04</span>
+            <span class="slide-title">系统架构设计 (第4章)</span>
+        </div>
+        <div class="content-area split-layout glass-panel animate-item delay-1">
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+                <div class="arch-layer">
+                    <div class="arch-title"><i class="fa-solid fa-desktop" style="margin-right:8px;"></i>前端展示层</div>
+                    <div><strong>Vue 3 + Pinia + 高德地图API</strong><br><span style="font-size:21px;">页面渲染、状态管理、GIS轨迹可视化</span></div>
+                </div>
+                <div class="arch-layer">
+                    <div class="arch-title"><i class="fa-solid fa-server" style="margin-right:8px;"></i>后端服务层</div>
+                    <div><strong>Spring Boot 生态</strong><br><span style="font-size:21px;">JWT鉴权、核心业务逻辑、MySQL+Redis存储</span></div>
+                </div>
+                <div class="arch-layer">
+                    <div class="arch-title"><i class="fa-solid fa-brain" style="margin-right:8px;"></i>AI服务层</div>
+                    <div><strong>DeepSeek大模型 + 随机森林</strong><br><span style="font-size:21px;">语义意图提取(Function Calling)与景观预测</span></div>
+                </div>
+            </div>
+            <div class="image-wrapper animate-item delay-2">
+                <!-- Fallback abstract tech image -->
+                <img src="https://images.stockcake.com/public/b/e/9/be901d84-a1e6-4229-87a3-cb2066c61f22_large/digital-network-connections-stockcake.jpg" alt="Architecture Concept">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide8">
+        <div class="slide-header animate-item">
+            <span class="slide-number">04</span>
+            <span class="slide-title">系统功能模块划分 (第4章)</span>
+        </div>
+        <div class="content-area glass-panel animate-item delay-1" style="justify-content: center; padding:40px;">
+            <div class="grid-columns-3">
+                <div class="tile-box" style="text-align: center;">
+                    <i class="fa-solid fa-mobile-screen" style="font-size:36px; color:var(--primary-blue); margin-bottom:15px;"></i>
+                    <h3 style="border-bottom:none; margin-bottom:10px;">前台用户功能</h3>
+                    <ul style="list-style:none; padding:0; font-size:21px; color:var(--text-light); line-height:2;">
+                        <li>个人中心与画像</li>
+                        <li>路线浏览与发布</li>
+                        <li>社区发帖互动</li>
+                        <li>智能推荐与天气</li>
+                    </ul>
+                </div>
+                <div class="tile-box" style="text-align: center; border-top-color: var(--primary-blue);">
+                    <i class="fa-solid fa-shield-halved" style="font-size:36px; color:var(--primary-blue); margin-bottom:15px;"></i>
+                    <h3 style="border-bottom:none; margin-bottom:10px;">后台管理员功能</h3>
+                    <ul style="list-style:none; padding:0; font-size:21px; color:var(--text-light); line-height:2;">
+                        <li>用户与权限管理</li>
+                        <li>路线审核与治理</li>
+                        <li>评论违规清理</li>
+                        <li>配置与操作日志</li>
+                    </ul>
+                </div>
+                <div class="tile-box" style="text-align: center;">
+                    <i class="fa-solid fa-microchip" style="font-size:36px; color:var(--primary-blue); margin-bottom:15px;"></i>
+                    <h3 style="border-bottom:none; margin-bottom:10px;">大模型智能功能</h3>
+                    <ul style="list-style:none; padding:0; font-size:21px; color:var(--text-light); line-height:2;">
+                        <li>语义理解提取</li>
+                        <li>Function Calling</li>
+                        <li>智能推荐检索</li>
+                        <li>GIS空间结合服务</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide9">
+        <div class="slide-header animate-item">
+            <span class="slide-number">04</span>
+            <span class="slide-title">AI推荐与景观预测链路设计 (核心)</span>
+        </div>
+        <div class="content-area glass-panel animate-item delay-1">
+            <h3 style="font-size:29px; color:var(--primary-blue); margin-bottom:15px;"><i class="fa-solid fa-robot" style="margin-right:8px;"></i> 1. AI 推荐链路</h3>
+            <div class="flow-container">
+                <div class="flow-step"><div class="flow-icon"><i class="fa-regular fa-comment-dots"></i></div><div class="flow-text">自然语言输入</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-step"><div class="flow-icon"><i class="fa-solid fa-brain"></i></div><div class="flow-text">DeepSeek 解析</div><div style="font-size:16px; color:#666;">(结构化参数)</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-step"><div class="flow-icon"><i class="fa-solid fa-database"></i></div><div class="flow-text">后端路线检索</div><div style="font-size:16px; color:#666;">(综合评分排序)</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-step"><div class="flow-icon"><i class="fa-solid fa-ticket"></i></div><div class="flow-text">生成推荐卡片</div></div>
+            </div>
+
+            <h3 style="font-size:29px; color:var(--primary-blue); margin-top:20px; margin-bottom:15px;"><i class="fa-solid fa-cloud-sun" style="margin-right:8px;"></i> 2. 景观预测链路</h3>
+            <div class="flow-container">
+                <div class="flow-step"><div class="flow-icon"><i class="fa-solid fa-satellite-dish"></i></div><div class="flow-text">坐标+气象数据</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-step"><div class="flow-icon"><i class="fa-solid fa-chart-pie"></i></div><div class="flow-text">特征构造</div><div style="font-size:16px; color:#666;">（温湿/風速/云量）</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-step"><div class="flow-icon"><i class="fa-solid fa-network-wired"></i></div><div class="flow-text">随机森林分类</div></div>
+                <i class="fa-solid fa-arrow-right flow-arrow"></i>
+                <div class="flow-step"><div class="flow-icon"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="flow-text">输出概率与风险</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide10">
+        <div class="slide-header animate-item">
+            <span class="slide-number">05</span>
+            <span class="slide-title">系统实现：路线详情与地图展示</span>
+        </div>
+        <div class="content-area split-layout glass-panel animate-item delay-1">
+            <div>
+                <ul class="styled-list">
+                    <li><strong>数据聚合展示：</strong>页面顶部直观展示封面、难度、总距离、累计爬升等硬核基础信息。</li>
+                    <li><strong>GIS可视化：</strong>基于高德地图API，动态渲染GeoJSON(GPX/KML)轨迹折线，标注起终点。</li>
+                    <li><strong>一站式服务：</strong>页面下方无缝集成区域天气趋势、景观预测面板及驴友实地评论。</li>
+                </ul>
+            </div>
+            <div class="image-wrapper animate-item delay-2">
+                <img src="https://s1.cdn.autoevolution.com/images/news/this-navigation-app-just-showed-google-maps-and-waze-how-it-s-done-224797_1.jpg" alt="Map Interface">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide11">
+        <div class="slide-header animate-item">
+            <span class="slide-number">05</span>
+            <span class="slide-title">系统实现：AI 智能对话推荐</span>
+        </div>
+        <div class="content-area split-layout glass-panel animate-item delay-1">
+            <div>
+                <ul class="styled-list">
+                    <li><strong>交互范式转变：</strong>从传统的"表单检索"变为类微信的"自然语言对话"。</li>
+                    <li><strong>流程机制：</strong>大模型解析意图 → Function Calling结构化 → 本地数据库检索 → 卡片渲染。</li>
+                    <li><strong>防幻觉设计：</strong>推荐结果具备可解释性，刚性检索走本地库，模糊长尾需求才依赖大模型推理，控制成本。</li>
+                </ul>
+            </div>
+            <div class="image-wrapper animate-item delay-2" style="background:#f1f5f9; display:flex; justify-content:center; align-items:center;">
+                <!-- Fallback chat image -->
+                <img src="https://cdn.dribbble.com/userupload/44543155/file/05ff2f1b0870e40f9f09f15a4eea5a5a.png?resize=752x&vertical=center" style="width:auto; height:100%;" alt="AI Chat Interface">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide12">
+        <div class="slide-header animate-item">
+            <span class="slide-number">05</span>
+            <span class="slide-title">系统实现：天气与景观预测</span>
+        </div>
+        <div class="content-area split-layout glass-panel animate-item delay-1">
+            <div>
+                <ul class="styled-list">
+                    <li><strong>数据输入：</strong>提取路线核心坐标与平均海拔，结合第三方气象/天文API。</li>
+                    <li><strong>模型应用：</strong>针对"云海"、"雾凇"、"日出"等，利用随机森林算法分别训练预测模型。</li>
+                    <li><strong>直观输出：</strong>生成预测日历，展示发生概率百分比及出行气象风险等级。</li>
+                    <li><strong>优势：</strong>训练成本低，特征重要性解释性强，极适合原型验证阶段。</li>
+                </ul>
+            </div>
+            <div class="image-wrapper animate-item delay-2">
+                <img src="https://images.stockcake.com/public/7/6/5/7657fa6a-3244-47bc-9acd-49800f8c2a2e_large/sunrise-above-clouds-stockcake.jpg" alt="Mountain Landscape">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide13">
+        <div class="slide-header animate-item">
+            <span class="slide-number">05</span>
+            <span class="slide-title">系统实现：后台管理</span>
+        </div>
+        <div class="content-area split-layout glass-panel animate-item delay-1">
+            <div>
+                <ul class="styled-list">
+                    <li><strong>数据总览 Dashboard：</strong>可视化展示新增用户、发布趋势等运营数据。</li>
+                    <li><strong>内容审核闭环：</strong>用户提交 → 待审队列 → 管理员核查地图/信息 → 通过或填写理由驳回。</li>
+                    <li><strong>权限与审计：</strong>基于 Spring Security 的 RBAC 角色权限控制，并记录关键操作日志审计。</li>
+                </ul>
+            </div>
+            <div class="image-wrapper animate-item delay-2">
+                <img src="https://colorlib.com/wp/wp-content/uploads/sites/2/elaadmin-dashboard-template.png" alt="Admin Dashboard">
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide14">
+        <div class="slide-header animate-item">
+            <span class="slide-number">06</span>
+            <span class="slide-title">系统测试结论 (第6章)</span>
+        </div>
+        <div class="content-area glass-panel animate-item delay-1" style="justify-content:center; padding: 40px 60px;">
+            <ul class="styled-list" style="font-size:22px; line-height:2;">
+                <li style="margin-bottom:20px;"><strong>功能覆盖：</strong>全面覆盖用户认证、路线服务、社区互动、AI推荐、后台管理等核心场景。</li>
+                <li style="margin-bottom:20px;"><strong>链路闭环：</strong>主要业务流（如路线上传审核、AI检索交互）均已打通，接口状态稳定。</li>
+                <li style="margin-bottom:20px;"><strong>性能优化：</strong>实施了路由按需加载、地图延迟加载、列表虚拟滚动以及 SSE 流式响应，显著提升体验。</li>
+                <li><strong style="color:var(--accent-gold);">最终结论：</strong>系统功能完整性与运行稳定性满足毕业设计既定目标，具备部署运行的原型基础。</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="slide" id="slide15">
+        <div class="slide-header animate-item">
+            <span class="slide-number">07</span>
+            <span class="slide-title">总结与展望 (第7章)</span>
+        </div>
+        <div class="content-area grid-columns-2 animate-item delay-1">
+            <div class="tile-box glass-panel">
+                <h3><i class="fa-solid fa-flag-checkered" style="margin-right:10px;"></i>阶段工作总结</h3>
+                <ul class="styled-list" style="font-size:21px;">
+                    <li>实现了一个聚焦于户外垂直场景的智能推荐平台。</li>
+                    <li>深度整合 <strong>Vue3 + SpringBoot + DeepSeek + 随机森林</strong> 交叉技术。</li>
+                    <li>探索形成了"以人找路线为主，多条件AI推荐为辅"的新服务模式。</li>
+                    <li>核心架构稳健，满足毕设检验要求。</li>
+                </ul>
+            </div>
+            <div class="tile-box glass-panel" style="border-top-color:var(--primary-blue);">
+                <h3 style="color:var(--text-dark);"><i class="fa-solid fa-rocket" style="margin-right:10px; color:var(--primary-blue);"></i>未来改进方向</h3>
+                <ul class="styled-list" style="font-size:21px;">
+                    <li style="margin-bottom: 20px;"><strong>多模态路线画像增强：</strong>尝试引入计算机视觉(CV)，从用户上传的实景图中自动提取地貌特征与实时路况信息。</li>
+                    <li><strong>景观预测引擎升级：</strong>待积累海量样本后，引入深度时间序列模型(如LSTM)或空间联合分析，进一步提升气象预测精准度。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide16">
+        <div class="content-area animate-item" style="justify-content:center; align-items:center;">
+            <div class="glass-panel" style="text-align:center; padding: 60px 100px; max-width:800px; border-top: 6px solid var(--primary-blue);">
+                <i class="fa-solid fa-quote-left" style="font-size:40px; color:var(--accent-gold); margin-bottom:20px; display:block;"></i>
+                <h1 style="font-size:53px; color:var(--primary-blue); margin-bottom:40px; letter-spacing:4px; font-family:'Noto Sans SC';">山高万仞，只登一步</h1>
+                
+                <div style="font-size:27px; color:var(--text-dark); line-height:2; margin-bottom:40px;">
+                    <p>感谢 <strong>昌明权</strong> 老师、<strong>刘妙兴</strong> 老师的悉心指导</p>
+                    <p>感谢 辅导员 <strong>陈艳</strong> 老师及所有授课恩师</p>
+                    <p>感谢一起走进自然户外的挚友们</p>
+                </div>
+                
+                <h2 style="font-size:40px; color:var(--accent-gold); letter-spacing:5px; border-top:1px solid #ccc; padding-top:20px;">致谢 / Thank You</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Presentation Logic
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const counterEl = document.getElementById('slide-counter');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+
+    function updateNav() {
+        counterEl.innerText = `${currentSlide + 1} / ${totalSlides}`;
+        btnPrev.disabled = currentSlide === 0;
+        btnNext.disabled = currentSlide === totalSlides - 1;
+    }
+
+    function goToSlide(n) {
+        slides[currentSlide].classList.remove('active');
+        if(n > currentSlide) {
+            slides[currentSlide].classList.add('fade-out'); // Slide out to left
+        } else {
+            slides[currentSlide].classList.remove('fade-out');
+        }
+        
+        // Slight delay to allow css transition before completely hiding logic if needed, 
+        // but css handles visual part.
+        
+        currentSlide = (n + totalSlides) % totalSlides;
+        
+        // Ensure new slide comes in from right or left properly
+        slides.forEach((s, idx) => {
+            if(idx > currentSlide) s.classList.remove('fade-out');
+            if(idx < currentSlide) s.classList.add('fade-out');
+        });
+
+        slides[currentSlide].classList.add('active');
+        slides[currentSlide].classList.remove('fade-out');
+        updateNav();
+    }
+
+    function nextSlide() {
+        if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+        if (currentSlide > 0) goToSlide(currentSlide - 1);
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'Enter') {
+            nextSlide();
+        } else if (e.key === 'ArrowLeft') {
+            prevSlide();
+        }
+    });
+
+    // Initialize
+    updateNav();
+
+    // No ambient particle animation.
+
+</script>
+

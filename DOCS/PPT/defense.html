@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>基于Vue的户外路线智能推荐平台的设计与实现 - 毕业答辩</title>
+  <link rel="stylesheet" href="./defense.css">
+</head>
+<body>
+  <main class="deck-shell" aria-label="毕业答辩幻灯片">
+    <div class="deck-stage" id="deckStage">
+      <div class="progress"><span id="progressBar"></span></div>
+
+      <section class="slide cover is-active" data-title="封面">
+        <div class="brand-mark">
+          <img src="./logo.png" alt="湖南信息学院校徽">
+          <span>湖南信息学院</span>
+        </div>
+        <div class="cover-content">
+          <p class="eyebrow">本科毕业论文（设计）答辩</p>
+          <h1>基于Vue的户外路线智能推荐平台的设计与实现</h1>
+          <div class="cover-meta">
+            <span>答辩人：陈胜</span>
+            <span>学号：202201150626</span>
+            <span>专业：软件工程</span>
+            <span>指导教师：昌明权 刘妙兴</span>
+          </div>
+        </div>
+        <aside class="notes">
+          老师们好，我是软件工程专业的陈胜。今天汇报的题目是“基于Vue的户外路线智能推荐平台的设计与实现”。这套系统围绕户外徒步路线发现、地图轨迹展示、AI智能推荐、天气与景观预测以及后台审核治理展开，目标是把用户找路线、判断路线、发布路线和平台管理这些环节做成一个相对完整的闭环。
+        </aside>
+      </section>
+
+      <section class="slide toc" data-title="目录">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">目录</span>
+        </div>
+        <h2>汇报目录</h2>
+        <div class="toc-grid">
+          <div><b>01</b><span>绪论</span></div>
+          <div><b>02</b><span>相关技术概述</span></div>
+          <div><b>03</b><span>系统需求分析</span></div>
+          <div><b>04</b><span>系统总体设计</span></div>
+          <div><b>05</b><span>系统总体实现</span></div>
+          <div><b>06</b><span>系统测试与优化</span></div>
+          <div><b>07</b><span>总结</span></div>
+        </div>
+        <aside class="notes">
+          我的汇报分为七个部分。前两部分介绍研究背景、研究现状和技术基础；第三、四部分说明系统需求与总体设计；第五部分重点展示系统实现效果；第六部分说明测试与优化结果；最后对工作进行总结并说明后续可以改进的方向。整体时间控制在八到十分钟。
+        </aside>
+      </section>
+
+      <section class="slide" data-title="研究背景">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第1章 绪论</span>
+        </div>
+        <div class="split">
+          <div>
+            <p class="eyebrow">Research Background</p>
+            <h2>户外路线需求从“能找到”走向“适合我”</h2>
+            <p class="lead">普通用户开始关注路线难度、天气窗口、景观概率和自身能力匹配，传统热度排序已经难以满足个性化决策。</p>
+          </div>
+          <div class="pain-list">
+            <div><b>轨迹数据不完整</b><span>路线介绍和真实轨迹割裂，用户难以判断风险。</span></div>
+            <div><b>环境信息不及时</b><span>天气、景观窗口和安全提醒缺少联动。</span></div>
+            <div><b>推荐解释不充分</b><span>按热度或关键词筛选，缺少自然语言理解。</span></div>
+          </div>
+        </div>
+        <aside class="notes">
+          近年来户外徒步参与人群明显扩大，用户已经不只满足于看到一条路线名称，而是希望知道这条路线是否适合自己的体力、什么时候去更合适、能否看到云海日出等景观。现有工具往往分散在轨迹、天气、社区内容和路线搜索之间，缺少针对中文户外场景的一体化推荐平台。所以本文希望把路线数据、地图轨迹、天气环境和AI对话结合起来，提升路线选择的效率和可信度。
+        </aside>
+      </section>
+
+      <section class="slide" data-title="国内外研究现状">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第1章 绪论</span>
+        </div>
+        <h2>国内外研究现状</h2>
+        <div class="two-cards">
+          <article>
+            <h3>国外研究</h3>
+            <ul>
+              <li>路线规划从最短路径转向质量感知与多目标优化。</li>
+              <li>大模型工具调用为自然语言推荐提供新交互范式。</li>
+              <li>随机森林等机器学习方法用于能见度与雾类天气预测。</li>
+            </ul>
+          </article>
+          <article>
+            <h3>国内研究</h3>
+            <ul>
+              <li>智慧文旅平台建设较成熟，Spring Boot + Vue 实践丰富。</li>
+              <li>地图 API、前后端分离和后台治理已有较多工程经验。</li>
+              <li>智能推荐开始关注透明性、用户行为和可解释性。</li>
+            </ul>
+          </article>
+        </div>
+        <div class="insight">研究空缺：面向户外徒步垂直场景，将 GIS 地图、天气环境、用户画像、AI 对话和景观预测整合的系统仍然较少。</div>
+        <aside class="notes">
+          从文献看，国外研究更关注质量感知导航、多目标路线优化、大模型工具调用和气象预测模型；国内研究更重视智慧文旅平台建设、地图服务接入以及前后端分离工程实践。本文的切入点不是单独提出一个算法，而是把这些能力整合到中文户外徒步这个具体场景中，让用户可以通过自然语言表达需求，再由系统完成路线检索、评分、解释和环境辅助判断。
+        </aside>
+      </section>
+
+      <section class="slide" data-title="相关技术概述">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第2章 技术概述</span>
+        </div>
+        <h2>相关技术概述</h2>
+        <div class="tech-grid">
+          <div class="tech-card"><span>前端</span><b>Vue 3</b><p>Composition API、TypeScript、Vite、Pinia、Tailwind CSS、DaisyUI</p></div>
+          <div class="tech-card"><span>后端</span><b>Spring Boot 3</b><p>MyBatis-Plus、MySQL、Redis、JWT、Spring Security</p></div>
+          <div class="tech-card"><span>AI 与 GIS</span><b>DeepSeek + 高德地图</b><p>Function Calling、路线语义解析、地图轨迹渲染、随机森林景观预测</p></div>
+        </div>
+        <aside class="notes">
+          系统采用前后端分离结构。前端以 Vue 3 和 TypeScript 为主，负责页面交互、地图展示和状态管理；后端使用 Spring Boot 3、MyBatis-Plus、MySQL 和 Redis，负责用户、路线、评论、媒体和审核等业务；AI与GIS部分使用 DeepSeek 做自然语言理解和推荐理由生成，地图服务负责轨迹展示，随机森林模型用于云海、雾凇、冰挂、日出日落等景观概率预测。
+        </aside>
+      </section>
+
+      <section class="slide" data-title="系统功能需求">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第3章 需求分析</span>
+        </div>
+        <h2>系统功能需求</h2>
+        <div class="role-layout">
+          <article>
+            <h3>普通用户端</h3>
+            <div class="chips">
+              <span>注册登录</span><span>路线浏览搜索</span><span>路线详情地图</span><span>路线发布上传</span><span>社区互动</span><span>个人中心画像</span><span>AI智能推荐</span><span>天气景观预测</span>
+            </div>
+          </article>
+          <article>
+            <h3>管理员端</h3>
+            <div class="chips">
+              <span>用户管理</span><span>路线审核</span><span>路线管理</span><span>评论治理</span><span>系统配置</span><span>操作日志</span>
+            </div>
+          </article>
+        </div>
+        <aside class="notes">
+          功能需求分为普通用户端和管理员端。普通用户需要完成找路线、看地图、发布路线、参与评论、维护个人画像以及使用AI推荐和天气景观预测。管理员端则负责用户管理、路线审核、路线治理、评论治理、配置和日志。这样的划分可以保证前台体验和后台治理同时闭环，也符合毕业设计对完整系统的要求。
+        </aside>
+      </section>
+
+      <section class="slide image-slide" data-title="系统架构设计">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第4章 总体设计</span>
+        </div>
+        <h2>系统架构设计</h2>
+        <div class="image-and-points">
+          <figure><img src="./assets/docx-images/image8.png" alt="系统架构图"><figcaption>图4.1 系统架构图</figcaption></figure>
+          <ul class="point-list">
+            <li><b>前端展示层</b>：Vue 3、Pinia、高德地图 API。</li>
+            <li><b>后端服务层</b>：鉴权、业务逻辑、数据持久化、Redis 状态。</li>
+            <li><b>AI服务层</b>：语义解析、Function Calling、景观预测。</li>
+          </ul>
+        </div>
+        <aside class="notes">
+          系统整体采用三层结构。前端展示层负责用户交互、地图可视化和页面渲染；后端服务层负责鉴权、业务规则、数据库和短期状态管理；AI服务层负责自然语言理解、推荐参数提取、推荐话术生成以及随机森林景观预测。这样的分层使系统既能保持工程结构清晰，也便于后续替换模型或扩展新的智能服务。
+        </aside>
+      </section>
+
+      <section class="slide image-slide" data-title="系统功能模块">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第4章 总体设计</span>
+        </div>
+        <h2>系统功能模块</h2>
+        <div class="image-and-points wide-image">
+          <figure><img src="./assets/docx-images/image16.png" alt="系统功能模块图"><figcaption>图4.5 系统功能模块图</figcaption></figure>
+          <ul class="point-list">
+            <li>前台功能覆盖路线、社区、用户画像与智能服务。</li>
+            <li>后台功能覆盖审核、治理、权限与操作日志。</li>
+            <li>大模型模块负责语义理解、工具调用和推荐解释。</li>
+          </ul>
+        </div>
+        <aside class="notes">
+          功能模块围绕三个板块展开。第一是前台用户功能，包括路线浏览、路线发布、评论互动和个人中心；第二是后台管理员功能，包括审核、治理、配置和日志；第三是大模型智能功能，负责把用户的模糊自然语言需求转换为结构化路线检索条件，并把推荐结果以可解释方式反馈给用户。
+        </aside>
+      </section>
+
+      <section class="slide image-slide" data-title="AI推荐与景观预测链路">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第4章 核心链路</span>
+        </div>
+        <h2>AI推荐与景观预测链路</h2>
+        <div class="dual-figures">
+          <figure><img src="./assets/docx-images/image60.png" alt="AI推荐与环境辅助决策链路协同示意图"><figcaption>AI推荐链路</figcaption></figure>
+          <figure><img src="./assets/docx-images/image68.png" alt="随机森林景观预测与推荐链路协同示意图"><figcaption>景观预测链路</figcaption></figure>
+        </div>
+        <div class="process-strip">
+          <span>自然语言输入</span><span>语义解析</span><span>路线检索评分</span><span>景观概率预测</span><span>推荐理由输出</span>
+        </div>
+        <aside class="notes">
+          这一页是系统的核心创新链路。用户用自然语言描述出行需求后，大模型提取地点、时间、难度和偏好等结构化参数，后端路线库完成候选检索和综合评分，最后输出路线卡片和推荐理由。景观预测链路则把路线坐标、海拔、天气和天文数据转成特征，交给随机森林预测器输出景观概率、风险等级和出行建议。
+        </aside>
+      </section>
+
+      <section class="slide image-slide" data-title="路线详情与地图展示">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第5章 系统实现</span>
+        </div>
+        <h2>路线详情与地图展示</h2>
+        <div class="screenshot-pair">
+          <figure><img src="./assets/docx-images/image77.png" alt="路线封面与介绍展示图"><figcaption>图5.6 路线封面与介绍</figcaption></figure>
+          <figure><img src="./assets/docx-images/image78.png" alt="路线轨迹图"><figcaption>图5.7 路线轨迹地图</figcaption></figure>
+        </div>
+        <div class="caption-points">基础信息、轨迹、天气、景观预测与评论互动在同一详情页聚合；地图使用高德 API 渲染路线折线、起终点与边界区域。</div>
+        <aside class="notes">
+          路线详情页是用户决策的主要入口。页面聚合路线名称、位置、难度、距离、爬升、封面介绍、地图轨迹、天气景观和评论互动。轨迹部分支持对 GPX、KML、GeoJSON 等数据进行解析和渲染，通过地图折线展示路线走向，并标注起终点，帮助用户更直观地判断路线特点。
+        </aside>
+      </section>
+
+      <section class="slide image-slide" data-title="AI智能推荐实现">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第5章 系统实现</span>
+        </div>
+        <h2>AI智能推荐实现</h2>
+        <div class="single-screenshot">
+          <figure><img src="./assets/docx-images/image87.png" alt="AI对话推荐路线图"><figcaption>图5.16 AI对话推荐路线图</figcaption></figure>
+          <div class="side-note">
+            <b>可解释推荐</b>
+            <p>自然语言需求先解析为结构化条件，再完成路线检索、评分排序和推荐理由生成。标准检索走数据库，模糊需求才调用 AI，兼顾体验与成本。</p>
+          </div>
+        </div>
+        <aside class="notes">
+          AI智能推荐模块允许用户直接用自然语言表达需求，例如“周末想找一条适合新手、能看日出的路线”。系统会先解析出地点、时间、难度和偏好，再调用后端路线检索和评分逻辑，最后以路线卡片和推荐理由的形式返回。这样推荐结果不是黑盒输出，而是能解释为什么推荐这条路线。
+        </aside>
+      </section>
+
+      <section class="slide image-slide" data-title="天气与景观预测">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第5章 系统实现</span>
+        </div>
+        <h2>天气与景观预测</h2>
+        <div class="single-screenshot reverse">
+          <div class="side-note">
+            <b>环境辅助判断</b>
+            <p>输入路线坐标、轨迹海拔、天气与天文数据，输出云海、雾凇、冰挂、日出日落概率，以及风险等级和出行建议。</p>
+          </div>
+          <figure><img src="./assets/docx-images/image88.png" alt="天气与景观预测图"><figcaption>图5.17 天气与景观预测图</figcaption></figure>
+        </div>
+        <aside class="notes">
+          天气与景观预测模块用于补充路线选择中的环境因素。系统根据路线坐标、轨迹海拔和天气数据构造特征，再使用随机森林模型预测云海、雾凇、冰挂、日出日落等景观概率。随机森林训练成本较低、解释性较强，适合在毕业设计阶段做小样本原型验证。
+        </aside>
+      </section>
+
+      <section class="slide image-slide" data-title="后台管理实现">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第5章 系统实现</span>
+        </div>
+        <h2>后台管理实现</h2>
+        <div class="admin-grid">
+          <figure><img src="./assets/docx-images/image89.png" alt="后台Dashboard图"><figcaption>Dashboard 总览</figcaption></figure>
+          <figure><img src="./assets/docx-images/image90.png" alt="后台路线审核图"><figcaption>路线审核</figcaption></figure>
+          <figure><img src="./assets/docx-images/image91.png" alt="后台路线管理图"><figcaption>路线管理</figcaption></figure>
+        </div>
+        <div class="caption-points">审核链路：用户提交 → 管理员审核 → 通过或驳回；结合 RBAC 权限控制与操作日志审计。</div>
+        <aside class="notes">
+          后台管理模块主要保证平台内容治理和运营安全。管理员可以查看总览数据，对用户提交的路线进行审核，也可以进行路线管理、评论治理、配置维护和日志查看。路线审核支持通过和驳回，并保留操作记录，配合角色权限控制，可以满足平台基本治理需求。
+        </aside>
+      </section>
+
+      <section class="slide" data-title="系统测试结论">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第6章 测试与优化</span>
+        </div>
+        <h2>系统测试结论</h2>
+        <div class="test-grid">
+          <div><b>6类场景</b><span>认证、路线、社区、AI、后台、媒体运营</span></div>
+          <div><b>链路闭环</b><span>前后端接口联动正常，主要业务流程可运行</span></div>
+          <div><b>性能优化</b><span>路由按需加载、地图延迟加载、列表优化、SSE流式响应</span></div>
+          <div><b>总体结论</b><span>功能完整性与运行稳定性满足毕业设计阶段目标</span></div>
+        </div>
+        <aside class="notes">
+          测试部分覆盖用户认证、路线与搜索、社区互动、AI智能推荐、后台管理、媒体上传与运营六类主要场景。测试结果表明，系统核心业务链路已经闭环，前后端接口联动正常。性能上主要通过路由按需加载、地图延迟加载、列表优化和流式响应减少等待时间，整体可以支撑毕业设计阶段的演示和验证。
+        </aside>
+      </section>
+
+      <section class="slide" data-title="总结与展望">
+        <div class="slide-header">
+          <div class="brand-mini"><img src="./logo.png" alt=""><span>湖南信息学院</span></div>
+          <span class="section-tag">第7章 总结</span>
+        </div>
+        <h2>总结与展望</h2>
+        <div class="summary-layout">
+          <article>
+            <h3>工作总结</h3>
+            <ul>
+              <li>实现面向户外徒步场景的路线智能推荐平台。</li>
+              <li>完成 Vue 3 前端、Spring Boot 后端与 AI 服务集成。</li>
+              <li>形成“人找路线为主，条件化推荐为辅”的服务模式。</li>
+            </ul>
+          </article>
+          <article>
+            <h3>未来展望</h3>
+            <ul>
+              <li>引入多模态路线画像，提取图片与视频中的地貌、路况特征。</li>
+              <li>积累更多实测样本后，引入时间序列或空间特征模型。</li>
+            </ul>
+          </article>
+        </div>
+        <aside class="notes">
+          总体来看，本文完成了一个基于 Vue 3 和 Spring Boot 的户外路线智能推荐平台，并集成 DeepSeek 大模型和随机森林景观预测能力。系统能够覆盖路线发现、发布、详情地图、社区互动、智能推荐、天气景观预测和后台管理。后续可以继续扩展多模态路线画像，并在积累更多实测数据后升级景观预测模型。
+        </aside>
+      </section>
+
+      <section class="slide thanks" data-title="致谢">
+        <div class="brand-mark">
+          <img src="./logo.png" alt="湖南信息学院校徽">
+          <span>湖南信息学院</span>
+        </div>
+        <div class="thanks-content">
+          <p class="eyebrow">Thanks</p>
+          <h2>致谢</h2>
+          <p>感谢指导老师昌明权老师、刘妙兴老师，感谢辅导员陈艳老师和大学四年的授课老师。</p>
+          <p>也感谢一路同行的朋友们，让我对户外路线、天气变化和真实出行体验有了更具体的认识。</p>
+          <strong>山高万仞，只登一步。</strong>
+        </div>
+        <aside class="notes">
+          最后是致谢。感谢指导老师昌明权老师和刘妙兴老师在论文选题、系统设计、论文修改等阶段给予的帮助，也感谢辅导员陈艳老师以及大学四年里教过我的老师。还要感谢一起走进户外的朋友们，这些真实的出行经历让我更理解户外路线平台应该解决什么问题。我的汇报到这里结束，恳请各位老师批评指正。
+        </aside>
+      </section>
+    </div>
+  </main>
+
+  <div class="hud">
+    <button id="prevBtn" type="button" aria-label="上一页">上一页</button>
+    <span id="pageIndicator">1 / 16</span>
+    <button id="nextBtn" type="button" aria-label="下一页">下一页</button>
+  </div>
+
+  <div class="help">← → 翻页 · S 演讲者视图 · O 总览 · F 全屏</div>
+
+  <div class="overview" id="overview" aria-hidden="true">
+    <div class="overview-grid" id="overviewGrid"></div>
+  </div>
+
+  <div class="presenter" id="presenter" aria-hidden="true">
+    <div class="presenter-card current">
+      <header>当前页</header>
+      <div class="mini-slide" id="presenterCurrent"></div>
+    </div>
+    <div class="presenter-card next">
+      <header>下一页</header>
+      <div class="mini-slide" id="presenterNext"></div>
+    </div>
+    <div class="presenter-card script">
+      <header>讲稿</header>
+      <div id="presenterScript"></div>
+    </div>
+    <div class="presenter-card timer">
+      <header>计时器</header>
+      <strong id="timerText">00:00</strong>
+      <span id="timerSlide">1 / 16</span>
+      <button id="resetTimer" type="button">重置计时</button>
+    </div>
+  </div>
+
+  <script src="./defense.js"></script>
+</body>
+</html>
