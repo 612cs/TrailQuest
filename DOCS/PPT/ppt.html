@@ -157,6 +157,16 @@
         .nav-area-left { left: 0; }
         .nav-area-right { right: 0; }
 
+        #slide-indicator {
+            position: absolute;
+            bottom: 30px;
+            right: 50px;
+            font-family: 'Poppins', sans-serif;
+            font-size: var(--font-size-footer);
+            color: var(--text-light);
+            z-index: 100;
+        }
+
         /* Move slide header into top area next to the school name */
         .slide-header {
             display: flex;
@@ -397,7 +407,7 @@
         <div class="presentation-brand__name">湖南信息学院</div>
     </div>
 
-
+    <div id="slide-indicator">1 / 16</div>
 
     <div class="slide active" id="slide1">
         <div class="cover-content animate-item">
@@ -832,6 +842,12 @@
 
         slides[currentSlide].classList.add('active');
         slides[currentSlide].classList.remove('fade-out');
+        
+        const indicator = document.getElementById('slide-indicator');
+        if (indicator) {
+            indicator.innerText = `${currentSlide + 1} / ${totalSlides}`;
+        }
+        
         updateNav();
     }
 
