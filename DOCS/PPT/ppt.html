@@ -15,6 +15,14 @@
             --text-dark: #1e293b;
             --text-light: #475569;
             --bg-overlay: rgba(255, 255, 255, 0.85); /* Semi-transparent white to make text readable over background */
+            --font-serif: "Songti SC", "STSong", "Noto Serif SC", serif;
+
+            /* Type Scale */
+            --font-size-cover-title: 40pt;
+            --font-size-page-title: 32pt;
+            --font-size-body: 22pt;
+            --font-size-secondary: 18pt;
+            --font-size-footer: 12pt;
         }
 
         * {
@@ -89,7 +97,7 @@
             pointer-events: none; /* Disable interaction when hidden */
             display: flex;
             flex-direction: column;
-            padding: 120px 80px 60px 80px; /* 减少顶部内边距，给内容更多空间 */
+            padding: 120px 120px 60px 120px; /* 统一所有页面的外边距 */
             z-index: 1;
         }
 
@@ -161,19 +169,19 @@
             border-radius: 8px 8px 0 0;
             position: absolute; /* position relative to #presentation-wrapper */
             top: 46px; /* align vertically with brand */
-            left: calc(324px + 42px); /* left + logo width (scaled) + gap */
+            right: 50px; /* display in top-right corner */
             z-index: 121;
         }
         .slide-number { 
             font-family: "KaiTi", "楷体", "STKaiti", "华文楷体", sans-serif;
-            font-size: 40px;
+            font-size: var(--font-size-page-title);
             font-weight: 700;
             color: var(--accent-gold);
             margin-right: 15px;
             line-height: 1;
         }
         .slide-title {
-            font-size: 40px;
+            font-size: var(--font-size-page-title);
             font-weight: 700;
             color: var(--primary-blue);
             line-height: 1;
@@ -185,6 +193,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            background: transparent;
         }
 
         /* Common frosted glass container for readability over background */
@@ -199,7 +208,7 @@
 
         /* Typography */
         p, li {
-            font-size: 27px;
+            font-size: var(--font-size-body);
             line-height: 1.7;
             color: var(--text-dark);
             margin-bottom: 12px;
@@ -216,46 +225,61 @@
             left: 5px;
             top: 2px;
             color: var(--accent-gold);
-            font-size: 27px;
+            font-size: var(--font-size-body);
         }
 
         /* Slide 1 Cover Layout */
-        #slide1 { justify-content: center; align-items: center; padding: 0; }
+        #slide1 { justify-content: start; align-items: flex-start; margin-top: 100px; }
         .cover-content {
-            background: rgba(255, 255, 255, 0.92);
-            padding: 60px 80px;
-            border-radius: 16px;
-            border-top: 6px solid var(--primary-blue);
-            border-bottom: 6px solid var(--accent-gold);
-            text-align: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            transform: translateY(20px); /* Adjust position relative to background image */
+            background: transparent;
+            padding: 0;
+            border: none;
+            text-align: left;
+            box-shadow: none;
+            width: 100%;
+            max-width: 100%;
+            margin-top: 0;
+        }
+        .cover-eyebrow {
+            font-size: var(--font-size-secondary);
+            color: var(--accent-gold);
+            letter-spacing: 4px;
+            margin-bottom: 25px;
+            font-family: var(--font-serif);
+            font-weight: 700;
         }
         .cover-content h1 {
-            font-size: 53px;
+            font-size: var(--font-size-cover-title);
             color: var(--primary-blue);
-            margin-bottom: 50px;
-            line-height: 1.4;
-            letter-spacing: 2px;
+            margin-bottom: 30px;
+            line-height: 1.3;
+            letter-spacing: 3px;
+            font-family: var(--font-serif);
+            font-weight: 700;
         }
-        .thesis-info {
+        .cover-meta {
             display: grid;
             grid-template-columns: auto auto;
-            gap: 15px 40px;
+            gap: 25px 120px;
             text-align: left;
-            margin: 0 auto;
-            width: fit-content;
+            border-top: 1px solid var(--accent-gold);
+            padding-top: 20px;
         }
-        .thesis-info p { font-size: 24px; margin: 0; color: #334155; }
-        .thesis-info strong { color: var(--primary-blue); letter-spacing: 4px; }
+        .cover-meta span { 
+            font-size: var(--font-size-body); 
+            color: var(--text-dark); 
+            font-family: var(--font-serif);
+        }
 
-        /* Slide 2 TOC Grid */
+        /* Slide 2 TOC Grid */  
         .toc-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px 40px;
-            width: 80%;
-            margin: 0 auto;
+            grid-template-rows: repeat(4, 1fr);
+            grid-auto-columns: 1fr;
+            grid-auto-flow: column;
+            gap: 20px;
+            width: 100%;
+            /* margin: 0 auto; */
         }
         .toc-item {
             display: flex;
@@ -268,8 +292,8 @@
             transition: transform 0.3s;
         }
         .toc-item:hover { transform: translateX(10px); }
-        .toc-number { font-size: 37px; font-family: 'Poppins'; font-weight: 700; color: var(--accent-gold); margin-right: 20px; width: 40px; }
-        .toc-text { font-size: 29px; font-weight: bold; color: var(--text-dark); }
+        .toc-number { font-size: var(--font-size-page-title); font-family: 'Poppins'; font-weight: 700; color: var(--accent-gold); margin-right: 20px; width: 40px; }
+        .toc-text { font-size: var(--font-size-body); font-weight: bold; color: var(--text-dark); }
 
         /* Image + Text layout */
         .split-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; height: 100%; align-items: center; }
@@ -373,27 +397,16 @@
         <div class="presentation-brand__name">湖南信息学院</div>
     </div>
 
-    <!-- Invisible Navigation Areas -->
-    <div class="nav-area nav-area-left" onclick="prevSlide()"></div>
-    <div class="nav-area nav-area-right" onclick="nextSlide()"></div>
 
-    <!-- Visible Controls -->
-    <div class="nav-controls">
-        <button class="nav-btn" id="btn-prev" onclick="prevSlide()"><i class="fa-solid fa-circle-chevron-left"></i></button>
-        <span id="slide-counter">1 / 16</span>
-        <button class="nav-btn" id="btn-next" onclick="nextSlide()"><i class="fa-solid fa-circle-chevron-right"></i></button>
-    </div>
 
     <div class="slide active" id="slide1">
         <div class="cover-content animate-item">
-            <h1>基于Vue的户外路线智能推荐平台<br>的设计与实现</h1>
-            <div class="thesis-info">
-                <p><strong>答辩人：</strong>陈胜</p>
-                <p><strong>指导教师：</strong>昌明权 刘妙兴</p>
-                <p><strong>学 号：</strong>202201150626</p>
-                <p><strong>学 院：</strong>计算机科学与工程学院</p>
-                <p><strong>专 业：</strong>软件工程</p>
-                <p><strong>学 校：</strong>湖南信息学院</p>
+            <h1>基于Vue的户外路线智能推荐平台的<br>设计与实现</h1>
+            <div class="cover-meta">
+                <span>答辩人：陈胜</span>
+                <span>学号：202201150626</span>
+                <span>专业：软件工程</span>
+                <span>指导教师：昌明权 刘妙兴</span>
             </div>
         </div>
     </div>
@@ -411,7 +424,7 @@
                 <div class="toc-item animate-item delay-2"><span class="toc-number">04</span><span class="toc-text">系统总体设计</span></div>
                 <div class="toc-item animate-item delay-3"><span class="toc-number">05</span><span class="toc-text">系统总体实现</span></div>
                 <div class="toc-item animate-item delay-3"><span class="toc-number">06</span><span class="toc-text">系统测试与优化</span></div>
-                <div class="toc-item animate-item delay-3" style="grid-column: span 2; width: 48%; margin: 0 auto;">
+                <div class="toc-item animate-item delay-3">
                     <span class="toc-number">07</span><span class="toc-text">总结与展望</span>
                 </div>
             </div>
@@ -793,14 +806,9 @@
     let currentSlide = 0;
     const slides = document.querySelectorAll('.slide');
     const totalSlides = slides.length;
-    const counterEl = document.getElementById('slide-counter');
-    const btnPrev = document.getElementById('btn-prev');
-    const btnNext = document.getElementById('btn-next');
 
     function updateNav() {
-        counterEl.innerText = `${currentSlide + 1} / ${totalSlides}`;
-        btnPrev.disabled = currentSlide === 0;
-        btnNext.disabled = currentSlide === totalSlides - 1;
+        // Navigation controls have been removed
     }
 
     function goToSlide(n) {
@@ -837,12 +845,41 @@
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'Enter') {
+        if (e.key === ' ') {
+            e.preventDefault();
             nextSlide();
-        } else if (e.key === 'ArrowLeft') {
+        } else if (e.key.toLowerCase() === 'b') {
             prevSlide();
+        } else if (e.key.toLowerCase() === 'f') {
+            toggleFullscreen();
         }
     });
+
+    // Fullscreen functionality
+    function toggleFullscreen() {
+        const elem = document.documentElement;
+        if (!document.fullscreenElement) {
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+    }
 
     // Initialize
     updateNav();
