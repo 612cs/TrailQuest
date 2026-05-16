@@ -183,7 +183,7 @@
             z-index: 121;
         }
         .slide-number { 
-            font-family: "KaiTi", "楷体", "STKaiti", "华文楷体", sans-serif;
+            font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
             font-size: var(--font-size-page-title);
             font-weight: 700;
             color: var(--accent-gold);
@@ -195,6 +195,7 @@
             font-weight: 700;
             color: var(--primary-blue);
             line-height: 1;
+            font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
         }
         
         .content-area {
@@ -307,10 +308,11 @@
             border-left: 5px solid var(--primary-blue);
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             transition: transform 0.3s;
+            cursor: pointer;
         }
-        .toc-item:hover { transform: translateX(10px); }
-        .toc-number { font-size: var(--font-size-page-title); font-family: 'Poppins'; font-weight: 700; color: var(--accent-gold); margin-right: 20px; width: 40px; }
-        .toc-text { font-size: var(--font-size-body); font-weight: bold; color: var(--text-dark); }
+        .toc-item:hover { transform: translateX(10px); background: rgba(255, 255, 255, 1); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+        .toc-number { font-size: var(--font-size-page-title); font-family: "Songti SC", "STSong", "Noto Serif SC", serif; font-weight: 700; color: var(--accent-gold); margin-right: 20px; width: 40px; }
+        .toc-text { font-size: var(--font-size-body); font-weight: bold; color: var(--text-dark); font-family: "Songti SC", "STSong", "Noto Serif SC", serif; }
 
         /* Image + Text layout */
         .split-layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; height: 100%; align-items: center; }
@@ -404,6 +406,28 @@
     color: #4f46e5;
     text-decoration: none;
   }
+
+  /* Glass effect container for full-page images */
+  .image-glass-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .image-glass-container img {
+    width: 95%;
+    height: 95%;
+    object-fit: contain;
+  }
 </style></head>
 <body>
 
@@ -431,17 +455,17 @@
     <div class="slide" id="slide2">
         <div class="slide-header animate-item">
             <span class="slide-number">00</span>
-            <span class="slide-title">答辩目录 / Contents</span>
+            <span class="slide-title">答辩目录</span>
         </div>
         <div class="content-area" style="justify-content: center;">
             <div class="toc-grid">
-                <div class="toc-item animate-item delay-1"><span class="toc-number">01</span><span class="toc-text">绪论</span></div>
-                <div class="toc-item animate-item delay-1"><span class="toc-number">02</span><span class="toc-text">相关技术概述</span></div>
-                <div class="toc-item animate-item delay-2"><span class="toc-number">03</span><span class="toc-text">系统需求分析</span></div>
-                <div class="toc-item animate-item delay-2"><span class="toc-number">04</span><span class="toc-text">系统总体设计</span></div>
-                <div class="toc-item animate-item delay-3"><span class="toc-number">05</span><span class="toc-text">系统总体实现</span></div>
-                <div class="toc-item animate-item delay-3"><span class="toc-number">06</span><span class="toc-text">系统测试与优化</span></div>
-                <div class="toc-item animate-item delay-3">
+                <div class="toc-item animate-item delay-1" data-slide="2"><span class="toc-number">01</span><span class="toc-text">绪论</span></div>
+                <div class="toc-item animate-item delay-1" data-slide="4"><span class="toc-number">02</span><span class="toc-text">相关技术概述</span></div>
+                <div class="toc-item animate-item delay-2" data-slide="5"><span class="toc-number">03</span><span class="toc-text">系统需求分析</span></div>
+                <div class="toc-item animate-item delay-2" data-slide="6"><span class="toc-number">04</span><span class="toc-text">系统总体设计</span></div>
+                <div class="toc-item animate-item delay-3" data-slide="8"><span class="toc-number">05</span><span class="toc-text">系统总体实现</span></div>
+                <div class="toc-item animate-item delay-3" data-slide="13"><span class="toc-number">06</span><span class="toc-text">系统测试与优化</span></div>
+                <div class="toc-item animate-item delay-3" data-slide="14">
                     <span class="toc-number">07</span><span class="toc-text">总结与展望</span>
                 </div>
             </div>
@@ -451,7 +475,7 @@
     <div class="slide" id="slide3">
         <div class="slide-header animate-item">
             <span class="slide-number">01</span>
-            <span class="slide-title">研究背景 (第1章)</span>
+            <span class="slide-title">研究背景</span>
         </div>
         <div class="content-area split-layout glass-panel animate-item delay-1">
             <div>
@@ -479,7 +503,7 @@
     <div class="slide" id="slide4">
         <div class="slide-header animate-item">
             <span class="slide-number">01</span>
-            <span class="slide-title">国内外研究现状 (第1章)</span>
+            <span class="slide-title">国内外研究现状</span>
         </div>
         <div class="content-area">
             <div class="grid-columns-2" style="margin-bottom: 20px;">
@@ -510,7 +534,7 @@
     <div class="slide" id="slide5">
         <div class="slide-header animate-item">
             <span class="slide-number">02</span>
-            <span class="slide-title">相关技术概述 (第2章)</span>
+            <span class="slide-title">相关技术概述</span>
         </div>
         <div class="content-area">
             <div class="grid-columns-3 glass-panel animate-item delay-1" style="padding: 40px; display: flex;justify-content: center; align-items: center;">
@@ -518,7 +542,7 @@
                     <div style="text-align:center; font-size:48px; color:var(--primary-blue); margin-bottom:15px;"><i class="fa-brands fa-vuejs"></i></div>
                     <h3 style="text-align:center; margin-bottom:20px; color:var(--text-dark);">前端展现层</h3>
                     <ul class="styled-list">
-                        <li><strong>Vue 3 (Composition API)</strong></li>
+                        <li><strong>Vue 3</strong></li>
                         <li><strong>TypeScript</strong></li>
                         <li><strong>Tailwind CSS + DaisyUI</strong></li>
                         <li><strong>Vite 7</strong></li>
@@ -551,7 +575,7 @@
     <div class="slide" id="slide6">
         <div class="slide-header animate-item">
             <span class="slide-number">03</span>
-            <span class="slide-title">系统功能需求分析 (第3章)</span>
+            <span class="slide-title">系统功能需求分析</span>
         </div>
         <div class="content-area glass-panel animate-item delay-1" style="justify-content: center;">
             <div class="grid-columns-2">
@@ -586,9 +610,11 @@
     <div class="slide" id="slide7">
         <div class="slide-header animate-item">
             <span class="slide-number">04</span>
-            <span class="slide-title">系统架构设计 (第4章)</span>
+            <span class="slide-title">系统架构设计</span>
         </div>
-        <img style="width: 100%; height: 100%;" src="./assets/docx-images/系统架构图.drawio.svg" alt="Architecture Concept">
+        <div class="image-glass-container animate-item delay-1">
+            <img src="./assets/docx-images/系统架构图.svg" alt="Architecture Concept">
+        </div>
         <!-- <div class="content-area split-layout glass-panel animate-item delay-1">
             <div style="display: flex; flex-direction: column; justify-content: center;">
                 <div class="arch-layer">
@@ -613,7 +639,7 @@
     <div class="slide" id="slide8">
         <div class="slide-header animate-item">
             <span class="slide-number">04</span>
-            <span class="slide-title">系统功能模块划分 (第4章)</span>
+            <span class="slide-title">系统功能模块划分</span>
         </div>
         <div class="content-area glass-panel animate-item delay-1" style="justify-content: center; padding:40px;">
             <div class="grid-columns-3">
@@ -654,7 +680,17 @@
     <div class="slide" id="slide9">
         <div class="slide-header animate-item">
             <span class="slide-number">04</span>
-            <span class="slide-title">AI推荐与景观预测链路设计 (核心)</span>
+            <span class="slide-title">系统功能模块图</span>
+        </div>
+        <div class="image-glass-container animate-item delay-1">
+            <img src="./assets/系统功能模块图.svg" alt="System Function Module Diagram">
+        </div>
+    </div>
+
+    <div class="slide" id="slide10">
+        <div class="slide-header animate-item">
+            <span class="slide-number">05</span>
+            <span class="slide-title">AI推荐与景观预测链路设计</span>
         </div>
         <div class="content-area glass-panel animate-item delay-1">
             <h3 style="font-size:29px; color:var(--primary-blue); margin-bottom:15px;"><i class="fa-solid fa-robot" style="margin-right:8px;"></i> 1. AI 推荐链路</h3>
@@ -681,7 +717,7 @@
         </div>
     </div>
 
-    <div class="slide" id="slide10">
+    <div class="slide" id="slide11">
         <div class="slide-header animate-item">
             <span class="slide-number">05</span>
             <span class="slide-title">系统实现：路线详情与地图展示</span>
@@ -700,7 +736,7 @@
         </div>
     </div>
 
-    <div class="slide" id="slide11">
+    <div class="slide" id="slide12">
         <div class="slide-header animate-item">
             <span class="slide-number">05</span>
             <span class="slide-title">系统实现：AI 智能对话推荐</span>
@@ -720,7 +756,7 @@
         </div>
     </div>
 
-    <div class="slide" id="slide12">
+    <div class="slide" id="slide13">
         <div class="slide-header animate-item">
             <span class="slide-number">05</span>
             <span class="slide-title">系统实现：天气与景观预测</span>
@@ -740,7 +776,7 @@
         </div>
     </div>
 
-    <div class="slide" id="slide13">
+    <div class="slide" id="slide14">
         <div class="slide-header animate-item">
             <span class="slide-number">05</span>
             <span class="slide-title">系统实现：后台管理</span>
@@ -759,12 +795,12 @@
         </div>
     </div>
 
-    <div class="slide" id="slide14">
+    <div class="slide" id="slide15">
         <div class="slide-header animate-item">
             <span class="slide-number">06</span>
-            <span class="slide-title">系统测试结论 (第6章)</span>
+            <span class="slide-title">系统测试结论</span>
         </div>
-        <div class="content-area glass-panel animate-item delay-1" style="justify-content:center; padding: 40px 60px;">
+        <div class="content-area glass-panel animate-item delay-1" style="justify-content:center;">
             <ul class="styled-list" style="font-size:22px; line-height:2;">
                 <li style="margin-bottom:20px;"><strong>功能覆盖：</strong>全面覆盖用户认证、路线服务、社区互动、AI推荐、后台管理等核心场景。</li>
                 <li style="margin-bottom:20px;"><strong>链路闭环：</strong>主要业务流（如路线上传审核、AI检索交互）均已打通，接口状态稳定。</li>
@@ -774,10 +810,10 @@
         </div>
     </div>
 
-    <div class="slide" id="slide15">
+    <div class="slide" id="slide16">
         <div class="slide-header animate-item">
             <span class="slide-number">07</span>
-            <span class="slide-title">总结与展望 (第7章)</span>
+            <span class="slide-title">总结与展望</span>
         </div>
         <div class="content-area grid-columns-2 animate-item delay-1">
             <div class="tile-box glass-panel" style="height: fit-content;">
@@ -799,20 +835,19 @@
         </div>
     </div>
 
-    <div class="slide" id="slide16">
-        <div class="content-area animate-item" style="justify-content:center; align-items:center;">
-            <div class="glass-panel" style="text-align:center; padding: 60px 100px; max-width:800px; border-top: 6px solid var(--primary-blue);">
-                <i class="fa-solid fa-quote-left" style="font-size:40px; color:var(--accent-gold); margin-bottom:20px; display:block;"></i>
-                <h1 style="font-size:53px; color:var(--primary-blue); margin-bottom:40px; letter-spacing:4px; font-family:'Noto Sans SC';">山高万仞，只登一步</h1>
-                
-                <div style="font-size:27px; color:var(--text-dark); line-height:2; margin-bottom:40px;">
-                    <p>感谢 <strong>昌明权</strong> 老师、<strong>刘妙兴</strong> 老师的悉心指导</p>
-                    <p>感谢 辅导员 <strong>陈艳</strong> 老师及所有授课恩师</p>
-                    <p>感谢一起走进自然户外的挚友们</p>
-                </div>
-                
-                <h2 style="font-size:40px; color:var(--accent-gold); letter-spacing:5px; border-top:1px solid #ccc; padding-top:20px;">致谢 / Thank You</h2>
+    <div class="slide" id="slide17">
+        <div class="content-area animate-item" style="justify-content:center; align-items:flex-start;">
+            <div style="margin-bottom: 20px;">
+                <p style="font-size:18pt; letter-spacing:0.2em; color:var(--accent-gold); margin-bottom:8px; font-weight:600; font-family:var(--font-serif);">THANKS</p>
             </div>
+            <h1 style="font-size:40pt; color:var(--primary-blue); margin-bottom:30px; font-weight:700; letter-spacing:0.08em; line-height:1.3; font-family:var(--font-serif);">致谢</h1>
+            
+            <div style="font-size:22pt; color:var(--text-light); line-height:1.7; margin-bottom:20px; max-width:920px;">
+                <p>感谢指导老师昌明权老师、刘妙兴老师，感谢辅导员陈艳老师和大学四年的授课老师。</p>
+                <p>也感谢一路同行的朋友们，让我对户外路线、天气变化和真实出行体验有了更具体的认识。</p>
+            </div>
+            
+            <h2 style="font-size:32pt; color:var(--primary-blue); font-weight:700; letter-spacing:0.15em; font-family:var(--font-serif);">山高方俯，只登一步。</h2>
         </div>
     </div>
 
@@ -865,6 +900,16 @@
     function prevSlide() {
         if (currentSlide > 0) goToSlide(currentSlide - 1);
     }
+
+    // TOC item click navigation
+    document.querySelectorAll('.toc-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const slideNum = parseInt(item.dataset.slide);
+            if (!isNaN(slideNum)) {
+                goToSlide(slideNum);
+            }
+        });
+    });
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {

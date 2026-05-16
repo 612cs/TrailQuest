@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1229px" height="1095px" viewBox="453 35 1229 1095">
+<rect x="0" y="0" width="100%" height="100%" fill="none"/>
+<g stroke="#000000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<line x1="1042.42" y1="680.00" x2="996.63" y2="990.12" />
+<line x1="1021.93" y1="680.00" x2="870.02" y2="932.01" />
+<line x1="997.78" y1="680.00" x2="808.05" y2="846.50" />
+<line x1="959.06" y1="674.60" x2="750.51" y2="766.37" />
+<line x1="959.06" y1="650.15" x2="714.55" y2="691.30" />
+<line x1="959.06" y1="630.19" x2="691.89" y2="615.93" />
+<line x1="959.06" y1="611.65" x2="673.34" y2="537.52" />
+<line x1="962.83" y1="590.00" x2="682.56" y2="443.74" />
+<line x1="996.47" y1="590.00" x2="728.36" y2="360.60" />
+<line x1="1017.45" y1="590.00" x2="802.27" y2="283.66" />
+<line x1="1034.65" y1="590.00" x2="914.92" y2="215.98" />
+<line x1="1051.45" y1="590.00" x2="1073.52" y2="174.58" />
+<line x1="1067.65" y1="590.00" x2="1219.81" y2="221.57" />
+<line x1="1085.93" y1="590.00" x2="1340.03" y2="279.84" />
+<line x1="1108.32" y1="590.00" x2="1412.10" y2="359.33" />
+<line x1="1139.06" y1="591.81" x2="1450.37" y2="442.41" />
+<line x1="1139.06" y1="611.71" x2="1453.27" y2="530.39" />
+<line x1="1139.06" y1="629.28" x2="1452.87" y2="609.34" />
+<line x1="1139.06" y1="647.33" x2="1419.55" y2="685.76" />
+<line x1="1139.06" y1="670.15" x2="1390.67" y2="768.40" />
+<line x1="1111.74" y1="680.00" x2="1346.68" y2="848.67" />
+<line x1="1082.93" y1="680.00" x2="1259.85" y2="915.08" />
+<line x1="1063.79" y1="680.00" x2="1165.46" y2="990.59" />
+<rect x="959.06" y="590.00" width="180.00" height="90.00" fill="none" />
+<ellipse cx="990.00" cy="1035.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="844.05" cy="975.10" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="763.50" cy="885.60" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="682.95" cy="796.10" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="629.25" cy="705.65" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="602.40" cy="611.15" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="593.45" cy="516.79" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="620.30" cy="411.25" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="682.95" cy="321.75" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="772.45" cy="241.20" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="900.70" cy="171.55" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1075.91" cy="129.60" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1238.01" cy="177.50" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1374.15" cy="238.20" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1461.60" cy="321.75" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1515.30" cy="411.25" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1533.20" cy="509.70" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1542.15" cy="603.67" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1506.35" cy="697.65" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1461.60" cy="796.10" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1398.11" cy="885.60" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1291.55" cy="957.20" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="1180.00" cy="1035.00" rx="90.00" ry="45.00" fill="none" />
+</g>
+<switch>
+<foreignObject x="961.06" y="592.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:bold;line-height:1.15;color:#000000;">路线</div></foreignObject>
+<text x="1049.06" y="635.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="bold" fill="#000000">
+路线
+</text>
+</switch>
+<switch>
+<foreignObject x="902.00" y="992.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">路线ID</div></foreignObject>
+<text x="990.00" y="1035.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+路线ID
+</text>
+</switch>
+<switch>
+<foreignObject x="756.05" y="932.10" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">封面图</div></foreignObject>
+<text x="844.05" y="975.10" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+封面图
+</text>
+</switch>
+<switch>
+<foreignObject x="675.50" y="842.60" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">路线名称</div></foreignObject>
+<text x="763.50" y="885.60" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+路线名称
+</text>
+</switch>
+<switch>
+<foreignObject x="594.95" y="753.10" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">位置描述</div></foreignObject>
+<text x="682.95" y="796.10" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+位置描述
+</text>
+</switch>
+<switch>
+<foreignObject x="541.25" y="662.65" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">起点坐标</div></foreignObject>
+<text x="629.25" y="705.65" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+起点坐标
+</text>
+</switch>
+<switch>
+<foreignObject x="514.40" y="568.15" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">结构化地点</div></foreignObject>
+<text x="602.40" y="611.15" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+结构化地点
+</text>
+</switch>
+<switch>
+<foreignObject x="505.45" y="473.79" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">地点来源</div></foreignObject>
+<text x="593.45" y="516.79" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+地点来源
+</text>
+</switch>
+<switch>
+<foreignObject x="532.30" y="368.25" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">定位IP</div></foreignObject>
+<text x="620.30" y="411.25" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+定位IP
+</text>
+</switch>
+<switch>
+<foreignObject x="594.95" y="278.75" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">难度信息</div></foreignObject>
+<text x="682.95" y="321.75" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+难度信息
+</text>
+</switch>
+<switch>
+<foreignObject x="684.45" y="198.20" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">负重类型</div></foreignObject>
+<text x="772.45" y="241.20" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+负重类型
+</text>
+</switch>
+<switch>
+<foreignObject x="812.70" y="128.55" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">行程类型</div></foreignObject>
+<text x="900.70" y="171.55" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+行程类型
+</text>
+</switch>
+<switch>
+<foreignObject x="987.91" y="86.60" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">评分</div></foreignObject>
+<text x="1075.91" y="129.60" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+评分
+</text>
+</switch>
+<switch>
+<foreignObject x="1150.01" y="134.50" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">评论数</div></foreignObject>
+<text x="1238.01" y="177.50" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+评论数
+</text>
+</switch>
+<switch>
+<foreignObject x="1286.15" y="195.20" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">距离</div></foreignObject>
+<text x="1374.15" y="238.20" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+距离
+</text>
+</switch>
+<switch>
+<foreignObject x="1373.60" y="278.75" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">海拔/爬升</div></foreignObject>
+<text x="1461.60" y="321.75" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+海拔/爬升
+</text>
+</switch>
+<switch>
+<foreignObject x="1427.30" y="368.25" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">耗时</div></foreignObject>
+<text x="1515.30" y="411.25" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+耗时
+</text>
+</switch>
+<switch>
+<foreignObject x="1445.20" y="466.70" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">路线介绍</div></foreignObject>
+<text x="1533.20" y="509.70" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+路线介绍
+</text>
+</switch>
+<switch>
+<foreignObject x="1454.15" y="560.67" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">收藏数</div></foreignObject>
+<text x="1542.15" y="603.67" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+收藏数
+</text>
+</switch>
+<switch>
+<foreignObject x="1418.35" y="654.65" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">点赞数</div></foreignObject>
+<text x="1506.35" y="697.65" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+点赞数
+</text>
+</switch>
+<switch>
+<foreignObject x="1373.60" y="753.10" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">发布者ID</div></foreignObject>
+<text x="1461.60" y="796.10" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+发布者ID
+</text>
+</switch>
+<switch>
+<foreignObject x="1310.11" y="842.60" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">路线状态</div></foreignObject>
+<text x="1398.11" y="885.60" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+路线状态
+</text>
+</switch>
+<switch>
+<foreignObject x="1203.55" y="914.20" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">审核信息</div></foreignObject>
+<text x="1291.55" y="957.20" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+审核信息
+</text>
+</switch>
+<switch>
+<foreignObject x="1092.00" y="992.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">时间信息</div></foreignObject>
+<text x="1180.00" y="1035.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+时间信息
+</text>
+</switch>
+</svg>

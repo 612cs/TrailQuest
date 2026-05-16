@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="180" viewBox="0 0 1200 180"><rect width="100%" height="100%" fill="none"/>
-      <text x="600" y="95" text-anchor="middle" font-family="'Cambria Math','Times New Roman','STIX Two Math',serif" font-size="72" font-style="italic" fill="#000">
+      <text x="600" y="95" text-anchor="middle" font-family="'Times New Roman'" font-size="72" font-style="italic" fill="#000">
         <tspan>P = f</tspan><tspan font-size="46" baseline-shift="sub">llm</tspan><tspan>(q) = {l, t, d, r, s}</tspan>
       </text></svg>

@@ -1,47 +1,47 @@
 <mxfile host="Electron">
   <diagram name="展示层架构图" id="展示层架构图">
-    <mxGraphModel dx="1784" dy="1446" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1760" pageHeight="940" math="0" shadow="0">
+    <mxGraphModel dx="1616" dy="1376" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1760" pageHeight="940" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="user_side" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" value="用户侧&#xa;用户访问与交互" vertex="1">
-          <mxGeometry height="740" width="50" x="140" y="120" as="geometry" />
+          <mxGeometry height="578" width="50" x="154" y="172" as="geometry" />
         </mxCell>
         <mxCell id="admin_side" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" value="管理侧&#xa;平台管理与配置" vertex="1">
-          <mxGeometry height="740" width="50" x="1703" y="120" as="geometry" />
+          <mxGeometry height="578" width="50" x="1703" y="172" as="geometry" />
         </mxCell>
-        <mxCell id="main_area" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;" value="" vertex="1">
-          <mxGeometry height="740" width="1485" x="205" y="120" as="geometry" />
+        <mxCell id="main_area" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;fontStyle=1" value="" vertex="1">
+          <mxGeometry height="578" width="1470" x="220" y="172" as="geometry" />
         </mxCell>
         <mxCell id="page_group" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;" value="" vertex="1">
-          <mxGeometry height="365" width="405" x="235" y="165" as="geometry" />
+          <mxGeometry height="339" width="405" x="235" y="190" as="geometry" />
         </mxCell>
         <mxCell id="page_title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" value="页面层" vertex="1">
-          <mxGeometry height="50" width="195" x="340" y="180" as="geometry" />
+          <mxGeometry height="50" width="195" x="340" y="198" as="geometry" />
         </mxCell>
         <mxCell id="home" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="首页" vertex="1">
-          <mxGeometry height="70" width="155" x="255" y="255" as="geometry" />
+          <mxGeometry height="70" width="155" x="265" y="255" as="geometry" />
         </mxCell>
         <mxCell id="search" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="搜索页" vertex="1">
-          <mxGeometry height="70" width="155" x="445" y="255" as="geometry" />
+          <mxGeometry height="70" width="155" x="455" y="255" as="geometry" />
         </mxCell>
         <mxCell id="community" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="社区页" vertex="1">
-          <mxGeometry height="70" width="155" x="255" y="345" as="geometry" />
+          <mxGeometry height="70" width="155" x="265" y="345" as="geometry" />
         </mxCell>
         <mxCell id="detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="路线详情" vertex="1">
-          <mxGeometry height="70" width="155" x="445" y="345" as="geometry" />
+          <mxGeometry height="70" width="155" x="455" y="345" as="geometry" />
         </mxCell>
         <mxCell id="publish" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="发布页" vertex="1">
-          <mxGeometry height="70" width="155" x="255" y="435" as="geometry" />
+          <mxGeometry height="70" width="155" x="265" y="435" as="geometry" />
         </mxCell>
         <mxCell id="assistant" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="AI 助手页" vertex="1">
-          <mxGeometry height="70" width="155" x="445" y="435" as="geometry" />
+          <mxGeometry height="70" width="155" x="455" y="435" as="geometry" />
         </mxCell>
         <mxCell id="component_group" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;" value="" vertex="1">
-          <mxGeometry height="365" width="415" x="746" y="165" as="geometry" />
+          <mxGeometry height="339" width="415" x="746" y="190" as="geometry" />
         </mxCell>
         <mxCell id="component_title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" value="组件层" vertex="1">
-          <mxGeometry height="50" width="250" x="816" y="180" as="geometry" />
+          <mxGeometry height="50" width="250" x="828.5" y="199" as="geometry" />
         </mxCell>
         <mxCell id="trail_card" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="路线卡片" vertex="1">
           <mxGeometry height="70" width="165" x="771" y="255" as="geometry" />
@@ -62,10 +62,10 @@
           <mxGeometry height="70" width="165" x="966" y="435" as="geometry" />
         </mxCell>
         <mxCell id="tech_group" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;" value="" vertex="1">
-          <mxGeometry height="365" width="395" x="1266" y="165" as="geometry" />
+          <mxGeometry height="339" width="395" x="1266" y="190" as="geometry" />
         </mxCell>
         <mxCell id="tech_title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" value="前端技术与基础设施" vertex="1">
-          <mxGeometry height="50" width="240" x="1351" y="180" as="geometry" />
+          <mxGeometry height="50" width="240" x="1351" y="200" as="geometry" />
         </mxCell>
         <mxCell id="vue_ts" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="Vue3&amp;nbsp;" vertex="1">
           <mxGeometry height="70" width="165" x="1291" y="255" as="geometry" />
@@ -83,37 +83,37 @@
           <mxGeometry height="70" width="169" x="1291" y="435" as="geometry" />
         </mxCell>
         <mxCell id="admin_front" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;" value="" vertex="1">
-          <mxGeometry height="190" width="1425" x="235" y="636" as="geometry" />
+          <mxGeometry height="130" width="1425" x="235" y="600" as="geometry" />
         </mxCell>
         <mxCell id="admin_title" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" value="后台管理层" vertex="1">
-          <mxGeometry height="50" width="430" x="726" y="644" as="geometry" />
+          <mxGeometry height="50" width="430" x="726" y="604" as="geometry" />
         </mxCell>
         <mxCell id="admin_home" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="后台首页" vertex="1">
-          <mxGeometry height="60" width="140" x="280" y="714" as="geometry" />
+          <mxGeometry height="60" width="140" x="280" y="654" as="geometry" />
         </mxCell>
         <mxCell id="trail_review" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="路线审核" vertex="1">
-          <mxGeometry height="60" width="140" x="429" y="714" as="geometry" />
+          <mxGeometry height="60" width="140" x="429" y="654" as="geometry" />
         </mxCell>
         <mxCell id="trail_manage" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="路线管理" vertex="1">
-          <mxGeometry height="60" width="140" x="578" y="714" as="geometry" />
+          <mxGeometry height="60" width="140" x="578" y="654" as="geometry" />
         </mxCell>
         <mxCell id="user_govern" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="用户治理" vertex="1">
-          <mxGeometry height="60" width="140" x="726" y="714" as="geometry" />
+          <mxGeometry height="60" width="140" x="726" y="654" as="geometry" />
         </mxCell>
         <mxCell id="review_govern" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="评论治理" vertex="1">
-          <mxGeometry height="60" width="140" x="875" y="714" as="geometry" />
+          <mxGeometry height="60" width="140" x="875" y="654" as="geometry" />
         </mxCell>
         <mxCell id="config_center" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="配置中心" vertex="1">
-          <mxGeometry height="60" width="140" x="1024" y="714" as="geometry" />
+          <mxGeometry height="60" width="140" x="1024" y="654" as="geometry" />
         </mxCell>
         <mxCell id="operation_log" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="操作日志" vertex="1">
-          <mxGeometry height="60" width="140" x="1173" y="714" as="geometry" />
+          <mxGeometry height="60" width="140" x="1173" y="654" as="geometry" />
         </mxCell>
         <mxCell id="permission" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="权限控制" vertex="1">
-          <mxGeometry height="60" width="140" x="1321" y="714" as="geometry" />
+          <mxGeometry height="60" width="140" x="1321" y="654" as="geometry" />
         </mxCell>
         <mxCell id="settings" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=none;fontSize=26;align=center;verticalAlign=middle;" value="设置中心" vertex="1">
-          <mxGeometry height="60" width="140" x="1470" y="714" as="geometry" />
+          <mxGeometry height="60" width="140" x="1470" y="654" as="geometry" />
         </mxCell>
         <mxCell id="L83tyH71zWxf_jIGbBDx-2" parent="1" style="html=1;shadow=0;dashed=0;align=center;verticalAlign=middle;shape=mxgraph.arrows2.arrow;dy=0.6;dx=40;notch=0;fillColor=none;direction=west;" value="" vertex="1">
           <mxGeometry height="55" width="80" x="1175" y="320" as="geometry" />
@@ -125,7 +125,7 @@
           <mxGeometry height="70" width="165" x="1486" y="435" as="geometry" />
         </mxCell>
         <mxCell id="L83tyH71zWxf_jIGbBDx-6" parent="1" style="html=1;shadow=0;dashed=0;align=center;verticalAlign=middle;shape=mxgraph.arrows2.arrow;dy=0.6;dx=40;notch=0;fillColor=none;direction=south;" value="" vertex="1">
-          <mxGeometry height="80" width="55" x="898.5" y="542.5" as="geometry" />
+          <mxGeometry height="70" width="44" x="926" y="530" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

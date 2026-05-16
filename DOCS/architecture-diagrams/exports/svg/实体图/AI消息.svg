@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="802px" height="480px" viewBox="58 40 802 480">
+<rect x="0" y="0" width="100%" height="100%" fill="none"/>
+<g stroke="#000000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<line x1="364.42" y1="407.29" x2="282.06" y2="391.29" />
+<line x1="382.17" y1="379.77" x2="286.34" y2="320.09" />
+<line x1="426.14" y1="379.77" x2="336.98" y2="237.93" />
+<line x1="454.42" y1="379.77" x2="454.42" y2="180.00" />
+<line x1="484.89" y1="379.77" x2="581.14" y2="237.62" />
+<line x1="528.16" y1="379.77" x2="632.96" y2="315.81" />
+<line x1="544.42" y1="407.90" x2="635.72" y2="390.79" />
+<rect x="364.42" y="379.77" width="180.00" height="90.00" fill="none" />
+<ellipse cx="198.17" cy="375.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="230.00" cy="285.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="310.00" cy="195.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="454.42" cy="135.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="610.00" cy="195.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="690.00" cy="281.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="720.00" cy="375.00" rx="90.00" ry="45.00" fill="none" />
+</g>
+<switch>
+<foreignObject x="366.42" y="381.77" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:bold;line-height:1.15;color:#000000;">AI消息</div></foreignObject>
+<text x="454.42" y="424.77" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="bold" fill="#000000">
+AI消息
+</text>
+</switch>
+<switch>
+<foreignObject x="110.17" y="332.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">消息ID</div></foreignObject>
+<text x="198.17" y="375.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+消息ID
+</text>
+</switch>
+<switch>
+<foreignObject x="142.00" y="242.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">会话ID</div></foreignObject>
+<text x="230.00" y="285.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+会话ID
+</text>
+</switch>
+<switch>
+<foreignObject x="222.00" y="152.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">角色</div></foreignObject>
+<text x="310.00" y="195.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+角色
+</text>
+</switch>
+<switch>
+<foreignObject x="366.42" y="92.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">消息内容</div></foreignObject>
+<text x="454.42" y="135.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+消息内容
+</text>
+</switch>
+<switch>
+<foreignObject x="522.00" y="152.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">token数</div></foreignObject>
+<text x="610.00" y="195.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+token数
+</text>
+</switch>
+<switch>
+<foreignObject x="602.00" y="238.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">消息元数据</div></foreignObject>
+<text x="690.00" y="281.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+消息元数据
+</text>
+</switch>
+<switch>
+<foreignObject x="632.00" y="332.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">创建时间</div></foreignObject>
+<text x="720.00" y="375.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+创建时间
+</text>
+</switch>
+</svg>

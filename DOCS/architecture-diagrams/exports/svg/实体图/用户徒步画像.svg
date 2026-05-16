@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="810px" height="449px" viewBox="40 89 810 449">
+<rect x="0" y="0" width="100%" height="100%" fill="none"/>
+<g stroke="#000000" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<line x1="351.68" y1="442.95" x2="269.51" y2="442.95" />
+<line x1="351.68" y1="403.18" x2="287.44" y2="374.80" />
+<line x1="407.20" y1="397.95" x2="322.20" y2="287.02" />
+<line x1="443.12" y1="397.95" x2="448.56" y2="228.81" />
+<line x1="482.22" y1="397.95" x2="583.04" y2="286.03" />
+<line x1="531.68" y1="402.10" x2="601.87" y2="370.25" />
+<line x1="531.68" y1="440.28" x2="620.16" y2="437.66" />
+<rect x="351.68" y="397.95" width="180.00" height="90.00" fill="none" />
+<ellipse cx="179.51" cy="442.95" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="220.00" cy="345.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="290.00" cy="245.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="450.00" cy="183.82" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="620.00" cy="245.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="668.51" cy="340.00" rx="90.00" ry="45.00" fill="none" />
+<ellipse cx="710.00" cy="435.00" rx="90.00" ry="45.00" fill="none" />
+</g>
+<switch>
+<foreignObject x="353.68" y="399.95" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:bold;line-height:1.15;color:#000000;">徒步画像</div></foreignObject>
+<text x="441.68" y="442.95" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="bold" fill="#000000">
+徒步画像
+</text>
+</switch>
+<switch>
+<foreignObject x="91.51" y="399.95" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">画像ID</div></foreignObject>
+<text x="179.51" y="442.95" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+画像ID
+</text>
+</switch>
+<switch>
+<foreignObject x="132.00" y="302.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">用户ID</div></foreignObject>
+<text x="220.00" y="345.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+用户ID
+</text>
+</switch>
+<switch>
+<foreignObject x="202.00" y="202.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">徒步经验&lt;div&gt;等级&lt;/div&gt;</div></foreignObject>
+<text x="290.00" y="245.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+<tspan x="290.00" y="211.00">徒步经验&lt;d</tspan>
+<tspan x="290.00" y="245.00">iv&gt;等级&lt;</tspan>
+<tspan x="290.00" y="279.00">/div&gt;</tspan>
+</text>
+</switch>
+<switch>
+<foreignObject x="362.00" y="140.82" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">常走路线&lt;div&gt;类型&lt;/div&gt;</div></foreignObject>
+<text x="450.00" y="183.82" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+<tspan x="450.00" y="149.82">常走路线&lt;d</tspan>
+<tspan x="450.00" y="183.82">iv&gt;类型&lt;</tspan>
+<tspan x="450.00" y="217.82">/div&gt;</tspan>
+</text>
+</switch>
+<switch>
+<foreignObject x="532.00" y="202.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">负重偏好</div></foreignObject>
+<text x="620.00" y="245.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+负重偏好
+</text>
+</switch>
+<switch>
+<foreignObject x="580.51" y="297.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">创建时间</div></foreignObject>
+<text x="668.51" y="340.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+创建时间
+</text>
+</switch>
+<switch>
+<foreignObject x="622.00" y="392.00" width="176.00" height="86.00"><div xmlns="http://www.w3.org/1999/xhtml" style="display:flex;align-items:center;justify-content:center;width:172.0px;height:82.0px;padding:0 4px;box-sizing:border-box;text-align:center;white-space:normal;word-break:break-all;overflow:hidden;font-family:Arial;font-size:30px;font-weight:normal;line-height:1.15;color:#000000;">更新时间</div></foreignObject>
+<text x="710.00" y="435.00" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="30" font-weight="normal" fill="#000000">
+更新时间
+</text>
+</switch>
+</svg>
