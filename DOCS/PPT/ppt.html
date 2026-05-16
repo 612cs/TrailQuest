@@ -729,7 +729,7 @@
                 </ul>
             </div>
             <div class="image-wrapper animate-item delay-2">
-                <img src="./assets/docx-images/trail-detail.png" alt="Map Interface">
+                <img id="trail-image-toggle" src="./assets/docx-images/trail-detail.png" alt="Map Interface" style="cursor: pointer;" title="点击切换图片">
             </div>
         </div>
     </div>
@@ -945,6 +945,22 @@
                 document.msExitFullscreen();
             }
         }
+    }
+
+    // Trail image toggle functionality
+    const trailImage = document.getElementById('trail-image-toggle');
+    if (trailImage) {
+        let isDetailView = true;
+        trailImage.addEventListener('click', () => {
+            if (isDetailView) {
+                trailImage.src = './assets/docx-images/trail-list.png';
+                trailImage.alt = 'Trail List';
+            } else {
+                trailImage.src = './assets/docx-images/trail-detail.png';
+                trailImage.alt = 'Map Interface';
+            }
+            isDetailView = !isDetailView;
+        });
     }
 
     // Initialize
