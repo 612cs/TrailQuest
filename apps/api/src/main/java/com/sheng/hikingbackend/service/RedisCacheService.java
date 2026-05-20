@@ -1,8 +1,6 @@
 package com.sheng.hikingbackend.service;
 
 import com.sheng.hikingbackend.dto.UploadStsCredential;
-import com.sheng.hikingbackend.vo.MediaFileVo;
-import com.sheng.hikingbackend.vo.OssUploadCredentialVo;
 
 /**
  * Redis缓存服务接口
