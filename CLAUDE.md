@@ -1,107 +1,41 @@
-# AGENTS.md
+本文是 Claude Code 在 TrailQuest 仓库内工作时的入口指引。详细规则请按 AGENTS.md 的导航表检索 `DOCS/agents/`。
 
-This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+## 项目简介
 
-## Project Overview
+TrailQuest 是 Vue 3 + TypeScript 徒步路线发现与分享平台，pnpm monorepo。
 
-TrailQuest is a Vue 3 + TypeScript hiking trail discovery application with features including trail search, community sharing, AI assistant chat, and user profiles.
+## 入口文档
 
-## Common Commands
+- 根 [AGENTS.md](./AGENTS.md) — Agent 操作地图与硬性规则
+- [DOCS/harness.md](./DOCS/harness.md) — Harness 工程理论
+- [DOCS/agents/README.md](./DOCS/agents/README.md) — Agent 操作手册集合
+- [DOCS/agents/architecture/boundaries.md](./DOCS/agents/architecture/boundaries.md) — 模块边界与依赖规则
+- [DOCS/agents/conventions/README.md](./DOCS/agents/conventions/README.md) — 通用编码规范
+- [DOCS/agents/harness/checklists.md](./DOCS/agents/harness/checklists.md) — PR 自检清单
+- [DOCS/agents/harness/failures.md](./DOCS/agents/harness/failures.md) — 失败案例库
+
+## 常用命令
 
 ```bash
-# Install dependencies (uses pnpm)
 pnpm install
-
-# Start development server
 pnpm dev
-
-# Build for production
-pnpm build
-
-# Preview production build
-pnpm preview
+pnpm dev:admin
+pnpm dev:api
+pnpm typecheck
+pnpm lint
+pnpm format:check
+pnpm harness:check
+pnpm test
+pnpm check
 ```
 
-## Tech Stack
+## 提交纪律
 
-- **Vue 3** with Composition API and `<script setup>`
-- **TypeScript**
-- **Vite 7** for build tooling
-- **Pinia** for state management
-- **Vue Router 5** for routing
-- **Tailwind CSS v4** for styling
-- **lucide-vue-next** for icons
+- 不自动提交代码，由用户手动触发。
+- 提交信息使用中文 Conventional Commits（`feat:`、`fix:`、`docs:`、`refactor:`、`chore:`）。
+- 优先使用 GitHub MCP 提交。
+- 提交前必须 `pnpm check` 通过。
 
-## Architecture
+## 失败即学习
 
-### Directory Structure
-```
-src/
-├── components/          # Vue components
-│   ├── common/         # Reusable base components (BaseIcon, ActionButton, BaseModal, etc.)
-│   ├── home/          # Home page components
-│   ├── trail/         # Trail-related components
-│   ├── search/        # Search components
-│   ├── chat/          # Chat components
-│   ├── community/     # Community components
-│   └── profile/       # Profile components
-├── views/             # Page-level components (routes)
-├── stores/            # Pinia stores (counter, chat, theme, useUserStore)
-├── mock/              # Mock data and TypeScript interfaces
-├── router/            # Vue Router configuration
-└── style.css          # Global styles with Tailwind v4 theme
-```
-
-### Routes
-| Path | Name | Description |
-|------|------|-------------|
-| `/` | Home | Trail discovery with activity grid |
-| `/search` | Search | Trail search with filters |
-| `/community` | Community | Community posts feed |
-| `/profile` | Profile | User profile and settings |
-| `/publish` | Publish | Publish new trail |
-| `/chat` | Chat | AI assistant |
-| `/trail/:id` | TrailDetail | Trail details with reviews |
-
-### Data Models (in `src/mock/mockData.ts`)
-- `User` - User profile with avatar
-- `Trail` / `TrailDetail` - Trail information with difficulty, distance, elevation
-- `Review` - Trail reviews with nested replies
-- `ChatMessage` - AI chat messages
-
-### State Management
-- Pinia stores in `src/stores/`
-- Theme store handles dark/light mode with CSS variables
-- User store manages authentication state (mock)
-
-## Key Conventions
-
-### UI Guidelines
-- **No emojis** - Use `lucide-vue-next` icons instead
-- Use `stroke-width="2"` for consistent icon styling
-- Use CSS variables (e.g., `var(--primary-500)`) instead of hardcoded colors
-- **主题适配** - 所有 UI 开发必须适配白天和暗黑模式
-- Use `animate-fade-in-up` class for entrance animations
-
-### Component Structure
-- Components should be placed in appropriate feature directories
-- View files handle layout and data fetching, delegate to smaller components
-- All mock data must be in `src/mock/` directory
-
-### Styling (Tailwind CSS v4)
-- Theme tokens defined in `style.css` (`@theme` block)
-- Custom CSS variables for dark/light mode
-- Use `.card` class for standard card styling
-- Use `.glass-header` for header with blur effect
-- Badge classes: `.badge-easy`, `.badge-moderate`, `.badge-hard`
-
-### TypeScript
-- Define interfaces for all data structures
-- Mock data uses proper TypeScript interfaces for API migration readiness
-
-# 代码提交
-
-- **流程**：不自动提交代码，由用户手动触发。完成开发工作后，等待用户决定何时提交。
-- **提交信息**：遵循约定式提交规范（Conventional Commits），如 `feat:`, `fix:`, `docs:`, `refactor:` 等，并且使用中文进行提交。
-- **工具优先**：优先使用 GitHub MCP 进行跨系统的直接提交，以确保操作的原子性和可追溯性。
-- git提交信息必须是中文
+任何 Agent 在仓库内出错的案例都写入 `DOCS/agents/harness/failures.md`，必要时把规则编码到 `tools/harness/` 或 `.oxlintrc.json`，让下一个 Agent 不会再犯同样的错。

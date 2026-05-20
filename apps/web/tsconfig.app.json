@@ -8,7 +8,7 @@
       "vue": ["./node_modules/vue"],
       "lucide-vue-next": ["./node_modules/lucide-vue-next"]
     },
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "types": ["vite/client"],
 
     /* Linting */

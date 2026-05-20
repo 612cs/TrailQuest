@@ -1,46 +1,56 @@
-# apps/admin — 管理后台
+本文是 `apps/admin` 管理后台 SPA 的 Agent 操作手册。通用规范见根 AGENTS.md 与 DOCS/agents/。
 
 ## 架构
 
-Vue 3 SPA，独立于用户端的管理后台，使用原始 CSS（非 Tailwind）。
+Vue 3 SPA，独立于用户端，使用原生 CSS（不引入 Tailwind），Pinia + Vue Router。
 
 ```text
 src/
-├── api/             # 5 个 API 模块（admin, auth, constants, http, uploads）
-├── components/      # 20 个组件，按功能目录组织
-│   ├── common/      # 通用基础组件
-│   ├── dashboard/   # 仪表盘
-│   ├── layout/      # 布局（Shell, Sidebar, Topbar）
-│   ├── logs/        # 操作日志
-│   ├── reviews/     # 评论管理
-│   ├── trails/      # 路线管理
-│   └── users/       # 用户管理
-├── composables/     # 6 个组合式函数
-├── router/          # 路由配置（含 ADMIN 角色守卫）
-├── stores/          # 3 个 Pinia Store（auth, pinia, theme）
-├── types/           # 5 个类型文件
-├── utils/           # 2 个工具模块
-└── views/           # 12 个页面级组件
+├── api/           按域拆分（admin、auth、constants、http、uploads）
+├── components/    按功能目录组织（common、dashboard、layout、logs、reviews、trails、users 等）
+├── composables/   组合式函数
+├── router/        含 ADMIN 角色守卫
+├── stores/        auth、pinia、theme
+├── types/         类型定义
+├── utils/         工具模块
+└── views/         页面级组件
 ```
 
 ## 命令
 
 ```bash
-pnpm dev              # Vite 开发服务器
-pnpm build            # 生产构建
+pnpm dev                  Vite 开发服务器（端口 5174）
+pnpm build                生产构建
+pnpm preview              本地预览构建产物
 ```
+
+根目录入口：`pnpm dev:admin`、`pnpm build:admin`、`pnpm preview:admin`。
 
 ## 关键约定
 
-- 独立认证流程，使用 ADMIN 角色验证，独立 localStorage key
-- 路由守卫强制 ADMIN 角色，非管理员重定向到登录页
-- API 约 25 个端点：仪表盘、审核、管理、日志、配置等
-- 使用原始 CSS，不使用 Tailwind
-- 布局组件在 `components/layout/`（Shell, Sidebar, Topbar）
+- 独立认证流程，使用 ADMIN 角色，独立 localStorage key，不与用户端共用。
+- 所有路由由路由守卫强制 ADMIN 角色，未通过重定向到登录页。
+- API 端点全部走 `src/api/admin.ts` 与 `src/api/http.ts`，不与用户端混用。
+- 布局组件统一在 `components/layout/`（Shell、Sidebar、Topbar）。
+- 所有管理操作必须落操作日志（后端审计表）。
 
-## Guardrails
+## 边界与硬规则
 
-- **不要**绕过路由守卫 — 所有管理页面必须验证 ADMIN 角色
-- **不要**与用户端 API 混用 — 使用 `src/api/admin.ts` 独立端点
-- **不要**在 Store 中硬编码角色判断 — 使用 auth store 的角色验证方法
-- **不要**跳过操作日志 — 所有管理操作应记录审计日志
+由 `pnpm harness:check` 强制：
+
+- 不得 import `apps/web` 的源码；只能依赖自身 `src` 与 `@trailquest/ui`。
+- `src/components/*` 不得 import `src/views/*`。
+- `src/stores/*` 不得 import `src/components/*`。
+
+详见 DOCS/agents/architecture/boundaries.md。
+
+## UI 纪律
+
+- 即便不使用 Tailwind，仍需通过 CSS 变量同时适配明暗模式。
+- 图标统一 `lucide-vue-next`，不使用 emoji。
+- 风险动作（封禁 / 下架 / 删除）必须二次确认 + 日志记录。
+
+## 失败案例参考
+
+- 文档与 typecheck 失败案例：DOCS/agents/harness/failures.md
+- PR 自检清单：DOCS/agents/harness/checklists.md

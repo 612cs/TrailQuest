@@ -1,88 +1,38 @@
-# DOCS 目录导航与地图检索说明
+本文是 `DOCS` 目录的检索导航，面向 Agent 与人类维护者。Harness 工程相关导航请优先看根 [AGENTS.md](../AGENTS.md) 与 [DOCS/agents/README.md](./agents/README.md)。
 
-本文件用于说明 `DOCS` 目录的资料分类、检索路径和维护规则。需要查找地图检索功能、路线搜索、地图相关数据库字段、论文图表或交接资料时，优先按本文档定位。
+## 顶层目录
 
-## 地图检索功能资料检索路径
+| 目录 | 用途 |
+|------|------|
+| `agents/` | Agent 操作手册（Harness 工程文档体系入口） |
+| `architecture-diagrams/` | 工程图表源文件与导出（Draw.io 源 + PNG / SVG） |
+| `archive/` | 历史与编辑器自动备份资料 |
+| `backend/` | 后端需求、方案、交接、开发清单 |
+| `database/` | 数据库初始化、结构与升级脚本 |
+| `frontend/` | 前端 UI、交互与主题规范 |
+| `handoff/` | 阶段交接、测试优先级、阶段计划 |
+| `thesis/` | 论文正文、稿件版本、答辩 PPT、插图与参考 |
 
-地图检索功能通常涉及前端搜索交互、路线数据结构、地理字段、后端检索方案和论文说明，可按以下顺序查找：
+## 常用入口
 
-1. `frontend/`：查看地图检索页面、筛选交互、UI 与主题规范。
-2. `backend/`：查看路线检索、AI 推荐、景观预测、天气等后端方案。
-3. `database/`：查看路线、轨迹、起点经纬度、结构化地理字段相关 SQL。
-4. `architecture-diagrams/`：查看路线浏览与搜索流程图、系统数据流图、数据库关系总图等图表。
-5. `thesis/`：查看论文正文、论文插图、实体图、功能流程图和答辩资料中对地图检索功能的描述。
-6. `handoff/`：查看阶段交接记录，确认地图检索相关工作的最新状态。
+- 当前迭代任务：[agents/plans/current-sprint.md](./agents/plans/current-sprint.md)
+- 系统架构总览：[agents/architecture/overview.md](./agents/architecture/overview.md)
+- 模块边界与依赖：[agents/architecture/boundaries.md](./agents/architecture/boundaries.md)
+- 通用编码规范：[agents/conventions/README.md](./agents/conventions/README.md)
+- 测试规范：[agents/conventions/testing.md](./agents/conventions/testing.md)
+- 命名规范：[agents/conventions/naming.md](./agents/conventions/naming.md)
+- 失败案例库：[agents/harness/failures.md](./agents/harness/failures.md)
+- PR 自检清单：[agents/harness/checklists.md](./agents/harness/checklists.md)
+- Agent 互评流程：[agents/harness/review-loop.md](./agents/harness/review-loop.md)
+- 工具链（oxlint / oxfmt）：[TOOLCHAIN.md](./TOOLCHAIN.md)
+- Harness 工程理论：[harness.md](./harness.md)
+- DOCS 索引：[README.md](./README.md)
 
-## 顶层目录说明
+## 维护规则
 
-### `backend/`
-
-存放后端功能设计、阶段交接、开发清单和方案文档。地图检索相关内容通常包括路线推荐、AI 检索层、景观预测、天气服务、发布上传等后端能力说明。
-
-### `frontend/`
-
-存放前端 UI 与交互规范文档。地图检索相关内容主要用于确认搜索页、筛选条件、主题适配、组件视觉规范和交互一致性。
-
-### `database/`
-
-存放数据库初始化脚本、结构脚本和增量升级 SQL。地图检索相关内容主要查看路线表、路线轨迹、起点经纬度、结构化地理信息、景观预测字段等 SQL 文件。
-
-### `handoff/`
-
-存放阶段交接、进度总结、测试优先级、阶段计划和后续工作包。需要确认某个地图检索功能是否完成、是否待测试或下一步怎么做时，先看最新日期的交接文档。
-
-### `architecture-diagrams/`
-
-存放工程图表资料，包含系统架构图、流程图、用例图、数据流图、数据库 ER 图以及实体表图。地图检索相关图表优先查看路线浏览与搜索流程图、路线推荐流程图、数据库关系总图和系统数据流图。
-
-子目录：
-
-- `sources/`：Draw.io 源文件，用于继续编辑图表。
-- `exports/png/`：PNG 格式导出图，用于预览、文档插图或演示。
-- `exports/svg/`：SVG 格式导出图，用于高清文档插图。
-- `tasks/`：图表绘制任务、清单和维护说明。
-
-### `thesis/`
-
-存放论文相关资料，包括正文草稿、Word 稿件、答辩 PPT、参考资料和论文插图。当前已经把 `lunwen/`、`PPT/` 等旧入口统一迁移到 `thesis/` 下的模块目录中。地图检索功能如需写入论文，应在这里查找需求分析、总体设计、详细实现、测试优化等章节内容。
-
-子目录：
-
-- `chapters/`：论文 Markdown 分章草稿。
-- `manuscripts/drafts/`：草稿与早期版本。
-- `manuscripts/revisions/`：修订链与版本迭代稿。
-- `manuscripts/final/`：最终稿与定稿归档。
-- `manuscripts/backups/`：Word 备份文件。
-- `figures/code-tables/`：代码表格 SVG。
-- `figures/entity-diagrams/`：论文实体关系图源文件与 SVG。
-- `figures/feature-diagrams/`：论文功能、流程、架构类图表。
-- `figures/formulas/`：公式图。
-- `figures/placeholders/entities/`：论文占位图与实体图预览。
-- `notes/`：AIGC、改写对照等论文辅助说明。
-- `presentation/`：答辩 PPT、HTML 讲稿与资源文件。
-- `reports/`：论文检测结果与输出报告。
-- `scripts/`：论文处理与生成脚本。
-
-### `archive/`
-
-存放历史资料、临时草稿和工具自动生成的非主线文件。一般不作为当前资料入口，除非需要恢复历史版本或检查编辑器备份。
-
-子目录：
-
-- `drawio-editor-backups/`：Draw.io 编辑器临时备份文件。
-- `thesis-drafts/`：临时论文图表草稿。
-
-## 根目录文件说明
-
-- `README.md`：DOCS 总索引，说明推荐阅读顺序和目录维护规则。
-- `TOOLCHAIN.md`：项目工具链说明，如 lint、format、构建相关工具。
-- `AGENTS.MD`：当前文件，面向协作代理和维护者的 DOCS 检索导航。
-
-## 命名与维护规则
-
-- 新增目录优先使用英文 kebab-case。
-- 论文正式交付物、中文图名或需要直接展示给论文/答辩使用的文件，可以保留中文名称。
-- 地图检索相关开发资料应按资料性质放入对应目录，不要新建散乱目录。
-- Draw.io 源文件放入 `architecture-diagrams/sources/` 或 `thesis/figures/**` 对应图表目录。
-- 导出图按格式放入 `exports/png/`、`exports/svg/` 或论文 `figures/` 下对应目录。
-- 不要把 `.DS_Store`、临时缓存、编辑器锁文件作为主资料保存。
+- 新增开发交接放入 `handoff/`，文件名建议含日期。
+- 新增数据库脚本放入 `database/`，升级脚本命名 `mysql-<topic>-upgrade.sql`。
+- 新增工程图表源文件放入 `architecture-diagrams/sources/`，导出图按格式分到 `exports/png/`、`exports/svg/`。
+- 新增论文素材放入 `thesis/` 对应子目录，不再使用旧拼音目录。
+- `.DS_Store` 与编辑器锁文件不作为主资料保留。
+- 新增 Agent 操作规则放入 `agents/`；触发 CI 强制时同步更新 `tools/harness/` 与根 [AGENTS.md](../AGENTS.md)。
