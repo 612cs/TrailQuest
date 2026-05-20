@@ -12,7 +12,7 @@ from lxml import etree
 
 
 BASE = Path(__file__).resolve().parents[3]
-DOCX_PATH = BASE / "DOCS/thesis/manuscripts/陈胜论文.docx"
+DOCX_PATH = BASE / "DOCS/thesis/manuscripts/final/陈胜论文.docx"
 
 NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 W = f"{{{NS['w']}}}"

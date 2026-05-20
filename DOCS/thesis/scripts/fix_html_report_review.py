@@ -9,8 +9,8 @@ from docx.shared import Pt
 
 
 ROOT = Path("/Users/sheng/Documents/code/hiking")
-SRC = ROOT / "DOCS/lunwen/定稿/陈胜论文.docx"
-OUT = ROOT / "DOCS/lunwen/定稿/陈胜论文-按批注修订V1.docx"
+SRC = ROOT / "DOCS/thesis/manuscripts/final/陈胜论文.docx"
+OUT = ROOT / "DOCS/thesis/manuscripts/revisions/陈胜论文-按批注修订V1.docx"
 
 
 def set_run_fonts(run, east=None, ascii_font=None, size=None, bold=None):

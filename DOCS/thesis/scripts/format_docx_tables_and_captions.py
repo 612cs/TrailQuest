@@ -13,8 +13,8 @@ from lxml import etree
 
 
 BASE = Path(__file__).resolve().parents[3]
-DEFAULT_INPUT = BASE / "DOCS/thesis/manuscripts/陈胜论文_格式修正版_代码SVG三线表版_v17.docx"
-DEFAULT_OUTPUT = BASE / "DOCS/thesis/manuscripts/陈胜论文_格式修正版_代码SVG三线表版_v18.docx"
+DEFAULT_INPUT = BASE / "DOCS/thesis/manuscripts/revisions/陈胜论文_格式修正版_代码SVG三线表版_v17.docx"
+DEFAULT_OUTPUT = BASE / "DOCS/thesis/manuscripts/revisions/陈胜论文_格式修正版_代码SVG三线表版_v18.docx"
 
 NS = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
 W = f"{{{NS['w']}}}"

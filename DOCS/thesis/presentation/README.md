@@ -1,4 +1,4 @@
-# PPT 资源本地化完成
+# 答辩 PPT 资源索引
 
 ## 已完成的工作
 
@@ -39,7 +39,7 @@
 ## 目录结构
 
 ```
-DOCS/PPT/
+DOCS/thesis/presentation/
 ├── ppt.html                    # 主 HTML 文件（已更新）
 ├── logo.png                    # 学校 logo
 ├── PPTback.png                 # 背景图

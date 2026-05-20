@@ -10,7 +10,7 @@
 2. `backend/`：查看路线检索、AI 推荐、景观预测、天气等后端方案。
 3. `database/`：查看路线、轨迹、起点经纬度、结构化地理字段相关 SQL。
 4. `architecture-diagrams/`：查看路线浏览与搜索流程图、系统数据流图、数据库关系总图等图表。
-5. `thesis/`：查看论文正文、论文插图、实体图和功能流程图中对地图检索功能的描述。
+5. `thesis/`：查看论文正文、论文插图、实体图、功能流程图和答辩资料中对地图检索功能的描述。
 6. `handoff/`：查看阶段交接记录，确认地图检索相关工作的最新状态。
 
 ## 顶层目录说明
@@ -40,21 +40,28 @@
 - `sources/`：Draw.io 源文件，用于继续编辑图表。
 - `exports/png/`：PNG 格式导出图，用于预览、文档插图或演示。
 - `exports/svg/`：SVG 格式导出图，用于高清文档插图。
-- `exports/entity-svg/`：实体表 SVG 导出图，用于数据库表结构展示。
 - `tasks/`：图表绘制任务、清单和维护说明。
 
 ### `thesis/`
 
-存放论文相关资料，包括正文草稿、Word 稿件、参考文献和论文插图。地图检索功能如需写入论文，应在这里查找需求分析、总体设计、详细设计、测试优化等章节内容。
+存放论文相关资料，包括正文草稿、Word 稿件、答辩 PPT、参考资料和论文插图。当前已经把 `lunwen/`、`PPT/` 等旧入口统一迁移到 `thesis/` 下的模块目录中。地图检索功能如需写入论文，应在这里查找需求分析、总体设计、详细实现、测试优化等章节内容。
 
 子目录：
 
 - `chapters/`：论文 Markdown 分章草稿。
-- `manuscripts/`：论文 Word 稿件版本。
-- `references/`：新增文献清单。
+- `manuscripts/drafts/`：草稿与早期版本。
+- `manuscripts/revisions/`：修订链与版本迭代稿。
+- `manuscripts/final/`：最终稿与定稿归档。
+- `manuscripts/backups/`：Word 备份文件。
 - `figures/code-tables/`：代码表格 SVG。
 - `figures/entity-diagrams/`：论文实体关系图源文件与 SVG。
 - `figures/feature-diagrams/`：论文功能、流程、架构类图表。
+- `figures/formulas/`：公式图。
+- `figures/placeholders/entities/`：论文占位图与实体图预览。
+- `notes/`：AIGC、改写对照等论文辅助说明。
+- `presentation/`：答辩 PPT、HTML 讲稿与资源文件。
+- `reports/`：论文检测结果与输出报告。
+- `scripts/`：论文处理与生成脚本。
 
 ### `archive/`
 

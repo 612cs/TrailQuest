@@ -15,7 +15,7 @@ from docx.text.paragraph import Paragraph
 
 
 BASE = Path(__file__).resolve().parents[3]
-DEFAULT_DOCX_PATH = BASE / "DOCS/thesis/manuscripts/陈胜论文.docx"
+DEFAULT_DOCX_PATH = BASE / "DOCS/thesis/manuscripts/final/陈胜论文.docx"
 
 FINAL_REFS = [
     "Siriaraya P, Wang Y, Zhang Y, et al. Beyond the Shortest Route: A Survey on Quality-Aware Route Navigation for Pedestrians[J]. IEEE Access, 2020, 8: 135569-135590.",

@@ -21,8 +21,8 @@ from lxml import etree
 
 
 BASE = Path(__file__).resolve().parents[3]
-DEFAULT_INPUT = BASE / "DOCS/thesis/manuscripts/陈胜论文_格式修正版_代码SVG三线表版_v14.docx"
-DEFAULT_OUTPUT = BASE / "DOCS/thesis/manuscripts/陈胜论文_格式修正版_代码SVG三线表版_v16.docx"
+DEFAULT_INPUT = BASE / "DOCS/thesis/manuscripts/revisions/陈胜论文_格式修正版_代码SVG三线表版_v14.docx"
+DEFAULT_OUTPUT = BASE / "DOCS/thesis/manuscripts/revisions/陈胜论文_格式修正版_代码SVG三线表版_v16.docx"
 DEFAULT_SVG_DIR = BASE / "DOCS/thesis/figures/code-tables/chapter5"
 
 NS = {

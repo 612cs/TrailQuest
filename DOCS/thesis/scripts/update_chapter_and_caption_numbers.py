@@ -4,8 +4,8 @@ from docx import Document
 
 
 ROOT = Path("/Users/sheng/Documents/code/hiking")
-SRC = ROOT / "DOCS/lunwen/定稿/基于Vue的户外路线智能推荐平台的设计与实现陈胜_副本.docx"
-OUT = ROOT / "DOCS/lunwen/定稿/基于Vue的户外路线智能推荐平台的设计与实现陈胜_副本-章节更新V1.docx"
+SRC = ROOT / "DOCS/thesis/manuscripts/revisions/基于Vue的户外路线智能推荐平台的设计与实现陈胜_副本.docx"
+OUT = ROOT / "DOCS/thesis/manuscripts/revisions/基于Vue的户外路线智能推荐平台的设计与实现陈胜_副本-章节更新V1.docx"
 
 
 ENTITY_TITLES = {

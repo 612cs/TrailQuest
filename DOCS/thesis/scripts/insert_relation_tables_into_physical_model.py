@@ -9,7 +9,7 @@ from docx.text.paragraph import Paragraph
 
 
 ROOT = Path("/Users/sheng/Documents/code/hiking")
-DOC_PATH = ROOT / "DOCS/lunwen/定稿/基于Vue的户外路线智能推荐平台的设计与实现陈胜_副本-章节更新V1.docx"
+DOC_PATH = ROOT / "DOCS/thesis/manuscripts/revisions/基于Vue的户外路线智能推荐平台的设计与实现陈胜_副本-章节更新V1.docx"
 
 
 def set_paragraph_text(paragraph: Paragraph, text: str):

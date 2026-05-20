@@ -14,8 +14,8 @@ from docx.shared import Pt
 
 
 BASE = Path(__file__).resolve().parents[3]
-INPUT = BASE / "DOCS/thesis/manuscripts/陈胜论文_格式修正版_代码SVG三线表版_v20.docx"
-OUTPUT = BASE / "DOCS/thesis/manuscripts/陈胜论文_格式修正版_代码SVG三线表版_v22.docx"
+INPUT = BASE / "DOCS/thesis/manuscripts/revisions/陈胜论文_格式修正版_代码SVG三线表版_v20.docx"
+OUTPUT = BASE / "DOCS/thesis/manuscripts/revisions/陈胜论文_格式修正版_代码SVG三线表版_v22.docx"
 
 ROWS = [
     ("论文题目：", "基于Vue的户外路线智能推荐平台的设计与实现"),

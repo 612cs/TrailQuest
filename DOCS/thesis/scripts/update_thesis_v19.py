@@ -17,8 +17,8 @@ from format_docx_tables_and_captions import build as normalize_docx
 
 
 BASE = Path(__file__).resolve().parents[3]
-INPUT = BASE / "DOCS/thesis/manuscripts/陈胜论文_格式修正版_代码SVG三线表版_v18.docx"
-OUTPUT = BASE / "DOCS/thesis/manuscripts/陈胜论文_格式修正版_代码SVG三线表版_v19.docx"
+INPUT = BASE / "DOCS/thesis/manuscripts/revisions/陈胜论文_格式修正版_代码SVG三线表版_v18.docx"
+OUTPUT = BASE / "DOCS/thesis/manuscripts/revisions/陈胜论文_格式修正版_代码SVG三线表版_v19.docx"
 
 PERF_CAPTION = "表6.7 性能与优化测试表"
 ACK_HEADING = "致  谢"

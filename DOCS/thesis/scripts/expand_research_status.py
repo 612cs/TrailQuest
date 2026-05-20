@@ -11,7 +11,7 @@ from docx.text.paragraph import Paragraph
 
 
 BASE = Path(__file__).resolve().parents[3]
-DOCX_PATH = BASE / "DOCS/thesis/manuscripts/陈胜论文.docx"
+DOCX_PATH = BASE / "DOCS/thesis/manuscripts/final/陈胜论文.docx"
 
 
 FOREIGN_PARAGRAPHS = [
