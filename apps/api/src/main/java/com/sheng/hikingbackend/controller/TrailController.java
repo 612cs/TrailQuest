@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import com.sheng.hikingbackend.common.ApiResponse;
 import com.sheng.hikingbackend.common.PageResponse;
+import com.sheng.hikingbackend.common.enums.TrailReviewStatus;
 import com.sheng.hikingbackend.config.CustomUserDetails;
 import com.sheng.hikingbackend.dto.trail.CreateTrailRequest;
 import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
@@ -70,9 +71,10 @@ public class TrailController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             HttpServletRequest httpServletRequest,
             @Valid @RequestBody CreateTrailRequest request) {
+        TrailDetailVo trail = trailService.createTrail(userDetails.getId(), resolveRequestIp(httpServletRequest), request);
         return ApiResponse.success(
-                "路线已提交审核，请耐心等待",
-                trailService.createTrail(userDetails.getId(), resolveRequestIp(httpServletRequest), request));
+                resolveSaveMessage(trail, false),
+                trail);
     }
 
     @PutMapping("/{id}")
@@ -81,9 +83,10 @@ public class TrailController {
             @PathVariable Long id,
             HttpServletRequest httpServletRequest,
             @Valid @RequestBody UpdateTrailRequest request) {
+        TrailDetailVo trail = trailService.updateTrail(id, userDetails.getId(), resolveRequestIp(httpServletRequest), request);
         return ApiResponse.success(
-                "路线更新已提交审核，请耐心等待",
-                trailService.updateTrail(id, userDetails.getId(), resolveRequestIp(httpServletRequest), request));
+                resolveSaveMessage(trail, true),
+                trail);
     }
 
     @DeleteMapping("/{id}")
@@ -135,5 +138,15 @@ public class TrailController {
 
         String remoteAddr = request.getRemoteAddr();
         return remoteAddr == null || remoteAddr.isBlank() ? "127.0.0.1" : remoteAddr;
+    }
+
+    private String resolveSaveMessage(TrailDetailVo trail, boolean isUpdate) {
+        if (TrailReviewStatus.APPROVED.getCode().equals(trail.getReviewStatus())) {
+            return isUpdate ? "路线更新成功，已通过 AI 预审" : "路线发布成功，已通过 AI 预审";
+        }
+        if (TrailReviewStatus.REJECTED.getCode().equals(trail.getReviewStatus())) {
+            return isUpdate ? "路线更新未通过 AI 预审，请修改后重试" : "路线未通过 AI 预审，请修改后重试";
+        }
+        return isUpdate ? "路线更新已提交人工复核" : "路线已提交人工复核";
     }
 }
