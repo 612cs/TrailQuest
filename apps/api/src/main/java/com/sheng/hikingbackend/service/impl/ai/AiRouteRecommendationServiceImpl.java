@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sheng.hikingbackend.common.enums.TrailSourceType;
 import com.sheng.hikingbackend.common.PageResponse;
 import com.sheng.hikingbackend.entity.UserHikingProfile;
 import com.sheng.hikingbackend.mapper.UserHikingProfileMapper;
@@ -23,6 +24,10 @@ import com.sheng.hikingbackend.dto.trail.TrailPageRequest;
 import com.sheng.hikingbackend.service.AiRouteRecommendationService;
 import com.sheng.hikingbackend.service.DashScopeChatService;
 import com.sheng.hikingbackend.service.TrailService;
+import com.sheng.hikingbackend.service.external.ExternalTrailImportService;
+import com.sheng.hikingbackend.service.external.model.ExternalTrailImportItem;
+import com.sheng.hikingbackend.service.external.model.ExternalTrailImportResult;
+import com.sheng.hikingbackend.service.external.model.ExternalTrailSearchRequest;
 import com.sheng.hikingbackend.service.impl.ai.model.AiIntent;
 import com.sheng.hikingbackend.service.impl.ai.model.AiParsedQuery;
 import com.sheng.hikingbackend.service.impl.ai.model.AiRecommendationResult;
@@ -48,6 +53,7 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
 
     private final DashScopeChatService dashScopeChatService;
     private final TrailService trailService;
+    private final ExternalTrailImportService externalTrailImportService;
     private final UserHikingProfileMapper userHikingProfileMapper;
     private final ObjectMapper objectMapper;
 
@@ -94,7 +100,7 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
             fallbackRequest.setPageNum(1);
             fallbackRequest.setPageSize(12);
             fallbackRequest.setSort("hot");
-            fallbackRequest.setKeyword(parsedQuery.location());
+            fallbackRequest.setKeyword(firstNonBlank(parsedQuery.geoDistrict(), parsedQuery.geoCity(), parsedQuery.geoProvince(), parsedQuery.location()));
             candidates = trailService.pageTrails(fallbackRequest, userId).getList();
         }
         if (candidates.isEmpty() && StringUtils.hasText(parsedQuery.location())) {
@@ -116,6 +122,7 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
         List<AiTrailCardVo> cards = ranked.stream()
                 .map(trail -> toTrailCard(trail, parsedQuery, profile, message))
                 .toList();
+        cards = maybeAppendExternalCards(cards, userId, message, parsedQuery);
 
         log.info(
                 "AI recommendation intent=trail_recommendation intent_parse_ms={} search_ms={} result_count={} fallback_search={} geo_province={} geo_city={} geo_district={} keyword={}",
@@ -136,6 +143,41 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
                 .routeFactsSummary(buildRouteFacts(cards))
                 .preferenceSummary(preferenceSummary)
                 .build();
+    }
+
+    private List<AiTrailCardVo> maybeAppendExternalCards(
+            List<AiTrailCardVo> cards,
+            Long userId,
+            String message,
+            AiParsedQuery parsedQuery) {
+        if (!cards.isEmpty()) {
+            return cards;
+        }
+        if (!StringUtils.hasText(parsedQuery.location())
+                && !StringUtils.hasText(parsedQuery.geoProvince())
+                && !StringUtils.hasText(parsedQuery.geoCity())
+                && !StringUtils.hasText(parsedQuery.geoDistrict())) {
+            return cards;
+        }
+
+        try {
+            ExternalTrailImportResult importResult = externalTrailImportService.searchAndImport(ExternalTrailSearchRequest.builder()
+                    .rawQuery(firstNonBlank(parsedQuery.geoDistrict(), parsedQuery.geoCity(), parsedQuery.geoProvince(), parsedQuery.location(), message))
+                    .location(firstNonBlank(parsedQuery.geoDistrict(), parsedQuery.geoCity(), parsedQuery.geoProvince(), parsedQuery.location()))
+                    .geoProvince(parsedQuery.geoProvince())
+                    .geoCity(parsedQuery.geoCity())
+                    .geoDistrict(parsedQuery.geoDistrict())
+                    .requesterUserId(userId)
+                    .limit(3)
+                    .build());
+            return importResult.getItems().stream()
+                    .filter(ExternalTrailImportItem::isConversationVisible)
+                    .map(this::toExternalTrailCard)
+                    .toList();
+        } catch (RuntimeException ex) {
+            log.warn("External trail import fallback failed. message={}", message, ex);
+            return cards;
+        }
     }
 
     private AiParsedQuery parseQuery(String message, String preferenceSummary) {
@@ -160,7 +202,7 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
                             .role("user")
                             .content("用户画像摘要：" + preferenceSummary + "\n用户消息：" + message)
                             .build());
-            String rawJson = dashScopeChatService.completeJson(messages, "qwen-plus");
+            String rawJson = dashScopeChatService.completeJson(messages);
             JsonNode node = objectMapper.readTree(rawJson);
             GeoMatch geoMatch = resolveGeoMatch(asNullable(node.path("location").asText(null)));
             return AiParsedQuery.builder()
@@ -289,7 +331,38 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
                 .favorites(trail.getFavorites())
                 .likedByCurrentUser(Boolean.TRUE.equals(trail.getLikedByCurrentUser()))
                 .favoritedByCurrentUser(Boolean.TRUE.equals(trail.getFavoritedByCurrentUser()))
+                .sourceType(trail.getSourceType())
+                .sourceLabel(null)
+                .detailAvailable(true)
                 .reason(buildReason(trail, parsedQuery, profile, message))
+                .build();
+    }
+
+    private AiTrailCardVo toExternalTrailCard(ExternalTrailImportItem item) {
+        return AiTrailCardVo.builder()
+                .id(item.getTrailId())
+                .image(item.getCandidate().getImageUrl())
+                .name(item.getCandidate().getName())
+                .location(item.getCandidate().getLocation())
+                .description(item.getCandidate().getDescription())
+                .difficulty(item.getCandidate().getDifficulty())
+                .difficultyLabel(item.getCandidate().getDifficultyLabel())
+                .packType(item.getCandidate().getPackType())
+                .durationType(item.getCandidate().getDurationType())
+                .rating(BigDecimal.ZERO.setScale(1))
+                .reviewCount(0)
+                .reviews("网络收录待人工公开")
+                .distance(item.getCandidate().getDistance())
+                .elevation(item.getCandidate().getElevation())
+                .duration(item.getCandidate().getDuration())
+                .likes(0)
+                .favorites(0)
+                .likedByCurrentUser(false)
+                .favoritedByCurrentUser(false)
+                .sourceType(TrailSourceType.AI_WEB_IMPORT.getCode())
+                .sourceLabel("网络收录")
+                .detailAvailable(item.isPubliclyVisible())
+                .reason("网络收录，来源于 " + item.getCandidate().getSourceSite() + "，AI 审核通过后仅在当前对话可见")
                 .build();
     }
 
@@ -385,11 +458,11 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
     }
 
     private String buildPrimaryKeyword(AiParsedQuery parsedQuery, String message) {
-        if (StringUtils.hasText(parsedQuery.geoDistrict()) || StringUtils.hasText(parsedQuery.geoCity()) || StringUtils.hasText(parsedQuery.geoProvince())) {
-            return null;
-        }
         if (StringUtils.hasText(parsedQuery.location())) {
             return parsedQuery.location();
+        }
+        if (StringUtils.hasText(parsedQuery.geoDistrict()) || StringUtils.hasText(parsedQuery.geoCity()) || StringUtils.hasText(parsedQuery.geoProvince())) {
+            return firstNonBlank(parsedQuery.geoDistrict(), parsedQuery.geoCity(), parsedQuery.geoProvince());
         }
         if (!parsedQuery.tags().isEmpty()) {
             return parsedQuery.tags().get(0);
@@ -399,6 +472,15 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
         }
         String core = extractCoreKeyword(message);
         return StringUtils.hasText(core) ? core : null;
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (StringUtils.hasText(value)) {
+                return value.trim();
+            }
+        }
+        return null;
     }
 
     private List<String> readStringArray(JsonNode node) {
@@ -488,7 +570,7 @@ public class AiRouteRecommendationServiceImpl implements AiRouteRecommendationSe
     }
 
     private String detectLocation(String message) {
-        for (String marker : List.of("萍乡", "芦溪", "杭州", "临安", "湖州", "莫干山", "武功山", "大理", "牛背山", "神农架", "稻城", "江西", "浙江", "四川", "云南")) {
+        for (String marker : List.of("尼泊尔", "EBC", "安娜普尔纳", "珠峰大本营", "萍乡", "芦溪", "杭州", "临安", "湖州", "莫干山", "武功山", "大理", "牛背山", "神农架", "稻城", "江西", "浙江", "四川", "云南")) {
             if (message.contains(marker)) {
                 return marker;
             }
