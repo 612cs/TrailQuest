@@ -36,9 +36,19 @@
     "oxlint": "^1.61.0"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx,mjs,vue}": [
-      "bash -lc 'files=\"$*\"; matched=\"\"; for f in $files; do case \"$f\" in apps/web/*|apps/admin/*|packages/ui/*|tools/harness/*) matched=\"$matched $f\" ;; esac; done; if [ -n \"${matched## }\" ]; then oxlint --fix -- ${matched## }; oxfmt --write -- ${matched## }; fi' --"
+    "apps/{web,admin}/**/*.{js,ts,jsx,tsx,vue,mjs}": [
+      "oxfmt --write",
+      "oxlint --fix"
     ],
-    "*.{json,md}": "bash -lc 'files=\"$*\"; if [ -n \"$files\" ]; then oxfmt --write -- $files; fi' --"
+    "packages/ui/**/*.{js,ts,jsx,tsx,vue,mjs}": [
+      "oxfmt --write",
+      "oxlint --fix"
+    ],
+    "tools/harness/**/*.{js,ts,jsx,tsx,mjs}": [
+      "oxfmt --write",
+      "oxlint --fix"
+    ],
+    "package.json": "oxfmt --write",
+    "DOCS/**/*.md": "oxfmt --write"
   }
 }

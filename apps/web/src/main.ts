@@ -20,4 +20,3 @@ const userStore = useUserStore()
 await userStore.bootstrap()
 
 app.mount('#app')
-// test

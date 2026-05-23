@@ -183,7 +183,7 @@
 | 状态 | Done |
 | Owner | 主 Agent |
 | 可并行 | 是 |
-| 依赖 | [ai-route-moderation-and-network-import-prd.md](/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-prd.md)、现有 `trails.review_status` 设计 |
+| 依赖 | [ai-route-moderation-and-network-import-prd.md](./ai-route-moderation-and-network-import-prd.md)、现有 `trails.review_status` 设计 |
 | 范围 | 明确 AI 审核三态、失败兜底、外部来源白名单、自动公开策略、去重口径、来源字段与导入日志方案 |
 | 不做 | 不写业务代码、不改前后端页面 |
 | 影响范围 | 文档 / 数据模型 / 规则说明 |
@@ -198,7 +198,7 @@
 | 状态 | Done |
 | Owner | 子代理 A |
 | 可并行 | 是 |
-| 依赖 | WP-1；[TrailServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/TrailServiceImpl.java:103)；现有后台审核逻辑 |
+| 依赖 | WP-1；[TrailServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/TrailServiceImpl.java)；现有后台审核逻辑 |
 | 范围 | 在创建/更新路线后触发 AI 审核；回写 AI 审核状态；处理失败兜底；保持现有人工审核链路兼容 |
 | 不做 | 不实现外部搜索；不改 AI 对话返回结构；不改后台 UI |
 | 影响范围 | `apps/api` 服务层 / 实体字段 / 可能的 SQL 升级脚本 |
@@ -213,7 +213,7 @@
 | 状态 | Done |
 | Owner | 子代理 B |
 | 可并行 | 是 |
-| 依赖 | WP-1；[AiRouteRecommendationServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/ai/AiRouteRecommendationServiceImpl.java)；现有 `TrailService` 数据契约 |
+| 依赖 | WP-1；[AiRouteRecommendationServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/ai/AiRouteRecommendationServiceImpl.java)；现有 `TrailService` 数据契约 |
 | 范围 | 新增外部搜索服务、标准化结构、来源字段、去重规则、导入日志和导入后触发 AI 审核的服务骨架 |
 | 不做 | 不接回 SSE 聊天流；不改后台 UI；不做复杂图片转存 |
 | 影响范围 | `apps/api` 服务层 / Mapper / 实体 / SQL 升级脚本 / 文档 |
@@ -228,7 +228,7 @@
 | 状态 | Doing |
 | Owner | 主 Agent |
 | 可并行 | 否 |
-| 依赖 | WP-2、WP-3；[AiChatServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/AiChatServiceImpl.java:49) |
+| 依赖 | WP-2、WP-3；[AiChatServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/AiChatServiceImpl.java) |
 | 范围 | 在 AI 推荐空结果或结果不足时触发外部搜索；只返回 AI 审核通过的导入路线；为返回结构补来源信息和来源标记，并确保网络收录路线不会通过详情页绕开“仅当前对话可见”限制 |
 | 不做 | 不改聊天页 UI 视觉稿；不实现后台工作台字段 |
 | 影响范围 | `AiRouteRecommendationService` / `AiChatServiceImpl` / AI VO 结构 / 可能的前端联调协议 |
@@ -325,7 +325,7 @@
 | 状态 | Doing |
 | Owner | 主 Agent |
 | 可并行 | 是 |
-| 依赖 | WP-3、WP-4；[ExternalTrailImportServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportServiceImpl.java)、[StubWhitelistedExternalTrailSearchServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/StubWhitelistedExternalTrailSearchServiceImpl.java)、[external-trail-provider-architecture.md](/Users/sheng/Documents/code/hiking/DOCS/backend/external-trail-provider-architecture.md) |
+| 依赖 | WP-3、WP-4；[ExternalTrailImportServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportServiceImpl.java)、[StubWhitelistedExternalTrailSearchServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/StubWhitelistedExternalTrailSearchServiceImpl.java)、[external-trail-provider-architecture.md](./external-trail-provider-architecture.md) |
 | 范围 | 将当前 stub 白名单搜索升级为真实联网 provider；补齐 provider 抽象、白名单站点配置、候选发现与详情抽取、结构化错误码与日志；保持现有导入去重、AI 审核、仅当前对话可见等约束不变 |
 | 不做 | 不在本批次实现全网开放搜索；不把图片自动转存 OSS；不在本批次上线多 provider 聚合排序平台 |
 | 影响范围 | `apps/api` external import 服务/配置/测试；`DOCS/backend` 技术设计；可能新增 provider 级集成测试 |
@@ -343,12 +343,12 @@ Goal：
 在用户创建/更新路线后触发 AI 审核，回写 AI 审核状态，并保证 AI 异常时默认进入人工复核而不是默认放行。
 
 Inputs：
-- 需求工作台：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-workbench.md
-- 需求 PRD：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-prd.md
+- 需求工作台：./ai-route-moderation-and-network-import-workbench.md
+- 需求 PRD：./ai-route-moderation-and-network-import-prd.md
 - 相关文件：
-  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/TrailServiceImpl.java
-  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/AdminServiceImpl.java
-  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/entity/Trail.java
+  - ../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/TrailServiceImpl.java
+  - ../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/AdminServiceImpl.java
+  - ../../apps/api/src/main/java/com/sheng/hikingbackend/entity/Trail.java
 
 Owned scope：
 - 路线创建/更新后的 AI 审核触发
@@ -386,12 +386,12 @@ Goal：
 实现库内无结果时可复用的外部路线搜索与标准化导入后端能力，至少覆盖结构化候选、去重、导入记录和导入后触发 AI 审核。
 
 Inputs：
-- 需求工作台：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-workbench.md
-- 需求 PRD：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-prd.md
+- 需求工作台：./ai-route-moderation-and-network-import-workbench.md
+- 需求 PRD：./ai-route-moderation-and-network-import-prd.md
 - 相关文件：
-  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/ai/AiRouteRecommendationServiceImpl.java
-  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/TrailService.java
-  - /Users/sheng/Documents/code/hiking/DOCS/database/hikingDBStruct.sql
+  - ../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/ai/AiRouteRecommendationServiceImpl.java
+  - ../../apps/api/src/main/java/com/sheng/hikingbackend/service/TrailService.java
+  - ../database/hikingDBStruct.sql
 
 Owned scope：
 - 外部搜索服务接口与实现骨架
@@ -430,8 +430,8 @@ Goal：
 让管理员在后台审核页清楚区分用户上传路线和网络导入路线，并查看 AI 审核状态、风险等级、来源站点与来源链接。
 
 Inputs：
-- 需求工作台：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-workbench.md
-- 需求 PRD：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-prd.md
+- 需求工作台：./ai-route-moderation-and-network-import-workbench.md
+- 需求 PRD：./ai-route-moderation-and-network-import-prd.md
 - 相关文件：
   - apps/admin 中路线审核相关 view/api/types
   - apps/api 后台路线审核查询接口对应 VO/Mapper
@@ -470,13 +470,13 @@ Goal：
 将当前 stub 白名单搜索升级为真实联网 provider，实现白名单站点内的真实搜索、抓取与结构化候选返回，同时保持现有导入去重、AI 审核、仅当前对话可见等业务边界不退化。
 
 Inputs：
-- 工作台：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-workbench.md
-- 技术设计：/Users/sheng/Documents/code/hiking/DOCS/backend/external-trail-provider-architecture.md
+- 工作台：./ai-route-moderation-and-network-import-workbench.md
+- 技术设计：./external-trail-provider-architecture.md
 - 相关文件：
-  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/external/ExternalTrailSearchService.java
-  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportServiceImpl.java
-  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/StubWhitelistedExternalTrailSearchServiceImpl.java
-  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportProperties.java
+  - ../../apps/api/src/main/java/com/sheng/hikingbackend/service/external/ExternalTrailSearchService.java
+  - ../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportServiceImpl.java
+  - ../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/StubWhitelistedExternalTrailSearchServiceImpl.java
+  - ../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportProperties.java
 
 Owned scope：
 - provider 抽象与 registry / facade

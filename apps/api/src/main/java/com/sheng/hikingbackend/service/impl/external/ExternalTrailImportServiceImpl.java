@@ -43,8 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ExternalTrailImportServiceImpl implements ExternalTrailImportService {
 
     private static final String DEFAULT_IP = "0.0.0.0";
-    private static final String DEFAULT_EXTERNAL_IMAGE =
-            "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%239ca3af' font-family='sans-serif' font-size='28'%3ETrailQuest%3C/text%3E%3C/svg%3E";
+    private static final String DEFAULT_EXTERNAL_IMAGE = "/images/external-trail-placeholder.svg";
 
     private final ExternalTrailSearchService externalTrailSearchService;
     private final TrailImportDeduplicationService trailImportDeduplicationService;
@@ -367,12 +366,7 @@ public class ExternalTrailImportServiceImpl implements ExternalTrailImportServic
             return true;
         }
         String normalizedRequested = requestedLocation.replaceAll("\\s+", "");
-        String normalizedCandidate = firstNonBlank(
-                candidate.getLocation(),
-                candidate.getGeoDistrict(),
-                candidate.getGeoCity(),
-                candidate.getGeoProvince(),
-                candidate.getName());
+        String normalizedCandidate = buildCandidateLocationText(candidate);
         if (!StringUtils.hasText(normalizedCandidate)) {
             return false;
         }
@@ -390,6 +384,26 @@ public class ExternalTrailImportServiceImpl implements ExternalTrailImportServic
             return false;
         }
         return false;
+    }
+
+    private String buildCandidateLocationText(ExternalTrailCandidate candidate) {
+        List<String> parts = new ArrayList<>();
+        addUniquePart(parts, candidate.getLocation());
+        addUniquePart(parts, candidate.getGeoProvince());
+        addUniquePart(parts, candidate.getGeoCity());
+        addUniquePart(parts, candidate.getGeoDistrict());
+        addUniquePart(parts, candidate.getName());
+        return parts.isEmpty() ? null : String.join(" ", parts);
+    }
+
+    private void addUniquePart(List<String> parts, String value) {
+        if (!StringUtils.hasText(value)) {
+            return;
+        }
+        String trimmed = value.trim();
+        if (!parts.contains(trimmed)) {
+            parts.add(trimmed);
+        }
     }
 
     private boolean containsAny(String source, List<String> tokens) {

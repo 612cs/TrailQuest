@@ -2,7 +2,7 @@
 
 ## 文档定位
 
-本文是 [ai-route-moderation-and-network-import-workbench.md](/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-workbench.md) 中 `WP-8` 的技术设计文档，目标是把当前基于 stub catalog 的白名单外部搜索升级为真实联网 provider，同时不破坏现有导入、去重、AI 审核与可见性边界。
+本文是 [ai-route-moderation-and-network-import-workbench.md](./ai-route-moderation-and-network-import-workbench.md) 中 `WP-8` 的技术设计文档，目标是把当前基于 stub catalog 的白名单外部搜索升级为真实联网 provider，同时不破坏现有导入、去重、AI 审核与可见性边界。
 
 ## 背景
 
@@ -17,7 +17,7 @@
 
 当前限制：
 
-- [StubWhitelistedExternalTrailSearchServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/StubWhitelistedExternalTrailSearchServiceImpl.java) 仅使用本地 catalog 模拟白名单站点搜索
+- [StubWhitelistedExternalTrailSearchServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/StubWhitelistedExternalTrailSearchServiceImpl.java) 仅使用本地 catalog 模拟白名单站点搜索
 - 没有真实联网搜索、抓取、抽取能力
 - provider 级配置、错误码、日志、回退策略仍不完整
 
@@ -129,26 +129,26 @@ AiRouteRecommendationService
 
 ### 保留
 
-- [ExternalTrailImportService.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/external/ExternalTrailImportService.java)
-- [ExternalTrailImportServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportServiceImpl.java)
-- [TrailImportDeduplicationService.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/external/TrailImportDeduplicationService.java)
-- [TrailImportModerationTrigger.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/external/TrailImportModerationTrigger.java)
-- [ExternalTrailCandidate.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/external/model/ExternalTrailCandidate.java)
+- [ExternalTrailImportService.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/external/ExternalTrailImportService.java)
+- [ExternalTrailImportServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportServiceImpl.java)
+- [TrailImportDeduplicationService.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/external/TrailImportDeduplicationService.java)
+- [TrailImportModerationTrigger.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/external/TrailImportModerationTrigger.java)
+- [ExternalTrailCandidate.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/external/model/ExternalTrailCandidate.java)
 
 ### 重构
 
-- [ExternalTrailSearchService.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/external/ExternalTrailSearchService.java)
+- [ExternalTrailSearchService.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/external/ExternalTrailSearchService.java)
   - 现状语义过粗
   - 建议拆成：
     - `ExternalTrailProvider`
     - `ExternalTrailProviderRegistry`
     - `ExternalTrailSearchFacade`
 
-- [ExternalTrailImportProperties.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportProperties.java)
+- [ExternalTrailImportProperties.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportProperties.java)
   - 建议迁入 `config`
   - 按 provider 维度拆配置
 
-- [StubWhitelistedExternalTrailSearchServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/StubWhitelistedExternalTrailSearchServiceImpl.java)
+- [StubWhitelistedExternalTrailSearchServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/StubWhitelistedExternalTrailSearchServiceImpl.java)
   - 从默认实现降级为：
     - `StubProvider`
     - 或 contract test fixture

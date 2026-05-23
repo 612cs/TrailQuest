@@ -135,6 +135,54 @@ class ExternalTrailImportServiceImplTest {
     }
 
     @Test
+    void searchAndImportShouldUseShortPlaceholderImageWhenMissing() {
+        ExternalTrailCandidate candidate = ExternalTrailCandidate.builder()
+                .externalId("no-image-demo")
+                .sourceSite("demo.partner.trailquest.cn")
+                .sourceUrl("https://demo.partner.trailquest.cn/routes/no-image-demo")
+                .name("无图路线")
+                .location("江西 萍乡")
+                .description("验证占位图")
+                .startLng(new BigDecimal("114.173260"))
+                .startLat(new BigDecimal("27.509540"))
+                .distance("8 km")
+                .elevation("+600 m")
+                .duration("5h")
+                .build();
+
+        when(externalTrailSearchService.search(any())).thenReturn(List.of(candidate));
+        when(geoService.reverse(candidate.getStartLng(), candidate.getStartLat())).thenReturn(ReverseGeoResponse.builder()
+                .country("中国")
+                .province("江西")
+                .city("萍乡")
+                .district("芦溪")
+                .formattedLocation("江西 萍乡 芦溪")
+                .build());
+        when(trailImportDeduplicationService.match(any())).thenReturn(TrailDeduplicationMatch.notMatched());
+        when(trailImportModerationTrigger.moderate(any())).thenReturn(TrailImportModerationResult.builder()
+                .decision(TrailImportModerationDecision.APPROVED)
+                .reviewStatusToPersist("pending")
+                .aiReviewStatusToPersist("approved")
+                .riskLevel("low")
+                .reason("无图占位")
+                .traceId("trace-placeholder")
+                .reviewedAt(java.time.LocalDateTime.now())
+                .categories(List.of("whitelist_source"))
+                .conversationVisible(true)
+                .publiclyVisible(false)
+                .build());
+
+        externalTrailImportService.searchAndImport(ExternalTrailSearchRequest.builder()
+                .rawQuery("江西 萍乡")
+                .geoCity("萍乡")
+                .build());
+
+        ArgumentCaptor<Trail> insertedTrail = ArgumentCaptor.forClass(Trail.class);
+        verify(trailMapper).insert(insertedTrail.capture());
+        assertEquals("/images/external-trail-placeholder.svg", insertedTrail.getValue().getImage());
+    }
+
+    @Test
     void searchAndImportShouldSkipIncompleteCandidateBeforeInsert() {
         ExternalTrailCandidate incomplete = ExternalTrailCandidate.builder()
                 .externalId("bad-demo")
@@ -197,6 +245,51 @@ class ExternalTrailImportServiceImplTest {
         assertEquals("候选地点与查询地点不一致，已跳过", result.getImportLogs().get(0).getMessage());
         verify(trailMapper, never()).insert(any(Trail.class));
         verify(trailImportModerationTrigger, never()).moderate(any());
+    }
+
+    @Test
+    void searchAndImportShouldMatchAgainstCombinedCandidateLocationFields() {
+        ExternalTrailCandidate candidate = ExternalTrailCandidate.builder()
+                .externalId("district-match-demo")
+                .sourceSite("demo.partner.trailquest.cn")
+                .sourceUrl("https://demo.partner.trailquest.cn/routes/district-match-demo")
+                .imageUrl("https://demo.partner.trailquest.cn/images/district-match-demo.jpg")
+                .name("武功山芦溪入口线")
+                .location("江西 萍乡")
+                .geoProvince("江西")
+                .geoCity("萍乡")
+                .geoDistrict("芦溪")
+                .description("验证 location 与 district 组合匹配")
+                .startLng(new BigDecimal("114.173260"))
+                .startLat(new BigDecimal("27.509540"))
+                .distance("8 km")
+                .elevation("+600 m")
+                .duration("5h")
+                .build();
+
+        when(externalTrailSearchService.search(any())).thenReturn(List.of(candidate));
+        when(trailImportDeduplicationService.match(any())).thenReturn(TrailDeduplicationMatch.notMatched());
+        when(trailImportModerationTrigger.moderate(any())).thenReturn(TrailImportModerationResult.builder()
+                .decision(TrailImportModerationDecision.APPROVED)
+                .reviewStatusToPersist("pending")
+                .aiReviewStatusToPersist("approved")
+                .riskLevel("low")
+                .reason("组合地理字段命中")
+                .traceId("trace-combined-location")
+                .reviewedAt(java.time.LocalDateTime.now())
+                .categories(List.of("whitelist_source"))
+                .conversationVisible(true)
+                .publiclyVisible(false)
+                .build());
+
+        ExternalTrailImportResult result = externalTrailImportService.searchAndImport(ExternalTrailSearchRequest.builder()
+                .rawQuery("芦溪徒步")
+                .geoDistrict("芦溪")
+                .build());
+
+        assertEquals(1, result.getItems().size());
+        assertTrue(result.getItems().get(0).isCreated());
+        verify(trailMapper).insert(any(Trail.class));
     }
 
     @Test

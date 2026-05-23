@@ -6,10 +6,10 @@
 
 当前 TrailQuest 已具备以下基础能力：
 
-- AI 对话与路线推荐基础链路已经存在，入口见 [AiController.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/controller/AiController.java)
-- AI 推荐已支持意图识别、结构化条件提取和路线库检索，核心实现见 [AiRouteRecommendationServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/ai/AiRouteRecommendationServiceImpl.java)
-- 路线实体已具备名称、介绍、起点经纬度、结构化地理字段、封面图、审核状态等基础字段，表结构见 [hikingDBStruct.sql](/Users/sheng/Documents/code/hiking/DOCS/database/hikingDBStruct.sql:372)
-- 后台已具备路线审核通过/驳回能力，核心逻辑见 [AdminServiceImpl.java](/Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/AdminServiceImpl.java:211)
+- AI 对话与路线推荐基础链路已经存在，入口见 [AiController.java](../../apps/api/src/main/java/com/sheng/hikingbackend/controller/AiController.java)
+- AI 推荐已支持意图识别、结构化条件提取和路线库检索，核心实现见 [AiRouteRecommendationServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/ai/AiRouteRecommendationServiceImpl.java)
+- 路线实体已具备名称、介绍、起点经纬度、结构化地理字段、封面图、审核状态等基础字段，表结构见 [hikingDBStruct.sql](../database/hikingDBStruct.sql)
+- 后台已具备路线审核通过/驳回能力，核心逻辑见 [AdminServiceImpl.java](../../apps/api/src/main/java/com/sheng/hikingbackend/service/impl/AdminServiceImpl.java)
 
 但当前系统仍存在两个明显缺口：
 
