@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>需求开发看板</title>
+    <script src="./ai-route-moderation-and-network-import-workbench-开发看板.assets/vendor/tailwind/tailwind.browser.js"></script>
+    <link rel="stylesheet" href="./ai-route-moderation-and-network-import-workbench-开发看板.assets/vendor/phosphor/style.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .kanban-col { min-width: 280px; max-width: 320px; }
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* 避免 HTML 中出现连续换行导致 Markdown 格式被破坏的问题 */
+        .prompt-box { white-space: pre-wrap; font-family: monospace; }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen overflow-hidden flex text-gray-800">
+
+    <!-- 侧边栏 (按照截图复刻) -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-full shrink-0">
+        <div class="p-5 border-b border-gray-100">
+            <h1 class="text-lg font-semibold text-gray-900 truncate" title="需求工作台">需求工作台</h1>
+            <p id="sidebar-meta" class="text-xs text-gray-500 mt-1">只读看板</p>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto p-3 space-y-1 text-sm font-medium" id="sidebar-nav">
+            <!-- 需求开发概览 -->
+            <button onclick="switchTab('overview')" id="nav-overview" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
+                <i class="ph ph-clock-counter-clockwise text-lg text-gray-500"></i>
+                需求开发概览
+            </button>
+
+            <!-- Epic (按层级重新排列) -->
+            <button onclick="switchTab('epic')" id="nav-epic" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
+                <i class="ph ph-crown text-lg text-gray-500"></i>
+                Epic
+            </button>
+
+            <!-- 用户故事 -->
+            <button onclick="switchTab('stories')" id="nav-stories" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
+                <i class="ph ph-book-open text-lg text-gray-500"></i>
+                用户故事
+            </button>
+
+            <!-- 工作包 Kanban -->
+            <button onclick="switchTab('kanban')" id="nav-kanban" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
+                <i class="ph ph-kanban text-lg text-gray-500"></i>
+                工作包
+            </button>
+
+            <!-- Sprint计划 -->
+            <button onclick="switchTab('sprint')" id="nav-sprint" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
+                <i class="ph ph-calendar-check text-lg text-gray-500"></i>
+                Sprint计划
+            </button>
+
+            <!-- 待确认问题 -->
+            <button onclick="switchTab('questions')" id="nav-questions" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
+                <i class="ph ph-question text-lg text-gray-500"></i>
+                待确认问题
+            </button>
+
+            <!-- 风险清单 -->
+            <button onclick="switchTab('risks')" id="nav-risks" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
+                <i class="ph ph-warning-octagon text-lg text-gray-500"></i>
+                风险清单
+            </button>
+
+            <!-- 子代理任务 -->
+            <button onclick="switchTab('agents')" id="nav-agents" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition-colors">
+                <i class="ph ph-robot text-lg text-gray-500"></i>
+                子代理任务
+            </button>
+        </nav>
+        
+        <div class="p-4 border-t border-gray-200 text-xs text-gray-400 text-center">
+            仅作只读展示，修改请编辑 Markdown
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shrink-0">
+            <h2 id="page-title" class="text-xl font-bold text-gray-800">Epic</h2>
+            <div class="flex gap-2">
+                <span id="sync-status" class="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">数据已同步</span>
+            </div>
+        </header>
+
+        <div id="content-container" class="flex-1 overflow-auto p-6 relative">
+            <!-- 内容由 JS 动态渲染 -->
+        </div>
+    </main>
+
+    <!-- 详情下钻弹窗组件 -->
+    <div id="common-modal" class="fixed inset-0 bg-gray-900/40 z-50 hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col mx-4 transform transition-all border border-gray-100">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center shrink-0 bg-gray-50/50 rounded-t-xl">
+                <h3 id="modal-title" class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <!-- Title injected here -->
+                </h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 hover:bg-gray-200 p-1.5 rounded-lg transition-colors">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+            <!-- Body -->
+            <div id="modal-body" class="p-6 overflow-y-auto flex-1 bg-white rounded-b-xl custom-scrollbar">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 事实源数据 (由同步脚本自动注入更新) ---
+        // [[INJECT_DATA_START]]
+        const SYNC_TIME = "2026-05-21 02:11:17";
+        const MOCK_DATA = {
+        "overview": {
+                "title": "AI 路线审核与网络导入开发工作台",
+                "status": "开发中",
+                "scale": "L",
+                "summary": "当 AI 对话在库内找不到路线时，系统应支持外部搜索并结构化导入路线，但所有用户发布路线和网络导入路线都要先经过 AI 审核，再决定自动通过、自动拒绝或进入人工复核。",
+                "stats": {
+                        "total": 8,
+                        "done": 3,
+                        "blocked": 0,
+                        "doing": 2
+                }
+        },
+        "epic": [
+                {
+                        "id": "Epic-1",
+                        "title": "路线内容 AI 审核",
+                        "desc": ""
+                },
+                {
+                        "id": "Epic-2",
+                        "title": "库内无结果时的网络搜索导入",
+                        "desc": ""
+                },
+                {
+                        "id": "Epic-3",
+                        "title": "导入路线审核后再展示",
+                        "desc": ""
+                },
+                {
+                        "id": "Epic-4",
+                        "title": "网络收录反馈与升格机制",
+                        "desc": ""
+                }
+        ],
+        "sprint": [
+                {
+                        "id": "Sprint 0",
+                        "time": "用户确认 PRD 主方向",
+                        "goal": "冻结规则与数据方案"
+                },
+                {
+                        "id": "Sprint 1",
+                        "time": "确认 AI 审核三态与失败兜底规则",
+                        "goal": "先打通 AI 审核主链路"
+                },
+                {
+                        "id": "Sprint 2",
+                        "time": "确认来源白名单与经纬度校验方案",
+                        "goal": "打通外部搜索与导入 MVP"
+                },
+                {
+                        "id": "Sprint 3",
+                        "time": "Sprint 1/2 完成并联调可用",
+                        "goal": "接回 AI 对话与后台工作台"
+                },
+                {
+                        "id": "Sprint 4",
+                        "time": "前三阶段主流程稳定",
+                        "goal": "稳定性与验收"
+                },
+                {
+                        "id": "Sprint 5",
+                        "time": "MVP 导入链路稳定，可安全替换 stub provider",
+                        "goal": "真实联网 provider 升级"
+                }
+        ],
+        "stories": [
+                {
+                        "id": "US-1",
+                        "epicId": "Epic-1",
+                        "role": "平台管理员",
+                        "action": "我希望路线先被 AI 预审",
+                        "value": "以便减少明显低质或违规内容进入人工审核队列"
+                },
+                {
+                        "id": "US-2",
+                        "epicId": "Epic-1",
+                        "role": "平台运营",
+                        "action": "我希望AI 审核失败时默认转人工复核，而不是默认通过",
+                        "value": "以便控制风险"
+                }
+        ],
+        "workPackages": [
+                {
+                        "id": "WP-5",
+                        "storyId": "US-1 / US-3",
+                        "sprintId": "Sprint 3",
+                        "type": "Frontend",
+                        "title": "后台审核页补齐 AI 审核与导入来源视图",
+                        "status": "Backlog",
+                        "blocker": "依赖后台接口补字段",
+                        "parallel": "是",
+                        "agent": "子代理 D",
+                        "ac": "管理员可以分辨“用户上传路线”和“网络导入路线”，并能看懂 AI 审核结论"
+                },
+                {
+                        "id": "WP-6",
+                        "storyId": "US-1 / US-2 / US-3",
+                        "sprintId": "Sprint 4",
+                        "type": "QA",
+                        "title": "测试、回归与运行手册",
+                        "status": "Backlog",
+                        "blocker": "依赖前置功能稳定",
+                        "parallel": "是",
+                        "agent": "主 Agent",
+                        "ac": "主流程具备可执行回归清单，关键失败路径有明确验证办法"
+                },
+                {
+                        "id": "WP-7",
+                        "storyId": "US-2 / US-3",
+                        "sprintId": "Sprint 4",
+                        "type": "Frontend / Backend dependency",
+                        "title": "网络收录反馈与升格机制",
+                        "status": "Backlog",
+                        "blocker": "依赖网络收录标记与阈值规则",
+                        "parallel": "否",
+                        "agent": "unknown",
+                        "ac": "能记录反馈并为后续升格机制留出稳定数据接口"
+                },
+                {
+                        "id": "WP-4",
+                        "storyId": "US-2 / US-3",
+                        "sprintId": "Sprint 3",
+                        "type": "Integration",
+                        "title": "AI 对话兜底接回与来源透出",
+                        "status": "Done",
+                        "blocker": "无",
+                        "parallel": "否",
+                        "agent": "主 Agent",
+                        "ac": "AI 对话在库内未命中时能稳定返回“外部收录且审核通过”的路线卡片及文字说明；网络收录路线需明确标记来源，且在未公开前不可作为公开详情入口"
+                },
+                {
+                        "id": "WP-8",
+                        "storyId": "US-2 / US-3",
+                        "sprintId": "Sprint 5",
+                        "type": "Backend dependency",
+                        "title": "真实联网 provider 升级",
+                        "status": "Doing",
+                        "blocker": "无",
+                        "parallel": "是",
+                        "agent": "主 Agent + 子代理研究 / 开发",
+                        "ac": "白名单搜索升级为真实联网召回与抽取，且导入审核、去重、来源治理保持不退化"
+                },
+                {
+                        "id": "WP-1",
+                        "storyId": "US-1 / US-2 / US-3",
+                        "sprintId": "Sprint 0",
+                        "type": "Discovery",
+                        "title": "冻结审核与导入口径",
+                        "status": "Done",
+                        "blocker": "无",
+                        "parallel": "是",
+                        "agent": "主 Agent",
+                        "ac": "已形成可实施的字段、状态流转、升格阈值与防刷默认规则，相关待确认问题已收敛为 Answered"
+                },
+                {
+                        "id": "WP-2",
+                        "storyId": "US-1",
+                        "sprintId": "Sprint 1",
+                        "type": "Backend dependency",
+                        "title": "用户发布路线 AI 预审主链路",
+                        "status": "Done",
+                        "blocker": "无",
+                        "parallel": "是",
+                        "agent": "子代理 A",
+                        "ac": "已完成独立 AiTrailModerationService、创建/更新后的 AI 审核触发、approved/rejected/needs_manual_review 三态回写、AI 异常转人工复核兜底，并通过 TrailServiceImplTest 与 AiTrailModerationServiceImplTest"
+                },
+                {
+                        "id": "WP-3",
+                        "storyId": "US-2",
+                        "sprintId": "Sprint 2",
+                        "type": "Backend dependency",
+                        "title": "外部搜索与标准化导入 MVP",
+                        "status": "Done",
+                        "blocker": "无",
+                        "parallel": "是",
+                        "agent": "子代理 B",
+                        "ac": "已完成独立 external import 服务骨架、最小字段校验、去重抽象、导入日志模型、导入后 AI 审核触发扩展点，并通过 ExternalTrailImportServiceImplTest；当前为白名单 stub 搜索，真实联网抓取留待后续接入"
+                }
+        ],
+        "questions": [
+                {
+                        "id": "Q-1",
+                        "relation": "影响状态流转和后台待审量",
+                        "content": "用户发布路线在 AI 审核通过后，是否仍必须保留 review_status = pending 等待人工审核，还是允许按配置自动通过",
+                        "status": "Answered"
+                },
+                {
+                        "id": "Q-2",
+                        "relation": "影响搜索实现边界和风控",
+                        "content": "网络导入路线的来源白名单有哪些，是否允许先接任意网页搜索结果",
+                        "status": "Answered"
+                },
+                {
+                        "id": "Q-3",
+                        "relation": "影响曝光策略和数据可信度",
+                        "content": "导入路线默认是否允许前台公开展示，还是只在当前对话中返回并保留后台记录",
+                        "status": "Answered"
+                },
+                {
+                        "id": "Q-4",
+                        "relation": "影响模型输出结构和后台展示字段",
+                        "content": "AI 审核风险分类是只做通用内容安全，还是还要加入“路线真实性不足”“经纬度不可信”等业务型风险",
+                        "status": "Answered"
+                },
+                {
+                        "id": "Q-5",
+                        "relation": "影响前端联调和文案策略",
+                        "content": "AI 对话返回的外部路线是否需要在前端做明显“网络收录”样式提示",
+                        "status": "Answered"
+                },
+                {
+                        "id": "Q-6",
+                        "relation": "影响升格机制是否可上线",
+                        "content": "网络收录路线的“可信 / 准确”反馈阈值是多少，如何防刷",
+                        "status": "Answered"
+                }
+        ],
+        "risks": [
+                {
+                        "id": "R-1",
+                        "relation": "会把错误路线写入主库",
+                        "type": "风险",
+                        "content": "LLM 结构化抽取可能幻觉经纬度或简介：对地点和经纬度做地图服务二次校验；不满足最小可信度则放弃导入"
+                },
+                {
+                        "id": "R-2",
+                        "relation": "可能误拒正常路线或放行风险内容",
+                        "type": "风险",
+                        "content": "AI 审核误判：保留人工复核态；高风险拒绝、模糊转人工"
+                },
+                {
+                        "id": "R-3",
+                        "relation": "前台展示不稳定，存在版权隐患",
+                        "type": "风险",
+                        "content": "外部图片版权与失效问题：本期只记录来源与 URL，不自动转存；后台展示来源页"
+                },
+                {
+                        "id": "R-4",
+                        "relation": "会让后台逻辑和查询条件变复杂",
+                        "type": "风险",
+                        "content": "review_status 与新增 AI 审核状态混用：分离 ai_review_status 与人工审核状态；在工作台和 SQL 中明确字段职责"
+                },
+                {
+                        "id": "R-5",
+                        "relation": "子代理之间容易改同一文件或互相覆盖",
+                        "type": "风险",
+                        "content": "并行开发 API 边界不清：先完成 WP-1，明确文件所有权；集成类改动留给主 Agent 收口"
+                },
+                {
+                        "id": "R-6",
+                        "relation": "可能导致召回不稳定、导入失败率上升或合规风险",
+                        "type": "风险",
+                        "content": "真实联网 provider 接入后，成本、超时、站点稳定性和 robots 约束会显著放大：采用白名单站点优先适配 + Firecrawl 兜底；补齐 provider 配置、错误码、日志和回退 provider；优先接单 provider 小流量验证"
+                }
+        ],
+        "agents": [
+                {
+                        "wp": "WP-2",
+                        "title": "WP-2",
+                        "prompt": "你负责执行工作包 WP-2：用户发布路线 AI 预审主链路\n\nGoal：\n在用户创建/更新路线后触发 AI 审核，回写 AI 审核状态，并保证 AI 异常时默认进入人工复核而不是默认放行。\n\nInputs：\n- 需求工作台：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-workbench.md\n- 需求 PRD：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-prd.md\n- 相关文件：\n  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/TrailServiceImpl.java\n  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/AdminServiceImpl.java\n  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/entity/Trail.java\n\nOwned scope：\n- 路线创建/更新后的 AI 审核触发\n- AI 审核结果字段与状态回写\n- 必要的后端服务、实体、SQL 升级脚本\n\nNon-owned scope：\n- 外部搜索导入\n- AI 对话兜底接回\n- 后台前端页面\n\nDependencies：\n- 以工作台 WP-1 的规则为准\n- 不要改动外部搜索相关服务命名和契约，除非主 Agent 明确要求\n\nAcceptance：\n- 创建/更新路线后可触发 AI 审核\n- AI 审核支持 approved/rejected/needs_manual_review\n- AI 失败不默认放行\n- 与现有 review_status 人工审核链路兼容\n\nFinal response format：\n- 完成内容\n- 修改文件\n- 验收结果\n- 阻塞/风险"
+                },
+                {
+                        "wp": "WP-3",
+                        "title": "WP-3",
+                        "prompt": "你负责执行工作包 WP-3：外部搜索与标准化导入 MVP\n\nGoal：\n实现库内无结果时可复用的外部路线搜索与标准化导入后端能力，至少覆盖结构化候选、去重、导入记录和导入后触发 AI 审核。\n\nInputs：\n- 需求工作台：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-workbench.md\n- 需求 PRD：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-prd.md\n- 相关文件：\n  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/ai/AiRouteRecommendationServiceImpl.java\n  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/TrailService.java\n  - /Users/sheng/Documents/code/hiking/DOCS/database/hikingDBStruct.sql\n\nOwned scope：\n- 外部搜索服务接口与实现骨架\n- 标准化结构和最小字段映射\n- 去重规则与导入日志\n- 导入后 AI 审核触发点\n\nNon-owned scope：\n- 聊天 SSE 集成\n- 后台前端页面\n- 用户发布路线 AI 审核主链路\n\nDependencies：\n- 以工作台 WP-1 的字段与规则冻结结果为准\n- 尽量避免和 WP-2 修改同一服务文件；若必须修改，共享边界请显式说明\n\nAcceptance：\n- 服务能接收一个搜索查询并输出结构化候选\n- 候选满足最小字段要求才可导入\n- 重复候选可命中去重规则\n- 导入路线会触发 AI 审核而不是直接公开\n\nFinal response format：\n- 完成内容\n- 修改文件\n- 验收结果\n- 阻塞/风险"
+                },
+                {
+                        "wp": "WP-5",
+                        "title": "WP-5",
+                        "prompt": "你负责执行工作包 WP-5：后台审核页补齐 AI 审核与导入来源视图\n\nGoal：\n让管理员在后台审核页清楚区分用户上传路线和网络导入路线，并查看 AI 审核状态、风险等级、来源站点与来源链接。\n\nInputs：\n- 需求工作台：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-workbench.md\n- 需求 PRD：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-prd.md\n- 相关文件：\n  - apps/admin 中路线审核相关 view/api/types\n  - apps/api 后台路线审核查询接口对应 VO/Mapper\n\nOwned scope：\n- 后台审核列表和详情页展示层\n- 前端 API 类型与渲染\n\nNon-owned scope：\n- 外部搜索后端服务\n- 用户发布路线审核逻辑\n- AI 对话集成\n\nDependencies：\n- 依赖后端接口补齐 AI 审核与来源字段\n- 不重构整套后台设计系统\n\nAcceptance：\n- 后台可筛选或识别来源类型\n- 后台可查看 AI 审核状态、原因、风险等级和来源链接\n- 空字段与失败状态展示合理\n\nFinal response format：\n- 完成内容\n- 修改文件\n- 验收结果\n- 阻塞/风险"
+                },
+                {
+                        "wp": "WP-8",
+                        "title": "WP-8",
+                        "prompt": "你负责执行工作包 WP-8：真实联网 provider 升级\n\nGoal：\n将当前 stub 白名单搜索升级为真实联网 provider，实现白名单站点内的真实搜索、抓取与结构化候选返回，同时保持现有导入去重、AI 审核、仅当前对话可见等业务边界不退化。\n\nInputs：\n- 工作台：/Users/sheng/Documents/code/hiking/DOCS/backend/ai-route-moderation-and-network-import-workbench.md\n- 技术设计：/Users/sheng/Documents/code/hiking/DOCS/backend/external-trail-provider-architecture.md\n- 相关文件：\n  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/external/ExternalTrailSearchService.java\n  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportServiceImpl.java\n  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/StubWhitelistedExternalTrailSearchServiceImpl.java\n  - /Users/sheng/Documents/code/hiking/apps/api/src/main/java/com/sheng/hikingbackend/service/impl/external/ExternalTrailImportProperties.java\n\nOwned scope：\n- provider 抽象与 registry / facade\n- 白名单站点真实联网搜索与详情抽取\n- provider 级配置、错误码、日志字段\n- 保留或改造 stub 为测试/回退 provider\n\nNon-owned scope：\n- 聊天页 UI 视觉改造\n- 后台管理页布局\n- 网络收录升格反馈机制\n\nWrite scope：\n- apps/api external import 相关 service / config / tests\n- DOCS/backend provider 设计与运行说明\n\nDependencies：\n- 以现有 WP-3 MVP 契约为基础\n- 不要破坏现有导入去重、AI 审核、detailAvailable/仅当前对话可见边界\n- 如接入第三方 provider，优先通过环境变量配置密钥，不提交真实密钥\n\nAcceptance：\n- 至少一个真实联网 provider 可在白名单域内召回候选\n- 候选可被标准化成 ExternalTrailCandidate 并进入现有导入链路\n- 超时、限流、抽取失败具备统一错误码和结构化日志\n- stub provider 仍可用于本地测试或回退\n\nFinal response format：\n- 完成内容\n- 修改文件\n- 验收结果\n- 阻塞/风险"
+                }
+        ]
+};
+        // [[INJECT_DATA_END]]
+
+        const COLUMNS = [
+            { id: 'Backlog', title: 'Backlog (尚未排入)' },
+            { id: 'Todo', title: 'Todo (准备做)' },
+            { id: 'Doing', title: 'Doing (正在做)' },
+            { id: 'Blocked', title: 'Blocked (被阻塞)' },
+            { id: 'Review', title: 'Review (待评审)' },
+            { id: 'Done', title: 'Done (已完成)' }
+        ];
+
+        // --- 视图渲染逻辑 ---
+
+        function renderOverview() {
+            const data = MOCK_DATA.overview;
+            return `
+                <div class="max-w-3xl space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-semibold mb-2">一句话总结</h3>
+                        <p class="text-gray-600 leading-relaxed">${data.summary}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
+                            <div class="text-sm text-gray-500 mb-1">总工作包</div>
+                            <div class="text-3xl font-bold text-gray-800">${data.stats.total}</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
+                            <div class="text-sm text-gray-500 mb-1">进行中</div>
+                            <div class="text-3xl font-bold text-blue-600">${data.stats.doing}</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-100">
+                            <div class="text-sm text-gray-500 mb-1">已完成</div>
+                            <div class="text-3xl font-bold text-green-600">${data.stats.done}</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow-sm border border-red-100 bg-red-50">
+                            <div class="text-sm text-red-500 mb-1">受阻塞</div>
+                            <div class="text-3xl font-bold text-red-600">${data.stats.blocked}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTable(headers, rows) {
+            return `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead class="bg-gray-50">
+                            <tr>${headers.map(h => `<th class="px-6 py-3 text-left font-medium text-gray-500">${h}</th>`).join('')}</tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            ${rows.length > 0 ? rows.join('') : '<tr><td colspan="'+headers.length+'" class="px-6 py-8 text-center text-gray-400">暂无数据</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderEpic() {
+            const rows = MOCK_DATA.epic.map(e => {
+                const storyCount = MOCK_DATA.stories.filter(s => s.epicId === e.id).length;
+                return `
+                <tr class="hover:bg-blue-50 cursor-pointer transition-colors group" onclick="openModal('epic', '${e.id}')">
+                    <td class="px-6 py-4 font-medium text-gray-900 w-32">${e.id}</td>
+                    <td class="px-6 py-4 font-semibold text-blue-600">${e.title}</td>
+                    <td class="px-6 py-4 text-gray-500">${e.desc}</td>
+                    <td class="px-6 py-4 text-right">
+                        <span class="inline-flex items-center gap-1 text-gray-400 group-hover:text-blue-600 transition-colors text-xs font-medium">
+                            包含 ${storyCount} 个故事 <i class="ph ph-caret-right"></i>
+                        </span>
+                    </td>
+                </tr>
+            `});
+            return renderTable(['Epic ID', '标题', '描述', '层级详情'], rows);
+        }
+
+        function renderSprint() {
+            const rows = MOCK_DATA.sprint.map(s => {
+                const wps = MOCK_DATA.workPackages.filter(wp => wp.sprintId === s.id);
+                const doneWps = wps.filter(wp => wp.status === 'Done').length;
+                return `
+                <tr class="hover:bg-blue-50 cursor-pointer transition-colors group" onclick="openModal('sprint', '${s.id}')">
+                    <td class="px-6 py-4 font-medium text-gray-900 w-32">${s.id}</td>
+                    <td class="px-6 py-4 text-gray-600 whitespace-nowrap">${s.time}</td>
+                    <td class="px-6 py-4 text-gray-700">${s.goal}</td>
+                    <td class="px-6 py-4">
+                        <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
+                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: ${wps.length ? (doneWps/wps.length)*100 : 0}%"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-500">进度: ${doneWps}/${wps.length}</span>
+                            <span class="text-xs text-gray-400 group-hover:text-blue-600 flex items-center gap-1 transition-colors">
+                                查看详情 <i class="ph ph-caret-right"></i>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+            `});
+            return renderTable(['Sprint', '周期', '目标', '迭代概览'], rows);
+        }
+
+        function renderStories(filter = null) {
+            let stories = MOCK_DATA.stories;
+            let filterHtml = '';
+            
+            if (filter && filter.key === 'epicId') {
+                stories = stories.filter(s => s.epicId === filter.val);
+                filterHtml = `
+                    <div class="mb-4 bg-blue-50 border border-blue-100 p-3 rounded-lg flex items-center justify-between">
+                        <span class="text-sm text-blue-800 flex items-center gap-2"><i class="ph ph-funnel text-blue-600"></i> 当前筛选：归属于 Epic <strong>${filter.val}</strong> 的故事</span>
+                        <button onclick="switchTab('stories')" class="text-xs text-blue-600 hover:text-blue-800 bg-white px-2 py-1 rounded shadow-sm">清除筛选</button>
+                    </div>
+                `;
+            }
+
+            const rows = stories.map(s => {
+                const wps = MOCK_DATA.workPackages.filter(wp => wp.storyId === s.id);
+                const doneCount = wps.filter(wp => wp.status === 'Done').length;
+                return `
+                <tr class="hover:bg-blue-50 cursor-pointer transition-colors group" onclick="openModal('story', '${s.id}')">
+                    <td class="px-6 py-4 font-medium text-gray-900 w-24">${s.id}</td>
+                    <td class="px-6 py-4 text-gray-500 w-24">
+                        <span class="px-2 py-1 bg-gray-100 rounded text-xs hover:bg-gray-200 transition-colors" onclick="event.stopPropagation(); openModal('epic', '${s.epicId}')">${s.epicId}</span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-800">作为 <strong>${s.role}</strong>，${s.action}，${s.value}。</td>
+                    <td class="px-6 py-4 text-xs text-gray-500">
+                        <div class="flex items-center justify-between">
+                            <span>包含 ${wps.length} 任务</span>
+                            <span class="text-gray-400 group-hover:text-blue-600 flex items-center gap-1 transition-colors">详情 <i class="ph ph-caret-right"></i></span>
+                        </div>
+                    </td>
+                </tr>
+            `});
+            
+            return filterHtml + renderTable(['Story ID', '所属 Epic', '故事描述', '任务拆解'], rows);
+        }
+
+        function renderKanban(filter = null) {
+            let wps = MOCK_DATA.workPackages;
+            let filterHtml = '';
+            
+            if (filter) {
+                wps = wps.filter(wp => wp[filter.key] === filter.val);
+                const filterLabels = { storyId: '用户故事', sprintId: '迭代' };
+                filterHtml = `
+                    <div class="mb-4 shrink-0 bg-blue-50 border border-blue-100 p-3 rounded-lg flex items-center justify-between">
+                        <span class="text-sm text-blue-800 flex items-center gap-2">
+                            <i class="ph ph-funnel text-blue-600"></i> 当前筛选：归属于 ${filterLabels[filter.key] || filter.key} <strong>${filter.val}</strong> 的工作包
+                        </span>
+                        <button onclick="switchTab('kanban')" class="text-xs text-blue-600 hover:text-blue-800 bg-white px-2 py-1 rounded shadow-sm">清除筛选</button>
+                    </div>
+                `;
+            }
+
+            const getTypeColor = (type) => {
+                if(type === '前端') return 'bg-blue-100 text-blue-700';
+                if(type === '后端') return 'bg-purple-100 text-purple-700';
+                return 'bg-gray-100 text-gray-700';
+            };
+
+            let colsHtml = COLUMNS.map(col => {
+                const colWps = wps.filter(wp => wp.status === col.id);
+                const cardsHtml = colWps.map(wp => `
+                    <div class="bg-white p-4 rounded shadow-sm border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all cursor-pointer group" onclick="openModal('wp', '${wp.id}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-gray-900">${wp.id}</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full ${getTypeColor(wp.type)}">${wp.type}</span>
+                        </div>
+                        <h4 class="text-sm font-medium text-gray-800 mb-2 leading-relaxed group-hover:text-blue-600 transition-colors">${wp.title}</h4>
+                        
+                        <!-- 展示层级关联标签 (点击标签单独跳转对应的弹窗，不触发卡片整体点击) -->
+                        <div class="flex gap-1.5 mb-3 flex-wrap">
+                            <span class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 flex items-center gap-0.5 hover:bg-gray-200 transition-colors" onclick="event.stopPropagation(); openModal('sprint', '${wp.sprintId}')" title="查看迭代"><i class="ph ph-calendar-check"></i> ${wp.sprintId}</span>
+                            <span class="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 flex items-center gap-0.5 hover:bg-blue-100 transition-colors" onclick="event.stopPropagation(); openModal('story', '${wp.storyId}')" title="查看故事"><i class="ph ph-book-open"></i> ${wp.storyId}</span>
+                        </div>
+
+                        ${wp.status === 'Blocked' && wp.blocker !== '无' ? `<div class="text-xs text-red-600 bg-red-50 p-2 rounded mb-2 flex items-start gap-1.5 border border-red-100"><i class="ph ph-warning-circle text-sm mt-0.5"></i> <span class="leading-tight">${wp.blocker}</span></div>` : ''}
+                        
+                        <div class="flex items-center justify-between text-xs text-gray-400 mt-3 pt-2 border-t border-gray-100">
+                            <span>并行: ${wp.parallel}</span>
+                            <span class="flex items-center gap-1 bg-gray-50 px-1.5 py-0.5 rounded"><i class="ph ph-robot"></i> ${wp.agent}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="kanban-col flex flex-col shrink-0 bg-gray-100/50 rounded-lg border border-gray-200/50">
+                        <div class="p-3 border-b border-gray-200/60 flex justify-between items-center bg-gray-100/80 rounded-t-lg">
+                            <h3 class="font-medium text-sm text-gray-700">${col.title}</h3>
+                            <span class="text-xs font-semibold bg-white text-gray-600 px-2 py-0.5 rounded-full shadow-sm border border-gray-200">${colWps.length}</span>
+                        </div>
+                        <div class="p-3 flex-1 overflow-y-auto space-y-3 custom-scrollbar">
+                            ${cardsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="flex flex-col h-full absolute inset-4">
+                    ${filterHtml}
+                    <div class="flex gap-4 flex-1 overflow-x-auto overflow-y-hidden pb-2 custom-scrollbar">
+                        ${colsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderQuestions() {
+            const rows = MOCK_DATA.questions.map(q => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900 w-20">${q.id}</td>
+                    <td class="px-6 py-4 text-gray-800">${q.content}</td>
+                    <td class="px-6 py-4 w-32">
+                        <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200">${q.relation}</span>
+                    </td>
+                    <td class="px-6 py-4"><span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs rounded-full border border-yellow-200">${q.status}</span></td>
+                </tr>
+            `);
+            return renderTable(['ID', '问题内容', '关联项', '当前状态'], rows);
+        }
+
+        function renderRisks() {
+            const rows = MOCK_DATA.risks.map(r => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-medium text-gray-900 w-20">${r.id}</td>
+                    <td class="px-6 py-4 w-24">
+                        <span class="px-2 py-1 text-xs rounded-md ${r.type==='阻塞' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}">${r.type}</span>
+                    </td>
+                    <td class="px-6 py-4 w-32">
+                        <span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded border border-gray-200">${r.relation}</span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-800">${r.content}</td>
+                </tr>
+            `);
+            return renderTable(['ID', '类型', '关联项', '描述'], rows);
+        }
+
+        function renderAgents() {
+            return `<div class="max-w-4xl space-y-6">` + MOCK_DATA.agents.map(a => `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                        <h4 class="font-medium text-gray-800 flex items-center gap-2"><i class="ph ph-robot text-blue-600"></i> ${a.wp} 子代理 Prompt</h4>
+                        <button onclick="copyPrompt(this)" class="text-xs flex items-center gap-1 text-gray-500 hover:text-blue-600 transition-colors">
+                            <i class="ph ph-copy"></i> 复制 Prompt
+                        </button>
+                    </div>
+                    <div class="p-4 bg-gray-900 text-gray-100 text-sm prompt-box">${a.prompt}</div>
+                </div>
+            `).join('') + `</div>`;
+        }
+
+// --- 弹窗与下钻逻辑 ---
+
+        function openModal(type, id) {
+            const modal = document.getElementById('common-modal');
+            const titleEl = document.getElementById('modal-title');
+            const bodyEl = document.getElementById('modal-body');
+
+            if (type === 'epic') {
+                const epic = MOCK_DATA.epic.find(e => e.id === id);
+                const stories = MOCK_DATA.stories.filter(s => s.epicId === id);
+                titleEl.innerHTML = `<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs border border-purple-200">Epic</span> <span>${epic.id}</span>`;
+                bodyEl.innerHTML = `
+                    <h4 class="font-bold text-xl text-gray-900 mb-2">${epic.title}</h4>
+                    <p class="text-gray-600 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">${epic.desc}</p>
+                    
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-2 mb-3">
+                        <h5 class="font-semibold text-gray-800">包含的用户故事 (${stories.length})</h5>
+                        <button onclick="switchTab('stories', {key: 'epicId', val: '${id}'}); closeModal();" class="text-xs text-blue-600 hover:underline">在列表中查看</button>
+                    </div>
+                    <div class="space-y-2">
+                        ${stories.map(s => `
+                            <div class="p-3 border border-gray-200 rounded-lg bg-white hover:border-blue-300 hover:shadow-sm cursor-pointer flex justify-between items-center transition-all group" onclick="openModal('story', '${s.id}')">
+                                <div>
+                                    <span class="font-bold text-gray-700 mr-2">${s.id}</span>
+                                    <span class="text-gray-600 text-sm">${s.action}</span>
+                                </div>
+                                <i class="ph ph-arrow-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                            </div>
+                        `).join('') || '<div class="text-gray-400 text-sm text-center py-4">暂无用户故事</div>'}
+                    </div>
+                `;
+            } else if (type === 'story') {
+                const story = MOCK_DATA.stories.find(s => s.id === id);
+                const wps = MOCK_DATA.workPackages.filter(wp => wp.storyId === id);
+                titleEl.innerHTML = `<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs border border-blue-200">Story</span> <span>${story.id}</span>`;
+                bodyEl.innerHTML = `
+                    <div class="mb-6 bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+                        <p class="text-gray-800 text-lg leading-relaxed">作为 <strong>${story.role}</strong>，${story.action}，${story.value}。</p>
+                        <div class="mt-3 text-sm text-gray-500 flex items-center gap-1">
+                            归属 Epic: <span class="px-2 py-0.5 bg-white border border-gray-200 rounded cursor-pointer hover:text-blue-600 transition-colors" onclick="openModal('epic', '${story.epicId}')">${story.epicId}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-2 mb-3">
+                        <h5 class="font-semibold text-gray-800">拆解的工作包 (${wps.length})</h5>
+                        <button onclick="switchTab('kanban', {key: 'storyId', val: '${id}'}); closeModal();" class="text-xs text-blue-600 hover:underline">在看板中过滤</button>
+                    </div>
+                    <div class="space-y-2">
+                        ${wps.map(wp => `
+                            <div class="p-3 border border-gray-200 rounded-lg bg-white hover:border-blue-300 hover:shadow-sm cursor-pointer flex justify-between items-center transition-all group" onclick="openModal('wp', '${wp.id}')">
+                                <div class="flex items-center gap-3">
+                                    <span class="font-bold text-gray-700">${wp.id}</span>
+                                    <span class="text-gray-800 text-sm font-medium">${wp.title}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-1 text-[10px] rounded-full ${wp.status === 'Done' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${wp.status}</span>
+                                    <i class="ph ph-arrow-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                                </div>
+                            </div>
+                        `).join('') || '<div class="text-gray-400 text-sm text-center py-4">尚未拆解工作包</div>'}
+                    </div>
+                `;
+            } else if (type === 'wp') {
+                const wp = MOCK_DATA.workPackages.find(w => w.id === id);
+                const agentInfo = MOCK_DATA.agents.find(a => a.wp === id);
+                titleEl.innerHTML = `<span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs border border-gray-200">工作包</span> <span>${wp.id}</span>`;
+                bodyEl.innerHTML = `
+                    <h4 class="font-bold text-xl text-gray-900 mb-4">${wp.title}</h4>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <div class="text-xs text-gray-500 mb-1">当前状态</div>
+                            <div class="font-medium text-sm flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${wp.status==='Done'?'bg-green-500':'bg-blue-500'}"></span> ${wp.status}</div>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <div class="text-xs text-gray-500 mb-1">任务类型</div>
+                            <div class="font-medium text-sm">${wp.type}</div>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 hover:bg-gray-100 cursor-pointer transition-colors" onclick="openModal('story', '${wp.storyId}')">
+                            <div class="text-xs text-gray-500 mb-1">所属 Story <i class="ph ph-arrow-up-right text-blue-500"></i></div>
+                            <div class="font-medium text-sm text-blue-600">${wp.storyId}</div>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 hover:bg-gray-100 cursor-pointer transition-colors" onclick="openModal('sprint', '${wp.sprintId}')">
+                            <div class="text-xs text-gray-500 mb-1">所属 Sprint <i class="ph ph-arrow-up-right text-blue-500"></i></div>
+                            <div class="font-medium text-sm text-blue-600">${wp.sprintId}</div>
+                        </div>
+                    </div>
+
+                    ${wp.status === 'Blocked' && wp.blocker !== '无' ? `
+                        <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6 flex gap-3 items-start shadow-sm">
+                            <i class="ph ph-warning-octagon text-xl mt-0.5"></i>
+                            <div>
+                                <div class="font-bold text-sm mb-1">任务受阻塞</div>
+                                <div class="text-sm">${wp.blocker}</div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="mb-6">
+                        <h5 class="font-semibold text-gray-800 mb-2 flex items-center gap-2"><i class="ph ph-check-square-offset text-gray-400"></i> 验收标准 (AC)</h5>
+                        <div class="text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm leading-relaxed">${wp.ac}</div>
+                    </div>
+
+                    ${agentInfo ? `
+                        <div>
+                            <h5 class="font-semibold text-gray-800 mb-2 flex justify-between items-center">
+                                <span class="flex items-center gap-2"><i class="ph ph-robot text-gray-400"></i> 子代理执行 Prompt</span>
+                                <button onclick="copyPromptFromModal(this)" class="text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors flex items-center gap-1">
+                                    <i class="ph ph-copy"></i> 复制指令
+                                </button>
+                            </h5>
+                            <div class="bg-gray-900 text-gray-100 p-4 rounded-lg text-sm prompt-box shadow-inner border border-gray-800">${agentInfo.prompt}</div>
+                        </div>
+                    ` : ''}
+                `;
+            } else if (type === 'sprint') {
+                 const sprint = MOCK_DATA.sprint.find(s => s.id === id);
+                 const wps = MOCK_DATA.workPackages.filter(wp => wp.sprintId === id);
+                 titleEl.innerHTML = `<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs border border-orange-200">迭代</span> <span>${sprint.id}</span>`;
+                 bodyEl.innerHTML = `
+                    <div class="mb-6">
+                        <div class="inline-flex items-center gap-1.5 text-gray-600 text-sm mb-3 bg-gray-100 px-2.5 py-1 rounded-full"><i class="ph ph-calendar"></i> 周期: ${sprint.time}</div>
+                        <h4 class="font-bold text-lg text-gray-900">迭代目标</h4>
+                        <p class="text-gray-700 bg-blue-50/50 p-4 rounded-lg border border-blue-100 mt-2">${sprint.goal}</p>
+                    </div>
+                    
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-2 mb-3">
+                        <h5 class="font-semibold text-gray-800">迭代任务清单 (${wps.length})</h5>
+                        <button onclick="switchTab('kanban', {key: 'sprintId', val: '${id}'}); closeModal();" class="text-xs text-blue-600 hover:underline">进入完整看板</button>
+                    </div>
+                    <div class="space-y-2">
+                        ${wps.map(wp => `
+                            <div class="p-3 border border-gray-200 rounded-lg bg-white hover:border-blue-300 hover:shadow-sm cursor-pointer flex justify-between items-center transition-all group" onclick="openModal('wp', '${wp.id}')">
+                                <div class="flex items-center gap-3">
+                                    <span class="font-bold text-gray-700">${wp.id}</span>
+                                    <span class="text-gray-800 text-sm font-medium">${wp.title}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2 py-1 text-[10px] rounded-full ${wp.status === 'Done' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${wp.status}</span>
+                                    <i class="ph ph-arrow-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                 `;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('common-modal').classList.add('hidden');
+        }
+
+        // 绑定键盘 Esc 键关闭弹窗
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeModal();
+        });
+
+// --- 交互逻辑 ---
+
+        function switchTab(tabId, filter = null) {
+            // 1. 更新导航栏样式
+            const navItems = document.querySelectorAll('#sidebar-nav button');
+            navItems.forEach(btn => {
+                // 恢复默认灰底样式
+                btn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-100 transition-colors";
+                // 移除高亮时可能存在的特殊右侧图标
+                const iconRight = btn.querySelector('.ph-dots-three-vertical');
+                if(iconRight) iconRight.remove();
+                
+                // 重置左侧图标颜色
+                const iconLeft = btn.querySelector('i');
+                if(iconLeft) {
+                    iconLeft.classList.remove('text-blue-600');
+                    iconLeft.classList.add('text-gray-500');
+                }
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "w-full flex items-center justify-between px-3 py-2.5 rounded-md bg-blue-50 text-blue-600 transition-colors";
+                
+                // 为选中项添加特殊的左/右图标样式
+                const activeIconLeft = activeBtn.querySelector('i');
+                if(activeIconLeft) {
+                    activeIconLeft.classList.remove('text-gray-500');
+                    activeIconLeft.classList.add('text-blue-600');
+                }
+                
+                // 重构内部结构以适配左右布局
+                const originalText = activeBtn.innerText.trim();
+                const iconClass = activeIconLeft ? activeIconLeft.className : 'ph ph-list-dashes text-lg text-blue-600';
+                activeBtn.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <i class="${iconClass}"></i>
+                        ${originalText}
+                    </div>
+                    <i class="ph ph-dots-three-vertical text-gray-400"></i>
+                `;
+            }
+
+            // 2. 更新标题和内容
+            const titleMap = {
+                'overview': '需求开发概览',
+                'epic': 'Epic',
+                'kanban': '工作包 Kanban',
+                'sprint': 'Sprint 计划',
+                'stories': '用户故事',
+                'questions': '待确认问题',
+                'risks': '风险清单',
+                'agents': '子代理任务 Prompt'
+            };
+            document.getElementById('page-title').innerText = titleMap[tabId];
+
+            const container = document.getElementById('content-container');
+            container.innerHTML = ''; // Clear
+
+            // 支持传入 filter 参数用于过滤渲染
+            switch(tabId) {
+                case 'overview': container.innerHTML = renderOverview(); break;
+                case 'epic': container.innerHTML = renderEpic(); break;
+                case 'kanban': container.innerHTML = renderKanban(filter); break;
+                case 'sprint': container.innerHTML = renderSprint(); break;
+                case 'stories': container.innerHTML = renderStories(filter); break;
+                case 'questions': container.innerHTML = renderQuestions(); break;
+                case 'risks': container.innerHTML = renderRisks(); break;
+                case 'agents': container.innerHTML = renderAgents(); break;
+            }
+        }
+
+        function copyPrompt(btn) {
+            const text = btn.parentElement.nextElementSibling.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i class="ph ph-check text-green-500"></i> <span class="text-green-500">已复制</span>`;
+                setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+            }).catch(err => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `<i class="ph ph-check text-green-500"></i> <span class="text-green-500">已复制</span>`;
+                    setTimeout(() => { btn.innerHTML = originalHtml; }, 2000);
+                } catch (err) {}
+                document.body.removeChild(textArea);
+            });
+        }
+
+        function copyPromptFromModal(btn) {
+            const text = btn.parentElement.nextElementSibling.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i class="ph ph-check"></i> 复制成功`;
+                btn.className = "text-xs text-green-600 bg-green-50 px-2 py-1 rounded flex items-center gap-1 transition-colors";
+                setTimeout(() => { 
+                    btn.innerHTML = originalHtml; 
+                    btn.className = "text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors flex items-center gap-1";
+                }, 2000);
+            }).catch(err => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `<i class="ph ph-check"></i> 复制成功`;
+                    btn.className = "text-xs text-green-600 bg-green-50 px-2 py-1 rounded flex items-center gap-1 transition-colors";
+                    setTimeout(() => { 
+                        btn.innerHTML = originalHtml; 
+                        btn.className = "text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded transition-colors flex items-center gap-1";
+                    }, 2000);
+                } catch (err) {}
+                document.body.removeChild(textArea);
+            });
+        }
+
+        // 初始化加载 Epic 页
+        window.onload = () => {
+            if (MOCK_DATA.overview && MOCK_DATA.overview.title) {
+                document.title = `需求开发看板 - ${MOCK_DATA.overview.title}`;
+                const meta = document.getElementById('sidebar-meta');
+                const scaleText = MOCK_DATA.overview.scale ? `规模: ${MOCK_DATA.overview.scale}` : '只读看板';
+                const statusText = MOCK_DATA.overview.status ? `状态: ${MOCK_DATA.overview.status}` : '';
+                meta.innerText = [scaleText, statusText].filter(Boolean).join(' | ');
+            }
+            switchTab('overview');
+            // 更新同步时间显示
+            if(typeof SYNC_TIME !== 'undefined' && SYNC_TIME !== "默认数据") {
+                document.getElementById('sync-status').innerText = `已与 Markdown 同步 (${SYNC_TIME})`;
+            }
+        };
+    </script>
+</body>
+</html>

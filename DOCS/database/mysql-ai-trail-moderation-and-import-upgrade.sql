@@ -1,0 +1,16 @@
+ALTER TABLE trails
+    ADD COLUMN source_type VARCHAR(32) NOT NULL DEFAULT 'user_upload' COMMENT '来源类型' AFTER author_id,
+    ADD COLUMN source_site VARCHAR(128) NULL COMMENT '来源站点' AFTER source_type,
+    ADD COLUMN source_url VARCHAR(500) NULL COMMENT '来源链接' AFTER source_site,
+    ADD COLUMN source_confidence DECIMAL(4,3) NULL COMMENT '来源可信度' AFTER source_url,
+    ADD COLUMN import_batch_no VARCHAR(64) NULL COMMENT '导入批次号' AFTER source_confidence,
+    ADD COLUMN ai_review_status VARCHAR(32) NOT NULL DEFAULT 'pending' COMMENT 'AI审核状态' AFTER review_status,
+    ADD COLUMN ai_review_reason VARCHAR(500) NULL COMMENT 'AI审核原因' AFTER ai_review_status,
+    ADD COLUMN ai_review_risk_level VARCHAR(32) NULL COMMENT 'AI风险等级' AFTER ai_review_reason,
+    ADD COLUMN ai_review_categories_json JSON NULL COMMENT 'AI风险分类JSON' AFTER ai_review_risk_level,
+    ADD COLUMN ai_review_model VARCHAR(64) NULL COMMENT 'AI审核模型' AFTER ai_review_categories_json,
+    ADD COLUMN ai_reviewed_at DATETIME NULL COMMENT 'AI审核时间' AFTER ai_review_model,
+    ADD COLUMN ai_review_trace_id VARCHAR(128) NULL COMMENT 'AI审核追踪ID' AFTER ai_reviewed_at,
+    ADD KEY idx_trails_source_type_created (source_type, created_at),
+    ADD KEY idx_trails_ai_review_status_created (ai_review_status, created_at),
+    ADD KEY idx_trails_source_site (source_site);
