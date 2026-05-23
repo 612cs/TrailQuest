@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
 import BaseIcon from '../common/BaseIcon.vue'
@@ -22,6 +23,11 @@ const durationLabels: Record<'single_day' | 'multi_day', string> = {
   multi_day: '多日',
 }
 
+const networkTagStyle = computed(() => ({
+  backgroundColor: 'var(--warning-soft)',
+  color: 'var(--warning-700)',
+}))
+
 function detailLink(id: string | number) {
   return {
     name: 'TrailDetail',
@@ -29,14 +35,19 @@ function detailLink(id: string | number) {
     query: { from: route.fullPath },
   }
 }
+
+function isDetailAvailable(item: AiTrailCard) {
+  return item.detailAvailable !== false
+}
 </script>
 
 <template>
   <div v-if="props.items.length > 0" class="space-y-3 pt-2">
-    <RouterLink
+    <component
       v-for="item in props.items"
       :key="item.id"
-      :to="detailLink(item.id)"
+      :is="isDetailAvailable(item) ? RouterLink : 'article'"
+      v-bind="isDetailAvailable(item) ? { to: detailLink(item.id) } : {}"
       class="group block rounded-3xl border p-3 transition-all duration-200 hover:-translate-y-0.5"
       style="border-color: var(--border-card); background-color: var(--bg-page)"
     >
@@ -51,6 +62,13 @@ function detailLink(id: string | number) {
             <TagBadge :label="item.difficultyLabel" />
             <TagBadge :label="packLabels[item.packType]" />
             <TagBadge :label="durationLabels[item.durationType]" />
+            <span
+              v-if="item.sourceLabel"
+              class="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium"
+              :style="networkTagStyle"
+            >
+              {{ item.sourceLabel }}
+            </span>
           </div>
           <div class="space-y-1">
             <h4
@@ -87,12 +105,15 @@ function detailLink(id: string | number) {
           {{ item.reason }}
         </p>
         <span
-          class="text-primary-500 flex shrink-0 items-center gap-1 text-xs font-medium sm:text-sm"
+          class="flex shrink-0 items-center gap-1 text-xs font-medium sm:text-sm"
+          :style="{
+            color: isDetailAvailable(item) ? 'var(--primary-500)' : 'var(--text-tertiary)',
+          }"
         >
-          查看详情
-          <BaseIcon name="ChevronRight" :size="16" />
+          {{ isDetailAvailable(item) ? '查看详情' : '仅当前对话可见' }}
+          <BaseIcon :name="isDetailAvailable(item) ? 'ChevronRight' : 'Lock'" :size="16" />
         </span>
       </div>
-    </RouterLink>
+    </component>
   </div>
 </template>

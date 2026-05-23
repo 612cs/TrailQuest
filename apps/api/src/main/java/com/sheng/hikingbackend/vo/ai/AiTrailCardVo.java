@@ -28,5 +28,8 @@ public class AiTrailCardVo {
     private Integer favorites;
     private Boolean likedByCurrentUser;
     private Boolean favoritedByCurrentUser;
+    private String sourceType;
+    private String sourceLabel;
+    private Boolean detailAvailable;
     private String reason;
 }

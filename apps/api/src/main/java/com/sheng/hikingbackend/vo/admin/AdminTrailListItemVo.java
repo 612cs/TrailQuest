@@ -15,6 +15,10 @@ public class AdminTrailListItemVo {
     private String location;
     private String status;
     private String reviewStatus;
+    private String sourceType;
+    private String sourceSite;
+    private String aiReviewStatus;
+    private String aiReviewRiskLevel;
     private String authorUsername;
     private LocalDateTime createdAt;
 }

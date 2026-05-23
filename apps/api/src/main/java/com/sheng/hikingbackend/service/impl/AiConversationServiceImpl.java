@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.exception.BusinessException;
+import com.sheng.hikingbackend.config.AiProperties;
 import com.sheng.hikingbackend.entity.AiConversation;
 import com.sheng.hikingbackend.entity.AiMessage;
 import com.sheng.hikingbackend.mapper.AiConversationMapper;
@@ -32,6 +33,7 @@ public class AiConversationServiceImpl implements AiConversationService {
     private final AiConversationMapper aiConversationMapper;
     private final AiMessageMapper aiMessageMapper;
     private final ObjectMapper objectMapper;
+    private final AiProperties aiProperties;
 
     @Override
     public List<AiConversationListItemVo> listConversations(Long userId) {
@@ -51,7 +53,7 @@ public class AiConversationServiceImpl implements AiConversationService {
         AiConversation conversation = new AiConversation();
         conversation.setUserId(userId);
         conversation.setTitle(StringUtils.hasText(title) ? title.trim() : "新的对话");
-        conversation.setModel("qwen3.5-plus");
+        conversation.setModel(resolveConversationModel());
         conversation.setStatus("active");
         aiConversationMapper.insert(conversation);
         return conversation;
@@ -183,5 +185,15 @@ public class AiConversationServiceImpl implements AiConversationService {
             return 0;
         }
         return Math.max(1, content.trim().length() / 2);
+    }
+
+    private String resolveConversationModel() {
+        if (StringUtils.hasText(aiProperties.getReasoningModel())) {
+            return aiProperties.getReasoningModel().trim();
+        }
+        if (StringUtils.hasText(aiProperties.getModel())) {
+            return aiProperties.getModel().trim();
+        }
+        return "qwen3.5-plus";
     }
 }

@@ -26,10 +26,29 @@
     "test": "pnpm test:web:unit && pnpm test:api",
     "test:api": "./apps/api/mvnw -f apps/api/pom.xml test",
     "test:web:unit": "pnpm --dir apps/web test:unit",
-    "test:web:e2e": "pnpm --dir apps/web test:e2e"
+    "test:web:e2e": "pnpm --dir apps/web test:e2e",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
     "oxfmt": "^0.46.0",
     "oxlint": "^1.61.0"
+  },
+  "lint-staged": {
+    "apps/{web,admin}/**/*.{js,ts,jsx,tsx,vue,mjs}": [
+      "oxfmt --write",
+      "oxlint --fix"
+    ],
+    "packages/ui/**/*.{js,ts,jsx,tsx,vue,mjs}": [
+      "oxfmt --write",
+      "oxlint --fix"
+    ],
+    "tools/harness/**/*.{js,ts,jsx,tsx,mjs}": [
+      "oxfmt --write",
+      "oxlint --fix"
+    ],
+    "package.json": "oxfmt --write",
+    "DOCS/**/*.md": "oxfmt --write"
   }
 }

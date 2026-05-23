@@ -63,9 +63,38 @@ public class Trail {
     @TableField("author_id")
     private Long authorId;
 
+    @TableField("source_type")
+    private String sourceType;
+
+    @TableField("source_site")
+    private String sourceSite;
+
+    @TableField("source_url")
+    private String sourceUrl;
+
+    @TableField("source_confidence")
+    private BigDecimal sourceConfidence;
+
+    @TableField("import_batch_no")
+    private String importBatchNo;
+
     private String status;
     @TableField("review_status")
     private String reviewStatus;
+    @TableField("ai_review_status")
+    private String aiReviewStatus;
+    @TableField("ai_review_reason")
+    private String aiReviewReason;
+    @TableField("ai_review_risk_level")
+    private String aiReviewRiskLevel;
+    @TableField("ai_review_categories_json")
+    private String aiReviewCategoriesJson;
+    @TableField("ai_review_model")
+    private String aiReviewModel;
+    @TableField("ai_reviewed_at")
+    private LocalDateTime aiReviewedAt;
+    @TableField("ai_review_trace_id")
+    private String aiReviewTraceId;
     @TableField("review_remark")
     private String reviewRemark;
     @TableField("reviewed_by")

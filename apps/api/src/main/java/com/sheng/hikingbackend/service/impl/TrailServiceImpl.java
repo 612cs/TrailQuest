@@ -3,8 +3,10 @@ package com.sheng.hikingbackend.service.impl;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,8 +21,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sheng.hikingbackend.common.PageResponse;
+import com.sheng.hikingbackend.common.enums.AiReviewStatus;
 import com.sheng.hikingbackend.common.enums.MediaBizType;
 import com.sheng.hikingbackend.common.enums.MediaFileStatus;
+import com.sheng.hikingbackend.common.enums.TrailSourceType;
 import com.sheng.hikingbackend.common.enums.TrailReviewStatus;
 import com.sheng.hikingbackend.common.enums.TrailStatus;
 import com.sheng.hikingbackend.common.exception.BusinessException;
@@ -38,9 +42,12 @@ import com.sheng.hikingbackend.mapper.TrailLikeMapper;
 import com.sheng.hikingbackend.mapper.TrailMapper;
 import com.sheng.hikingbackend.mapper.TrailTagMapper;
 import com.sheng.hikingbackend.mapper.TrailTrackMapper;
+import com.sheng.hikingbackend.service.AiTrailModerationService;
 import com.sheng.hikingbackend.service.GeoService;
 import com.sheng.hikingbackend.service.TrackParseService;
 import com.sheng.hikingbackend.service.TrailService;
+import com.sheng.hikingbackend.service.impl.ai.model.AiTrailModerationPayload;
+import com.sheng.hikingbackend.service.impl.ai.model.AiTrailModerationResult;
 import com.sheng.hikingbackend.service.impl.support.TrackParseResult;
 import com.sheng.hikingbackend.vo.common.UserSummaryVo;
 import com.sheng.hikingbackend.vo.trail.TrailDetailVo;
@@ -56,6 +63,7 @@ import lombok.RequiredArgsConstructor;
 public class TrailServiceImpl implements TrailService {
 
     private static final long EDIT_WINDOW_HOURS = 48;
+    private static final String DEFAULT_TRAIL_FACT_VALUE = "待补充";
 
     private final TrailMapper trailMapper;
     private final TrailLikeMapper trailLikeMapper;
@@ -65,6 +73,7 @@ public class TrailServiceImpl implements TrailService {
     private final TrailTagMapper trailTagMapper;
     private final TagMapper tagMapper;
     private final TrailTrackMapper trailTrackMapper;
+    private final AiTrailModerationService aiTrailModerationService;
     private final GeoService geoService;
     private final TrackParseService trackParseService;
     private final ObjectMapper objectMapper;
@@ -113,6 +122,18 @@ public class TrailServiceImpl implements TrailService {
         trail.setReviewCount(0);
         trail.setStatus(TrailStatus.ACTIVE.getCode());
         trail.setReviewStatus(TrailReviewStatus.PENDING.getCode());
+        trail.setSourceType(TrailSourceType.USER_UPLOAD.getCode());
+        trail.setSourceSite(null);
+        trail.setSourceUrl(null);
+        trail.setSourceConfidence(null);
+        trail.setImportBatchNo(null);
+        trail.setAiReviewStatus(AiReviewStatus.PENDING.getCode());
+        trail.setAiReviewReason(null);
+        trail.setAiReviewRiskLevel(null);
+        trail.setAiReviewCategoriesJson(null);
+        trail.setAiReviewModel(null);
+        trail.setAiReviewedAt(null);
+        trail.setAiReviewTraceId(null);
         trail.setReviewRemark(null);
         trail.setReviewedBy(null);
         trail.setReviewedAt(null);
@@ -122,6 +143,8 @@ public class TrailServiceImpl implements TrailService {
         replaceGalleryImages(trail.getId(), galleryMedia);
         replaceTags(trail.getId(), request.getTags());
         replaceTrack(trail.getId(), currentUserId, mutation);
+        applyAiModeration(trail, buildModerationPayload(trail, request, galleryMedia));
+        trailMapper.updateById(trail);
 
         return getTrailDetail(trail.getId(), currentUserId);
     }
@@ -138,14 +161,22 @@ public class TrailServiceImpl implements TrailService {
 
         applyTrailFields(trail, request, requestIp, coverMedia, mutation.parsedTrack());
         trail.setReviewStatus(TrailReviewStatus.PENDING.getCode());
+        trail.setAiReviewStatus(AiReviewStatus.PENDING.getCode());
+        trail.setAiReviewReason(null);
+        trail.setAiReviewRiskLevel(null);
+        trail.setAiReviewCategoriesJson(null);
+        trail.setAiReviewModel(null);
+        trail.setAiReviewedAt(null);
+        trail.setAiReviewTraceId(null);
         trail.setReviewRemark(null);
         trail.setReviewedBy(null);
         trail.setReviewedAt(null);
-        trailMapper.updateById(trail);
 
         replaceGalleryImages(trailId, galleryMedia);
         replaceTags(trailId, request.getTags());
         replaceTrack(trailId, currentUserId, mutation);
+        applyAiModeration(trail, buildModerationPayload(trail, request, galleryMedia));
+        trailMapper.updateById(trail);
 
         return getTrailDetail(trailId, currentUserId);
     }
@@ -237,9 +268,21 @@ public class TrailServiceImpl implements TrailService {
                 .likedByCurrentUser(Boolean.TRUE.equals(row.getLikedByCurrentUser()))
                 .favoritedByCurrentUser(Boolean.TRUE.equals(row.getFavoritedByCurrentUser()))
                 .authorId(row.getAuthorId())
+                .sourceType(row.getSourceType())
+                .sourceSite(row.getSourceSite())
+                .sourceUrl(row.getSourceUrl())
+                .sourceConfidence(row.getSourceConfidence())
+                .importBatchNo(row.getImportBatchNo())
                 .publishTime(formatPublishTime(row.getCreatedAt()))
                 .createdAt(row.getCreatedAt())
                 .reviewStatus(row.getReviewStatus())
+                .aiReviewStatus(row.getAiReviewStatus())
+                .aiReviewReason(row.getAiReviewReason())
+                .aiReviewRiskLevel(row.getAiReviewRiskLevel())
+                .aiReviewCategoriesJson(row.getAiReviewCategoriesJson())
+                .aiReviewModel(row.getAiReviewModel())
+                .aiReviewedAt(row.getAiReviewedAt())
+                .aiReviewTraceId(row.getAiReviewTraceId())
                 .reviewRemark(row.getReviewRemark())
                 .reviewedBy(row.getReviewedBy())
                 .reviewedAt(row.getReviewedAt())
@@ -286,16 +329,104 @@ public class TrailServiceImpl implements TrailService {
         trail.setDescription(normalizeOptional(request.getDescription()));
     }
 
+    private void applyAiModeration(Trail trail, AiTrailModerationPayload payload) {
+        AiTrailModerationResult moderationResult = aiTrailModerationService.moderateTrail(payload);
+        trail.setAiReviewStatus(moderationResult.decision().getCode());
+        trail.setAiReviewReason(normalizeOptional(moderationResult.reason()));
+        trail.setAiReviewRiskLevel(normalizeOptional(moderationResult.riskLevel()));
+        trail.setAiReviewCategoriesJson(serializeReviewCategories(moderationResult.riskCategories()));
+        trail.setAiReviewModel(normalizeOptional(moderationResult.modelName()));
+        trail.setAiReviewedAt(LocalDateTime.now());
+        trail.setAiReviewTraceId(null);
+        trail.setReviewedBy(null);
+
+        switch (moderationResult.decision()) {
+            case APPROVED -> {
+                trail.setReviewStatus(TrailReviewStatus.APPROVED.getCode());
+                trail.setReviewRemark(null);
+                trail.setReviewedAt(LocalDateTime.now());
+            }
+            case REJECTED -> {
+                trail.setReviewStatus(TrailReviewStatus.REJECTED.getCode());
+                trail.setReviewRemark(buildReviewRemark("AI 预审拒绝", moderationResult));
+                trail.setReviewedAt(LocalDateTime.now());
+            }
+            case NEEDS_MANUAL_REVIEW -> {
+                trail.setReviewStatus(TrailReviewStatus.PENDING.getCode());
+                trail.setReviewRemark(buildReviewRemark("AI 待人工复核", moderationResult));
+                trail.setReviewedAt(null);
+            }
+        }
+    }
+
+    private AiTrailModerationPayload buildModerationPayload(
+            Trail trail,
+            CreateTrailRequest request,
+            List<MediaFile> galleryMedia) {
+        LinkedHashSet<String> imageUrls = new LinkedHashSet<>();
+        if (StringUtils.hasText(trail.getImage())) {
+            imageUrls.add(trail.getImage());
+        }
+        for (MediaFile mediaFile : galleryMedia) {
+            if (mediaFile != null && StringUtils.hasText(mediaFile.getUrl())) {
+                imageUrls.add(mediaFile.getUrl());
+            }
+        }
+        List<String> tags = request.getTags() == null ? List.of() : request.getTags().stream()
+                .map(this::normalizeOptional)
+                .filter(Objects::nonNull)
+                .toList();
+        return AiTrailModerationPayload.builder()
+                .trailId(trail.getId())
+                .authorId(trail.getAuthorId())
+                .sourceType(trail.getSourceType())
+                .name(trail.getName())
+                .location(trail.getLocation())
+                .description(trail.getDescription())
+                .difficulty(trail.getDifficulty())
+                .difficultyLabel(trail.getDifficultyLabel())
+                .tags(tags)
+                .imageUrls(new ArrayList<>(imageUrls))
+                .build();
+    }
+
+    private String buildReviewRemark(String prefix, AiTrailModerationResult moderationResult) {
+        String reason = normalizeOptional(moderationResult.reason());
+        String categories = moderationResult.riskCategories() == null || moderationResult.riskCategories().isEmpty()
+                ? null
+                : String.join("/", moderationResult.riskCategories());
+        if (reason == null && categories == null) {
+            return prefix;
+        }
+        if (categories == null) {
+            return prefix + "：" + reason;
+        }
+        if (reason == null) {
+            return prefix + "（" + categories + "）";
+        }
+        return prefix + "：" + reason + "（" + categories + "）";
+    }
+
+    private String serializeReviewCategories(List<String> categories) {
+        try {
+            return objectMapper.writeValueAsString(categories == null ? List.of() : categories);
+        } catch (Exception ex) {
+            throw BusinessException.badRequest("AI_REVIEW_SERIALIZE_FAILED", "AI 审核结果序列化失败");
+        }
+    }
+
     private void applyStructuredGeo(Trail trail, CreateTrailRequest request, TrackParseResult parsedTrack) {
         if (parsedTrack != null && parsedTrack.getStartLng() != null && parsedTrack.getStartLat() != null) {
             try {
                 var reverseGeo = geoService.reverse(parsedTrack.getStartLng(), parsedTrack.getStartLat());
-                trail.setGeoCountry(normalizeOptional(reverseGeo.getCountry()));
-                trail.setGeoProvince(normalizeOptional(reverseGeo.getProvince()));
-                trail.setGeoCity(normalizeOptional(reverseGeo.getCity()));
-                trail.setGeoDistrict(normalizeOptional(reverseGeo.getDistrict()));
-                trail.setGeoSource("track_reverse");
-                return;
+                if (reverseGeo != null) {
+                    trail.setGeoCountry(normalizeOptional(reverseGeo.getCountry()));
+                    trail.setGeoProvince(normalizeOptional(reverseGeo.getProvince()));
+                    trail.setGeoCity(normalizeOptional(reverseGeo.getCity()));
+                    trail.setGeoDistrict(normalizeOptional(reverseGeo.getDistrict()));
+                    trail.setGeoSource("track_reverse");
+                    return;
+                }
             } catch (BusinessException ex) {
                 // Fallback to client-supplied or text lookup values below.
             }
@@ -313,12 +444,14 @@ public class TrailServiceImpl implements TrailService {
         if (StringUtils.hasText(request.getLocation())) {
             try {
                 var lookup = geoService.lookupLocation(request.getLocation().trim());
-                trail.setGeoCountry(normalizeOptional(lookup.getCountry()));
-                trail.setGeoProvince(normalizeOptional(lookup.getProvince()));
-                trail.setGeoCity(normalizeOptional(lookup.getCity()));
-                trail.setGeoDistrict(normalizeOptional(lookup.getDistrict()));
-                trail.setGeoSource("location_lookup");
-                return;
+                if (lookup != null) {
+                    trail.setGeoCountry(normalizeOptional(lookup.getCountry()));
+                    trail.setGeoProvince(normalizeOptional(lookup.getProvince()));
+                    trail.setGeoCity(normalizeOptional(lookup.getCity()));
+                    trail.setGeoDistrict(normalizeOptional(lookup.getDistrict()));
+                    trail.setGeoSource("location_lookup");
+                    return;
+                }
             } catch (BusinessException ex) {
                 // Final fallback keeps visible location only.
             }
@@ -609,7 +742,7 @@ public class TrailServiceImpl implements TrailService {
         if (parsedTrack != null && parsedTrack.getDistanceMeters() != null) {
             return formatDistance(parsedTrack.getDistanceMeters());
         }
-        return null;
+        return DEFAULT_TRAIL_FACT_VALUE;
     }
 
     private String resolveElevation(String manualValue, TrackParseResult parsedTrack) {
@@ -620,7 +753,7 @@ public class TrailServiceImpl implements TrailService {
         if (parsedTrack != null && parsedTrack.getElevationGainMeters() != null) {
             return "+" + parsedTrack.getElevationGainMeters().setScale(0, RoundingMode.HALF_UP).toPlainString() + " m";
         }
-        return null;
+        return DEFAULT_TRAIL_FACT_VALUE;
     }
 
     private String resolveDuration(String manualValue, TrackParseResult parsedTrack) {
@@ -631,7 +764,7 @@ public class TrailServiceImpl implements TrailService {
         if (parsedTrack != null && parsedTrack.getDurationSeconds() != null && parsedTrack.getDurationSeconds() > 0) {
             return formatDurationSeconds(parsedTrack.getDurationSeconds());
         }
-        return null;
+        return DEFAULT_TRAIL_FACT_VALUE;
     }
 
     private String normalizeOptional(String value) {

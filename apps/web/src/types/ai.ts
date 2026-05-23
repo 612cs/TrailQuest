@@ -27,6 +27,9 @@ export interface AiTrailCard {
   favorites: number
   likedByCurrentUser: boolean
   favoritedByCurrentUser: boolean
+  sourceType?: string
+  sourceLabel?: string
+  detailAvailable?: boolean
   reason: string
 }
 
