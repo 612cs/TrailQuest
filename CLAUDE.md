@@ -39,3 +39,18 @@ pnpm check
 ## 失败即学习
 
 任何 Agent 在仓库内出错的案例都写入 `DOCS/agents/harness/failures.md`，必要时把规则编码到 `tools/harness/` 或 `.oxlintrc.json`，让下一个 Agent 不会再犯同样的错。
+
+## 📝 第二大脑桥接
+
+写代码时有心得想存到 Obsidian 第二大脑？因为沙箱限制写不到 Documents 目录，请走桥接目录：
+
+```bash
+# 方式一：写文件到桥接目录
+echo "# 标题\n\n心得内容" > /tmp/obsidian-bridge/notes/2026-05-24-标题.md
+
+# 方式二：用快捷脚本
+python3 /Users/sheng/.hermes/scripts/obsidian-write.py --topic notes "标题" "内容"
+```
+
+每 10 分钟自动搬入 Obsidian Vault 的 `10-私人/Hermes-Memory/knowledge/`。
+详细说明见 `/tmp/obsidian-bridge/AGENT_INSTRUCTIONS.md`

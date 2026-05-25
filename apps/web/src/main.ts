@@ -12,11 +12,10 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
-// Initialize theme before mount
 const themeStore = useThemeStore()
 themeStore.init()
 
-const userStore = useUserStore()
-await userStore.bootstrap()
-
 app.mount('#app')
+
+const userStore = useUserStore()
+void userStore.bootstrap()
