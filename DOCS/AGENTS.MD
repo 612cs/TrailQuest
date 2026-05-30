@@ -11,7 +11,6 @@
 | `database/` | 数据库初始化、结构与升级脚本 |
 | `frontend/` | 前端 UI、交互与主题规范 |
 | `handoff/` | 阶段交接、测试优先级、阶段计划 |
-| `thesis/` | 论文正文、稿件版本、答辩 PPT、插图与参考 |
 
 ## 常用入口
 
@@ -33,6 +32,5 @@
 - 新增开发交接放入 `handoff/`，文件名建议含日期。
 - 新增数据库脚本放入 `database/`，升级脚本命名 `mysql-<topic>-upgrade.sql`。
 - 新增工程图表源文件放入 `architecture-diagrams/sources/`，导出图按格式分到 `exports/png/`、`exports/svg/`。
-- 新增论文素材放入 `thesis/` 对应子目录，不再使用旧拼音目录。
 - `.DS_Store` 与编辑器锁文件不作为主资料保留。
 - 新增 Agent 操作规则放入 `agents/`；触发 CI 强制时同步更新 `tools/harness/` 与根 [AGENTS.md](../AGENTS.md)。
